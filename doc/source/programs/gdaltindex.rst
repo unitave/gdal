@@ -6,11 +6,11 @@ gdaltindex
 
 .. only:: html
 
-    Creates an OGR-supported dataset as a raster tileindex.
+    OGR 지원 데이터셋을 래스터 타일 색인으로 생성합니다.
 
 .. Index:: gdaltindex
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -20,105 +20,81 @@ Synopsis
             [-src_srs_name field_name] [-src_srs_format [AUTO|WKT|EPSG|PROJ]
             [-lyr_name name] index_file [gdal_file]*
 
-Description
+설명
 -----------
 
-This program creates an OGR-supported dataset with a record for each input raster file,
-an attribute containing the filename, and a polygon geometry outlining the
-raster.  This output is suitable for use with `MapServer <http://mapserver.org/>`__ as a raster
-tileindex.
+이 프로그램은 각 입력 래스터 파일에 대한 레코드, 파일명을 담고 있는 속성, 그리고 래스터 윤곽선을 그리는 폴리곤 도형을 가지고 있는 OGR 지원 데이터셋을 생성합니다. 이 산출물은 `MapServer <http://mapserver.org/>`_ 에서 래스터 타일 색인으로 사용하는 데 적합합니다.
 
 .. program:: ogrtindex
 
 .. option:: -f <format>
 
-    The OGR format of the output tile index file. Starting with
-    GDAL 2.3, if not specified, the format is guessed from the extension (previously
-    was ESRI Shapefile).
+    산출 타일 색인 파일의 OGR 포맷입니다. GDAL 2.3버전부터, 이 옵션을 지정하지 않는 경우 확장자로부터 포맷을 추정합니다. (이전 버전까지는 ESRI Shapefile을 기본값으로 사용했습니다.)
 
 .. option:: -tileindex <field_name>
 
-    The output field name to hold the file path/location to the indexed
-    rasters. The default tile index field name is ``location``.
+    색인된 래스터를 가리키는 파일 경로/위치를 담은 산출물 필드명입니다. 기본 타일 색인 필드명은 ``location`` 입니다.
 
 .. option:: -write_absolute_path
 
-    The absolute path to the raster files is stored in the tile index file.
-    By default the raster filenames will be put in the file exactly as they
-    are specified on the command line.
+    래스터 파일을 가리키는 절대 경로는 타일 색인 파일에 저장됩니다. 기본적으로 래스터 파일명은 명령줄에서 지정한 그대로 파일에 들어갈 것입니다.
 
 .. option:: -skip_different_projection
 
-    Only files with same projection as files already inserted in the tileindex
-    will be inserted (unless :option:`-t_srs` is specified). Default does not
-    check projection and accepts all inputs.
+    (:option:`-t_srs` 를 설정하지 않았다면) 타일 색인에 이미 삽입된 파일과 동일한 투영법을 가진 파일만 삽입될 것입니다. 기본값은 투영법을 확인하지 않고 모든 입력을 받아들이는 것입니다.
 
 .. option:: -t_srs <target_srs>:
 
-    Geometries of input files will be transformed to the desired target
-    coordinate reference system.
-    Default creates simple rectangular polygons in the same coordinate reference
-    system as the input rasters.
+    입력 파일의 도형을 원하는 대상 좌표계로 변환할 것입니다. 기본값은 단순 직사각형 폴리곤을 입력 래스터와 동일한 좌표계로 생성하는 것입니다.
 
 .. option:: -src_srs_name <field_name>
 
-    The name of the field to store the SRS of each tile. This field name can be
-    used as the value of the TILESRS keyword in MapServer
+    각 타일의 공간 좌표계를 저장할 필드의 이름입니다. MapServer에서 이 필드명을 TILESRS 키워드의 값으로 사용할 수 있습니다.
 
 .. option:: -src_srs_format <type>
 
-    The format in which the SRS of each tile must be written. Types can be
-    AUTO, WKT, EPSG, PROJ.
+    이 옵션에서 지정한 서식으로 각 타일의 공간 좌표계를 작성해야만 합니다. AUTO, WKT, EPSG, PROJ 유형을 지정할 수 있습니다.
 
 .. option:: -lyr_name <name>
 
-    Layer name to create/append to in the output tile index file.
+    산출 타일 색인 파일에 생성/추가할 레이어 이름입니다.
 
 .. option:: index_file
 
-    The name of the output file to create/append to. The default dataset will
-    be created if it doesn't already exist, otherwise it will append to the
-    existing dataset.
+    생성/추가할 산출물 파일의 이름입니다. 기본 데이터셋이 없다면 산출물을 생성할 것이고, 기본 데이터셋이 있다면 기존 데이터셋에 추가할 것입니다.
 
 .. option:: <gdal_file>
 
-    The input GDAL raster files, can be multiple files separated by spaces.
-    Wildcards my also be used. Stores the file locations in the same style as
-    specified here, unless :option:`-write_absolute_path` option is also used.
+    입력 GDAL 래스터 파일로, 공백으로 분리된 파일 여러 개일 수도 있습니다. 와일드카드("*")도 쓰일 수 있습니다. :option:`-write_absolute_path` 옵션을 이미 사용한 경우가 아니라면 이 옵션에 지정한 스타일대로 파일 위치를 저장합니다.
 
-Examples
+예시
 --------
 
-- Produce a shapefile (``doq_index.shp``) with a record for every
-  image that the utility found in the ``doq`` folder. Each record holds
-  information that points to the location of the image and also a bounding rectangle
-  shape showing the bounds of the image:
+- 유틸리티가 ``doq`` 폴더에서 탐지한 모든 이미지에 대한 레코드를 가진 shapefile(``doq_index.shp``)을 생성합니다. 각 레코드는 이미지의 위치를 가리키는 정보는 물론 이미지의 경계를 보여주는 경계 상자 도형도 가지고 있습니다.:
 
 ::
 
     gdaltindex doq_index.shp doq/*.tif
 
-- Perform the same command as before, but now we create a GeoPackage instead of a Shapefile. 
+- 앞과 동일한 작업을 수행하지만, 다음은 shapefile 대신 GeoPackage를 생성하는 명령어입니다:
 
 ::
 
     gdaltindex -f GPKG doq_index.gpkg doq/*.tif
 
-- The :option:`-t_srs` option can also be used to transform all input rasters
-  into the same output projection:
+- :option:`-t_srs` 옵션을 사용하면 모든 입력 래스터를 동일한 산출 투영법으로 변환할 수 있습니다:
 
 ::
 
     gdaltindex -t_srs EPSG:4326 -src_srs_name src_srs tile_index_mixed_srs.shp *.tif
 
-- Make a tile index from files listed in a text file :
+- 텍스트 파일에 있는 파일 목록으로 타일 색인을 만듭니다:
 
 ::
 
     gdaltindex doq_index.shp --optfile my_list.txt
 
-See also
+참고
 --------
 
-:ref:`raster_common_options` for other command-line options, and in particular the
-:ref:`--optfile <raster_common_options_optfile>` switch that can be used to specify a list of input datasets.
+다른 명령줄 옵션을 알고 싶다면 :ref:`raster_common_options` 를 읽어보십시오. 특히 :ref:`--optfile <raster_common_options_optfile>` 스위치는 입력 데이터셋 목록을 지정하는 데 쓰일 수 있습니다.

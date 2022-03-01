@@ -6,11 +6,11 @@ gdalbuildvrt
 
 .. only:: html
 
-    Builds a VRT from a list of datasets.
+    데이터셋 목록으로부터 VRT를 작성합니다.
 
 .. Index:: gdalbuildvrt
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -30,207 +30,148 @@ Synopsis
                 [-strict | -non_strict]
                 output.vrt [gdalfile]*
 
-Description
+설명
 -----------
 
-This program builds a VRT (Virtual Dataset) that is a mosaic of the list of
-input GDAL datasets. The list of input GDAL datasets can be specified at the end
-of the command line, or put in a text file (one filename per line) for very long lists,
-or it can be a MapServer tileindex (see \ref gdaltindex utility). In the later case, all
-entries in the tile index will be added to the VRT.
+이 프로그램은 입력 GDAL 데이터셋들의 목록의 모자이크인 VRT(Virtual Dataset)를 작성합니다. 명령줄 마지막 부분에 입력 GDAL 데이터셋들을 지정하거나, 매우 긴 목록의 경우 (1행마다 파일명 하나인) 텍스트 파일 또는 MapServer 타일 색인을 삽입할 수 있습니다. (:ref:`gdaltindex` 유틸리티 참조) 후자의 경우, 타일 색인에 있는 모든 항목이 VRT에 추가될 것입니다.
 
-With -separate, each files goes into a separate band in the VRT dataset. Otherwise,
-the files are considered as tiles of a larger mosaic and the VRT file has as many bands as one
-of the input files.
+-separate 옵션을 사용하면, VRT 데이터셋의 개별 밴드에 각 파일을 넣습니다. 그렇지 않다면 파일들을 더 큰 모자이크의 타일들로 간주해서 VRT 파일이 입력 파일들 가운데 가장 많은 밴드를 가지고 있는 파일의 밴드 개수만큼의 밴드를 가집니다.
 
-If one GDAL dataset is made of several subdatasets and has 0 raster bands,
-all the subdatasets will be added to the VRT rather than the dataset itself.
+GDAL 데이터셋 하나가 하위 데이터셋 몇 개로 이루어져 있고 래스터 밴드 0개를 가지고 있는 경우, VRT에 데이터셋 자체가 아니라 모든 하위 데이터셋을 추가할 것입니다.
 
-gdalbuildvrt does some amount of checks to assure that all files that will be put
-in the resulting VRT have similar characteristics : number of bands, projection, color
-interpretation... If not, files that do not match the common characteristics will be skipped.
-(This is only true in the default mode, and not when using the -separate option)
+gdalbuildvrt는 산출되는 VRT에 들어갈 모든 파일들이 비슷한 특성을 가지고 있는지 검증합니다: 밴드 개수, 투영법, 색상 해석... 비슷하지 않다면, 공통 특성과 일치하지 않는 파일을 건너뛸 것입니다. (기본 모드에서만 이렇고, -separate 옵션을 사용하는 경우엔 아닙니다.)
 
-If there is some amount of spatial overlapping between files, the order of files
-appearing in the list of source matter: files that are listed at the end are the ones
-from which the content will be fetched. Note that nodata will be taken into account
-to potentially fetch data from less priority datasets, but currently, alpha channel
-is not taken into account to do alpha compositing (so a source with alpha=0
-appearing on top of another source will override is content). This might be
-changed in later versions.
+파일들 사이에 어느 정도의 공간 중첩이 있는 경우, 소스 목록에 나타나는 파일들의 순서가 중요해집니다: 목록 마지막 부분에 있는 파일들로부터 내용을 불러올 것입니다. 우선 순위가 낮은 데이터셋으로부터 데이터를 불러올 가능성이 있도록 NODATA를 고려할 것이지만, 현재로서는 알파 채널 합성 작업을 위해 알파 채널을 고려하지 않습니다. (따라서 또다른 소스 위에 나타나는 알파 채널이 0인 소스가 또다른 소스의 내용을 무시할 것입니다.) 이 습성은 다음 버전에서 달라질 수도 있습니다.
 
 .. program:: gdalbuildvrt
 
 .. option:: -tileindex
 
-    Use the specified value as the tile index field, instead of the default
-    value which is 'location'.
+    기본값인 'location' 대신 지정한 값을 타일 색인 필드로 사용합니다.
 
 .. option:: -resolution {highest|lowest|average|user}
 
-    In case the resolution of all input files is not the same, the -resolution flag
-    enables the user to control the way the output resolution is computed.
+    모든 입력 파일의 해상도가 동일하지 않은 경우, -resolution 플래그를 사용하면 사용자가 산출물 해상도가 계산되는 방식을 제어할 수 있습니다.
 
-    `highest` will pick the smallest values of pixel dimensions within the set of source rasters.
+    `highest`는 소스 래스터 집합 내에서 픽셀 차원의 가장 작은 값을 고를 것입니다.
 
-    `lowest` will pick the largest values of pixel dimensions within the set of source rasters.
+    `lowest`는 소스 래스터 집합 내에서 픽셀 차원의 가장 큰 값을 고를 것입니다.
 
-    `average` is the default and will compute an average of pixel dimensions within the set of source rasters.
+    `average`는 기본값으로 소스 래스터 집합 내에서 픽셀 차원의 평균을 계산할 것입니다.
 
-    `user` must be used in combination with the :option:`-tr` option to specify the target resolution.
+    `user`는 대상 해상도를 지정하기 위해 :option:`-tr` 옵션과 함께 쓰여야만 합니다.
 
 .. option:: -tr <xres> <yres>
 
-    Set target resolution. The values must be expressed in georeferenced units.
-    Both must be positive values. Specifying those values is of course incompatible with
-    highest|lowest|average values for :option:`-resolution` option.
-
+    대상 해상도를 설정합니다. 이 값은 지리참조 단위로 표현되어야만 합니다. 두 값 모두 양의 값이어야만 합니다. 이 값들을 지정하면 당연히 :option:`-resolution` 옵션의 highest|lowest|average 값을 사용할 수 없게 됩니다.
 
 .. option:: -tap
 
-    (target aligned pixels) align
-    the coordinates of the extent of the output file to the values of the :option:`-tr`,
-    such that the aligned extent includes the minimum extent.
+    (대상에 정렬된 픽셀(target aligned pixels)) 산출물 파일의 범위의 좌표를 :option:`-tr` 옵션의 값에 정렬시켜 정렬된 범위가 최소 범위를 포함하도록 합니다.
 
 .. option:: -te xmin ymin xmax ymax
 
-    Set georeferenced extents of VRT file. The values must be expressed in georeferenced units.
-    If not specified, the extent of the VRT is the minimum bounding box of the set of source rasters.
+    VRT 파일의 지리참조 범위를 설정합니다. 이 값은 지리참조 단위로 표현되어야만 합니다. 이 옵션을 지정하지 않는 경우, VRT의 범위는 소스 래스터 집합의 최소 경계 상자가 됩니다.
 
 .. option:: -addalpha
 
-    Adds an alpha mask band to the VRT when the source raster have none. Mainly useful for RGB sources (or grey-level sources).
-    The alpha band is filled on-the-fly with the value 0 in areas without any source raster, and with value
-    255 in areas with source raster. The effect is that a RGBA viewer will render
-    the areas without source rasters as transparent and areas with source rasters as opaque.
-    This option is not compatible with :option:`-separate`.
+    소스 래스터에 알파 밴드가 없는 경우 VRT에 알파 마스크 밴드를 추가합니다. 주로 RGB (또는 회색조) 소스에 유용합니다. 이 알파 밴드는 어떤 소스 래스터도 없는 영역을 실시간으로(on-the-fly) 0값으로 채우고, 소스 래스터가 있는 영역을 255값으로 채웁니다. 이렇게 하면 RGBA 뷰어가 소스 래스터가 없는 영역을 투명하게 렌더링하고 소스 래스터가 있는 영역을 불투명하게 렌더링하게 됩니다. 이 옵션을 :option:`-separate` 옵션과 함께 사용할 수 없습니다.
 
 .. option:: -hidenodata
 
-    Even if any band contains nodata value, giving this option makes the VRT band
-    not report the NoData. Useful when you want to control the background color of
-    the dataset. By using along with the -addalpha option, you can prepare a
-    dataset which doesn't report nodata value but is transparent in areas with no
-    data.
+    NODATA 값을 담고 있는 밴드가 있더라도, 이 옵션을 사용하면 VRT 밴드가 NODATA를 리포트하지 않습니다. 데이터셋의 배경색을 제어하려 할 때 유용합니다. -addalpha 옵션과 함께 사용하면, NODATA를 리포트하지 않지만 데이터가 없는 영역이 투명한 데이터셋을 준비할 수 있습니다.
 
 .. option:: -srcnodata <value> [<value>...]
 
-    Set nodata values for input bands (different values can be supplied for each band). If
-    more than one value is supplied all values should be quoted to keep them
-    together as a single operating system argument. If the option is not specified, the
-    intrinsic nodata settings on the source datasets will be used (if they exist). The value set by this option
-    is written in the NODATA element of each ComplexSource element. Use a value of
-    `None` to ignore intrinsic nodata settings on the source datasets.
+    입력 밴드에 대한 NODATA 값을 설정합니다. (각 밴드 별로 서로 다른 값을 지정할 수 있습니다.) 값을 하나 이상 지정하는 경우 모든 값들을 단일 운영체제 인수로써 따옴표로 묶어주어야 합니다. 이 옵션을 지정하지 않으면 소스 데이터셋 상의 고유한 NODATA 설정을 (존재하는 경우) 사용할 것입니다. 이 옵션으로 설정한 값은 각 ComplexSource 요소의 NODATA 요소에 작성됩니다. 소스 데이터셋 상의 고유한 NODATA 설정을 무시하려면 ``None`` 이라는 값을 사용하십시오.
 
 .. option:: -ignore_srcmaskband
 
     .. versionadded:: 3.3
 
-    Starting with GDAL 3.3, if a source has a mask band (internal/external mask
-    band, or alpha band), a <ComplexSource> element is created by default with
-    a <UseMaskBand>true</UseMaskBand> child element, to instruct the VRT driver
-    to use the mask band of the source to mask pixels being composited. This is
-    a generalization of the NODATA element.
-    When specifying the -ignore_srcmaskband option, the mask band of sources will
-    not be taken into account, and in case of overlapping between sources, the
-    last one will override previous ones in areas of overlap.
+    GDAL 3.3버전부터, 소스가 마스크 밴드를 (내부/외부 마스크 밴드, 또는 알파 밴드를) 가지고 있는 경우 VRT 드라이버에 소스의 마스크 밴드를 사용해서 합성 중인 픽셀을 마스킹하도록 지시하기 위해 기본적으로 <UseMaskBand>true</UseMaskBand> 상속(child) 요소로 <ComplexSource> 요소를 생성합니다. 이것은 NODATA 요소를 일반화(generalization)하는 것입니다. -ignore_srcmaskband 옵션을 지정할 때 소스의 마스크 밴드를 고려하지 않으며, 소스들 사이에 중첩이 발생하는 경우 중첩되는 영역에서 마지막 소스가 이전 소스를 무시할 것입니다.
 
 .. option:: -b <band>
 
-    Select an input <band> to be processed. Bands are numbered from 1.
-    If input bands not set all bands will be added to vrt.
-    Multiple :option:`-b` switches may be used to select a set of input bands.
+    처리한 입력 <band>를 선택합니다. 밴드 번호는 1부터 시작합니다. 입력 밴드를 설정하지 않는 경우 VRT에 모든 밴드를 추가할 것입니다. 입력 밴드 집합을 선택하기 위해 :option:`-b` 스위치를 여러 개 사용할 수도 있습니다.
 
 .. option:: -sd< <subdataset>
 
-    If the input
-    dataset contains several subdatasets use a subdataset with the specified
-    number (starting from 1). This is an alternative of giving the full subdataset
-    name as an input.
+    입력 데이터셋이 하위 데이터셋 몇 개를 담고 있는 경우 지정한 (1부터 시작하는) 번호로 하위 데이터셋을 사용할 수 있습니다. 하위 데이터셋 이름 전체를 입력하는 대신 쓸 수 있는 옵션입니다.
 
 .. option:: -vrtnodata <value> [<value>...]
 
-    Set nodata values at the VRT band level (different values can be supplied for each band).  If more
-    than one value is supplied all values should be quoted to keep them together
-    as a single operating system argument.  If the option is not specified,
-    intrinsic nodata settings on the first dataset will be used (if they exist). The value set by this option
-    is written in the NoDataValue element of each VRTRasterBand element. Use a value of
-    `None` to ignore intrinsic nodata settings on the source datasets.
+    VRT 밴드 수준에서 NODATA 값을 설정합니다. (각 밴드 별로 서로 다른 값을 지정할 수 있습니다.) 값을 하나 이상 지정하는 경우 모든 값들을 단일 운영체제 인수로써 따옴표로 묶어주어야 합니다. 이 옵션을 지정하지 않으면 첫 번째 데이터셋 상의 고유한 NODATA 설정을 (존재하는 경우) 사용할 것입니다. 이 옵션으로 설정한 값은 각 각 VRTRasterBand 요소의 NoDataValue 요소에 작성됩니다. 소스 데이터셋 상의 고유한 NODATA 설정을 무시하려면 ``None`` 이라는 값을 사용하십시오.
 
 .. option:: -separate
 
-    Place each input file into a separate band. In that case, only the first
-    band of each dataset will be placed into a new band. Contrary to the default mode, it is not
-    required that all bands have the same datatype.
+    각 입력 파일을 개별 밴드로 배치합니다. 이런 경우, 각 데이터셋의 첫 번째 밴드만 새 밴드로 배치될 것입니다. 기본 모드와는 반대로, 모든 밴드가 동일한 데이터 유형이어야 할 필요는 없습니다.
 
 .. option:: -allow_projection_difference
 
-    When this option is specified, the utility will accept to make a VRT even if the input datasets have
-    not the same projection. Note: this does not mean that they will be reprojected. Their projection will
-    just be ignored.
+    이 옵션을 지정하면 유틸리티가 입력 데이터셋들이 동일한 투영법이 아니더라도 받아들여 VRT를 생성할 것입니다. 주의: 입력 데이터셋이 재투영될 것이라는 의미가 아닙니다. 그냥 입력 데이터셋의 투영법을 무시할 뿐입니다.
 
 .. option:: -a_srs <srs_def>
 
-    Override the projection for the output file.  The <srs_def> may be any of the usual GDAL/OGR forms,
-    complete WKT, PROJ.4, EPSG:n or a file containing the WKT. No reprojection is done.
+    산출물 파일의 투영법을 무시합니다. <srs_def>는 완전한 WKT, PROJ.4, EPSG:n 또는 WKT를 담고 있는 파일 등 일반적인 GDAL/OGR 양식이라면 무엇이든 될 수 있습니다. 어떤 재투영도 하지 않습니다.
 
 .. option:: -r {nearest (default),bilinear,cubic,cubicspline,lanczos,average,mode}
 
-    Select a resampling algorithm.
+    리샘플링 알고리즘을 선택합니다.
 
 .. option:: -oo NAME=VALUE
 
-    Dataset open option (format specific)
+    데이터셋 열기 옵션 (특정 포맷 지원)
 
     .. versionadded:: 2.2
 
 .. option:: -input_file_list <mylist.txt>
 
-    To specify a text file with an input filename on each line
+    각 행에 입력 파일명을 가진 텍스트 파일을 지정합니다.
 
 .. option:: -q
 
-    To disable the progress bar on the console
+    콘솔의 진행 상태 막대(progress bar)를 비활성화합니다.
 
 .. option:: -overwrite
 
-    Overwrite the VRT if it already exists.
+    VRT가 이미 존재하는 경우 VRT를 덮어씁니다.
 
 .. option:: -strict
 
-    Turn warnings as failures. This is mutually exclusive with -non_strict, the latter which is the default.
+    경고를 실패로 바꿉니다. 기본값인 -non_strict와 함께 사용할 수 없습니다.
 
     .. versionadded:: 3.4.2
 
 .. option:: -non_strict
 
-    Skip source datasets that have issues with warnings, and continue processing. This is the default.
+    경고를 받는 문제를 가진 소스 데이터셋을 건너뛰고 계속 진행합니다. 기본값입니다.
 
     .. versionadded:: 3.4.2
 
-Examples
+예시
 --------
 
-- Make a virtual mosaic from all TIFF files contained in a directory :
+- 디렉터리에 있는 모든 TIFF 파일로부터 가상 모자이크를 생성합니다:
 
 ::
 
     gdalbuildvrt doq_index.vrt doq/*.tif
 
-- Make a virtual mosaic from files whose name is specified in a text file :
+- 텍스트 파일에 파일명이 지정돼 있는 파일들로부터 가상 모자이크를 생성합니다:
 
 ::
 
     gdalbuildvrt -input_file_list my_list.txt doq_index.vrt
 
 
-- Make a RGB virtual mosaic from 3 single-band input files :
+- 단일 밴드 입력 파일 3개로부터 RGB 가상 모자이크를 생성합니다:
 
 ::
 
     gdalbuildvrt -separate rgb.vrt red.tif green.tif blue.tif
 
-- Make a virtual mosaic with blue background colour (RGB: 0 0 255) :
+- 배경색이 파란색(RGB: 0 0 255)인 가상 모자이크를 생성합니다:
 
 ::
 
