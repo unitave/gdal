@@ -6,11 +6,11 @@ gdal_translate
 
 .. only:: html
 
-    Converts raster data between different formats.
+    래스터 데이터를 서로 다른 포맷으로 변환합니다.
 
 .. Index:: gdal_translate
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -37,12 +37,10 @@ Synopsis
         [-oo NAME=VALUE]*
         src_dataset dst_dataset
 
-Description
+설명
 -----------
 
-The :program:`gdal_translate` utility can be used to convert raster data between
-different formats, potentially performing some operations like subsettings,
-resampling, and rescaling pixels in the process.
+:program:`gdal_translate` 유틸리티는 래스터 데이터를 서로 다른 포맷으로 변환하기 위해 쓰일 수 있습니다. 이 과정에서 하위 집합 생성, 리샘플링, 그리고 픽셀 크기 조정 같은 몇몇 작업을 수행할 수도 있습니다.
 
 .. program:: gdal_translate
 
@@ -50,8 +48,7 @@ resampling, and rescaling pixels in the process.
 
 .. option:: -strict
 
-    Don't be forgiving of mismatches and lost data when translating to the
-    output format.
+    산출물 포맷으로 변환하는 과정에서 부정합(mismatch) 및 손상 데이터를 용납하지 않습니다.
 
 .. include:: options/if.rst
 
@@ -59,120 +56,74 @@ resampling, and rescaling pixels in the process.
 
 .. option:: -b <band>
 
-    Select an input band **band** for output. Bands are numbered from 1.
-    Multiple :option:`-b` switches may be used to select a set of input bands
-    to write to the output file, or to reorder bands. **band** can also be set
-    to "mask,1" (or just "mask") to mean the mask band of the first band of the
-    input dataset.
+    입력 밴드에서 산출물 용 **밴드** 를 선택합니다. 밴드 번호는 1부터 시작합니다. 산출 파일에 작성할 입력 밴드를 여러 개 선택하기 위해, 또는 밴드 순서를 재정렬하기 위해 :option:`-b` 스위치를 여러 개 사용할 수도 있습니다. 입력 데이터셋의 첫 번째 밴드의 마스크 밴드를 의도하려면 **밴드** 를 "mask,1"(또는 그냥 "mask")로 설정할 수도 있습니다.
 
 .. option:: -mask <band>
 
-    Select an input band **band** to create output dataset mask band. Bands are
-    numbered from 1. **band** can be set to "none" to avoid copying the global
-    mask of the input dataset if it exists. Otherwise it is copied by default
-    ("auto"), unless the mask is an alpha channel, or if it is explicitly used
-    to be a regular band of the output dataset ("-b mask"). **band** can also
-    be set to "mask,1" (or just "mask") to mean the mask band of the 1st band
-    of the input dataset.
+    입력 밴드에서 산출 데이터셋 마스크 밴드를 생성하기 위한 **밴드** 를 선택합니다. 밴드 번호는 1부터 시작합니다. 입력 데이터셋에 전체 수준(global) 마스크가 존재하는 경우 이를 복사하는 일을 피하려면 **밴드** 를 "none"으로 설정하면 됩니다. 이렇게 하지 않으면, 마스크가 알파 채널이 아니거나 명백히 산출 데이터셋의 정규 밴드로 쓰이는 경우("-b mask")를 제외하고, 기본적으로 ("auto") 복사될 것입니다. 입력 데이터셋의 첫 번째 밴드의 마스크 밴드를 의도하려면 **밴드** 를 "mask,1"(또는 그냥 "mask")로 설정할 수도 있습니다.
 
 .. option:: -expand gray|rgb|rgba
 
-    To expose a dataset with 1 band with a color table as a dataset with
-    3 (RGB) or 4 (RGBA) bands. Useful for output drivers such as JPEG,
-    JPEG2000, MrSID, ECW that don't support color indexed datasets. The 'gray'
-    value enables to expand a dataset with a color table that only contains
-    gray levels to a gray indexed dataset.
+    색상표를 가지고 있는 밴드 1개의 데이터셋을 밴드 3개(RGB) 또는 4개(RGBA)의 데이터셋으로 노출시킵니다. 색상 색인(color indexed) 데이터셋을 지원하지 않는 JPEG, JPEG2000, MrSID, ECW 같은 산출물 드라이버에 유용합니다. 'gray' 값은 회색도(gray level)만 담고 있는 색상표를 가진 데이터셋을 회색 색인 데이터셋으로 확장시켜 줍니다.
 
 .. option:: -outsize <xsize>[%]|0 <ysize>[%]|0
 
-    Set the size of the output file.  Outsize is in pixels and lines unless '%'
-    is attached in which case it is as a fraction of the input image size.
-    If one of the 2 values is set to 0, its value will be determined from the
-    other one, while maintaining the aspect ratio of the source dataset.
+    산출 파일의 크기를 설정합니다. outsize는 '%'가 붙지 않는 이상 픽셀과 행 단위입니다. '%'가 붙는 경우 입력 이미지 크기 대비 비율을 의미합니다. 2개의 값 가운데 하나를 0으로 설정하면, 소스 데이터셋의 가로세로비(aspect ratio)를 유지한다는 기준으로 다른 값으로부터 해당 값을 결정할 것입니다.
 
 .. option:: -tr <xres> <yres>
 
-    set target resolution. The values must be expressed in georeferenced units.
-    Both must be positive values. This is mutually exclusive with
-    :option:`-outsize` and :option:`-a_ullr`.
+    대상(target) 해상도를 설정합니다. 값은 지리참조된 단위로 표현되어야만 합니다. 두 값 모두 양의 값이어야만 합니다. 이 옵션을 :option:`-outsize` 및 :option:`-a_ullr` 옵션과 함께 사용해서는 안 됩니다.
 
 .. option:: -r {nearest (default),bilinear,cubic,cubicspline,lanczos,average,rms,mode}
 
-    Select a resampling algorithm.
+    리샘플링 알고리즘을 선택합니다.
 
-    ``nearest`` applies a nearest neighbour (simple sampling) resampler
+    ``nearest`` 최근접 이웃 (단순 샘플링) 리샘플링 도구(resampler)를 적용합니다.
 
-    ``average`` computes the average of all non-NODATA contributing pixels. Starting with GDAL 3.1, this is a weighted average taking into account properly the weight of source pixels not contributing fully to the target pixel.
+    ``average`` NODATA가 아닌 모든 기여 픽셀(contributing pixel)의 평균을 계산합니다. GDAL 3.1버전부터, 이 평균은 대상 픽셀에 완전히 기여하지 않는 소스 픽셀의 가중치를 제대로 고려하는 가중 평균이 되었습니다.
 
-    ``rms`` computes the root mean squared / quadratic mean of all non-NODATA contributing pixels (GDAL >= 3.3)
+    ``rms`` NODATA가 아닌 모든 기여 픽셀의 제곱평균제곱근(root mean squared)/이차평균(quadratic mean)을 계산합니다. (GDAL 3.3버전 이상)
 
-    ``bilinear`` applies a bilinear convolution kernel.
+    ``bilinear`` 이중선형 회선 커널(bilinear convolution kernel)을 적용합니다.
 
-    ``cubic`` applies a cubic convolution kernel.
+    ``cubic`` 3차 회선 커널(cubic convolution kernel)을 적용합니.
 
-    ``cubicspline`` applies a B-Spline convolution kernel.
+    ``cubicspline`` B 스플라인 회선 커널(B-Spline convolution kernel)을 적용합니다.
 
-    ``lanczos`` applies a Lanczos windowed sinc convolution kernel.
+    ``lanczos`` 란초시 창함수 싱크 회선 커널(Lánczos windowed sinc convolution kernel)을 적용합니다.
 
-    ``mode`` selects the value which appears most often of all the sampled points.
+    ``mode`` 샘플링된 모든 포인트들에서 가장 출현 빈도가 높은 값을 선택합니다.
 
 .. option:: -scale [src_min src_max [dst_min dst_max]]
 
-    Rescale the input pixels values from the range **src_min** to **src_max**
-    to the range **dst_min** to **dst_max**. If omitted the output range is 0
-    to 255.  If omitted the input range is automatically computed from the
-    source data. Note that these values are only used to compute a scale and
-    offset to apply to the input raster values. In particular, src_min and
-    src_max are not used to clip input values.
-    -scale can be repeated several times (if specified only once,
-    it also applies to all bands of the output dataset), so as to specify per
-    band parameters. It is also possible to use the "-scale_bn" syntax where bn
-    is a band number (e.g. "-scale_2" for the 2nd band of the output dataset)
-    to specify the parameters of one or several specific bands.
+    입력 픽셀 값을 **src_min** 에서 **src_max** 까지의 범위로부터 **dst_min** 에서 **dst_max** 까지의 범위로 값의 크기를 재조정(rescale)합니다. 이 옵션을 지정하지 않는 경우 산출 범위는 0에서 255까지이며, 입력 범위는 소스 데이터로부터 자동적으로 계산됩니다. 이 값들은 크기 조정 계산 및 입력 래스터 값에 적용하기 위한 상쇄(offset)에만 사용된다는 사실을 기억하십시오. 특히, src_min과 src_max는 입력값을 자르기(clip) 위해 사용되지 않습니다. 밴드 파라미터마다 지정하려면 -scale을 여러 번 반복하면 됩니다. (한번만 지정해도 산출 데이터의 모든 밴드에 적용됩니다.) 한 개 또는 여러 개의 특정 밴드의 파라미터를 지정하기 위해 "-scale_bn"이라는 문법도 사용할 수 있습니다. 이때 bn은 밴드 번호입니다. (예: "-scale_2"는 산출 데이터셋의 두 번째 밴드를 뜻합니다.)
 
 .. option:: -exponent <exp_val>
 
-    To apply non-linear scaling with a power function. exp_val is the exponent
-    of the power function (must be positive). This option must be used with the
-    -scale option. If specified only once, -exponent applies to all bands of
-    the output image. It can be repeated several times so as to specify per
-    band parameters. It is also possible to use the "-exponent_bn" syntax where
-    bn is a band number (e.g. "-exponent_2" for the 2nd band of the output
-    dataset) to specify the parameters of one or several specific bands.
+    거듭제곱 함수로 비선형적으로 값의 크기를 조정합니다. exp_val은 거듭제곱 함수의 지수(exponent)입니다(양의 값이어야만 합니다). 이 옵션은 -scale 옵션과 함께 사용해야만 합니다. 한번만 지정하는 경우, 산출 이미지의 모든 밴드에 -exponent를 적용합니다. 밴드 파라미터마다 지정하려면 -exponent를 여러 번 반복하면 됩니다. 한 개 또는 여러 개의 특정 밴드의 파라미터를 지정하기 위해 "-exponent_bn"이라는 문법도 사용할 수 있습니다. 이때 bn은 밴드 번호입니다. (예: "-exponent_2"는 산출 데이터셋의 두 번째 밴드를 뜻합니다.)
 
 .. option:: -unscale
 
-    Apply the scale/offset metadata for the bands to convert scaled values to
-    unscaled values.  It is also often necessary to reset the output datatype
-    with the :option:`-ot` switch.
+    밴드에 scale/offset 메타데이터를 적용해서 크기 조정된 값을 조정되지 않은 값으로 변환합니다. 또 :option:`-ot` 스위치로 산출물 데이터 유형을 리셋시켜햐 하는 경우도 많습니다.
 
 .. option:: -srcwin <xoff> <yoff> <xsize> <ysize>
 
-    Selects a subwindow from the source image for copying based on pixel/line location.
+   픽셀/행 위치를 기반으로 복사하기 위해 소스 이미지에서 하위 창(subwindow)을 선택합니다.
 
 .. option:: -projwin <ulx> <uly> <lrx> <lry>
 
-    Selects a subwindow from the source image for copying
-    (like :option:`-srcwin`) but with the corners given in georeferenced
-    coordinates (by default expressed in the SRS of the dataset. Can be
-    changed with :option:`-projwin_srs`).
+    복사하기 위해 (:option:`-srcwin` 처럼) 소스 이미지에서 하위 창을 선택하지만 모서리를 지리참조된 좌표로 입력합니다. (기본적으로 데이터셋의 공간 좌표계로 표현합니다. :option:`-projwin_srs` 옵션으로 좌표계를 변경할 수 있습니다.)
 
     .. note::
 
-        In GDAL 2.1.0 and 2.1.1, using -projwin with coordinates not aligned
-        with pixels will result in a sub-pixel shift. This has been corrected
-        in later versions. When selecting non-nearest neighbour resampling,
-        starting with GDAL 2.1.0, sub-pixel accuracy is however used to get
-        better results.
+        GDAL 2.1.0 및 2.1.1에서, 픽셀과 정렬되지 않는 좌표계로 -projwin을 사용하면 하위 픽셀(sub-pixel)이 이동할 것입니다. 이후 버전에서는 수정되었습니다. GDAL 2.1.0버전부터, 최근접 이웃 리샘플링 이외의 메소드를 선택하는 경우, 보다 나은 결과물을 얻기 위해 하위 픽셀 정확도를 어찌됐든 이용합니다.
 
 .. option:: -projwin_srs <srs_def>
 
-    Specifies the SRS in which to interpret the coordinates given with
-    :option:`-projwin`. The <srs_def> may be any of the usual GDAL/OGR forms,
-    complete WKT, PROJ.4, EPSG:n or a file containing the WKT.
+    :option:`-projwin` 으로 입력된 좌표를 해석하기 위한 공간 좌표계를 지정합니다. <srs_def>는 완전한 WKT, PROJ.4, EPSG:n 또는 WKT를 담고 있는 파일 등 일반적인 GDAL/OGR 양식이라면 무엇이든 될 수 있습니다.
 
     .. warning::
-        This does not cause reprojection of the dataset to the specified SRS.
+        이 옵션은 데이터셋을 지정한 공간 좌표계로 재투영하지 않습니다.
 
 .. option:: -epo
 
@@ -301,7 +252,7 @@ This utility is also callable from C with :cpp:func:`GDALTranslate`.
 
 .. versionadded:: 2.1
 
-Examples
+예시
 --------
 
 ::
