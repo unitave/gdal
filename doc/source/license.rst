@@ -1,35 +1,32 @@
 .. _license:
 
 ================================================================================
-License
+사용허가
 ================================================================================
 
 .. include:: ./substitutions.rst
 
-License
+사용허가
 --------------------------------------------------------------------------------
 
-In general GDAL/OGR is licensed under an MIT style license with the 
-following terms:
+일반적으로 GDAL/OGR은 MIT 스타일의 사용허가 및 다음 조건들 아래 사용할 수 있습니다:
 
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
+이 소프트웨어 및 관련 문서 파일들("소프트웨어")의 복사본을 획득한 모든 사람에게
+소프트웨어의 복사본을 무료로 사용, 복사, 수정, 병합, 발표, 배포, 2차 사용허가,
+그리고/또는 판매할 수 있는 제한 없는 권리를 포함해서 제약 없이 소프트웨어를 다룰 수
+있도록 허가하며, 소프트웨어를 제공받은 사람에게 다음 조건들을 준수하는 한 그렇게 할
+수 있도록 허가합니다:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+앞의 저작권 공고와 이 허가 공고는 소프트웨어의 모든 복사본 또는 실질적 부분들에
+포함되어야 합니다.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
+소프트웨어는 직접적인 표현이나 암시하는 일 없이, 매매가능성, 특정 목적에 대한 적합성
+및 비위반성의 보증을 포함하지만 그에 제한되지 않는 어떤 종류의 보증도 없이 "있는
+그대로" 제공됩니다. 저자 또는 저작권자는 어떤 경우에도 소프트웨어 외부 또는
+소프트웨어 관련 또는 소프트웨어의 사용 또는 기타 처리 때문에 발생하는 계약 조치,
+불법 행위 또는 기타 등등에 의한 모든 청구, 손해 또는 기타 책무에 대해 책임을 지지
+않습니다.
 
-The full licensing terms are available in the `LICENSE.TXT`_ file.
+전체 사용허가 조건은 `LICENSE.TXT`_ 파일에서 볼 수 있습니다.
 
 .. _`LICENSE.TXT`: https://raw.githubusercontent.com/OSGeo/gdal/master/LICENSE.TXT

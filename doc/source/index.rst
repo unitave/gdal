@@ -4,7 +4,7 @@ GDAL
 
 .. include:: ./about_no_title.rst
 
-This documentation is also available as a `PDF file <gdal.pdf>`_.
+이 문서는 `PDF 파일 <gdal.pdf>`_ 로도 볼 수 있습니다.
 
 .. toctree::
     :maxdepth: 2
@@ -23,7 +23,7 @@ This documentation is also available as a `PDF file <gdal.pdf>`_.
     faq
     license
 
-Index
+인덱스
 =====
 
 * :ref:`genindex`
