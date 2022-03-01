@@ -149,100 +149,88 @@ gdal_translate
 
 .. option:: -a_scale <value>
 
-    Set band scaling value (no modification of pixel values is done)
+    밴드 크기 조정 값을 설정합니다. (어떤 픽셀 값도 수정하지 않습니다.)
 
     .. versionadded:: 2.3
 
 .. option:: -a_offset<value>
 
-    Set band offset value (no modification of pixel values is done)
+    밴드 오프셋 값을 설정합니다. (어떤 픽셀 값도 수정하지 않습니다.)
 
     .. versionadded:: 2.3
 
 .. option:: -a_ullr <ulx> <uly> <lrx> <lry>
 
-    Assign/override the georeferenced bounds of the output file.  This assigns
-    georeferenced bounds to the output file, ignoring what would have been
-    derived from the source file. So this does not cause reprojection to the
-    specified SRS.
+    산출 파일의 지리참조된 경계를 할당/무시합니다. 이 옵션은 소스 파일로부터 파생되었을 경계를 무시하고, 산출 파일에 지리참조된 경계를 할당합니다. 즉 이 옵션은 지정한 공간 좌표계로 재투영하지 않습니다.
 
 .. option:: -a_nodata <value>
 
-    Assign a specified nodata value to output bands. It can
-    be set to ``none`` to avoid setting a nodata value to the output file if
-    one exists for the source file. Note that, if the input dataset has a
-    nodata value, this does not cause pixel values that are equal to that nodata
-    value to be changed to the value specified with this option.
+    산출 밴드에 지정한 NODATA 값을 할당합니다. 산출 파일에 소스 파일에 있을 수도 있는 값을 설정하는 경우를 피하려면 ``none`` 으로 설정하면 됩니다. 입력 데이터셋에 NODATA 값이 존재하는 경우, 이 옵션이 해당 NODATA 값과 동일한 픽셀 값을 지정한 값으로 변경하지 않는다는 사실을 기억하십시오.
 
 .. option:: -colorinterp_X <red|green|blue|alpha|gray|undefined>
 
-    Override the color interpretation of band X (where X is a valid band number,
-    starting at 1)
+    밴드 X의 색상 해석을 무시합니다. (이때 X는 1부터 시작하는 유효한 밴드 번호입니다.)
 
     .. versionadded:: 2.3
 
 .. option:: -colorinterp <red|green|blue|alpha|gray|undefined[,red|green|blue|alpha|gray|undefined]*>
 
-    Override the color interpretation of all specified bands. For
-    example -colorinterp red,green,blue,alpha for a 4 band output dataset.
+    지정한 모든 밴드의 색상 해석을 무시합니다. 예를 들면 밴드 4개를 가진 산출 데이터셋의 경우 -colorinterp red,green,blue,alpha 처럼 사용할 수 있습니다.
 
     .. versionadded:: 2.3
 
 .. option:: -mo META-TAG=VALUE
 
-    Passes a metadata key and value to set on the output dataset if possible.
+    가능하다면 산출 데이터셋에 설정할 메타데이터 키와 값을 전송(pass)합니다.
 
 .. include:: options/co.rst
 
 .. option:: -nogcp
 
-    Do not copy the GCPs in the source dataset to the output dataset.
+    산출 데이터셋에 소스 데이터셋에 있는 GCP들을 복사하지 않습니다.
 
 .. option:: -gcp <pixel> <line> <easting> <northing> <elevation>
 
-    Add the indicated ground control point to the output dataset.  This option
-    may be provided multiple times to provide a set of GCPs.
+    산출 데이터셋에 지정한 GCP를 추가합니다. GCP 집합을 추가하려면 이 옵션을 여러 번 사용할 수도 있습니다.
 
 .. option:: -q
 
-    Suppress progress monitor and other non-error output.
+    과정 모니터 및 기타 오류가 아닌 결과를 표시하지 않습니다.
 
 .. option:: -sds
 
-    Copy all subdatasets of this file to individual output files.  Use with
-    formats like HDF that have subdatasets.
+    개별 산출 파일에 이 파일의 모든 하위 데이터셋을 복사합니다. 하위 데이터셋을 지원하는 HDF 같은 포맷과 함께 사용하십시오.
 
 .. option:: -stats
 
-    Force (re)computation of statistics.
+    통계를 강제로 (다시) 계산합니다.
 
 .. option:: -norat
 
-    Do not copy source RAT into destination dataset.
+    대상(destination) 데이터셋에 소스의 RAT을 복사하지 않습니다.
 
 .. option:: -noxmp
 
-    Do not copy the XMP metadata in the source dataset to the output dataset when driver is able to copy it.
+    드라이버가 복사할 수 있더라도, 산출 데이터셋에 소스 데이터셋에 있는 XMP 메타데이터를 복사하지 않습니다.
 
     .. versionadded:: 3.2
 
 .. option:: -oo NAME=VALUE
 
-    Dataset open option (format specific)
+    데이터셋 열기 옵션 (특정 포맷 지원)
 
 .. option:: <src_dataset>
 
-    The source dataset name. It can be either file name, URL of data source or
-    subdataset name for multi-dataset files.
+    소스 데이터셋의 이름입니다. 파일명일 수도, 데이터소스의 URL 일 수도 있고 다중 데이터셋 파일들의 하위 데이터셋 이름일 수도 있습니다.
 
 .. option:: <dst_dataset>
 
-    The destination file name.
+    대상(destination) 파일의 이름입니다.
 
 C API
 -----
 
-This utility is also callable from C with :cpp:func:`GDALTranslate`.
+이 유틸리티는 C에서 :cpp:func:`GDALTranslate` 로 호출할 수도 있습니다.
 
 .. versionadded:: 2.1
 
@@ -254,14 +242,14 @@ This utility is also callable from C with :cpp:func:`GDALTranslate`.
     gdal_translate -of GTiff -co "TILED=YES" utm.tif utm_tiled.tif
 
 
-To create a JPEG-compressed TIFF with internal mask from a RGBA dataset
+RGBA 데이터셋으로부터 나온 내부 마스크를 가진 JPEG 압축 TIFF를 생성하려면
 
 ::
 
     gdal_translate rgba.tif withmask.tif -b 1 -b 2 -b 3 -mask 4 -co COMPRESS=JPEG -co PHOTOMETRIC=YCBCR --config GDAL_TIFF_INTERNAL_MASK YES
 
 
-To create a RGBA dataset from a RGB dataset with a mask
+마스크를 가진 RGB 데이터셋으로부터 RGBA 데이터셋을 생성하려면
 
 ::
 
