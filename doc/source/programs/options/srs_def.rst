@@ -1,4 +1,1 @@
-The coordinate reference systems that can be passed are anything supported by the
-OGRSpatialReference.SetFromUserInput() call, which includes EPSG Projected,
-Geographic or Compound CRS (i.e. EPSG:4296), a well known text (WKT) CRS definition,
-PROJ.4 declarations, or the name of a .prj file containing a WKT CRS definition.
+OGRSpatialReference.SetFromUserInput()이 지원하는 좌표계라면 어떤 좌표계든 전송(pass)할 수 있습니다. 이 지원 좌표계에는 투영 EPSG, 지리 또는 복합 좌표계(예: EPSG:4296), WKT(Well Known Text) 좌표계 정의, PROJ.4 선언, 또는 WKT 좌표계 정의를 담고 있는 .prj 파일의 이름 등이 포함됩니다.

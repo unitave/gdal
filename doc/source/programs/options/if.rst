@@ -1,8 +1,5 @@
 .. option:: -if <format>
 
-    Format/driver name to be attempted to open the input file(s). It is generally
-    not necessary to specify it, but it can be used to skip automatic driver
-    detection, when it fails to select the appropriate driver.
-    This option can be repeated several times to specify several candidate drivers.
+    입력 파일(들)을 열기 위해 시도할 포맷/드라이버 이름입니다. 일반적으로 지정해야 할 필요는 없지만, 적절한 드라이버를 선택하지 못 하는 경우 드라이버 자동 탐지를 건너뛰는 데 쓰일 수는 있습니다. 후보 드라이버를 몇 가지 지정하기 위해 이 옵션을 몇 번 반복할 수 있습니다.
 
     .. versionadded:: 3.2

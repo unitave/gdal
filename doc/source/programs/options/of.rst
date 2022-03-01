@@ -1,5 +1,3 @@
 .. option:: -of <format>
 
-    Select the output format. Starting with GDAL 2.3, if not specified, the
-    format is guessed from the extension (previously was GTiff). Use the short
-    format name.
+    산출물 포맷을 선택합니다. GDAL 2.3버전부터, 이 옵션을 지정하지 않을 경우 확장자로부터 포맷을 추정합니다. (이전에는 GTiff가 기본값이었습니다.) 단축 포맷 이름을 사용하십시오.
