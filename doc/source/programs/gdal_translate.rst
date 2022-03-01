@@ -127,31 +127,25 @@ gdal_translate
 
 .. option:: -epo
 
-    (Error when Partially Outside) If this option is set, :option:`-srcwin` or
-    :option:`-projwin` values that falls partially outside the source raster
-    extent will be considered as an error. The default behavior is to accept
-    such requests, when they were considered as an error before.
+    (부분적으로 외부에 있을 경우 오류(Error when Partially Outside)) 이 옵션을 설정한 경우, 소스 래스터 범위를 부분적으로 벗어나는 :option:`-srcwin` 또는 :option:`-projwin` 값을 오류로 간주할 것입니다. 이런 요청이 이전에 오류로 간주되었더라도, 기본적으로 이런 요청을 받아들입니다.
 
 .. option:: -eco
 
-    (Error when Completely Outside) Same as :option:`-epo`, except that the
-    criterion for erroring out is when the request falls completely outside
-    the source raster extent.
+    (완전히 외부에 있을 경우 오류(Error when Completely Outside)) 오류로 판단하는 기준이 요청이 소스 래스터 범위를 완전히 벗어나는 경우인 점을 제외하면, :option:`-epo` 와 동일합니다.
 
 .. option:: -a_srs <srs_def>
 
-    Override the projection for the output file.
+    산출 파일의 투영법을 무시합니다.
 
     .. include:: options/srs_def.rst
 
-    .. note:: No reprojection is done.
+    .. note:: 어떤 재투영도 하지 않습니다.
 
 .. option:: -a_coord_epoch <epoch>
 
     .. versionadded:: 3.4
 
-    Assign a coordinate epoch, linked with the output SRS. Useful when the
-    output SRS is a dynamic CRS.
+    산출물의 공간 좌표계와 링크된 시대 좌표(coordinate epoch)를 할당합니다. 산출물의 공간 좌표계가 동적 좌표계(dynamic CRS)인 경우 유용합니다.
 
 .. option:: -a_scale <value>
 
