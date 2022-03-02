@@ -6,18 +6,18 @@ gdaldem
 
 .. only:: html
 
-    Tools to analyze and visualize DEMs.
+    DEM을 분석하고 가시화하는 도구입니다.
 
 .. Index:: gdaldem
 
-Synopsis
+개요
 --------
 
 .. code-block::
 
     gdaldem <mode> <input> <output> <options>
 
-Generate a shaded relief map from any GDAL-supported elevation raster:
+GDAL이 지원하는 모든 표고 래스터로부터 음영기복도(shaded relief map)를 생성합니다:
 
 .. code-block::
 
@@ -27,7 +27,7 @@ Generate a shaded relief map from any GDAL-supported elevation raster:
                 [-alg Horn|ZevenbergenThorne] [-combined | -multidirectional | -igor]
                 [-compute_edges] [-b Band (default=1)] [-of format] [-co "NAME=VALUE"]* [-q]
 
-Generate a slope map from any GDAL-supported elevation raster:
+GDAL이 지원하는 모든 표고 래스터로부터 경사도(slope map)를 생성합니다:
 
 .. code-block::
 
@@ -36,8 +36,7 @@ Generate a slope map from any GDAL-supported elevation raster:
                 [-alg Horn|ZevenbergenThorne]
                 [-compute_edges] [-b Band (default=1)] [-of format] [-co "NAME=VALUE"]* [-q]
 
-Generate an aspect map from any GDAL-supported elevation raster,
-outputs a 32-bit float raster with pixel values from 0-360 indicating azimuth:
+GDAL이 지원하는 모든 표고 래스터로부터 경사방향도(aspect map)를 생성해서 방위각을 의미하는 0에서 360까지의 픽셀 값을 가진 32비트 부동소수점 데이터 유형 래스터를 산출합니다:
 
 .. code-block::
 
@@ -46,7 +45,7 @@ outputs a 32-bit float raster with pixel values from 0-360 indicating azimuth:
                 [-alg Horn|ZevenbergenThorne]
                 [-compute_edges] [-b Band (default=1)] [-of format] [-co "NAME=VALUE"]* [-q]
 
-Generate a color relief map from any GDAL-supported elevation raster:
+GDAL이 지원하는 모든 표고 래스터로부터 색상기복도(color relief map)를 생성합니다:
 
 .. code-block::
 
@@ -55,7 +54,7 @@ Generate a color relief map from any GDAL-supported elevation raster:
                 [-b Band (default=1)] [-of format] [-co "NAME=VALUE"]* [-q]
     where color_text_file contains lines of the format "elevation_value red green blue"
 
-Generate a Terrain Ruggedness Index (TRI) map from any GDAL-supported elevation raster:
+GDAL이 지원하는 모든 표고 래스터로부터 지형 험상 지수(Terrain Ruggedness Index; TRI) 맵을 생성합니다:
 
 .. code-block::
 
@@ -63,258 +62,225 @@ Generate a Terrain Ruggedness Index (TRI) map from any GDAL-supported elevation 
                 [-alg Wilson|Riley]
                 [-compute_edges] [-b Band (default=1)] [-of format] [-q]
 
-Generate a Topographic Position Index (TPI) map from any GDAL-supported elevation raster:
+GDAL이 지원하는 모든 표고 래스터로부터 지형 위치 지수(Topographic Position Index; TPI) 맵을 생성합니다:
 
 .. code-block::
 
     gdaldem TPI input_dem output_TPI_map
                 [-compute_edges] [-b Band (default=1)] [-of format] [-q]
 
-Generate a roughness map from any GDAL-supported elevation raster:
+GDAL이 지원하는 모든 표고 래스터로부터 거칠기(roughness) 맵을 생성합니다:
 
 .. code-block::
 
     gdaldem roughness input_dem output_roughness_map
                 [-compute_edges] [-b Band (default=1)] [-of format] [-q]
 
-Description
+설명
 -----------
 
-The :program:`gdaldem` generally assumes that x, y and z units are identical.
-If x (east-west) and y (north-south) units are identical, but z (elevation)
-units are different, the scale (-s) option can be used to set the ratio of
-vertical units to horizontal.
-For LatLong projections near the equator, where units of latitude and units of
-longitude are similar, elevation (z) units can be converted to be compatible
-by using scale=370400 (if elevation is in feet) or scale=111120 (if elevation is in
-meters).  For locations not near the equator, it would be best to reproject your
-grid using gdalwarp before using gdaldem.
+:program:`gdaldem` 은 일반적으로 x, y 및 z 단위가 동일하다고 가정합니다. x(동-서)와 y(남-북) 단위는 동일하지만 z(표고) 단위가 다른 경우, 척도(-s) 옵션을 사용해서 수직 단위와 수평 단위의 비율을 설정할 수 있습니다. 적도에 가까운 위도/경도 투영법의 경우 (표고가 피트 단위일 때) scale=370400, 또는 (표고가 미터 단위일 때) scale=111120을 사용하면 표고(z) 단위가 호환되도록 변환할 수 있습니다. 적도에 가까운 위치가 아니라면, gdaldem을 사용하기 전에 gdalwarp를 사용해서 사용자의 그리드를 재투영하는 방법이 최선일 것입니다.
 
 .. option:: <mode>
 
-    Where <mode> is one of the seven available modes:
+    <mode> 위치에 다음 7개 모드 가운데 하나를 사용할 수 있습니다:
 
     * ``hillshade``
 
-        Generate a shaded relief map from any GDAL-supported elevation raster.
+        GDAL이 지원하는 모든 표고 래스터로부터 음영기복도(shaded relief map)를 생성합니다.
 
     * ``slope``
 
-        Generate a slope map from any GDAL-supported elevation raster.
+        GDAL이 지원하는 모든 표고 래스터로부터 경사도(slope map)를 생성합니다.
 
     * ``aspect``
 
-        Generate an aspect map from any GDAL-supported elevation raster.
+        GDAL이 지원하는 모든 표고 래스터로부터 경사방향도(aspect map)를 생성합니다.
 
     * ``color-relief``
 
-        Generate a color relief map from any GDAL-supported elevation raster.
+        GDAL이 지원하는 모든 표고 래스터로부터 색상기복도(color relief map)를 생성합니다.
 
     * ``TRI``
 
-        Generate a map of Terrain Ruggedness Index from any GDAL-supported elevation raster.
+        GDAL이 지원하는 모든 표고 래스터로부터 지형 험상 지수(Terrain Ruggedness Index; TRI) 맵을 생성합니다.
 
     * ``TPI``
 
-        Generate a map of Topographic Position Index from any GDAL-supported elevation raster.
+        GDAL이 지원하는 모든 표고 래스터로부터 지형 위치 지수(Topographic Position Index; TPI) 맵을 생성합니다.
 
     * ``roughness``
 
-        Generate a map of roughness from any GDAL-supported elevation raster.
+        GDAL이 지원하는 모든 표고 래스터로부터 거칠기(roughness) 맵을 생성합니다.
 
-The following general options are available:
+다음 일반 옵션들을 사용할 수 있습니다:
 
 .. option:: input_dem
 
-    The input DEM raster to be processed
+    처리할 입력 DEM 래스터입니다.
 
 .. option:: output_xxx_map
 
-    The output raster produced
+    생산한 산출 래스터입니다.
 
 .. option:: -of <format>
 
-    Select the output format.
+    산출물 포맷을 선택합니다.
 
     .. versionadded:: 2.3.0
 
-        If not specified, the format is guessed from the extension
-        (previously was :ref:`raster.gtiff`). Use the short format name.
+        지정하지 않는 경우, 확장자로부터 포맷을 추정합니다. (이전 버전까지는 :ref:`raster.gtiff` 를 사용했습니다.) 단축 포맷명을 사용하십시오.
 
 .. option:: -compute_edges
 
-    Do the computation at raster edges and near nodata values
+    래스터 경계와 NODATA 값에 근접한 위치에서 계산을 수행합니다.
 
 .. option:: -b <band>
 
-    Select an input band to be processed. Bands are numbered from 1.
+    처리할 입력 밴드를 선택합니다. 밴드 번호는 1부터 시작합니다.
 
 .. include:: options/co.rst
 
 .. option:: -q
 
-    Suppress progress monitor and other non-error output.
+    진행 상황 모니터 및 기타 오류가 아닌 결과를 표시하지 않습니다.
 
-For all algorithms, except color-relief, a nodata value in the target dataset
-will be emitted if at least one pixel set to the nodata value is found in the
-3x3 window centered around each source pixel. The consequence is that there
-will be a 1-pixel border around each image set with nodata value.
+색상기복을 제외한 모든 알고리즘에서, 각 소스 픽셀을 중심으로 하는 3x3 창 안에서 NODATA 값으로 설정된 픽셀이 하나라도 탐지되는 경우, 대상 데이터셋에서 NODATA 값을 누락시킬 것입니다. 그 결과 NODATA 값이 설정된 각 이미지를 둘러싼 픽셀 1개 두께의 경계선이 생길 것입니다.
 
-    If :option:`-compute_edges` is specified, gdaldem will compute values
-    at image edges or if a nodata value is found in the 3x3 window,
-    by interpolating missing values.
+    :option:`-compute_edges` 를 지정한 경우, gdaldem이 이미지 경계에서 값을 계산할 것입니다. 또는 3x3 창 안에서 NODATA 값을 하나라도 탐지한 경우, 누락된 값을 보간해서 계산할 것입니다.
 
-Modes
+모드
 -----
 
 hillshade
 ^^^^^^^^^
 
-This command outputs an 8-bit raster with a nice shaded relief effect. It’s very useful for visualizing the terrain. You can optionally specify the azimuth and altitude of the light source, a vertical exaggeration factor and a scaling factor to account for differences between vertical and horizontal units.
+이 명령어는 보기 좋은 음영기복 효과를 준 8비트 래스터를 산출합니다. 지형을 가시화하는 데 매우 유용한 모드입니다. 광원의 방위각과 고도를 선택적으로 지정할 수 있고, 수직 과장 인자 및 수직과 수평 단위의 차이를 조정하기 위한 척도 인자도 지정할 수 있습니다.
 
-The value 0 is used as the output nodata value.
+0을 산출 NODATA 값으로 사용합니다.
 
-The following specific options are available :
+다음 특화 옵션을 사용할 수 있습니다:
 
 .. option:: -alg Horn|ZevenbergenThorne
 
-    The literature suggests Zevenbergen & Thorne to be more suited to smooth landscapes, whereas Horn's formula to perform better on rougher terrain.
+    문헌에 따르면 체벤베르겐 & 손(Zevenbergen & Thorne) 공식은 매끄러운 풍경에 더 적합한 반면, 혼(Horn) 공식은 거친 지형에서 더 나은 결과를 보인다고 합니다.
 
 .. option:: -z <factor>
 
-    Vertical exaggeration used to pre-multiply the elevations
+    표고를 사전에 증가시키기 위해 쓰이는 수직 강조 인자입니다.
 
 .. option:: -s <scale>
 
-    Ratio of vertical units to horizontal. If the horizontal unit of the source DEM is degrees (e.g Lat/Long WGS84 projection), you can use scale=111120 if the vertical units are meters (or scale=370400 if they are in feet)
+    수직 단위와 수평 단위의 비율입니다. 소스 DEM의 수평 단위가 도(예: 위도/경도 WGS84 투영법)인 경우, 수평 단위가 미터라면 scale=111120 을 (또는 피트라면 scale=370400을) 사용하면 됩니다.
 
 .. option:: -az <azimuth>
 
-    Azimuth of the light, in degrees. 0 if it comes from the top of the raster, 90 from the east, ... The default value, 315, should rarely be changed as it is the value generally used to generate shaded maps.
+    광원의 (도 단위) 방위각입니다. 래스터 위 수직 방향에서 빛이 온다면 0, 동쪽 방향에서 온다면 90, ... 기본값인 315는 음영기복도를 생산할 때 일반적으로 쓰이는 값이기 때문에 변경해야 할 일은 거의 없습니다.
 
 .. option:: -alt <altitude>
 
-    Altitude of the light, in degrees. 90 if the light comes from above the DEM, 0 if it is raking light.
+    광원의 (도 단위) 고도입니다. DEM 위 수직 방향에서 빛이 온다면 90이고, 지평선에 평행하게 온다면 0입니다.
 
 .. option:: -combined
 
-    combined shading, a combination of slope and oblique shading.
+    경사와 사선 음영을 결합한 결합 음영을 산출합니다.
 
 .. option:: -multidirectional
 
-    multidirectional shading, a combination of hillshading illuminated from 225 deg, 270 deg, 315 deg, and 360 deg azimuth.
+    225도, 270도, 315도, 그리고 360도 방위각으로부터 빛을 비춘 음영기복을 결합한 다중방향 음영을 산출합니다.
 
     .. versionadded:: 2.2
 
 .. option:: -igor
 
-    shading which tries to minimize effects on other map features beneath. Can't be used with -alt option.
+    음영이 아래 있는 다른 맵 객체에 미치는 영향을 최소화시킵니다. -alt 옵션과 함께 사용해서는 안 됩니다.
 
     .. versionadded:: 3.0
 
-Multidirectional hillshading applies the formula of http://pubs.usgs.gov/of/1992/of92-422/of92-422.pdf.
+다중방향 음영은 http://pubs.usgs.gov/of/1992/of92-422/of92-422.pdf 의 공식을 적용합니다.
 
-Igor's hillshading uses formula from Maperitive http://maperitive.net/docs/Commands/GenerateReliefImageIgor.html.
+이고르(Igor) 음영은 Maperitive의 http://maperitive.net/docs/Commands/GenerateReliefImageIgor.html 에서 나온 공식을 사용합니다.
 
 slope
 ^^^^^
 
-This command will take a DEM raster and output a 32-bit float raster with slope values. You have the option of specifying the type of slope value you want: degrees or percent slope. In cases where the horizontal units differ from the vertical units, you can also supply a scaling factor.
+이 명령어는 DEM 래스터를 입력받아 경사 값을 가진 32비트 부동소수점 데이터 유형 래스터를 산출합니다. 사용자가 원하는 경사 값 유형을 지정할 수 있는 옵션이 있습니다: 도 또는 백분율 경사입니다. 수평 단위와 수직 단위가 다른 경우, 척도 인자도 지정할 수 있습니다.
 
-The value `-9999` is used as the output nodata value.
+`-9999` 값을 산출 NODATA 값으로 사용합니다.
 
-The following specific options are available :
+다음 특화 옵션을 사용할 수 있습니다:
 
 .. option:: -alg Horn|ZevenbergenThorne
 
-    The literature suggests Zevenbergen & Thorne to be more suited to smooth landscapes, whereas Horn's formula to perform better on rougher terrain.
+    문헌에 따르면 체벤베르겐 & 손(Zevenbergen & Thorne) 공식은 매끄러운 풍경에 더 적합한 반면, 혼(Horn) 공식은 거친 지형에서 더 나은 결과를 보인다고 합니다.
 
 .. option:: -p
 
-    If specified, the slope will be expressed as percent slope. Otherwise, it is expressed as degrees
+    이 옵션을 지정하면, 경사가 백분율로 표현될 것입니다. 지정하지 않으면 도 단위로 표현됩니다.
 
-:option:`-s`
+.. option:: -s
 
-    Ratio of vertical units to horizontal. If the horizontal unit of the source DEM is degrees (e.g Lat/Long WGS84 projection), you can use scale=111120 if the vertical units are meters (or scale=370400 if they are in feet).
+    수직 단위와 수평 단위의 비율입니다. 소스 DEM의 수평 단위가 도(예: 위도/경도 WGS84 투영법)인 경우, 수평 단위가 미터라면 s=111120 을 (또는 피트라면 s=370400을) 사용하면 됩니다.
 
 aspect
 ^^^^^^
 
-This command outputs a 32-bit float raster with values between 0° and 360° representing the azimuth that slopes are facing. The definition of the azimuth is such that : 0° means that the slope is facing the North, 90° it's facing the East, 180° it's facing the South and 270° it's facing the West (provided that the top of your input raster is north oriented). The aspect value -9999 is used as the nodata value to indicate undefined aspect in flat areas with slope=0.
+이 명령어는 경사면이 향하고 있는 방위각을 표현하는 0°에서 360°까지의 값을 가진 32비트 부동소수점 데이터 유형 래스터를 산출합니다. 방위각의 정의는 다음과 같습니다: (사용자의 입력 래스터의 위쪽이 북쪽 방향이라는 가정 하에) 0°는 경사면이 정북을 향하고 있다는 의미이고, 90°는 정동, 180°는 정남 그리고 270°는 정서를 향하고 있다는 뜻입니다. 경사방향 값 -9999를 경사가 0인 평지에서 정의되지 않는 경사방향을 의미하는 NODATA 값으로 사용합니다.
 
-The following specifics options are available :
+다음 특화 옵션을 사용할 수 있습니다:
 
 .. option:: -alg Horn|ZevenbergenThorne
 
-    The literature suggests Zevenbergen & Thorne to be more suited to smooth landscapes, whereas Horn's formula to perform better on rougher terrain.
+    문헌에 따르면 체벤베르겐 & 손(Zevenbergen & Thorne) 공식은 매끄러운 풍경에 더 적합한 반면, 혼(Horn) 공식은 거친 지형에서 더 나은 결과를 보인다고 합니다.
 
 .. option:: -trigonometric
 
-    Return trigonometric angle instead of azimuth. Thus 0° means East, 90° North, 180° West, 270° South.
+    방위각 대신 삼각함수 각도를 반환합니다. 즉 0°가 정동, 90°가 정북, 180°가 정서, 270°가 정남을 의미합니다.
 
 .. option:: -zero_for_flat
 
-    Return 0 for flat areas with slope=0, instead of -9999.
+    경사가 0인 평지의 경우 -9999 대신 0을 반환합니다.
 
-By using those 2 options, the aspect returned by gdaldem aspect should be
-identical to the one of GRASS r.slope.aspect. Otherwise, it's identical to
-the one of Matthew Perry's :file:`aspect.cpp` utility.
+이 옵션 2개를 사용하면, gdaldem이 반환하는 경사방향은 GRASS r.slope.aspect가 반환하는 경사방향과 동일할 것입니다. 사용하지 않는 경우, 매슈 페리(Matthew Perry)의 :file:`aspect.cpp` 유틸리티가 반환하는 경사방향과 동일합니다.
 
 color-relief
 ^^^^^^^^^^^^
 
-This command outputs a 3-band (RGB) or 4-band (RGBA) raster with values are computed from the elevation and a text-based color configuration file, containing the association between various elevation values and the corresponding wished color. By default, the colors between the given elevation values are blended smoothly and the result is a nice colorized DEM. The -exact_color_entry or -nearest_color_entry options can be used to avoid that linear interpolation for values that don't match an index of the color configuration file.
+이 명령어는 다양한 표고 값과 그에 대응하는 원하는 색상 간의 조합을 담고 있는 텍스트 기반 색상 환경설정 파일과 표고로부터 계산된 값을 가진 밴드 3개(RGB) 또는 밴드 4개(RGBA) 래스터를 산출합니다. 기본적으로 입력된 표고 값들 사이의 색상들은 부드럽게 혼합되어 그 결과 보기 좋게 색을 입힌 DEM을 생성합니다. -exact_color_entry 또는 -nearest_color_entry 옵션을 사용해서 색상 환경설정 파일의 색인과 일치하지 않는 값에 대한 선형 보간을 방지할 수 있습니다.
 
-The following specifics options are available :
+다음 특화 옵션을 사용할 수 있습니다:
 
 .. option:: color_text_file
 
-    Text-based color configuration file
+    텍스트 기반 색상 환경설정 파일
 
 .. option:: -alpha
 
-    Add an alpha channel to the output raster
+    산출 래스터에 알파 채널을 추가합니다.
 
 .. option:: -exact_color_entry
 
-    Use strict matching when searching in the color configuration file.
-    If none matching color entry is found, the "0,0,0,0" RGBA quadruplet will be used
+    색상 환경설정 파일을 검색할 때 엄격한 일치 기준을 사용합니다. 일치하는 색상 항목을 찾지 못 하는 경우, "0,0,0,0"이라는 RGBA 4개 값을 사용할 것입니다.
 
 .. option:: -nearest_color_entry
 
-    Use the RGBA quadruplet corresponding to the closest entry in the color configuration file.
+    색상 환경설정 파일에서 가장 근접한 항목에 해당하는 RGBA 4개 값을 사용합니다.
 
-The color-relief mode is the only mode that supports VRT as output format.
-In that case, it will translate the color configuration file into appropriate
-LUT elements. Note that elevations specified as percentage will be translated
-as absolute values, which must be taken into account when the statistics of
-the source raster differ from the one that was used when building the VRT.
+색상기복 모드는 산출물 포맷으로 VRT를 지원하는 유일한 모드입니다. 이런 경우, 색상 환경설정 파일을 적절한 LUT 요소로 변환할 것입니다. 백분율로 지정된 표고를 절대값으로 변환할 것이라는 점을 기억하십시오. 이때 소스 래스터의 통계가 VRT를 작성할 때 쓰였던 래스터의 통계와 다를 경우 이 절대값을 고려해야만 합니다.
 
-The text-based color configuration file generally contains 4 columns
-per line: the elevation value and the corresponding Red, Green, Blue
-component (between 0 and 255). The elevation value can be any floating
-point value, or the nv keyword for the nodata value.
-The elevation can also be expressed as a percentage: 0% being the minimum
-value found in the raster, 100% the maximum value.
+텍스트 기반 색상 환경설정 파일은 일반적으로 행마다 열 4개를 담고 있습니다: 표고 값과 그에 대응하는 (0에서 255 사이의) 적색(Red), 녹색(Green), 청색(Blue) 구성요소입니다. 표고 값은 모든 부동소수점 값을 지원하며, NODATA 값의 경우 nv 키워드를 쓸 수 있습니다. 표고를 백분율로도 표현할 수 있습니다: 래스터에서 검색된 최저값을 0%, 최고값을 100%로 표현합니다.
 
-An extra column can be optionally added for the alpha component.
-If it is not specified, full opacity (255) is assumed.
+알파 구성요소를 위해 추가적인 열을 선택적으로 추가할 수 있습니다. 이 열을 지정하지 않는 경우, 완전히 불투명(255)하다고 가정합니다.
 
-Various field separators are accepted: comma, tabulation, spaces, ':'.
+다양한 필드 구분자(field separator)를 지원합니다: 쉼표, 표, 공백, 쌍점(':').
 
-Common colors used by GRASS can also be specified by using their name,
-instead of the RGB triplet. The supported list is: white, black, red,
-green, blue, yellow, magenta, cyan, aqua, grey/gray, orange, brown,
-purple/violet and indigo.
+GRASS가 사용하는 공통 색상도, RGB 3개 값 대신 색상 이름을 사용해서 지정할 수 있습니다. 지원하는 색상 목록은: white, black, red, green, blue, yellow, magenta, cyan, aqua, grey/gray, orange, brown, purple/violet 및 indigo 입니다.
 
-    GMT :file:`.cpt` palette files are also supported (COLOR_MODEL = RGB only).
+    GMT :file:`.cpt` 색상표(palette) 파일도 지원합니다(COLOR_MODEL = RGB 전용).
 
-Note: the syntax of the color configuration file is derived from the one
-supported by GRASS r.colors utility. ESRI HDR color table files (.clr)
-also match that syntax. The alpha component and the support of tab and
-comma as separators are GDAL specific extensions.
+주의: 색상 환경설정 파일의 문법은 GRASS r.colors 유틸리티가 지원하는 문법으로부터 파생된 것입니다. ESRI HDR 색상표 파일(.clr)도 해당 문법과 일치합니다. 구분자로 탭과 쉼표를 지원하는 것과 알파 구성요소는 GDAL에 특화된 확장 기능입니다.
 
-For example:
+예를 들면:
 
 ::
 
@@ -326,9 +292,7 @@ For example:
     nv     0   0   0   0
 
 
-To implement a "round to the floor value" mode, the elevation value can be
-duplicate with a new value being slightly above the threshold.
-For example to have red in [0,10], green in ]10,20] and blue in ]20,30]:
+"하한값으로 반올림(round to the floor value)" 모드를 구현하려면, 표고 값을 한계값보다 살짝 위에 있는 새로운 값으로 복제할 수 있어야 합니다. 예를 들어 적색을 [0,10], 녹색을 [10,20], 청색을 [20,30] 표고 값으로 조합시키려면:
 
 ::
 
@@ -342,71 +306,55 @@ For example to have red in [0,10], green in ]10,20] and blue in ]20,30]:
 TRI
 ^^^
 
-This command outputs a single-band raster with values computed from the elevation.
-`TRI` stands for Terrain Ruggedness Index, which measures the difference
-between a central pixel and its surrounding cells.
+이 명령어는 표고로부터 계산된 값을 가진 단일 밴드 래스터를 산출합니다. `TRI` 는 지형 험상 지수(Terrain Ruggedness Index)의 약어로, 중심 픽셀과 중심 픽셀을 감싸고 있는 셀들 사이의 차이를 측정합니다.
 
-The value -9999 is used as the output nodata value.
+-9999값을 산출 NODATA 값으로 사용합니다.
 
-The following option is available:
+다음 옵션을 사용할 수 있습니다:
 
 .. option:: -alg Wilson|Riley
 
-    Starting with GDAL 3.3, the Riley algorithm (see Riley, S.J.,
-    De Gloria, S.D., Elliot, R. (1999): A Terrain Ruggedness that Quantifies Topographic Heterogeneity.
-    Intermountain Journal of Science, Vol.5, No.1-4, pp.23-27) is available and
-    the new default value. This algorithm uses the
-    square root of the sum of the square of the difference between a central pixel
-    and its surrounding cells. This is recommended for terrestrial use cases.
+    GDAL 3.3버전부터, 라일리(Riley) 알고리즘과 새로운 기본값을 사용할 수 있습니다. (Riley, S.J., De Gloria, S.D., Elliot, R. (1999): A Terrain Ruggedness that Quantifies Topographic Heterogeneity. Intermountain Journal of Science, Vol.5, No.1-4, pp.23-27 참조) 이 알고리즘은 중심 픽셀과 중심 픽셀을 감싸고 있는 셀들 사이의 차이를 제곱한 값들을 모두 더한 값의 제곱근을 이용합니다. 지상 사용(terrestrial use) 사례에 사용하면 좋습니다.
 
-    The Wilson (see Wilson et al 2007, Marine Geodesy 30:3-35) algorithm
-    uses the mean difference between a central pixel and its surrounding cells.
-    This is recommended for bathymetric use cases.
+    윌슨(Wilson) 알고리즘은 중심 픽셀과 중심 픽셀을 감싸고 있는 셀들 사이의 차이의 평균을 이용합니다. (Wilson et al 2007, Marine Geodesy 30:3-35 참조) 심해 사용(bathymetric use) 사례에 사용하면 좋습니다.
 
 TPI
 ^^^
 
-This command outputs a single-band raster with values computed from the elevation.
-`TPI` stands for Topographic Position Index, which is defined as the difference
-between a central pixel and the mean of its surrounding cells (see Wilson et al
-2007, Marine Geodesy 30:3-35).
+이 명령어는 표고로부터 계산된 값을 가진 단일 밴드 래스터를 산출합니다. `TPI` 는 지형 위치 지수(Topographic Position Index)의 약어로, 중심 픽셀과 중심 픽셀을 감싸고 있는 셀들의 평균 사이의 차이로 정의됩니다. (Wilson et al 2007, Marine Geodesy 30:3-35 참조)
 
-The value -9999 is used as the output nodata value.
+-9999값을 산출 NODATA 값으로 사용합니다.
 
-There are no specific options.
+특화 옵션이 없습니다.
 
 roughness
 ^^^^^^^^^
 
-This command outputs a single-band raster with values computed from the elevation.
-Roughness is the largest inter-cell difference of a central pixel and its surrounding
-cell, as defined in Wilson et al (2007, Marine Geodesy 30:3-35).
+이 명령어는 표고로부터 계산된 값을 가진 단일 밴드 래스터를 산출합니다. 거칠기란 Wilson et al 2007, Marine Geodesy 30:3-35에 정의된대로 중심 픽셀과 중심 픽셀을 감싸고 있는 셀들 사이의 차이 가운데 가장 큰 값입니다.
 
-The value -9999 is used as the output nodata value.
+-9999값을 산출 NODATA 값으로 사용합니다.
 
-There are no specific options.
+특화 옵션이 없습니다.
 
 C API
 -----
 
-This utility is also callable from C with :cpp:func:`GDALDEMProcessing`.
+C에서 :cpp:func:`GDALDEMProcessing` 을 호출하면 이 유틸리티의 기능을 수행할 수 있습니다.
 
 .. versionadded:: 2.1
 
-Authors
+작성자
 -------
 
-Matthew Perry perrygeo@gmail.com, Even Rouault even.rouault@spatialys.com,
-Howard Butler hobu.inc@gmail.com, Chris Yesson chris.yesson@ioz.ac.uk
+매슈 페리(Matthew Perry) perrygeo@gmail.com, 이반 루오(Even Rouault) even.rouault@spatialys.com,
+하워드 버틀러(Howard Butler) hobu.inc@gmail.com, 크리스 예슨(Chris Yesson) chris.yesson@ioz.ac.uk
 
-Derived from code by Michael Shapiro, Olga Waupotitsch, Marjorie Larson, Jim Westervelt:
-U.S. Army CERL, 1993. GRASS 4.1 Reference Manual. U.S. Army Corps of Engineers,
-Construction Engineering Research Laboratories, Champaign, Illinois, 1-425.
+마이클 샤피로(Michael Shapiro), 올가 바우포티치(Olga Waupotitsch), 마조리 라슨(Marjorie Larson), 짐 웨스터벨트(Jim Westervelt)가 작성한 코드에서 파생: 미육군 건축공학연구소, 1993. GRASS 4.1 참조 지침서. 미육군 공병대, 건축공학연구소, 일리노이 주 샴페인 시, 1-425.
 
-See also
+참고
 --------
 
-Documentation of related GRASS utilities:
+관련 GRASS 유틸리티 문서:
 
 https://grass.osgeo.org/grass79/manuals/r.slope.aspect.html
 
