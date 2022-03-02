@@ -6,11 +6,11 @@ gdal_merge.py
 
 .. only:: html
 
-    Mosaics a set of images.
+    이미지 집합으로 모자이크를 생성합니다.
 
 .. Index:: gdal_merge
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -21,23 +21,16 @@ Synopsis
                   [-n nodata_value] [-a_nodata output_nodata_value]
                   [-ot datatype] [-createonly] input_files
 
-Description
+설명
 -----------
 
-This utility will automatically mosaic a set of images.  All the images must
-be in the same coordinate system and have a matching number of bands, but
-they may be overlapping, and at different resolutions. In areas of overlap,
-the last image will be copied over earlier ones. Nodata/transparency values
-are considered on a band by band level, i.e. a nodata/transparent pixel on
-one source band will not set a nodata/transparent value on all bands for the
-target pixel in the resulting raster nor will it overwrite a valid pixel value.
+이 이미지는 이미지 집합으로 자동적으로 모자이크를 생성합니다. 모든 이미지는 동일한 좌표계를 사용해야만 하며 밴드의 개수도 일치해야만 하지만, 서로 중첩할 수도 있고 해상도가 달라도 됩니다. 중첩되는 영역에서는 마지막 이미지가 이전 이미지들 위로 복사될 것입니다. NODATA/투명도 값은 밴드 별 수준에서 고려됩니다. 예를 들어 하나의 소스 밴드 상에 있는 NODATA/투명도 값이 산출되는 래스터의 대상 픽셀의 모든 밴드 상에 있는 NODATA/투명도 값을 설정하지는 않을 것입니다. 또 하나의 소스 밴드 상에 있는 NODATA/투명도 값이 유효한 픽셀 값을 덮어쓰지도 않을 것입니다.
 
 .. program:: gdal_merge
 
 .. option:: -o <out_filename>
 
-    The name of the output file,
-    which will be created if it does not already exist (defaults to "out.tif").
+    산출물 파일의 이름입니다. 지정한 이름의 파일이 이미 존재하지 않는다면 지정한 이름으로 파일을 생성할 것입니다. (기본값은 "out.tif"입니다.)
 
 .. include:: options/of.rst
 
@@ -47,72 +40,59 @@ target pixel in the resulting raster nor will it overwrite a valid pixel value.
 
 .. option:: -ps <pixelsize_x> <pixelsize_y>
 
-    Pixel size to be used for the
-    output file.  If not specified the resolution of the first input file will
-    be used.
+    산출물 파일에 사용할 픽셀 크기입니다. 지정하지 않는 경우 첫 번째 입력 파일의 해상도를 이용할 것입니다.
 
 .. option:: -tap
 
-    (target aligned pixels) align
-    the coordinates of the extent of the output file to the values of the -tr,
-    such that the aligned extent includes the minimum extent.
+    (대상 정렬 픽셀(target aligned pixels)) 정렬된 범위가 최소 범위를 포함하도록, 산출물 파일의 범위 좌표를 :option:`-tr` 의 값들에 정렬시킵니다.
 
 .. option:: -ul_lr <ulx> <uly> <lrx> <lry>
 
-    The extents of the output file.
-    If not specified the aggregate extents of all input files will be
-    used.
+    산출물 파일의 범위입니다. 지정하지 않는 경우 모든 입력 파일의 범위를 합친 범위를 이용할 것입니다.
 
 .. option:: -v
 
-    Generate verbose output of mosaicing operations as they are done.
+    모자이크 작업이 끝나면 작업에 대한 자세한 설명을 생성합니다.
 
 .. option:: -separate
 
-    Place each input file into a separate band.
+    각 입력 파일을 개별 밴드로 배치합니다.
 
 .. option:: -pct
 
-    Grab a pseudo-color table from the first input image, and use it for the output.
-    Merging pseudo-colored images this way assumes that all input files use the same
-    color table.
+    첫 번째 입력 이미지로부터 의사색상표를 가져와서 산출물에 사용합니다. 의사색상 이미지들을 이런 방식으로 병합한다는 것은 모든 입력 파일이 동일한 색상표를 사용한다고 가정한다는 뜻입니다.
 
 .. option:: -n <nodata_value>
 
-    Ignore pixels from files being merged in with this pixel value.
+    병합되는 파일들에서 이 픽셀 값을 가진 픽셀들을 무시합니다.
 
 .. option:: -a_nodata <output_nodata_value>
 
-    Assign a specified nodata value to output bands.
+    산출물 밴드에 지정한 NODATA 값을 할당합니다.
 
 .. option:: -init <"value(s)">
 
-    Pre-initialize the output image bands with these values.  However, it is not
-    marked as the nodata value in the output file.  If only one value is given, the
-    same value is used in all the bands.
+    산출 이미지 밴드를 이 값으로 사전 초기화합니다. 하지만 산출물 파일에서 이 값을 NODATA 값으로 표시하지는 않습니다. 값을 하나만 지정하는 경우, 모든 밴드에 동일한 값을 사용합니다.
 
 .. option:: -createonly
 
-    The output file is created (and potentially pre-initialized) but no input
-    image data is copied into it.
+    산출물 파일을 생성하지만 (그리고 사전 초기화할 수도 있지만) 산출물 파일에 어떤 입력 이미지 데이터도 복사하지 않습니다.
 
 .. note::
 
-    gdal_merge.py is a Python script, and will only work if GDAL was built
-    with Python support.
+    gdal_merge.py는 파이썬 스크립트로, GDAL이 파이썬 지원과 함께 빌드된 경우에만 작동할 것입니다.
 
-Example
+예시
 -------
 
-Create an image with the pixels in all bands initialized to 255.
+모든 밴드에 있는 픽셀을 255로 초기화한 이미지를 생성합니다.
 
 ::
 
     gdal_merge.py -init 255 -o out.tif in1.tif in2.tif
 
 
-Create an RGB image that shows blue in pixels with no data. The first two bands
-will be initialized to 0 and the third band will be initialized to 255.
+데이터가 없는 픽셀을 청색으로 표시한 RGB 이미지를 생성합니다. 처음 두 밴드는 0으로, 그리고 세 번째 밴드는 255로 초기화할 것입니다.
 
 ::
 
