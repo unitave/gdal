@@ -6,11 +6,11 @@ gdal_grid
 
 .. only:: html
 
-    Creates regular grid from the scattered data.
+    분산 데이터로부터 정규 그리드를 생성합니다.
 
 .. Index:: gdal_grid
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -28,17 +28,12 @@ Synopsis
               [-a algorithm[:parameter1=value1]*] [-q]
               <src_datasource> <dst_filename>
 
-Description
+설명
 -----------
 
-This program creates regular grid (raster) from the scattered data read from
-the OGR datasource. Input data will be interpolated to fill grid nodes with
-values, you can choose from various interpolation methods.
+이 프로그램은 OGR 데이터소스에서 읽어온 분산 데이터(scattered data)로부터 정규 그리드(래스터)를 생성합니다. 그리드 노드를 값으로 채우기 위해 입력 데이터를 보간하는데, 다양한 보간 메소드 가운데 선택할 수 있습니다.
 
-It is possible to set the ``GDAL_NUM_THREADS``
-configuration option to parallelize the processing. The value to specify is
-the number of worker threads, or ``ALL_CPUS`` to use all the cores/CPUs of the
-computer.
+프로세스를 병렬화하려면 ``GDAL_NUM_THREADS`` 환경설정 옵션을 설정하면 됩니다. 지정한 값이 작업 스레드의 개수가 되고, 또는 ``ALL_CPUS`` 로 설정하면 컴퓨터의 모든 코어/CPU를 사용합니다.
 
 .. program:: gdal_grid
 
@@ -48,174 +43,125 @@ computer.
 
 .. option:: -txe <xmin> <xmax>
 
-    Set georeferenced X extents of output file to be created.
+    생성할 산출물 파일의 지리참조된 X 범위를 설정합니다.
 
 .. option:: -tye <ymin> <ymax>
 
-    Set georeferenced Y extents of output file to be created.
+    생성할 산출물 파일의 지리참조된 Y 범위를 설정합니다.
 
 .. option:: -tr <xres> <yres>
 
-    Set output file resolution (in target georeferenced units).
-    Note that :option:`-tr` just works in combination with a valid input from :option:`-txe` and :option:`-tye`
+    산출물 파일의 해상도를 (대상 지리참조 단위로) 설정합니다. :option:`-txe` 및 :option:`-tye` 로부터 나온 무결한 입력물을 사용하면 :option:`-tr` 옵션은 그냥 작동한다는 사실을 기억하십시오.
 
     .. versionadded:: 3.2
 
 .. option:: -outsize <xsize ysize>
 
-    Set the size of the output file in pixels and lines.
-    Note that :option:`-outsize` cannot be used with :option:`-tr`
+    산출 파일의 크기를 픽셀 및 라인 단위로 설정합니다. :option:`-outsize` 와 :option:`-tr` 를 함께 사용할 수 없다는 사실을 기억하십시오.
 
 .. option:: -a_srs <srs_def>
 
-    Override the projection for the
-    output file.  The <i>srs_def> may be any of the usual GDAL/OGR forms,
-    complete WKT, PROJ.4, EPSG:n or a file containing the WKT.
-    No reprojection is done.
+    산출물 파일의 투영법을 무시합니다. <srs_def>는 완전한 WKT, PROJ.4, EPSG:n 또는 WKT를 담고 있는 파일 등 일반적인 GDAL/OGR 양식이라면 무엇이든 될 수 있습니다. 어떤 재투영도 하지 않습니다.
 
 .. option:: -zfield <field_name>
 
-    Identifies an attribute field
-    on the features to be used to get a Z value from. This value overrides Z value
-    read from feature geometry record (naturally, if you have a Z value in
-    geometry, otherwise you have no choice and should specify a field name
-    containing Z value).
+    Z 값을 가져오기 위해 사용할 객체의 속성 필드를 식별합니다. 이 값이 객체 도형 레코드에서 읽어온 Z 값을 무시합니다. (당연히, 도형이 Z 값을 가지고 있는 경우입니다. 그렇지 않다면 Z 값을 담고 있는 필드 이름을 지정하는 수밖에 없습니다.)
 
 .. option:: -z_increase <increase_value>
 
-    Addition to the attribute field
-    on the features to be used to get a Z value from. The addition should be the same
-    unit as Z value. The result value will be Z value + Z increase value. The default value is 0.
+    Z 값을 가져오기 위해 사용할 객체의 속성 필드에 더할 값입니다. 이 증가값은 Z 값과 동일한 단위여야 합니다. Z 값과 Z 증가값의 합계를 산출할 것입니다. 기본값은 0입니다.
 
 .. option:: -z_multiply <multiply_value>
 
-    This is multiplication
-    ratio for Z field. This can be used for shift from e.g. foot to meters or from
-    elevation to deep. The result value will be (Z value + Z increase value) * Z multiply value.
-    The default value is 1.
+    Z 필드의 값에 곱할 배수입니다. 예를 들면 피트 단위를 미터 단위로 바꾸거나 표고를 깊이로 바꾸는 데 사용할 수 있습니다. (Z 값 + Z 증가값) * Z 배수값의 결과를 산출할 것입니다. 기본값은 1입니다.
 
 .. option:: -a <[algorithm[:parameter1=value1][:parameter2=value2]...]>
 
-    Set the interpolation algorithm or data metric name and (optionally)
-    its parameters. See `Interpolation algorithms`_ and `Data metrics`_
-    sections for further discussion of available options.
+    보간 알고리즘 또는 데이터 메트릭 이름 및 (선택적으로) 데이터 메트릭의 파라미터를 설정합니다. 사용할 수 있는 옵션에 대해 자세히 알고 싶다면 `Interpolation algorithms`_ 및 `Data metrics`_ 단락을 읽어보십시오.
 
 .. option:: -spat <xmin> <ymin> <xmax> <ymax>
 
-    Adds a spatial filter
-    to select only features contained within the bounding box described by
-    (xmin, ymin) - (xmax, ymax).
+    (xmin, ymin) - (xmax, ymax)가 나타내는 경계상자 내부에 담겨 있는 객체들만 선택하려면 이 공간 필터를 추가하십시오.
 
 .. option:: -clipsrc [xmin ymin xmax ymax]|WKT|datasource|spat_extent
 
-    Adds a spatial filter to select only features contained within the
-    specified bounding box (expressed in source SRS), WKT geometry (POLYGON or
-    MULTIPOLYGON), from a datasource or to the spatial extent of the :option:`-spat`
-    option if you use the ``spat_extent`` keyword. When specifying a
-    datasource, you will generally want to use it in combination of the
-    :option:`-clipsrclayer`, :option:`-clipsrcwhere` or :option:`-clipsrcsql`
-    options.
+    지정한 (소스 공간 좌표계로 표현된) 경계상자 또는 WKT 도형(폴리곤 또는 멀티폴리곤) 내부에 담겨 있는, 또는 데이터소스로부터 나온, 또는 ``spat_extent`` 키워드를 사용한 경우 :option:`-spat` 옵션의 공간 범위에 있는 객체들만 선택하려면 이 공간 필터를 추가하십시오. 데이터소스를 지정하는 경우, 일반적으로  :option:`-clipsrclayer`, :option:`-clipsrcwhere` 또는 :option:`-clipsrcsql` 옵션과 함께 사용하게 될 것입니다.
 
 .. option:: -clipsrcsql <sql_statement>
 
-    Select desired geometries using an SQL query instead.
+    SQL 쿼리를 대신 사용해서 원하는 도형을 선택합니다.
 
 .. option:: -clipsrclayer <layername>
 
-    Select the named layer from the source clip datasource.
+    소스 클립 데이터소스로부터 지정한 레이어를 선택합니다.
 
 .. option:: -clipsrcwhere <expression>
 
-    Restrict desired geometries based on attribute query.
+    속성 쿼리를 기반으로 원하는 도형을 제한합니다.
 
 .. option:: -l <layername>
 
-    Indicates the layer(s) from the
-    datasource that will be used for input features.  May be specified multiple
-    times, but at least one layer name or a :option:`-sql` option must be
-    specified.
+    입력 객체로 사용될, 데이터소스에서 나온 레이어(들)를 설정합니다. 여러 번 지정할 수도 있지만, 최소한 레이어 이름 하나 또는 :option:`-sql` 옵션 하나를 지정해야만 합니다.
 
 .. option:: -where <expression>
 
-    An optional SQL WHERE style query expression to be applied to select features
-    to process from the input layer(s).
+    입력 레이어(들)에서 나온, 처리할 객체를 선택하기 위해 적용되는, 선택적인 SQL WHERE 스타일의 쿼리 표현식입니다.
 
 .. option:: -sql <select_statement>
 
-    An SQL statement to be evaluated against the datasource to produce a
-    virtual layer of features to be processed.
+    처리할 객체의 가상 레이어를 생성하기 위한 데이터소스를 대상으로 평가될 SQL 선언문입니다.
 
 .. include:: options/co.rst
 
 .. option:: -q
 
-    Suppress progress monitor and other non-error output.
+    진행 상황 모니터 및 기타 오류가 아닌 결과를 표시하지 않습니다.
 
 .. option:: <src_datasource>
 
-    Any OGR supported readable datasource.
+    OGR이 지원하는 읽기 가능한 모든 데이터소스를 설정할 수 있습니다.
 
 .. option:: <dst_filename>
 
-    The GDAL supported output file.
+    GDAL이 지원하는 산출물 파일입니다.
 
 
-Interpolation algorithms
+보간 알고리즘
 ------------------------
 
-There are number of interpolation algorithms to choose from.
+선택할 수 있는 보간 알고리즘이 여러 개 있습니다.
 
-More details about them can also be found in :ref:`gdal_grid_tut`
+:ref:`gdal_grid_tut` 에서 보간 알고리즘에 대해 더 자세히 알 수 있습니다.
 
 .. _gdal_grid_invdist:
 
 invdist
 +++++++
 
-Inverse distance to a power. This is default algorithm. It has following
-parameters:
+역거리 거듭제곱 가중치 보간법(inverse distance to a power). 기본 알고리즘입니다. 다음 파라미터를 사용합니다:
 
-- ``power``: Weighting power (default 2.0).
-- ``smoothing``: Smoothing parameter (default 0.0).
-- ``radius1``: The first radius (X axis if rotation angle is 0)
-  of search ellipse. Set this parameter to zero to use whole point array.
-  Default is 0.0.
-- ``radius2``: The second radius (Y axis if rotation angle is 0)
-  of search ellipse. Set this parameter to zero to use whole point array.
-  Default is 0.0.
-- ``angle``: Angle of search ellipse rotation in degrees
-  (counter clockwise, default 0.0).
-- ``max_points``: Maximum number of data points to use. Do not
-  search for more points than this number. This is only used if search ellipse
-  is set (both radii are non-zero). Zero means that all found points should
-  be used. Default is 0.
-- ``min_points``: Minimum number of data points to use. If less
-  amount of points found the grid node considered empty and will be filled with
-  NODATA marker. This is only used if search ellipse is set (both radii are
-  non-zero). Default is 0.
-- ``nodata``: NODATA marker to fill empty points (default
-  0.0).
+- ``power``: 가중치 거듭제곱 지수 (기본값은 2.0)
+- ``smoothing``: 평활화(smoothing) 파라미터 (기본값은 0.0)
+- ``radius1``: 검색 타원의 첫 번째 반경(기울기 각도가 0인 경우 X축), 포인트 배열 전체를 사용하려면 이 파라미터를 0으로 설정하십시오. 기본값은 0.0입니다.
+- ``radius2``: 검색 타원의 두 번째 반경(기울기 각도가 0인 경우 Y축), 포인트 배열 전체를 사용하려면 이 파라미터를 0으로 설정하십시오. 기본값은 0.0입니다.
+- ``angle``: 검색 타원 기울기의 도 단위 각도입니다. (반시계 방향, 기본값은 0.0)
+- ``max_points``: 사용할 데이터 포인트의 최대 개수. 이 개수 이하의 포인트만 검색합니다. (두 반경 모두 0이 아닌) 검색 타원을 설정한 경우에만 사용됩니다. 0으로 설정하면 검색된 모든 포인트를 사용합니다. 기본값은 0입니다.
+- ``min_points``: 사용할 데이터 포인트의 최소 개수. 이 개수 미만의 포인트가 발견된 그리드 노드는 비어 있다고 간주되어 NODATA 마커로 채워질 것입니다. (두 반경 모두 0이 아닌) 검색 타원을 설정한 경우에만 사용됩니다. 기본값은 0입니다.
+- ``nodata``: 비어 있는 포인트를 채울 NODATA 마커 (기본값은 0.0)
 
 invdistnn
 +++++++++
 
 .. versionadded:: 2.1
 
-Inverse distance to a power with nearest neighbor searching, ideal when
-max_points is used. It has following parameters:
+최근접 이웃을 검색하는 역거리 거듭제곱 가중치 보간법. max_points를 사용하는 경우 이상적입니다. 다음 파라미터를 사용합니다:
 
-- ``power``: Weighting power (default 2.0).
-- ``smoothing``: Smoothing parameter (default 0.0).
-- ``radius``: The radius of the search circle, which should be
-  non-zero. Default is 1.0.
-- ``max_points``: Maximum number of data points to use. Do not
-  search for more points than this number. Found points will be ranked from
-  nearest to furthest distance when weighting. Default is 12.
-- ``min_points``: Minimum number of data points to use. If less
-  amount of points found the grid node is considered empty and will be filled
-  with NODATA marker. Default is 0.
-- ``nodata``: NODATA marker to fill empty points (default
-  0.0).
+- ``power``: 가중치 거듭제곱 지수 (기본값은 2.0)
+- ``smoothing``: 평활화(smoothing) 파라미터 (기본값은 0.0)
+- ``radius``: 검색 원의 반경으로, 0이어서는 안 됩니다. 기본값은 1.0입니다.
+- ``max_points``: 사용할 데이터 포인트의 최대 개수. 이 개수 이하의 포인트만 검색합니다. 가중치 작업 시 검색된 포인트를 최근접에서 최원격까지 순위를 매길 것입니다. 기본값은 12입니다.
+- ``min_points``: 사용할 데이터 포인트의 최소 개수. 이 개수 미만의 포인트가 발견된 그리드 노드는 비어 있다고 간주되어 NODATA 마커로 채워질 것입니다. 기본값은 0입니다.
+- ``nodata``: 비어 있는 포인트를 채울 NODATA 마커 (기본값은 0.0)
 
 
 .. _gdal_grid_average:
@@ -223,119 +169,73 @@ max_points is used. It has following parameters:
 average
 +++++++
 
-Moving average algorithm. It has following parameters:
+이동 평균(moving average) 알고리즘입니다. 다음 파라미터를 사용합니다:
 
-- ``radius1``: The first radius (X axis if rotation angle is 0)
-  of search ellipse. Set this parameter to zero to use whole point array.
-  Default is 0.0.
-- ``radius2``: The second radius (Y axis if rotation angle is 0)
-  of search ellipse. Set this parameter to zero to use whole point array.
-  Default is 0.0.
-- ``angle``: Angle of search ellipse rotation in degrees
-  (counter clockwise, default 0.0).
-- ``min_points``: Minimum number of data points to use. If less
-  amount of points found the grid node considered empty and will be filled with
-  NODATA marker. Default is 0.
-- ``nodata``: NODATA marker to fill empty points (default
-  0.0).
+- ``radius1``: 검색 타원의 첫 번째 반경(기울기 각도가 0인 경우 X축), 포인트 배열 전체를 사용하려면 이 파라미터를 0으로 설정하십시오. 기본값은 0.0입니다.
+- ``radius2``: 검색 타원의 두 번째 반경(기울기 각도가 0인 경우 Y축), 포인트 배열 전체를 사용하려면 이 파라미터를 0으로 설정하십시오. 기본값은 0.0입니다.
+- ``angle``: 검색 타원 기울기의 도 단위 각도입니다. (반시계 방향, 기본값은 0.0)
+- ``min_points``: 사용할 데이터 포인트의 최소 개수. 이 개수 미만의 포인트가 발견된 그리드 노드는 비어 있다고 간주되어 NODATA 마커로 채워질 것입니다. 기본값은 0입니다.
+- ``nodata``: 비어 있는 포인트를 채울 NODATA 마커 (기본값은 0.0)
 
-Note, that it is essential to set search ellipse for moving average method. It
-is a window that will be averaged when computing grid nodes values.
+이동 평균 메소드 용 검색 타원을 반드시 설정해야 한다는 점을 기억하십시오. 그리드 노드 값 계산 시 이 창 안에 들어오는 모든 데이터 포인트의 평균을 계산할 것입니다.
 
 .. _gdal_grid_nearest:
 
 nearest
 +++++++
 
-Nearest neighbor algorithm. It has following parameters:
+최근접 이웃(nearest neighbor) 알고리즘입니다. 다음 파라미터를 사용합니다:
 
-- ``radius1``: The first radius (X axis if rotation angle is 0)
-  of search ellipse. Set this parameter to zero to use whole point array.
-  Default is 0.0.
-- ``radius2``: The second radius (Y axis if rotation angle is 0)
-  of search ellipse. Set this parameter to zero to use whole point array.
-  Default is 0.0.
-- ``angle``: Angle of search ellipse rotation in degrees
-  (counter clockwise, default 0.0).
-- ``nodata``: NODATA marker to fill empty points (default
-  0.0).
+- ``radius1``: 검색 타원의 첫 번째 반경(기울기 각도가 0인 경우 X축), 포인트 배열 전체를 사용하려면 이 파라미터를 0으로 설정하십시오. 기본값은 0.0입니다.
+- ``radius2``: 검색 타원의 두 번째 반경(기울기 각도가 0인 경우 Y축), 포인트 배열 전체를 사용하려면 이 파라미터를 0으로 설정하십시오. 기본값은 0.0입니다.
+- ``angle``: 검색 타원 기울기의 도 단위 각도입니다. (반시계 방향, 기본값은 0.0)
+- ``nodata``: 비어 있는 포인트를 채울 NODATA 마커 (기본값은 0.0)
 
 linear
 ++++++
 
 .. versionadded:: 2.1
 
-Linear interpolation algorithm.
+선형 보간 알고리즘입니다.
 
-The Linear method performs linear interpolation by computing a Delaunay
-triangulation of the point cloud, finding in which triangle of the triangulation
-the point is, and by doing linear interpolation from its barycentric coordinates
-within the triangle.
-If the point is not in any triangle, depending on the radius, the
-algorithm will use the value of the nearest point or the nodata value.
+선형 메소드는 점구름(point cloud)의 들로네 삼각분할(Delaunay triangulation)을 계산해서 선형 보간을 수행합니다. 포인트가 삼각분할의 어느 삼각형 안에 있는지 찾은 다음, 해당 삼각형 내부의 무게중심 좌표로부터 선형 보간을 수행합니다. 포인트가 어떤 삼각형에도 들어가지 않는 경우, 이 알고리즘은 검색 반경에 따라 최근접 포인트의 값 또는 NODATA 값을 사용할 것입니다.
 
-It has following parameters:
+다음 파라미터를 사용합니다:
 
-- ``radius``: In case the point to be interpolated does not fit
-  into a triangle of the Delaunay triangulation, use that maximum distance to search a nearest
-  neighbour, or use nodata otherwise. If set to -1, the search distance is infinite.
-  If set to 0, nodata value will be always used. Default is -1.
-- ``nodata``: NODATA marker to fill empty points (default
-  0.0).
+- ``radius``: 보간할 포인트가 들로네 삼각분할의 삼각형 안에 들어가지 않는 경우, 이 최대 거리를 사용해서 최근접 이웃을 찾거나 또는 최대 거리 안에 최근접 이웃이 없다면 NODATA를 사용합니다. 이 파라미터를 -1로 설정하면, 검색 반경이 무한대가 됩니다. 0으로 설정하면 항상 NODATA 값을 사용할 것입니다. 기본값은 -1입니다.
+- ``nodata``: 비어 있는 포인트를 채울 NODATA 마커 (기본값은 0.0)
 
-Data metrics
+데이터 메트릭
 ------------
 
-Besides the interpolation functionality \ref gdal_grid can be used to compute
-some data metrics using the specified window and output grid geometry. These
-metrics are:
+보간 기능 이외에도, :ref:`gdal_grid` 는 지정한 창과 산출 그리드 도형을 사용해서 몇몇 데이터 메트릭(data metrics)을 계산할 수 있습니다. 다음과 같은 메트릭을 계산합니다:
 
-- ``minimum``: Minimum value found in grid node search ellipse.
+- ``minimum``: 그리드 노드 검색 타원에서 발견된 최소값
 
-- ``maximum``: Maximum value found in grid node search ellipse.
+- ``maximum``: 그리드 노드 검색 타원에서 발견된 최대값
 
-- ``range``: A difference between the minimum and maximum values
-  found in grid node search ellipse.
+- ``range``: 그리드 노드 검색 타원에서 발견된 최소값과 최대값의 차
 
-- ``count``:  A number of data points found in grid node search ellipse.
+- ``count``:  그리드 노드 검색 타원에서 발견된 데이터 포인트의 개수
 
-- ``average_distance``: An average distance between the grid
-  node (center of the search ellipse) and all of the data points found in grid
-  node search ellipse.
+- ``average_distance``: 그리드 노드(검색 타원의 중심)와 그리드 노드 검색 타원에서 발견된 모든 데이터 포인트 사이의 평균 거리
 
-- ``average_distance_pts``: An average distance between the data
-  points found in grid node search ellipse. The distance between each pair of
-  points within ellipse is calculated and average of all distances is set as a
-  grid node value.
+- ``average_distance_pts``: 그리드 노드 검색 타원에서 발견된 데이터 포인트들 사이의 평균 거리. 타원 내부에 있는 각 포인트쌍 사이의 거리를 계산하고 그 모든 거리의 평균을 그리드 노드 값으로 설정합니다.
 
-All the metrics have the same set of options:
+모든 메트릭이 동일한 옵션을 가지고 있습니다:
 
-- ``radius1``: The first radius (X axis if rotation angle is 0)
-  of search ellipse. Set this parameter to zero to use whole point array.
-  Default is 0.0.
-- ``radius2``: The second radius (Y axis if rotation angle is 0)
-  of search ellipse. Set this parameter to zero to use whole point array.
-  Default is 0.0.
-- ``angle``: Angle of search ellipse rotation in degrees
-  (counter clockwise, default 0.0).
-- ``min_points``: Minimum number of data points to use. If less
-  amount of points found the grid node considered empty and will be filled with
-  NODATA marker. This is only used if search ellipse is set (both radii are
-  non-zero). Default is 0.
-- ``nodata``: NODATA marker to fill empty points (default
-  0.0).
+- ``radius1``: 검색 타원의 첫 번째 반경(기울기 각도가 0인 경우 X축), 포인트 배열 전체를 사용하려면 이 파라미터를 0으로 설정하십시오. 기본값은 0.0입니다.
+- ``radius2``: 검색 타원의 두 번째 반경(기울기 각도가 0인 경우 Y축), 포인트 배열 전체를 사용하려면 이 파라미터를 0으로 설정하십시오. 기본값은 0.0입니다.
+- ``angle``: 검색 타원 기울기의 도 단위 각도입니다. (반시계 방향, 기본값은 0.0)
+- ``min_points``: 사용할 데이터 포인트의 최소 개수. 이 개수 미만의 포인트가 발견된 그리드 노드는 비어 있다고 간주되어 NODATA 마커로 채워질 것입니다. (두 반경 모두 0이 아닌) 검색 타원을 설정한 경우에만 사용됩니다. 기본값은 0입니다.
+- ``nodata``: 비어 있는 포인트를 채울 NODATA 마커 (기본값은 0.0)
 
-Reading comma separated values
+쉼표로 분리된 값 읽기
 ------------------------------
 
-Often you have a text file with a list of comma separated XYZ values to work
-with (so called CSV file). You can easily use that kind of data source in \ref
-gdal_grid. All you need is create a virtual dataset header (VRT) for you CSV
-file and use it as input datasource for \ref gdal_grid. You can find details
-on VRT format at :ref:`vector.vrt` description page.
+쉼표로 분리된 XYZ 값의 목록을 가진 (CSV 파일이라고 불리는) 텍스트 파일을 작업해야 하는 경우가 자주 있습니다. :ref:`gdal_grid` 에서 이런 유형의 데이터소스를 쉽게 이용할 수 있습니다. 사용자의 CSV 파일을 위한 가상 데이터셋 헤더(VRT)를 생성해서 :ref:`gdal_grid` 의 입력 데이터소스로 쓰면 됩니다. :ref:`vector.vrt` 설명 페이지에서 VRT 포맷에 대한 자세한 내용을 볼 수 있습니다.
 
-Here is a small example. Let we have a CSV file called <i>dem.csv>
-containing
+간단한 예시를 들어봅시다. 다음과 같은 내용을 담고 있는 <dem.csv>라는 CSV 파일이 있다고 가정합니다:
 
 ::
 
@@ -346,8 +246,7 @@ containing
     87077.6,891995,135.01
     ...
 
-For above data we will create <i>dem.vrt> header with the following
-content:
+이 데이터에 대해 다음 내용을 가진 <dem.vrt> 헤더를 생성할 것입니다:
 
 .. code-block:: xml
 
@@ -359,44 +258,31 @@ content:
         </OGRVRTLayer>
     </OGRVRTDataSource>
 
-This description specifies so called 2.5D geometry with three coordinates X, Y
-and Z. Z value will be used for interpolation. Now you can use <i>dem.vrt>
-with all OGR programs (start with \ref ogrinfo to test that everything works
-fine). The datasource will contain single layer called <i>"dem"> filled
-with point features constructed from values in CSV file. Using this technique
-you can handle CSV files with more than three columns, switch columns, etc.
+이 서술된 내용은 X, Y 및 Z 3개 좌표를 가지고 있는 소위 2.5D 도형을 지정합니다. 보간 작업에는 Z값을 사용할 것입니다. 이제 모든 OGR 프로그램에서 <dem.vrt>를 사용할 수 있습니다. (모든 것이 잘 작동하는지 확인하려면 :ref:`ogrinfo` 로 시작해보십시오.) 데이터소스가 CSV 파일에 있는 값들로부터 구성된 포인트 객체로 채워진 <"dem">이라는 단일 레이어를 담게 될 것입니다. 이 방법을 사용하면 3개 이상의 열, 스위치 열 등등을 가진 CSV 파일을 처리할 수 있습니다.
 
-If your CSV file does not contain column headers then it can be handled in the
-following way:
+사용자의 CSV 파일이 열 헤더를 담고 있지 않다면 다음과 같은 방식으로 처리할 수 있습니다:
 
 .. code-block:: xml
 
     <GeometryField encoding="PointFromColumns" x="field_1" y="field_2" z="field_3"/>
 
-The :ref:`vector.csv` description page contains
-details on CSV format supported by GDAL/OGR.
+:ref:`vector.csv` 설명 페이지에서 GDAL/OGR이 지원하는 CSV 포맷에 대한 자세한 내용을 볼 수 있습니다.
 
 C API
 -----
 
-This utility is also callable from C with :cpp:func:`GDALGrid`.
+C에서 :cpp:func:`GDALGrid` 로도 이 유틸리티를 호출할 수 있습니다.
 
-Examples
+예시
 --------
 
-The following would create raster TIFF file from VRT datasource described in
-`Reading comma separated values`_ section using the inverse distance to a power method.
-Values to interpolate will be read from Z value of geometry record.
+다음 명령어는 `쉼표로 분리된 값 읽기`_ 단락에서 설명하는 VRT 데이터소스로부터 역거리 거듭제곱 가중치 보간법을 사용해서 래스터 TIFF 파일을 생성할 것입니다. 보간할 값은 도형 레코드의 Z값에서 읽어올 것입니다.
 
 ::
 
     gdal_grid -a invdist:power=2.0:smoothing=1.0 -txe 85000 89000 -tye 894000 890000 -outsize 400 400 -of GTiff -ot Float64 -l dem dem.vrt dem.tiff
 
-The next command does the same thing as the previous one, but reads values to
-interpolate from the attribute field specified with <b>-zfield</b> option
-instead of geometry record. So in this case X and Y coordinates are being
-taken from geometry and Z is being taken from the <i>"Elevation"> field.
-The GDAL_NUM_THREADS is also set to parallelize the computation.
+다음 명령어는 앞의 예시와 동일한 작업을 하지만, 도형 레코드 대신 **-zfield** 옵션으로 지정한 속성 필드에서 보간할 값을 읽어옵니다. 즉 이 경우 X와 Y 좌표는 도형에서 가져오고 Z 좌표는 <"Elevation"> 필드에서 가져옵니다. 계산 프로세스를 병렬화하기 위해 GDAL_NUM_THREADS도 설정합니다.
 
 ::
 

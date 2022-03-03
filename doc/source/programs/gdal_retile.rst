@@ -6,11 +6,11 @@ gdal_retile.py
 
 .. only:: html
 
-    Retiles a set of tiles and/or build tiled pyramid levels.
+    타일 집합을 다시 타일화하고, 그리고/또는 타일화된 피라미드 수준을 작성합니다.
 
 .. Index:: gdal_retile
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -27,23 +27,18 @@ Synopsis
                    [-useDirForEachRow] [-resume]
                    -targetDir TileDirectory input_files
 
-Description
+설명
 -----------
 
-This utility will retile a set of input tile(s). All the input tile(s) must
-be georeferenced in the same coordinate system and have a matching number of bands.
-Optionally pyramid levels are generated. It  is  possible to generate  shape file(s) for the tiled output.
+이 유틸리티는 입력 타일(들)의 집합을 다시 타일화합니다. 모든 입력 타일(들)은 동일한 좌표계에서 지리참조되어야만 하며 밴드 개수가 일치해야만 합니다. 피라미드 수준을 생성하는 옵션이 있습니다. 타일화된 산출물에 대한 shapefile(들)을 생성할 수 있습니다.
 
-If your number of input tiles exhausts the command line buffer, use the general
-:ref:`--optfile <raster_common_options_optfile>` option
+입력 타일 개수가 명령줄 버퍼를 넘어서는 경우, 일반적인 :ref:`--optfile <raster_common_options_optfile>` 옵션을 사용하십시오.
 
 .. program:: gdal_retile
 
 .. option:: -targetDir <directory>
 
-    The directory where the tile result is created. Pyramids are stored
-    in  sub-directories  numbered  from  1. Created tile names have a numbering
-    schema and contain the name of the source tiles(s)
+    타일화 결과물을 생성하는 디렉터리입니다. 1부터 시작하는 하위 디렉터리에 피라미드를 저장합니다. 생성된 타일 이름은 번호 부여 스키마를 가지고 있으며, 소스 타일(들)의 이름을 담고 있습니다.
 
 .. include:: options/of.rst
 
@@ -53,75 +48,58 @@ If your number of input tiles exhausts the command line buffer, use the general
 
 .. option:: -ps <pixelsize_x> <pixelsize_y>
 
-    Pixel size to be used for the
-    output file.  If not specified, 256 x 256 is the default
+    산출 파일에 사용할 픽셀 크기입니다. 지정하지 않는 경우 기본값은 256x256입니다.
 
 .. option:: -overlap< <val_in_pixel>
 
-    Overlap in pixels between consecutive tiles. If not specified, 0 is the default
+    연속되는 타일들을 지정한 픽셀 개수만큼 중첩합니다. 지정하지 않는 경우 기본값은 0입니다.
 
     .. versionadded:: 2.2
 
 .. option:: -levels <numberOfLevels>
 
-    Number of pyramids levels to build.
+    작성할 피라미드 수준의 개수입니다.
 
 .. option:: -v
 
-    Generate verbose output of tile operations as they are done.
+    타일화 작업이 끝나면 작업에 대한 자세한 설명을 생성합니다.
 
 .. option:: -pyramidOnly
 
-    No retiling, build only the pyramids
+    다시 타일화하지 않고, 피라미드만 작성합니다.
 
 .. option:: -r <algorithm>
 
-    Resampling algorithm, default is near
+    리샘플링 알고리즘입니다. 기본값은 ``near`` 입니다.
 
 .. option:: -s_srs <srs_def>
 
-    Source spatial reference to use. The coordinate systems  that  can  be
-    passed  are  anything  supported by the OGRSpatialReference.SetFromUserInput()  call,
-    which  includes  EPSG, PCS, and GCSes (i.e. EPSG:4296), PROJ.4 declarations (as above),
-    or the name of a .prj file containing well known text.
-    If  no  srs_def  is  given,  the srs_def  of the source tiles is used (if there is any).
-    The srs_def will be propagated to created tiles (if possible) and  to  the  optional
-    shape file(s)
+    소스 공간 좌표계를 설정합니다. OGRSpatialReference.SetFromUserInput() 호출이 지원하는 모든 좌표계를 전송(pass)할 수 있습니다. 이 모든 좌표계는 EPSG PCS와 GCS들(예: EPSG:4296), (앞에서 보인대로의) PROJ.4 선언문, 또는 WKT를 담고 있는 .prj 파일의 이름을 포함합니다. srs_def를 지정하지 않는 경우, (소스 타일의 srs_def가 있다면) 소스 srs_def를 사용합니다. srs_def는 (가능하다면) 생성된 타일에 그리고 선택적인 shapefile(들)에 들어갈 것입니다.
 
 .. option:: -tileIndex <tileIndexName>
 
-    The name of shape file containing the result tile(s) index
+    산출되는 타일(들) 색인을 담고 있는 shapefile의 이름입니다.
 
 .. option:: -tileIndexField <tileIndexFieldName>
 
-    The name of the attribute containing the tile name
+    타일 이름을 담고 있는 속성의 이름입니다.
 
 .. option:: -csv <csvFileName>
 
-    The name of the csv file containing the tile(s) georeferencing information.
-    The file contains 5 columns: tilename,minx,maxx,miny,maxy
+    타일(들)의 지리참조 정보를 담고 있는 CSV 파일의 이름입니다. 이 파일은 tilename, minx, maxx, miny, maxy 열 5개를 담고 있습니다.
 
 .. option:: -csvDelim <column delimiter>
 
-    The column delimiter used in the CSV file, default value is a semicolon ";"
+    CSV 파일에서 쓰이는 열 구분자입니다. 기본값은 쌍반점 ";"입니다.
 
 .. option:: -useDirForEachRow
 
-    Normally the tiles of the base image are stored as described in :option:`-targetDir`.
-    For large images, some file systems have performance problems if the number of files
-    in a directory is to big, causing gdal_retile not to finish in reasonable time.
-    Using this parameter creates a different output structure. The tiles of the base image
-    are stored in a sub-directory called 0, the pyramids in sub-directories numbered 1,2,....
-    Within each of these directories another level of sub-directories is created, numbered from
-    0...n, depending of how many tile rows are needed for each level. Finally, a directory contains
-    only the tiles for one row for a specific level. For large images a performance improvement
-    of a factor N could be achieved.
+    일반적으로 기반 이미지의 타일은 :option:`-targetDir` 에 설정한대로 저장됩니다. 대용량 이미지의 경우, 디렉터리 하나 안에 있는 파일 개수가 너무 큰 경우 일부 파일 시스템의 성능이 저하되어 gdal_retile이 적정한 시간 안에 종료되지 않을 수도 있습니다. 이 파라미터를 사용하면 다른 산출물 구조를 생성합니다. 0이라는 하위 디렉터리에 기반 이미지의 타일을 저장하고, 1, 2, ... 번호를 붙인 하위 디렉터리에 피라미드를 저장합니다. 이 디렉터리 각각에 0에서 n까지 번호를 붙인 또다른 수준의 하위 디렉터리를 생성합니다. 이때 n은 각 수준에서 타일 행들이 얼마나 많이 필요하냐에 따라 달라집니다. 결국, 디렉터리 하나가 특정 수준 하나의 행 하나에 해당하는 타일들만 담게 됩니다. 대용량 이미지의 경우 N배의 성능 향상을 이룰 수 있습니다.
 
 .. option:: -resume
 
-    Resume mode. Generate only missing files.
+    다시 시작(resume) 모드입니다. 누락된 파일만 생성합니다.
 
 .. note::
 
-    gdal_retile.py is a Python script, and will only work if GDAL was built
-    with Python support.
+    gdal_retile.py는 파이썬 스크립트로, GDAL이 파이썬 지원과 함께 빌드된 경우에만 작동할 것입니다.
