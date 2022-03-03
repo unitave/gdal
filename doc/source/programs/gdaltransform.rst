@@ -6,11 +6,11 @@ gdaltransform
 
 .. only:: html
 
-    Transforms coordinates.
+    좌표를 변환합니다.
 
 .. Index:: gdaltransform
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -21,122 +21,96 @@ Synopsis
         [-gcp pixel line easting northing [elevation]]* [-output_xy]
         [srcfile [dstfile]]
 
-Description
+설명
 -----------
 
-The gdaltransform utility reprojects a list of coordinates into any supported
-projection,including GCP-based transformations.
+gdaltransform 유틸리티는 좌표 목록을 GCP 기반 변환을 포함하는 모든 지원 투영법으로 재투영합니다.
 
 .. program:: gdaltransform
 
 .. option:: -s_srs <srs_def>
 
-    Set source spatial reference.
-    The coordinate systems that can be passed are anything supported by the
-    OGRSpatialReference.SetFromUserInput() call, which includes EPSG PCS and GCSes
-    (i.e. EPSG:4296), PROJ.4 declarations (as above), or the name of a .prj file
-    containing well known text.
+    소스 공간 좌표계를 설정합니다. OGRSpatialReference.SetFromUserInput() 호출이 지원하는 모든 좌표계를 전송(pass)할 수 있습니다. 이 모든 좌표계는 EPSG PCS와 GCS들(예: EPSG:4296), (앞에서 보인대로의) PROJ.4 선언문, 또는 WKT를 담고 있는 .prj 파일의 이름을 포함합니다.
 
 .. option:: -t_srs <srs_def>
 
-    set target spatial reference.
-    The coordinate systems that can be passed are anything supported by the
-    OGRSpatialReference.SetFromUserInput() call, which includes EPSG PCS and GCSes
-    (i.e. EPSG:4296), PROJ.4 declarations (as above), or the name of a .prj file
-    containing well known text.
+    대상 공간 좌표계를 설정합니다. OGRSpatialReference.SetFromUserInput() 호출이 지원하는 모든 좌표계를 전송(pass)할 수 있습니다. 이 모든 좌표계는 EPSG PCS와 GCS들(예: EPSG:4296), (앞에서 보인대로의) PROJ.4 선언문, 또는 WKT를 담고 있는 .prj 파일의 이름을 포함합니다.
 
 .. option:: -ct <string>
 
-    A PROJ string (single step operation or multiple step string
-    starting with +proj=pipeline), a WKT2 string describing a CoordinateOperation,
-    or a urn:ogc:def:coordinateOperation:EPSG::XXXX URN overriding the default
-    transformation from the source to the target CRS. It must take into account the
-    axis order of the source and target CRS.
+    PROJ 문자열(한 단계 작업 또는 +proj=pipeline으로 시작하는 여러 단계 작업 문자열)로, CoordinateOperation을 설명하는 WKT2 문자열, 또는 소스로부터 대상 좌표계로의 기본 변환을 무시하는 urn:ogc:def:coordinateOperation:EPSG::XXXX URN입니다. 소스 및 대상 좌표계의 축 순서를 고려해야만 합니다.
 
     .. versionadded:: 3.0
 
 .. option:: -to NAME=VALUE
 
-    set a transformer option suitable to pass to :cpp:func:`GDALCreateGenImgProjTransformer2`.
+    :cpp:func:`GDALCreateGenImgProjTransformer2` 에 전송하기에 적합한 변환기(transformer) 옵션을 설정합니다.
 
 .. option:: -order <n>
 
-    order of polynomial used for warping (1 to 3). The default is to select a
-    polynomial order based on the number of GCPs.
+    왜곡 작업에 쓰이는 다항(polynomial)의 순서(1에서 3까지)입니다. 기본값은 GCP 개수를 기반으로 하는 다항 순서를 선택하는 것입니다.
 
 .. option:: -tps
 
-    Force use of thin plate spline transformer based on available GCPs.
+    사용할 수 있는 GCP를 기반으로 박막 스플라인(thin plate spline) 변환기를 강제로 사용시킵니다.
 
 .. option:: -rpc
 
-    Force use of RPCs.
+    RPC를 강제로 사용시킵니다.
 
 .. option:: -geoloc
 
-    Force use of Geolocation Arrays.
+    지리위치 배열(Geolocation Array)를 강제로 사용시킵니다.
 
 .. option:: -i
 
-    Inverse transformation: from destination to source.
+    역변환(Inverse transformation): 대상으로부터 소스로.
 
 .. option:: -gcp <pixel> <line> <easting> <northing> [<elevation>]
 
-    Provide a GCP to be used for transformation (generally three or more are required)
+    변환 작업에 쓰일 GCP를 지정합니다. (일반적으로 3개 이상이 필요합니다.)
 
 .. option:: -output_xy
 
-    Restrict output to "x y" instead of "x y z"
+    산출물을 "x y z" 대신 "x y"로 제한합니다.
 
 .. option:: <srcfile>
 
-    File with source projection definition or GCP's. If
-    not given, source projection is read from the command-line :option:`-s_srs`
-    or :option:`-gcp` parameters 
+    소스 또는 GCP의 투영법 정의를 가진 파일입니다. 지정하지 않는 경우, 명령줄 :option:`-s_srs` 또는 :option:`-gcp` 파라미터로부터 소스 투영법을 읽어옵니다.
 
 .. option:: <dstfile>
 
-    File with destination projection definition. 
+    대상 투영법 정의를 가진 파일입니다.
 
-Coordinates are read as pairs, triples (for 3D,) or (since GDAL 3.0.0,) quadruplets
-(for X,Y,Z,time) of numbers per line from standard
-input, transformed, and written out to standard output in the same way. All
-transformations offered by gdalwarp are handled, including gcp-based ones.
+좌표를 쌍으로, (3D의 경우) 3개 값으로, 또는 (GDAL 3.0.0부터 X, Y, Z, 시간의 경우) 4개 값으로 읽어와서, 표준 산출물에 동일한 방식으로 변환해서 작성합니다. GCP 기반 변환을 포함, gdalwarp가 제공하는 모든 변환 메소드를 처리합니다.
 
-Note that input and output must always be in decimal form.  There is currently
-no support for DMS input or output.
+입력물과 산출물이 언제나 소수점(decimal) 양식이어야만 한다는 사실을 기억하십시오. 현재 DMS 입력 또는 산출을 지원하지 않습니다.
 
-If an input image file is provided, input is in pixel/line coordinates on that
-image.  If an output file is provided, output is in pixel/line coordinates
-on that image.
+입력 이미지 파일을 지정한 경우, 입력물의 좌표는 해당 이미지의 픽셀/라인 좌표 단위입니다. 산출물 파일을 지정한 경우, 산출물의 좌표는 해당 이미지의 픽셀/라인 좌표 단위입니다.
 
-Examples
+예시
 --------
 
-Reprojection Example
+재투영 예시
 ++++++++++++++++++++
 
-Simple reprojection from one projected coordinate system to another:
+어떤 투영 좌표계로부터 다른 투영 좌표계로의 단순 재투영:
 
 ::
 
     gdaltransform -s_srs EPSG:28992 -t_srs EPSG:31370
     177502 311865
 
-Produces the following output in meters in the "Belge 1972 / Belgian Lambert
-72" projection:
+"Belge 1972 / Belgian Lambert 72" 투영법을 사용하는 다음 미터 단위 산출물을 생성합니다:
 
 ::
 
     244510.77404604 166154.532871342 -1046.79270555763
 
-Image RPC Example
+이미지 RPC 예시
 +++++++++++++++++
 
-The following command requests an RPC based transformation using the RPC
-model associated with the named file.  Because the -i (inverse) flag is
-used, the transformation is from output georeferenced (WGS84) coordinates
-back to image coordinates.
+다음 명령어는 지정한 파일과 연관된 RPC 모델을 사용하는 RPC 기반 변환을 요청합니다. -i (inverse) 플래그를 사용하기 때문에, 산출물의 지리참조(WGS84) 좌표를 이미지 좌표로 다시 변환합니다.
 
 
 ::
@@ -144,17 +118,16 @@ back to image coordinates.
     gdaltransform -i -rpc 06OCT20025052-P2AS-005553965230_01_P001.TIF
     125.67206 39.85307 50
 
-Produces this output measured in pixels and lines on the image:
+이미지 상의 픽셀과 라인 단위로 측정된 산출물을 생성합니다:
 
 ::
 
     3499.49282422381 2910.83892848414 50
 
-X,Y,Z,time transform
+X, Y, Z, 시간 변환
 ++++++++++++++++++++
 
-15-term time-dependent Helmert coordinate transformation from ITRF2000 to ITRF93
-for a coordinate at epoch 2000.0
+2000.0 시대(epoch) 좌표를 ITRF2000으로부터 ITRF93로 15기간(term) 시간 의존적 헬메르트(Helmert) 좌표 변환:
 
 ::
 
@@ -166,7 +139,7 @@ for a coordinate at epoch 2000.0
     +proj=unitconvert +xy_in=rad +xy_out=deg"
     2 49 0 2000
 
-Produces this output measured in longitude degrees, latitude degrees and ellipsoid height in metre:
+경도, 위도 및 미터 단위 타원체 높이 단위로 측정된 산출물을 생성합니다:
 
 ::
 

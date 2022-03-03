@@ -146,7 +146,7 @@ GDAL 2.1.0부터 벡터 데이터를 래스터 데이터의 좌표계로 실시�
 C API
 -----
 
-C에서 :cpp:func:`GDALRasterize` 를 호출하면 이 유틸리티의 기능을 수행할 수 있습니다.
+C에서 :cpp:func:`GDALRasterize` 로 이 유틸리티를 호출할 수 있습니다.
 
 .. versionadded:: 2.1
 

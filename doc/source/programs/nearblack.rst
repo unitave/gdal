@@ -6,11 +6,11 @@ nearblack
 
 .. only:: html
 
-    Convert nearly black/white borders to black.
+    검은색/하얀색에 가까운 경계를 검은색으로 변환합니다.
 
 .. Index:: nearblack
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -18,92 +18,69 @@ Synopsis
     nearblack [-of format] [-white | [-color c1,c2,c3...cn]*] [-near dist] [-nb non_black_pixels]
               [-setalpha] [-setmask] [-o outfile] [-q]  [-co "NAME=VALUE"]* infile
 
-Description
+설명
 -----------
 
-This utility will scan an image and try to set all pixels that are nearly or exactly
-black, white or one or more custom colors around the collar to black or white. This
-is often used to "fix up" lossy compressed air photos so that color pixels can be
-treated as transparent when mosaicing. The output format must use lossless compression
-if either alpha band or mask band is not set.
+이 유틸리티는 이미지를 스캔해서, 가장자리 주변의 검은색, 하얀색, 또는 하나 이상의 사용자 지정 색상에 근사하거나 일치하는 모든 픽셀을 검은색 또는 하얀색으로 설정하려 합니다. 이 유틸리티는 손실 압축 항공사진을 "고쳐서" 모자이크 작업 시 색상 픽셀을 투명하게 취급할 수 있도록 하는 데 자주 사용됩니다. 알파 밴드 또는 마스크 밴드를 설정하지 않은 경우 산출 포맷은 비손실 압축을 사용해야만 합니다.
 
 .. program:: nearblack
 
 .. option:: -o <outfile>
 
-    The name of the output file to be created.
+    생성할 산출물 파일의 이름입니다.
 
 .. option:: -of <format>
 
-    Select the output format.
-    Starting with GDAL 2.3, if not specified, the format is guessed from the extension (previously
-    was ERDAS Imagine .img).
-    Use the short format name (GTiff for GeoTIFF for example).
+    산출 포맷을 선택합니다. GDAL 2.3버전부터, 지정하지 않는 경우 확장자로부터 포맷을 추정합니다. (이전 버전까지는 ERDAS Imagine .img 포맷을 사용했습니다.) 단축 포맷명을 사용하십시오. (예: GeoTIFF의 경우 GTiff)
 
 .. option:: -co `"NAME=VALUE"`
 
-    Passes a creation option to the output format driver.  Multiple
-    :option:`-co` options may be listed. See :ref:`raster_drivers` format
-    specific documentation for legal creation options for each format.
+    산출 포맷 드라이버에 생성 옵션을 전송(pass)합니다. :option:`-co` 옵션 여러 개를 목록화할 수도 있습니다. 각 포맷을 위한 정당한 생성 옵션을 알고 싶다면 :ref:`raster_drivers` 포맷 사양 문서를 읽어보십시오.
 
-    Only valid when creating a new file
+    새 파일을 생성하는 경우에만 효과가 있습니다.
 
 .. option:: -white
 
-    Search for nearly white (255) pixels instead of nearly black pixels.
+    근사 검은색 픽셀 대신 근사 하얀색(255) 픽셀을 검색합니다.
 
 .. option:: -color <c1,c2,c3...cn>
 
-    Search for pixels near the specified color. May be specified multiple times.
-    When -color is specified, the pixels that are considered as the collar are set to 0.
+    지정한 색상에 근사한 픽셀을 검색합니다. 색상을 여러 개 지정할 수도 있습니다. -color 옵션을 지정한 경우, 가장자리로 간주되는 픽셀을 0으로 설정합니다.
 
 .. option:: -near <dist>
 
-    Select how far from black, white or custom colors the pixel values can be
-    and still considered near black, white or custom color.  Defaults to 15.
+    픽셀값이 검은색, 하얀색 또는 사용자 지정 색상으로 간주되려면 검은색, 하얀색 또는 사용자 지정 색상과 얼마나 다를 수 있는지를 선택합니다. 기본값은 15입니다.
 
 .. option:: -nb <non_black_pixels>
 
-    number of non-black pixels that can be encountered before the giving up search inwards. Defaults to 2.
+    검은색이 아닌 픽셀을 이만큼 마주치면 안쪽 방향 검색을 멈추는 픽셀 개수입니다. 기본값은 2입니다.
 
 .. option:: -setalpha
 
-    Adds an alpha band if the output file is specified and the input file has 3 bands,
-    or sets the alpha band of the output file if it is specified and the input file has 4 bands,
-    or sets the alpha band of the input file if it has 4 bands and no output file is specified.
-    The alpha band is set to 0 in the image collar and to 255 elsewhere.
+    입력 파일이 밴드 3개를 가지고 있고 산출 파일을 지정한 경우 알파 밴드를 추가합니다. 또는 입력 파일이 밴드 4개를 가지고 있고 산출 파일을 지정한 경우 산출 파일의 알파 밴드를 설정합니다. 또는 입력 파일이 밴드 4개를 가지고 있고 산출 파일을 지정하지 않은 경우 입력 파일의 알파 밴드를 설정합니다. 이 알파 밴드는 이미지 가장자리에서 0으로, 그 외 모든 영역에서 255로 설정됩니다.
 
 .. option:: -setmask
 
-    Adds a mask band to the output file,
-    or adds a mask band to the input file if it does not already have one and no output file is specified.
-    The mask band is set to 0 in the image collar and to 255 elsewhere.
+    산출 파일에 마스크 밴드를 추가합니다. 또는 입력 파일이 마스크 밴드를 가지고 있지 않고 산출 파일을 지정하지 않은 경우 입력 파일에 마스크 밴드를 추가합니다. 이 마스크 밴드는 이미지 가장자리에서 0으로, 그 외 모든 영역에서 255로 설정됩니다.
 
 .. option:: -q
 
-    Suppress progress monitor and other non-error output.
+    진행 상황 모니터 및 기타 오류가 아닌 결과를 표시하지 않습니다.
 
 .. option:: <infile>
 
-    The input file.  Any GDAL supported format, any number of bands, normally 8bit
-    Byte bands.
+    입력 파일입니다. GDAL이 지원하는, 일반적으로 밴드 개수에 제한이 없고 8비트 바이트 밴드를 가진 모든 포맷을 입력할 수 있습니다.
 
-The algorithm processes the image one scanline at a time.  A scan "in" is done
-from either end setting pixels to black or white until at least
-"non_black_pixels" pixels that are more than "dist" gray levels away from
-black, white or custom colors have been encountered at which point the scan stops.  The nearly
-black, white or custom color pixels are set to black or white. The algorithm also scans from
-top to bottom and from bottom to top to identify indentations in the top or bottom.
+이 알고리즘은 한번에 한 라인씩 이미지를 스캔합니다. "dist" 회색조 수준을 초과할 만큼 검은색, 하얀색 또는 사용자 지정 색상과 다른 픽셀을 최소한 "non_black_pixels" 개수만큼 마주쳤을 때 양쪽 끝에서 픽셀을 검은색 또는 하얀색으로 설정하는 "안쪽 방향" 스캔이 종료됩니다. 근사 검은색, 하얀색 또는 사용자 지정 색상 픽셀을 검은색 또는 하얀색으로 설정합니다. 이 알고리즘은 이미지 최상단과 최하단에 깎인 자국(indentation)이 있는지 식별하기 위해 최상단에서 최하단으로, 최하단에서 최상단으로 스캔하기도 합니다.
 
-The processing is all done in 8bit (Bytes).
+모든 처리 과정은 8비트(바이트) 단위로 수행됩니다.
 
-If the output file is omitted, the processed results will be written back
-to the input file - which must support update.
+산출물 파일이 누락된 경우, 처리 결과를 입력 파일에 다시 작성할 것입니다 - 따라서 입력 파일은 업데이트를 지원해야만 합니다.
 
 C API
 -----
 
-This utility is also callable from C with :cpp:func:`GDALNearblack`.
+C에서 :cpp:func:`GDALNearblack` 으로 이 유틸리티를 호출할 수 있습니다.
 
 .. versionadded:: 2.1
 
