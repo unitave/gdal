@@ -6,11 +6,11 @@ gdal_rasterize
 
 .. only:: html
 
-    Burns vector geometries into a raster.
+    벡터 도형을 래스터로 변환(burn)합니다.
 
 .. Index:: gdal_rasterize
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -26,80 +26,58 @@ Synopsis
         [-optim {[AUTO]/VECTOR/RASTER}] [-q]
         <src_datasource> <dst_filename>
 
-Description
+설명
 -----------
 
-This program burns vector geometries (points, lines, and polygons) into the
-raster band(s) of a raster image.  Vectors are read from OGR supported vector
-formats.
+이 프로그램은 (포인트, 라인 및 폴리곤) 벡터 도형을 래스터 이미지의 래스터 밴드(들)에 덮어씁니다. OGR이 지원하는 벡터 포맷들로부터 벡터를 읽어옵니다.
 
-Note that on the fly reprojection of vector data to the coordinate system of the
-raster data is only supported since GDAL 2.1.0.
+GDAL 2.1.0부터 벡터 데이터를 래스터 데이터의 좌표계로 실시간(on the fly) 재투영하는 기능을 지원한다는 사실을 기억하십시오.
 
 .. program:: gdal_rasterize
 
 .. option:: -b <band>
 
-    The band(s) to burn values into.  Multiple -b arguments may be used to burn
-    into a list of bands.  The default is to burn into band 1.  Not used when
-    creating a new raster.
+    값을 덮어쓸 밴드(들)입니다. 밴드 여러 개에 덮어쓰기 위해 -b 인자를 여러 번 사용할 수도 있습니다. 기본값은 밴드 1에 덮어쓰는 것입니다. 새 래스터를 생성하는 경우 사용하지 않습니다.
 
 .. option:: -i
 
-    Invert rasterization.  Burn the fixed burn value, or the burn value associated
-    with the first feature into all parts of the image *not* inside the
-    provided polygon.
+    역(逆) 래스터화입니다. 고정된 덮어쓸 값을 덮어쓰거나, 지정한 폴리곤 안에 들어가지 *않는* 이미지의 모든 부분에 첫 번째 객체와 관련된 덮어쓸 값을 덮어씁니다.
 
 .. option:: -at
 
-    Enables the ALL_TOUCHED rasterization option so that all pixels touched
-    by lines or polygons will be updated, not just those on the line render path,
-    or whose center point is within the polygon.  Defaults to disabled for normal
-    rendering rules.
+    라인 렌더링 경로 상에 있거나 폴리곤 내부에 중심 포인트가 있는 픽셀만이 아니라, 라인 또는 폴리곤에 접한 모든 픽셀을 업데이트하도록 ALL_TOUCHED 래스터화 옵션을 활성화합니다. 기본값은 일반 렌더링 규칙을 따르기 위한 비활성화 상태입니다.
 
 .. option:: -burn <value>
 
-    A fixed value to burn into a band for all objects.  A list of :option:`-burn` options
-    can be supplied, one per band being written to.
+    모든 객체의 밴드에 덮어쓸 고정값입니다. 작성할 밴드 당 :option:`-burn` 옵션을 하나씩 지정한 목록을 사용할 수 있습니다.
 
 .. option:: -a <attribute_name>
 
-    Identifies an attribute field on the features to be used for a burn-in value.
-    The value will be burned into all output bands.
+    덮어쓸(burn-in) 값을 위해 사용할 객체의 속성 필드를 식별합니다. 모든 산출 밴드에 값을 덮어쓸 것입니다.
 
 .. option:: -3d
 
-    Indicates that a burn value should be extracted from the "Z" values of the
-    feature. Works with points and lines (linear interpolation along each segment).
-    For polygons, works properly only if the are flat (same Z value for all
-    vertices).
+    객체의 "Z" 값으로부터 덮어쓸 값을 추출해야 한다는 사실을 나타냅니다. 포인트와 라인에 대해 (각 선분을 따라 선형 보간하는 방식으로) 작동합니다. 폴리곤의 경우, 폴리곤이 평평한 (모든 꼭짓점의 Z 값이 동일한) 경우에만 제대로 작동합니다.
 
 .. option:: -add
 
-    Instead of burning a new value, this adds the new value to the existing raster.
-    Suitable for heatmaps for instance.
+    새 값을 덮어쓰는 대신, 이 옵션은 기존 래스터에 새 값을 추가합니다. 예를 들자면 히트 맵(heat map)에 적합합니다.
 
 .. option:: -l <layername>
 
-    Indicates the layer(s) from the datasource that will be used for input
-    features.  May be specified multiple times, but at least one layer name or a
-    :option:`-sql` option must be specified.
+    입력 객체로 사용될 데이터소스에서 나온 레이어(들)를 의미합니다. 여러 번 지정할 수도 있지만, 최소한 레이어 이름 하나 또는 :option:`-sql` 옵션 하나를 지정해야만 합니다.
 
 .. option:: -where <expression>
 
-    An optional SQL WHERE style query expression to be applied to select features
-    to burn in from the input layer(s).
+    입력 레이어(들)로부터 값을 덮어쓸 객체를 선택하기 위해 적용되는, 선택적인 SQL WHERE 스타일의 쿼리 표현식입니다.
 
 .. option:: -sql <select_statement>
 
-    An SQL statement to be evaluated against the datasource to produce a
-    virtual layer of features to be burned in.
+    값을 덮어쓸 객체의 가상 레이어를 생성하기 위한 데이터소스를 대상으로 평가될 SQL 선언문입니다.
 
 .. option:: -dialect <dialect>
 
-    SQL dialect. In some cases can be used to use (unoptimized) OGR SQL instead of
-    the native SQL of an RDBMS by passing OGRSQL. The
-    "SQLITE" dialect can also be used with any datasource.
+    SQL 방언(dialect)입니다. 어떤 경우 OGRSQL을 전송해서 RDBMS의 네이티브 SQL 대신 (최적화되지 않은) OGR SQL을 사용하기 위해 쓰일 수도 있습니다. 모든 데이터소스에서 "SQLITE" 방언도 사용할 수 있습니다.
 
     .. versionadded:: 2.1
 
@@ -107,29 +85,19 @@ raster data is only supported since GDAL 2.1.0.
 
 .. option:: -a_nodata <value>
 
-    Assign a specified nodata value to output bands.
+    산출 밴드에 지정한 NODATA 값을 할당합니다.
 
 .. option:: -init <value>
 
-    Pre-initialize the output image bands with these values.  However, it is not
-    marked as the nodata value in the output file.  If only one value is given, the
-    same value is used in all the bands.
+    산출 이미지 밴드를 이 값으로 사전 초기화합니다. 하지만 산출물 파일에서 이 값을 NODATA 값으로 표시하지는 않습니다. 값을 하나만 지정하는 경우, 모든 밴드에 동일한 값을 사용합니다.
 
 .. option:: -a_srs <srs_def>
 
-    Override the projection for the output file. If not specified, the projection of
-    the input vector file will be used if available. When using this option, no reprojection
-    of features from the SRS of the input vector to the specified SRS of the output raster,
-    so use only this option to correct an invalid source SRS.
-    The <srs_def> may be any of the usual GDAL/OGR forms, complete WKT, PROJ.4,
-    EPSG:n or a file containing the WKT.
+    산출물 파일의 투영법을 무시합니다. 지정하지 않는 경우, 입력 벡터 파일의 투영법을 사용할 수 있다면 해당 투영법을 사용할 것입니다. 이 옵션을 사용할 때, 어떤 객체도 입력 벡터의 공간 좌표계로부터 산출 래스터의 지정된 공간 좌표계로 재투영하지 않습니다. 따라서 무결하지 않은 소스 공간 좌표계를 수정하기 위해서만 이 옵션을 사용하십시오. <srs_def>는 완전한 WKT, PROJ.4, EPSG:n 또는 WKT를 담고 있는 파일 등 일반적인 GDAL/OGR 양식이라면 무엇이든 될 수 있습니다.
 
 .. option:: -to NAME=VALUE
 
-    set a transformer
-    option suitable to pass to :cpp:func:`GDALCreateGenImgProjTransformer2`. This is
-    used when converting geometries coordinates to target raster pixel space. For
-    example this can be used to specify RPC related transformer options.
+    :cpp:func:`GDALCreateGenImgProjTransformer2` 를 전송(pass)하기에 적합한 변환기(transformer) 옵션을 설정합니다. 도형의 좌표를 대상 래스터 픽셀 공간으로 변환하는 경우 이 옵션을 사용합니다. 예를 들면 RPC 관련 변환기 옵션을 지정하기 위해 이 옵션을 사용할 수 있습니다.
 
     .. versionadded:: 2.3
 
@@ -137,90 +105,69 @@ raster data is only supported since GDAL 2.1.0.
 
 .. option:: -te <xmin> <ymin> <xmax> <ymax>
 
-    Set georeferenced extents. The values must be expressed in georeferenced units.
-    If not specified, the extent of the output file will be the extent of the vector
-    layers.
+    지리참조 범위를 설정합니다. 이 값은 지리참조 단위로 표현되어야만 합니다. 이 옵션을 지정하지 않는 경우, 산출물 파일의 범위는 벡터 레이어들의 범위가 될 것입니다.
 
 .. option:: -tr <xres> <yres>
 
-    Set target resolution. The values must be expressed in georeferenced units.
-    Both must be positive values.
+    대상 해상도를 설정합니다. 이 값은 지리참조 단위로 표현되어야만 합니다. 두 값 모두 양의 값이어야만 합니다.
 
 .. option:: -tap
 
-    (target aligned pixels) Align
-    the coordinates of the extent of the output file to the values of the :option:`-tr`,
-    such that the aligned extent includes the minimum extent.
+    (대상에 정렬된 픽셀(target aligned pixels)) 산출물 파일의 범위의 좌표를 :option:`-tr` 옵션의 값에 정렬시켜 정렬된 범위가 최소 범위를 포함하도록 합니다.
 
 .. option:: -ts <width> <height>
 
-    Set output file size in pixels and lines. Note that :option:`-ts` cannot be used with
-    :option:`-tr`
+    산출물 파일의 크기를 픽셀과 행 단위로 설정합니다. :option:`-ts` 와 :option:`-tr` 을 함께 사용할 수 없다는 사실을 기억하십시오.
 
 .. option:: -ot <type>
 
-    Force the output bands to be of the indicated data type. Defaults to ``Float64``
+    산출 밴드가 지정한 데이터 유형이도록 강제합니다. 기본값은 ``Float64`` 입니다.
 
 .. option:: -optim {[AUTO]/VECTOR/RASTER}}
 
-    Force the algorithm used (results are identical). The raster mode is used in most cases and
-    optimise read/write operations. The vector mode is useful with a decent amount of input
-    features and optimise the CPU use. That mode have to be used with tiled images to be
-    efficient. The auto mode (the default) will chose the algorithm based on input and output
-    properties.
+    최적화 알고리즘을 사용하도록 강제합니다. (결과는 동일합니다.) 대부분의 경우 래스터 모드를 사용해서 읽기/쓰기 작업을 최적화합니다. 벡터 모드는 입력 객체가 상당히 많은 경우 유용하며 CPU 사용을 최적화합니다. 래스터 모드를 효율적으로 사용하려면 타일화된 이미지에 사용해야 합니다. (기본값인) AUTO 모드는 입력물과 산출물의 속성을 바탕으로 알고리즘을 선택할 것입니다.
 
     .. versionadded:: 2.3
 
 .. option:: -q
 
-    Suppress progress monitor and other non-error output.
+    진행 상황 모니터 및 기타 오류가 아닌 결과를 표시하지 않습니다.
 
 .. option:: <src_datasource>
 
-    Any OGR supported readable datasource.
+    OGR이 지원하는 읽기 가능한 모든 데이터소스입니다.
 
 .. option:: <dst_filename>
 
-    The GDAL supported output file.  Must support update mode access.
-    This file will be created (or overwritten if it already exists):option:`-of`,
-    :option:`-a_nodata`, :option:`-init`, :option:`-a_srs`, :option:`-co`, :option:`-te`,
-    :option:`-tr`, :option:`-tap`, :option:`-ts`, or :option:`-ot` options are used.
+    GDAL이 지원하는 산출물 파일입니다. 업데이트 모드 접근을 지원해야만 합니다. :option:`-of`, :option:`-a_nodata`, :option:`-init`, :option:`-a_srs`, :option:`-co`, :option:`-te`, :option:`-tr`, :option:`-tap`, :option:`-ts`, 또는 :option:`-ot` 옵션을 사용해서 이 파일을 생성할 (또는 파일이 이미 존재하는 경우 덮어쓸) 것입니다.
 
-The program create a new target raster image when any of the :option:`-of`,
-:option:`-a_nodata`, :option:`-init`, :option:`-a_srs`, :option:`-co`, :option:`-te`,
-:option:`-tr`, :option:`-tap`, :option:`-ts`, or :option:`-ot` options are used.
-The resolution or size must be specified using the :option:`-tr` or :option:`-ts` option for all new
-rasters.  The target raster will be overwritten if it already exists and any of
-these creation-related options are used.
+:option:`-of`, :option:`-a_nodata`, :option:`-init`, :option:`-a_srs`, :option:`-co`, :option:`-te`, :option:`-tr`, :option:`-tap`, :option:`-ts`, 또는 :option:`-ot` 옵션 가운데 하나라도 사용되는 경우 이 프로그램은 새 대상 래스터 이미지를 생성합니다. 모든 새 래스터에 대해 :option:`-tr` 또는 :option:`-ts` 옵션을 사용해서 해상도 또는 크기를 지정해야만 합니다. 대상 래스터가 이미 존재하고 생성 관련 옵션 가운데 하나라도 사용되는 경우 대상 래스터를 덮어쓸 것입니다.
 
 C API
 -----
 
-This utility is also callable from C with :cpp:func:`GDALRasterize`.
+C에서 :cpp:func:`GDALRasterize` 를 호출하면 이 유틸리티의 기능을 수행할 수 있습니다.
 
 .. versionadded:: 2.1
 
-Example
+예시
 -------
 
-The following would burn all polygons from mask.shp into the RGB TIFF
-file work.tif with the color red (RGB = 255,0,0).
+다음 명령어는 RGB TIFF 파일인 work.tif에 mask.shp의 모든 폴리곤을 적색(RGB = 255,0,0)으로 덮어쓸 것입니다.
 
 ::
 
     gdal_rasterize -b 1 -b 2 -b 3 -burn 255 -burn 0 -burn 0 -l mask mask.shp work.tif
 
 
-The following would burn all "class A" buildings into the output elevation
-file, pulling the top elevation from the ROOF_H attribute.
+다음 명령어는 ROOF_H 속성으로부터 정상 표고(top elevation)를 가져와서 산출 표고 파일에 모든 "class A" 건물을 덮어쓸 것입니다.
 
 ::
 
     gdal_rasterize -a ROOF_H -where "class='A'" -l footprints footprints.shp city_dem.tif
 
-The following would burn all polygons from footprint.shp into a new 1000x1000
-rgb TIFF as the color red.  Note that :option:`-b` is not used; the order of the :option:`-burn`
-options determines the bands of the output raster.
+
+다음 명령어는 새 1000x1000픽셀 크기의 RGB TIFF에 footprint.shp의 모든 폴리곤을 적색으로 덮어쓸 것입니다. :option:`-b` 를 사용하지 않는다는 점을 기억하십시오. :option:`-burn` 옵션들의 순서가 산출 래스터의 밴드 순서를 결정합니다.
 
 ::
 
