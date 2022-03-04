@@ -6,66 +6,65 @@ gdalsrsinfo
 
 .. only:: html
 
-    Lists info about a given SRS in number of formats (WKT, PROJ.4, etc.)
+    입력 공간 좌표계에 대한 정보를 (WKT, PROJ.4 등등) 여러 서식으로 목록화합니다.
 
 .. Index:: gdalsrsinfo
 
-Synopsis
+개요
 --------
 
 .. code-block::
 
     Usage: gdalsrsinfo [--single-line] [-V] [-e][-o <out_type>] <srs_def>
 
-Description
+설명
 -----------
 
-The :program:`gdalsrsinfo` utility reports information about a given SRS from one of the following:
+:program:`gdalsrsinfo` 유틸리티는 입력 공간 좌표계에 대한 정보를 다음 가운데 하나로 리포트합니다:
 
-- The filename of a dataset supported by GDAL/OGR which contains SRS information
-- Any of the usual GDAL/OGR forms (complete WKT, PROJ.4, EPSG:n or a file containing the SRS)
+- GDAL/OGR이 지원하는, 공간 좌표계 정보를 담고 있는 데이터셋의 파일명
+- 일반적인 GDAL/OGR 양식 가운데 하나 (완전한 WKT, PROJ.4, EPSG:n 또는 공간 좌표계를 담고 있는 파일)
 
 
 .. program:: gdalsrsinfo
 
 .. option:: --single-line
 
-    Print WKT on single line
+    WKT를 한 줄로 출력합니다.
 
 .. option:: -V
 
-    Validate SRS
+    공간 좌표계의 무결성을 검증합니다.
 
 .. option:: -e
 
-    Search for EPSG number(s) corresponding to SRS
+    공간 좌표계에 대응하는 EPSG 번호(들)를 검색합니다.
 
 .. option:: -o <out_type>
 
-    Output types:
+    산출물 유형:
 
-    - ``default``: proj4 and wkt (default option)
-    - ``all``: all options available
-    - ``wkt_all``: all wkt options available
-    - ``PROJJSON``: PROJJSON string (GDAL >= 3.1 and PROJ >= 6.2)
-    - ``proj4``: PROJ.4 string
-    - ``wkt1``: OGC WKT format (full)
-    - ``wkt_simple``: OGC WKT 1 (simplified)
-    - ``wkt_noct``: OGC WKT 1 (without OGC CT params)
-    - ``wkt_esri``: ESRI WKT format
-    - ``wkt``: Latest WKT version supported, currently wkt2_2018
-    - ``wkt2``: Latest WKT2 version supported, currently wkt2_2018
+    - ``default``: PROJ.4와 WKT (기본 옵션)
+    - ``all``: 사용할 수 있는 모든 옵션
+    - ``wkt_all``: 사용할 수 있는 모든 WKT 옵션
+    - ``PROJJSON``: PROJJSON 문자열 (GDAL 3.1버전, PROJ 6.2버전 이상)
+    - ``proj4``: PROJ.4 문자열
+    - ``wkt1``: OGC WKT 서식 (전체)
+    - ``wkt_simple``: OGC WKT 1 (단순화)
+    - ``wkt_noct``: OGC WKT 1 (OGC CT 파라미터 없음)
+    - ``wkt_esri``: ESRI WKT 서식
+    - ``wkt``: 최신 WKT 버전 지원, 현재 wkt2_2018
+    - ``wkt2``: 최신 WKT2 버전 지원, 현재 wkt2_2018
     - ``wkt2_2015``: OGC WKT2:2015
     - ``wkt2_2018``: OGC WKT2:2018
-    - ``mapinfo``: Mapinfo style CoordSys format
-    - ``xml``: XML format (GML based)
+    - ``mapinfo``: Mapinfo 스타일의 CoordSys 서식
+    - ``xml``: XML 서식 (GML 기반)
 
 .. option:: <srs_def>
 
-    may be the filename of a dataset supported by GDAL/OGR from which to extract SRS information
-    OR any of the usual GDAL/OGR forms (complete WKT, PROJ.4, EPSG:n or a file containing the SRS)
+    GDAL/OGR이 지원하는, 공간 좌표계 정보를 추출할 데이터셋의 파일명 또는 일반적인 GDAL/OGR 양식 (완전한 WKT, PROJ.4, EPSG:n 또는 공간 좌표계를 담고 있는 파일) 가운데 하나일 수 있습니다.
 
-Example
+예시
 -------
 
 ::

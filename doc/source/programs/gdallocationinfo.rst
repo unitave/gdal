@@ -6,11 +6,11 @@ gdallocationinfo
 
 .. only:: html
 
-    Raster query tool
+    래스터 쿼리 도구
 
 .. Index:: gdallocationinfo
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -20,102 +20,81 @@ Synopsis
                             [-l_srs srs_def] [-geoloc] [-wgs84]
                             [-oo NAME=VALUE]* srcfile [x y]
 
-Description
+설명
 -----------
 
-The :program:`gdallocationinfo` utility provide a mechanism to query information about
-a pixel given its location in one of a variety of coordinate systems.  Several
-reporting options are provided.
+:program:`gdallocationinfo` 유틸리티는 다양한 좌표계 가운데 한 좌표계로 위치를 지정한 픽셀 하나에 대한 정보를 쿼리하는 메커니즘을 제공합니다. 리포트 작업을 위한 몇 가지 옵션이 있습니다.
 
 .. program:: gdallocationinfo
 
 .. option:: -xml
 
-    The output report will be XML formatted for convenient post processing.
+    편리한 포스팅을 위해 산출 리포트를 XML 서식으로 작성합니다.
 
 .. option:: -lifonly
 
-    The only output is filenames production from the LocationInfo request
-    against the database (i.e. for identifying impacted file from VRT).
+    데이터베이스를 대상으로 하는 LocationInfo 요청으로부터 (예를 들면 VRT로부터 영향을 받은 파일을 식별하기 위해) 파일명만 생성합니다.
 
 .. option:: -valonly
 
-    The only output is the pixel values of the selected pixel on each of
-    the selected bands.
+    선택한 각 밴드에서 선택한 픽셀 값만 산출합니다.
 
 .. option:: -b <band>
 
-    Selects a band to query.  Multiple bands can be listed.  By default all
-    bands are queried.
+    쿼리할 밴드를 선택합니다. 밴드를 여러개 목록화할 수 있습니다. 기본적으로 모든 밴드를 쿼리합니다.
 
 .. option:: -overview <overview_level>
 
-    Query the (overview_level)th overview (overview_level=1 is the 1st overview),
-    instead of the base band. Note that the x,y location (if the coordinate system is
-    pixel/line) must still be given with respect to the base band.
+    기반(base) 밴드 대신, <overview_level> 번째 오버뷰를 쿼리합니다. (overview_level을 1로 설정하면 첫 번째 오버뷰라는 의미입니다.) 이 경우에도 (좌표계가 픽셀/라인 단위인 경우) 기반 밴드에 따라 x, y 위치를 입력해야만 한다는 사실을 기억하십시오.
 
 .. option:: -l_srs <srs_def>
 
-    The coordinate system of the input x, y location.
+    입력 x, y 위치의 좌표계입니다.
 
 .. option:: -geoloc
 
-    Indicates input x,y points are in the georeferencing system of the image.
+    입력 x, y 포인트의 좌표계가 이미지의 지리참조 좌표계입니다.
 
 .. option:: -wgs84
 
-    Indicates input x,y points are WGS84 long, lat.
+    입력 x, y 포인트의 좌표계가 WGS84 경도/위도입니다.
 
 .. option:: -oo NAME=VALUE
 
-    Dataset open option (format specific)
+    데이터셋 열기 옵션 (특정 포맷 지원)
 
 .. option:: <srcfile>
 
-    The source GDAL raster datasource name.
+    소스 GDAL 래스터 데이터셋의 이름입니다.
 
 .. option:: <x>
 
-    X location of target pixel.  By default the
-    coordinate system is pixel/line unless -l_srs, -wgs84 or -geoloc supplied. 
+    대상 픽셀의 X 위치입니다. -l_srs, -wgs84 또는 -geoloc을 설정하지 않았다면 기본 좌표계는 픽셀/라인 단위입니다.
 
 .. option:: <y>
 
-    Y location of target pixel.  By default the
-    coordinate system is pixel/line unless -l_srs, -wgs84 or -geoloc supplied. 
+    대상 픽셀의 Y 위치입니다. -l_srs, -wgs84 또는 -geoloc을 설정하지 않았다면 기본 좌표계는 픽셀/라인 단위입니다. 
 
 
-This utility is intended to provide a variety of information about a
-pixel.  Currently it reports:
+이 유틸리티의 목적은 픽셀에 대한 다양한 정보를 제공하는 것입니다. 현재 다음과 같은 정보를 리포트합니다:
 
-- The location of the pixel in pixel/line space.
-- The result of a LocationInfo metadata query against the datasource.
-  This is implement for VRT files which will report the
-  file(s) used to satisfy requests for that pixel, and by the
-  :ref:`raster.mbtiles` driver
-- The raster pixel value of that pixel for all or a subset of the bands.
-- The unscaled pixel value if a Scale and/or Offset apply to the band.
+- 픽셀/라인 공간에서 픽셀의 위치
+- 데이터소스를 대상으로 하는 LocationInfo 메타데이터 쿼리의 결과. 해당 픽셀에 대한 요청을 만족시키기 위한, 그리고 :ref:`raster.mbtiles` 드라이버가 사용하는, 파일(들)을 리포트할 VRT 파일을 위해 구현되었습니다.
+- 밴드 전체 또는 하위 집합에서 해당 픽셀의 래스터 픽셀 값
+- 크기 조정 그리고/또는 오프셋이 밴드에 적용된 경우 크기 조정하기 전의 픽셀 값
 
-The pixel selected is requested by x/y coordinate on the command line, or read
-from stdin. More than one coordinate pair can be supplied when reading
-coordinates from stdin. By default pixel/line coordinates are expected.
-However with use of the :option:`-geoloc`, :option:`-wgs84`, or :option:`-l_srs` switches it is possible
-to specify the location in other coordinate systems.
+명령줄에서 x/y 좌표를 입력해서, 또는 stdin으로부터 좌표를 읽어와서 선택한 픽셀을 요청합니다. stdin으로부터 좌표를 읽어오는 경우 좌표쌍을 하나 이상 지정할 수 있습니다. 기본적으로 픽셀/라인 좌표를 가정합니다. 하지만 :option:`-geoloc`, :option:`-wgs84`, 또는 :option:`-l_srs` 스위치를 사용하면 다른 좌표계로 위치를 지정할 수 있습니다.
 
-The default report is in a human readable text format.  It is possible to
-instead request xml output with the -xml switch.
+기본 리포트는 사람이 읽을 수 있는 텍스트 서식입니다. -xml 스위치를 쓰면 XML 산출물을 대신 요청할 수 있습니다.
 
-For scripting purposes, the -valonly and -lifonly switches are provided to
-restrict output to the actual pixel values, or the LocationInfo files
-identified for the pixel.
+스크립트 작업 목적을 위해, 산출물을 실제 픽셀 값 또는 픽셀을 식별한 LocationInfo 파일로 제한하기 위한 -valonly 및 -lifonly 스위치를 사용할 수 있습니다.
 
-It is anticipated that additional reporting capabilities will be added to
-gdallocationinfo in the future.
+향후 gdallocationinfo에 추가적인 리포트 작업 기능들이 추가될 것으로 기대하고 있습니다.
 
-Examples
+예시
 --------
 
-Simple example reporting on pixel (256,256) on the file utm.tif.
+utm.tif 파일에 있는 (256,256) 픽셀에 대해 리포트 하는 간단한 예시입니다.
 
 ::
 
@@ -125,7 +104,7 @@ Simple example reporting on pixel (256,256) on the file utm.tif.
     Band 1:
         Value: 115
 
-Query a VRT file providing the location in WGS84, and getting the result in xml.
+위치를 WGS84로 지정하는 VRT 파일을 쿼리하고, 그 결과를 XML 서식으로 받습니다.
 
 ::
 
@@ -139,7 +118,7 @@ Query a VRT file providing the location in WGS84, and getting the result in xml.
         </BandReport>
     </Report>
 
-Reading location from stdin.
+stdin으로부터 위치를 읽어옵니다.
 
 ::
 

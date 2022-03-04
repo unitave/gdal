@@ -6,11 +6,11 @@ gdal_polygonize.py
 
 .. only:: html
 
-    Produces a polygon feature layer from a raster.
+    래스터로부터 폴리곤 객체 레이어를 생성합니다.
 
 .. Index:: gdal_polygonize
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -18,66 +18,52 @@ Synopsis
     gdal_polygonize.py [-8] [-nomask] [-mask filename] <raster_file> [-b band]
                        [-q] [-f ogr_format] <out_file> [layer] [fieldname]
 
-Description
+설명
 -----------
-This utility creates vector polygons for all connected regions of pixels in
-the raster sharing a common pixel value.  Each polygon is created with an
-attribute indicating the pixel value of that polygon.  A raster mask
-may also be provided to determine which pixels are eligible for processing.
+이 유틸리티는 공통 픽셀값을 공유하는 래스터에서 픽셀들이 연결된 모든 영역에 대해 벡터 폴리곤을 생성합니다. 각 폴리곤의 픽셀 값을 나타내는 속성과 함께 폴리곤을 생성합니다. 어떤 픽셀이 처리하기에 적당한지를 결정하기 위한 래스터 마스크를 지정할 수도 있습니다.
 
-The utility will create the output vector datasource if it does not already
-exist, defaulting to GML format.
+산출 벡터 데이터소스가 이미 존재하지 않는 경우 이 유틸리티가 산출 벡터 데이터소스를 생성할 것입니다. 기본값은 GML 포맷입니다.
 
-The utility is based on the ::cpp:func:`GDALPolygonize` function which has additional
-details on the algorithm.
+이 유틸리티는 알고리즘에 대한 추가적인 상세 정보를 가지고 있는 ::cpp:func:`GDALPolygonize` 함수를 바탕으로 합니다.
 
 .. program:: gdal_polygonize
 
 .. option:: -8
 
-    Use 8 connectedness. Default is 4 connectedness.
+    8-연결성(connectedness)을 사용합니다. 기본값은 4-연결성입니다.
 
 .. option:: -nomask
 
-    Do not use the default validity mask for the input band (such as nodata, or
-    alpha masks).
+    (NODATA 또는 알파 마스크 같은) 입력 밴드에 기본 무결성(validity) 마스크를 사용하지 않습니다.
 
 .. option:: -mask <filename>
 
-    Use the first band of the specified file as a validity mask (zero is invalid,
-    non-zero is valid). If not specified, the default validity mask for the input
-    band (such as nodata, or alpha masks) will be used (unless -nomask is specified)
+    지정한 파일의 첫 번째 밴드를 무결성 마스크로 사용합니다. (0은 무결하지 않고, 0이 아닌 값은 무결합니다.) 지정하지 않는 경우, (-nomask도 지정하지 않았다면) (NODATA 또는 알파 마스크 같은) 입력 밴드에 기본 무결성(validity) 마스크를 사용할 것입니다.
 
 .. option:: <raster_file>
 
-    The source raster file from which polygons are derived.
+    폴리곤을 파생시킬 소스 래스터 파일입니다.
 
 .. option:: -b <band>
 
-    The band on <raster_file> to build
-    the polygons from. Starting with GDAL 2.2, the value can also be set to "mask",
-    to indicate that the mask band of the first band must be used (or
-    "mask,band_number" for the mask of a specified band)
+    이 옵션에서 지정한 <raster_file>의 밴드로부터 폴리곤을 작성합니다. GDAL 2.2버전부터, 이 옵션의 값을 첫 번째 밴드의 마스크 밴드를 반드시 사용해야만 한다는 사실을 나타내는 "mask"로 설정할 수도 있습니다. (또는 지정한 밴드의 마스크를 사용하려면 "mask,band_number"로 설정하면 됩니다.)
 
 .. option:: -f <ogr_format>
 
-    Select the output format. Starting with
-    GDAL 2.3, if not specified, the format is guessed from the extension (previously
-    was GML). Use the short format name
+    산출물 포맷을 선택합니다. GDAL 2.3버전부터 이 옵션을 지정하지 않는 경우 확장자로부터 포맷을 추정합니다. (이전 버전까지는 GML을 사용했습니다.) 단축 포맷명을 사용하십시오.
 
 .. option:: <out_file>
 
-    The destination vector file to which the polygons will be written.
+    폴리곤을 작성할 대상 벡터 파일입니다.
 
 .. option:: <layer>
 
-    The name of the layer created to hold the polygon features.
+    폴리곤 객체를 담기 위해 생성된 레이어의 이름입니다.
 
 .. option:: <fieldname>
 
-    The name of the field to create (defaults to "DN").
+    생성할 필드 이름입니다. (기본값은 "DN")
 
 .. option:: -q
 
-    The script runs in quiet mode.  The progress monitor is suppressed and routine
-    messages are not displayed.
+    스크립트를 침묵 모드로 실행합니다. 진행 상황 모니터 및 통상적인 메시지를 표시하지 않습니다.

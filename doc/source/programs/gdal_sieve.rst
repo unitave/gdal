@@ -6,11 +6,11 @@ gdal_sieve.py
 
 .. only:: html
 
-    Removes small raster polygons.
+    작은 래스터 폴리곤을 제거합니다.
 
 .. Index:: gdal_sieve
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -18,16 +18,11 @@ Synopsis
     gdal_sieve.py [-q] [-st threshold] [-4] [-8] [-o name=value]
             srcfile [-nomask] [-mask filename] [-of format] [dstfile]
 
-Description
+설명
 -----------
 
-:program:`gdal_sieve.py` script removes raster polygons smaller than
-a provided threshold size (in pixels) and replaces them with the
-pixel value of the largest neighbour polygon. The result can be written
-back to the existing raster band, or copied into a new file.
+:program:`gdal_sieve.py` 스크립트는 지정한 (픽셀 단위) 한계 크기보다 작은 래스터 폴리곤을 제거하고 최대 이웃 폴리곤의 픽셀 값으로 대체합니다. 기존 래스터 밴드에 결과물을 작성할 수도 있고, 아니면 새 파일로 복사할 수도 있습니다.
 
-The input dataset is read as integer data which means that floating point
-values are rounded to integers. Re-scaling source data may be necessary in
-some cases (e.g. 32-bit floating point data with min=0 and max=1).
+입력 데이터셋을 정수 데이터 유형으로 읽는데, 부동소수점 값을 정수로 반올림한다는 의미입니다. 어떤 경우 소스 데이터의 크기를 다시 조정(rescale)해야 할 수도 있습니다. (예: 최소값이 0이고 최대값이 1인 32비트 부동소수점 데이터)
 
-Additional details on the algorithm are available in the :cpp:func:`GDALSieveFilter` docs.
+:cpp:func:`GDALSieveFilter` 문서에서 이 알고리즘에 대한 추가적인 내용을 찾을 수 있습니다.

@@ -6,11 +6,11 @@ gdalmove.py
 
 .. only:: html
 
-    Transform georeferencing of raster file in place.
+    래스터 파일의 지리참조를 제자리 변환합니다.
 
 .. Index:: gdalmove
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -18,43 +18,27 @@ Synopsis
     gdalmove.py [-s_srs <srs_defn>] -t_srs <srs_defn>
                 [-et <max_pixel_err>] <target_file>
 
-Description
+설명
 -----------
 
-The :program:`gdalmove.py` script transforms the bounds of a raster file from
-one coordinate system to another, and then updates the coordinate system and
-geotransform of the file. This is done without altering pixel values at all. It
-is loosely similar to using gdalwarp to transform an image but avoiding the
-resampling step in order to avoid image damage. It is generally only suitable
-for transformations that are effectively linear in the area of the file.
+:program:`gdalmove.py` 스크립트는 래스터 파일의 경계를 어떤 좌표계로부터 다른 좌표계로 변환하고, 파일의 좌표계 및 지리변형(geotransform)을 업데이트합니다. 이 작업 도중 픽셀 값을 전혀 변경하지 않습니다. gdalwarp를 이용해서 이미지를 변형하는 작업과 조금 비슷하지만 이미지 훼손을 막기 위해 리샘플링 단계를 거치지 않는다는 점이 다릅니다.다. 파일 영역에서 사실상 선형(linear)인 변형을 수행하는 데 적합한 알고리즘입니다.
 
-If no error threshold value (:option:`-et`) is provided then the file is not
-actually updated, but the errors that would be incurred are reported. If
-:option:`-et` is provided then the file is only modify if the apparent error
-being introduced is less than the indicate threshold (in pixels).
+오류 제한값(:option:`-et`)을 지정하지 않는 경우 파일을 실제로 업데이트하지는 않지만, 발생한 오류를 리포트하기는 할 것입니다. :option:`-et` 를 지정한다면 분명한 오류가 지정한 (픽셀 단위) 제한값 미만으로 발생하는 경우에만 파일을 수정합니다.
 
-Currently the transformed geotransform is computed based on the transformation
-of the top left, top right, and bottom left corners. A reduced overall error
-could be produced using a least squares fit of at least all four corner points.
+현재 좌상단, 우상단, 그리고 좌하단 모서리의 변형을 바탕으로 변형된 지리변형을 계산합니다. 적어도 네 군데의 모든 모서리 포인트에 들어맞는 최소 정사각형을 사용하면 전반적인 오류를 줄일 수 있습니다.
 
 .. option:: -s_srs <srs_defn>
 
-    Override the coordinate system of the file with the indicated coordinate
-    system definition. Optional. If not provided the source coordinate system
-    is read from the source file.
+    파일의 좌표계를 지정한 좌표계 정의로 무시합니다. 선택적 옵션입니다. 지정하지 않는 경우 소스 파일에서 소스 좌표계를 읽어옵니다.
 
 .. option:: -t_srs <srs_defn>
 
-    Defines the target coordinate system. This coordinate system will be
-    written to the file after an update.
+    대상 좌표계를 정의합니다. 업데이트 후 파일에 이 좌표계를 작성할 것입니다.
 
 .. option:: -et <max_pixel_err>
 
-    The error threshold (in pixels) beyond which the file will not be updated.
-    If not provided no update will be applied to the file, but errors will be
-    reported.
+    이 (픽셀 단위) 오류 한계값을 초과하는 경우 파일을 업데이트하지 않을 것입니다. 지정하지 않으면 파일을 전혀 업데이트하지 않지만, 오류는 리포트할 것입니다.
 
 <target_file>
 
-    The file to be operated on. To update this must be a file format that
-    supports in place updates of the geotransform and SRS.
+    작업할 파일입니다. 이 파일을 업데이트하려면, 파일이 지리변형 및 공간 좌표계의 제자리(in place) 업데이트를 지원하는 파일 포맷이어야만 합니다.
