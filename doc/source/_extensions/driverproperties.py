@@ -5,10 +5,10 @@ import sphinx.locale
 
 sphinx.locale.admonitionlabels['shortname'] = ''
 sphinx.locale.admonitionlabels['built_in_by_default'] = ''  # 'Built-in by default'
-sphinx.locale.admonitionlabels['supports_create'] = ''  # 'Supports Create()'
-sphinx.locale.admonitionlabels['supports_createcopy'] = ''  # 'Supports CreateCopy()'
-sphinx.locale.admonitionlabels['supports_georeferencing'] = ''  # 'Supports georeferencing'
-sphinx.locale.admonitionlabels['supports_virtualio'] = ''  # 'Supports VirtualIO'
+sphinx.locale.admonitionlabels['supports_create'] = ''  # 'Create() 지원'
+sphinx.locale.admonitionlabels['supports_createcopy'] = ''  # 'CreateCopy() 지원'
+sphinx.locale.admonitionlabels['supports_georeferencing'] = ''  # '지리참조 작업 지원'
+sphinx.locale.admonitionlabels['supports_virtualio'] = ''  # 'VirtualIO 지원'
 sphinx.locale.admonitionlabels['supports_multidimensional'] = ''  # 'Supports multidimensional'
 sphinx.locale.admonitionlabels['deprecated_driver'] = ''  # 'Driver is deprecated and marked for removal'
 
@@ -177,7 +177,7 @@ class ShortName(Directive):
     def run(self):
 
         node = shortname('\n'.join(self.content))
-        node += nodes.title(_('Driver short name'), _('Driver short name'))
+        node += nodes.title(_('드라이버 단축 이름'), _('드라이버 단축 이름'))
 
         return finish_directive(self, 'shortname', node)
 
@@ -190,9 +190,9 @@ class BuiltInByDefault(Directive):
     def run(self):
 
         if not self.content:
-            self.content = docutils.statemachine.StringList(['This driver is built-in by default'])
+            self.content = docutils.statemachine.StringList(['이 드라이버는 기본적으로 내장되어 있습니다.'])
         node = built_in_by_default('\n'.join(self.content))
-        node += nodes.title(_('Driver built-in by default'), _('Driver built-in by default'))
+        node += nodes.title(_('기본 내장 드라이버'), _('기본 내장 드라이버'))
 
         return finish_directive(self, 'built_in_by_default', node)
 
@@ -204,9 +204,9 @@ class BuildDependencies(Directive):
 
     def run(self):
 
-        assert self.content, "Content should be defined for build_dependencies directive"
+        assert self.content, "build_dependencies 지시문에 내용을 정의해야 합니다."
         node = build_dependencies('\n'.join(self.content))
-        node += nodes.title(_('Build dependencies'), _('Build dependencies'))
+        node += nodes.title(_('빌드 의존성'), _('빌드 의존성'))
 
         return finish_directive(self, 'build_dependencies', node)
 
@@ -219,9 +219,9 @@ class CreateDirective(Directive):
     def run(self):
 
         if not self.content:
-            self.content = docutils.statemachine.StringList(['This driver supports the :cpp:func:`GDALDriver::Create` operation'])
+            self.content = docutils.statemachine.StringList(['이 드라이버는 :cpp:func:`GDALDriver::Create` 작업을 지원합니다.'])
         node = supports_create('\n'.join(self.content))
-        node += nodes.title(_('Supports Create()'), _('Supports Create()'))
+        node += nodes.title(_('Create() 지원'), _('Create() 지원'))
 
         return finish_directive(self, 'supports_create', node)
 
@@ -233,9 +233,9 @@ class CreateCopyDirective(Directive):
     def run(self):
 
         if not self.content:
-            self.content = docutils.statemachine.StringList(['This driver supports the :cpp:func:`GDALDriver::CreateCopy` operation'])
+            self.content = docutils.statemachine.StringList(['이 드라이버는 :cpp:func:`GDALDriver::CreateCopy` 작업을 지원합니다.'])
         node = supports_createcopy('\n'.join(self.content))
-        node += nodes.title(_('Supports CreateCopy()'), _('Supports CreateCopy()'))
+        node += nodes.title(_('CreateCopy() 지원'), _('CreateCopy() 지원'))
 
         return finish_directive(self, 'supports_createcopy', node)
 
@@ -248,9 +248,9 @@ class GeoreferencingDirective(Directive):
     def run(self):
 
         if not self.content:
-            self.content = docutils.statemachine.StringList(['This driver supports georeferencing'])
+            self.content = docutils.statemachine.StringList(['이 드라이버는 지리참조 작업을 지원합니다.'])
         node = supports_georeferencing('\n'.join(self.content))
-        node += nodes.title(_('Supports Georeferencing'), _('Supports Georeferencing'))
+        node += nodes.title(_('지리참조 작업 지원'), _('지리참조 작업 지원'))
 
         return finish_directive(self, 'supports_georeferencing', node)
 
@@ -263,9 +263,9 @@ class VirtualIODirective(Directive):
     def run(self):
 
         if not self.content:
-            self.content = docutils.statemachine.StringList(['This driver supports :ref:`virtual I/O operations (/vsimem/, etc.) <virtual_file_systems>`'])
+            self.content = docutils.statemachine.StringList(['이 드라이버는 :ref:`virtual I/O operations (/vsimem/, etc.) <virtual_file_systems>` 를 지원합니다.'])
         node = supports_virtualio('\n'.join(self.content))
-        node += nodes.title(_('Supports VirtualIO'), _('Supports VirtualIO'))
+        node += nodes.title(_('VirtualIO 지원'), _('VirtualIO 지원'))
 
         return finish_directive(self, 'supports_virtualio', node)
 
@@ -278,9 +278,9 @@ class MultiDimensionalDirective(Directive):
     def run(self):
 
         if not self.content:
-            self.content = docutils.statemachine.StringList(['This driver supports the :ref:`multidim_raster_data_model`'])
+            self.content = docutils.statemachine.StringList(['이 드라이버는 :ref:`multidim_raster_data_model` 을 지원합니다.'])
         node = supports_virtualio('\n'.join(self.content))
-        node += nodes.title(_('Supports multidimensional API'), _('Supports multidimensional API'))
+        node += nodes.title(_('다중차원 API 지원'), _('다중차원 API 지원'))
 
         return finish_directive(self, 'supports_multidimensional', node)
 
@@ -297,26 +297,26 @@ class DeprecatedDriverDirective(Directive):
                                         c.startswith('version_targeted_for_removal:')]
         if version_targeted_for_removal:
             explanation.append(
-                "This driver is considered for removal in GDAL {}.".format(version_targeted_for_removal[0]))
+                "GDAL {}에서 이 드라이버를 제거할지 고려 중입니다.".format(version_targeted_for_removal[0]))
         else:
-            explanation.append("This driver is considered for removal in a future GDAL release.")
+            explanation.append("이후 GDAL 배포판에서 이 드라이버를 제거할지 고려 중입니다.")
 
         message = [c[len('message:'):].strip() for c in self.content if
                                         c.startswith('message:')]
         if message:
             explanation.append(message[0])
         else:
-            explanation.append("You are invited to convert any dataset in that format to another more common one.")
+            explanation.append("해당 포맷의 모든 데이터셋을 더 자주 사용되는 다른 포맷으로 변환할 것을 추천합니다.")
 
-        explanation.append("If you need this driver in future GDAL versions, create a ticket at https://github.com/OSGeo/gdal "
-                           "(look first for an existing one first) to explain how critical it is for you "
-                           "(but the GDAL project may still remove it).")
+        explanation.append("이후 GDAL 버전에서 이 드라이버가 필요한 경우, 이 드라이버가 얼마나 중요한지 설명하려면"
+                           "(먼저 기존 티켓을 찾아본 다음) https://github.com/OSGeo/gdal 에서 티켓을 생성하십시오."
+                           "(그래도 GDAL 프로젝트가 해당 드라이버를 제거할 수도 있습니다.)")
 
         env_variable = [c[len('env_variable:'):].strip() for c in self.content if
                         c.startswith('env_variable:')]
         if env_variable:
-            explanation.append("To enable use of the deprecated driver the {} configuration option /"
-                               " environment variable must be set to YES.".format(env_variable[0]))
+            explanation.append("퇴출된 드라이버 사용을 활성화하려면 {} 환경설정 옵션 /"
+                               " 환경 변수를 YES로 설정해야만 합니다.".format(env_variable[0]))
 
         self.content = docutils.statemachine.StringList(explanation)
 
