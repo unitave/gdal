@@ -4,13 +4,13 @@ import docutils.statemachine
 import sphinx.locale
 
 sphinx.locale.admonitionlabels['shortname'] = ''
-sphinx.locale.admonitionlabels['built_in_by_default'] = ''  # 'Built-in by default'
+sphinx.locale.admonitionlabels['built_in_by_default'] = ''  # '기본 내장'
 sphinx.locale.admonitionlabels['supports_create'] = ''  # 'Create() 지원'
 sphinx.locale.admonitionlabels['supports_createcopy'] = ''  # 'CreateCopy() 지원'
 sphinx.locale.admonitionlabels['supports_georeferencing'] = ''  # '지리참조 작업 지원'
 sphinx.locale.admonitionlabels['supports_virtualio'] = ''  # 'VirtualIO 지원'
-sphinx.locale.admonitionlabels['supports_multidimensional'] = ''  # 'Supports multidimensional'
-sphinx.locale.admonitionlabels['deprecated_driver'] = ''  # 'Driver is deprecated and marked for removal'
+sphinx.locale.admonitionlabels['supports_multidimensional'] = ''  # '다중차원 지원'
+sphinx.locale.admonitionlabels['deprecated_driver'] = ''  # '퇴출 대상 드라이버로 제거하도록 표시되었습니다'
 
 def setup(app):
     app.add_node(shortname,
