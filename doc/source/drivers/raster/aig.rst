@@ -1,33 +1,24 @@
 .. _raster.aig:
 
 ================================================================================
-AIG -- Arc/Info Binary Grid
+AIG -- Arc/Info 바이너리 그리드
 ================================================================================
 
 .. shortname:: AIG
 
 .. built_in_by_default::
 
-Supported by GDAL for read access. This format is the internal binary
-format for Arc/Info Grid, and takes the form of a coverage level
-directory in an Arc/Info database. To open the coverage select the
-coverage directory, or an .adf file (such as hdr.adf) from within it. If
-the directory does not contain file(s) with names like w001001.adf then
-it is not a grid coverage.
+GDAL이 읽기 접근을 위해 지원합니다. 이 포맷은 Arc/Info 그리드를 위한 내부 바이너리 포맷으로, Arc/Info 데이터베이스의 커버리지 수준 디렉터리의 형태를 취하고 있습니다. 커버리지를 열려면 커버리지 디렉터리를 선택하거나, 디렉터리 안에 있는 (hdr.adf 같은) .adf 파일을 선택하십시오. 디렉터리가 w001001.adf 같은 이름을 가진 파일(들)을 담고 있지 않다면, 그 디렉터리는 그리드 커버리지 디렉터리가 아닙니다.
 
-Support includes reading of an affine georeferencing transform, some
-projections, and a color table (.clr) if available.
+아핀(affine) 지리참조 변환, 일부 투영법, 그리고 색상표(.clr) 읽기를 포함하는 읽기 접근을 지원합니다.
 
-This driver is implemented based on a reverse engineering of the format.
-See the :ref:`raster.arcinfo_grid_format` for more details.
+이 드라이버는 해당 포맷을 리버스 엔지니어링한 내용을 바탕으로 구현되었습니다. 더 자세한 내용은 :ref:`raster.arcinfo_grid_format` 을 읽어보십시오.
 
-The projections support (read if a prj.adf file is available) is quite
-limited. Additional sample prj.adf files may be sent to the maintainer,
-warmerdam@pobox.com.
+(prj.adf 파일을 사용할 수 있는 경우 읽어오는) 투영법 지원은 극히 제한되어 있습니다. 유지관리자 warmerdam@pobox.com 에게 추가적인 예시 prj.ad 파일을 보내볼 수도 있습니다.
 
-NOTE: Implemented as ``gdal/frmts/aigrid/aigdataset.cpp``.
+주의: ``gdal/frmts/aigrid/aigdataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::

@@ -1,57 +1,30 @@
 .. _raster.aaigrid:
 
 ================================================================================
-AAIGrid -- Arc/Info ASCII Grid
+AAIGrid -- Arc/Info 아스키 그리드
 ================================================================================
 
 .. shortname:: AAIGrid
 
 .. built_in_by_default::
 
-Supported for read and write access, including reading of an affine
-georeferencing transform and some projections. This format is the ASCII
-interchange format for Arc/Info Grid, and takes the form of an ASCII
-file, plus sometimes an associated .prj file. It is normally produced
-with the Arc/Info ASCIIGRID command.
+아핀(affine) 지리참조 변환과 일부 투영법 읽기를 포함하는 읽기와 쓰기 접근을 지원합니다. 이 포맷은 Arc/Info 그리드를 위한 아스키(ASCII) 교환 포맷으로, 아스키 파일 형태를 취하고 있습니다. 관련 .prj 파일을 함께 입력받는 경우도 있습니다. 일반적으로 Arc/Info ASCIIGRID 명령어를 통해 생성됩니다.
 
-The projections support (read if a \*.prj file is available) is quite
-limited. Additional sample .prj files may be sent to the maintainer,
-warmerdam@pobox.com.
+(\*.prj 파일을 사용할 수 있는 경우 읽어오는) 투영법 지원은 극히 제한되어 있습니다. 유지관리자 warmerdam@pobox.com 에게 추가적인 예시 .prj 파일을 보내볼 수도 있습니다.
 
-The NODATA value for the grid read is also preserved when available in
-the same format as the band data.
+그리드를 읽어올 때, 동일한 포맷이 NODATA 값을 밴드 데이터로 사용할 수 있는 경우 NODATA 값을 보전합니다.
 
-By default, the datatype returned for AAIGRID datasets by GDAL is
-autodetected, and set to Float32 for grid with floating point values or
-Int32 otherwise. This is done by analysing the format of the NODATA
-value and, if needed, the data of the grid. You can
-explicitly specify the datatype by setting the AAIGRID_DATATYPE
-configuration option (Int32, Float32 and Float64 values are supported
-currently)
+GDAL이 AAIGRID 데이터셋에 반환하는 데이터 유형은 기본적으로 자동 탐지되고, 부동소수점형 값을 가진 그리드의 경우 Float32로 그 외의 경우 Int32로 설정됩니다. 이 작업은 NODATA 값을, 그리고 필요한 경우 그리드 데이터의 포맷을 분석해서 이루어집니다. AAIGRID_DATATYPE 환경설정 옵션을 설정해서 데이터 유형을 직접 명확하게 지정할 수도 있습니다. (현재 Int32, Float32 및 Float64 값을 지원합니다.)
 
-If pixels being written are not square (the width and height of a pixel
-in georeferenced units differ) then DX and DY parameters will be output
-instead of CELLSIZE. Such files can be used in Golden Surfer, but not
-most other ascii grid reading programs. For force the X pixel size to be
-used as CELLSIZE use the FORCE_CELLSIZE=YES creation option or resample
-the input to have square pixels.
+작성되는 픽셀이 정사각형이 아닌 경우 (픽셀의 지리참조 단위 너비와 높이가 다른 경우) 산출물에 CELLSIZE 대신 DX와 DY 파라미터가 적용될 것입니다. 골든소프트웨어의 서퍼(Surfer) 프로그램에서 이런 파일을 사용할 수 있지만, 아스키 그리드를 읽는 대부분의 다른 프로그램에서는 사용할 수 없습니다. 사용할 X 픽셀 크기를 CELLSIZE로 강제하려면 FORCE_CELLSIZE=YES 생성 옵션을 사용하거나, 또는 입력물을 정사각형 픽셀로 리샘플링하십시오.
 
-When writing floating-point values, the driver uses the "%.20g" format
-pattern as a default. You can consult a `reference
-manual <http://en.wikipedia.org/wiki/Printf>`__ for printf to have an
-idea of the exact behavior of this ;-). You can alternatively specify
-the number of decimal places with the DECIMAL_PRECISION creation option.
-For example, DECIMAL_PRECISION=3 will output numbers with 3 decimal
-places(using %lf format). Another option is
-SIGNIFICANT_DIGITS=3, which will output 3 significant digits (using %g
-format).
+부동소수점형 값을 작성할 때, 드라이버는 기본값으로 "%.20g" 서식 패턴을 사용합니다. printf가 이 패턴의 정확한 습성을 알게 하려면 `참조 지침 <http://en.wikipedia.org/wiki/Printf>`_ 을 읽어보십시오. 또는 DECIMAL_PRECISION 생성 옵션으로 소수점 이하 자릿수를 대신 지정할 수도 있습니다. 예를 들어, DECIMAL_PRECISION을 3으로 지정하면 (%lf 서식을 사용하는) 소수점 이하 자릿수가 3개인 숫자를 산출할 것입니다. 또다른 옵션으로 SIGNIFICANT_DIGITS를 3으로 지정할 수도 있는데, 이렇게 하면 (%g 서식을 사용하는) 유효 숫자 자릿수가 3개인 숫자를 산출할 것입니다.
 
-The :ref:`raster.aig` driver is also available for Arc/Info Binary Grid
-format.
+:ref:`raster.aig` 드라이버는 Arc/Info 바이너리 그리드 포맷 용으로도 사용할 수 있습니다.
 
-NOTE: Implemented as ``gdal/frmts/aaigrid/aaigriddataset.cpp``.
+주의: ``gdal/frmts/aaigrid/aaigriddataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
