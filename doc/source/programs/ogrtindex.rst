@@ -6,11 +6,11 @@ ogrtindex
 
 .. only:: html
 
-    Creates a tileindex.
+    타일 색인을 생성합니다.
 
 .. Index:: ogrtindex
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -22,86 +22,67 @@ Synopsis
               [-accept_different_schemas]
               <output_dataset> <src_dataset>...
 
-Description
+설명
 -----------
 
-:program:`ogrtindex` program can be used to create a tileindex - a file
-containing a list of the identities of a bunch of other files along with
-their spatial extents. This is primarily intended to be used with
-`MapServer <http://mapserver.org/>`__ for tiled access to layers using
-the OGR connection type.
+:program:`ogrtindex` 프로그램을 사용해서 타일 색인(tileindex)을 생성할 수 있습니다. 타일 색인이란 공간 범위를 가진 다른 파일들 여러 개의 식별 정보 목록을 담고 있는 파일입니다. 이 프로그램은 OGR 연결 유형을 사용하는 레이어에 타일화된 접근을 하기 위해 `MapServer <http://mapserver.org/>`_ 에 사용하려는 목적으로 개발되었습니다.
 
 .. program:: ogrtindex
 
 .. option:: -lnum <n>
 
-    Add layer number ``n`` from each source file in the tile index.
+    타일 인덱스에 있는 각 소스 파일로부터 ``n`` 번 레이어를 추가합니다.
 
 .. option:: -lname <name>
 
-    Add the layer named ``name`` from each source file in the tile index.
+    타일 인덱스에 있는 각 소스 파일로부터 ``name`` 이라는 이름의 레이어를 추가합니다.
 
 .. option:: -f <output_format>
 
-    Select an output format name. The default is to create a shapefile.
+    산출물 포맷 이름을 선택합니다. 기본값은 shapefile을 생성하는 것입니다.
 
 .. option:: -tileindex <field_name>
 
-    The name to use for the dataset name. Defaults to LOCATION.
+    데이터셋 이름으로 사용할 이름입니다. 기본값은 LOCATION입니다.
 
 .. option:: -write_absolute_path
 
-    Filenames are written with absolute paths
+    파일명을 절대 경로로 작성합니다.
 
 .. option:: -skip_different_projection
 
-    Only layers with same projection ref as layers already inserted in
-    the tileindex will be inserted.
+    이미 타일 색인에 삽입된 레이어와 동일한 투영 좌표계를 가진 레이어만 삽입할 것입니다.
 
 .. option:: -t_srs <target_srs>
 
-    Extent of input files will be transformed to the desired target
-    coordinate reference system. Using this option generates files that
-    are not compatible with MapServer < 7.2. Default creates simple
-    rectangular polygons in the same coordinate reference system as the
-    input vector layers.
+    입력 파일들의 범위를 원하는 대상 좌표계로 변형할 것입니다. 이 옵션을 사용해서 생성된 파일들은 MapServer 7.2 미만 버전과 호환되지 않습니다. 기본값은 입력 벡터 레이어들과 동일한 좌표계를 사용하는 단순 직사각형 폴리곤을 생성하는 것입니다.
 
     .. versionadded:: 2.2.0
 
 .. option:: -src_srs_name <field_name>
 
-    The name of the field to store the SRS of each tile. This field name
-    can be used as the value of the TILESRS keyword in MapServer >= 7.2.
+    각 타일의 공간 좌표계를 저장할 필드의 이름입니다. MapServer 7.2버전부터, 이 필드 이름을 TILESRS 키워드의 값으로 사용할 수 있습니다.
 
     .. versionadded:: 2.2.0
 
 .. option:: -src_srs_format <format>
 
-    The format in which the SRS of each tile must be written.
-    Available formats are: ``AUTO``, ``WKT``, ``EPSG``, ``PROJ``.
+    각 타일의 공간 좌표계를 지정한 서식으로 작성해야만 합니다. ``AUTO``, ``WKT``, ``EPSG``, ``PROJ`` 서식을 지정할 수 있습니다.
 
     .. versionadded:: 2.2.0
 
 .. option:: -accept_different_schemas
 
-    By default ogrtindex checks that all layers inserted into the index
-    have the same attribute schemas. If you specify this option, this
-    test will be disabled. Be aware that resulting index may be
-    incompatible with MapServer!
+    ogrtindex는 기본적으로 색인에 삽입되는 모든 레이어가 동일한 속성 스키마를 가지고 있는지 검증합니다. 이 옵션을 지정하면, 검증하지 않을 것입니다. 이 옵션을 사용해서 생성된 색인은 MapServer와 호환되지 않을 수도 있으니 조심하십시오!
 
-If no :option:`-lnum` or :option:`-lname` arguments are given it is assumed
-that all layers in source datasets should be added to the tile index as
-independent records.
+:option:`-lnum` 또는 :option:`-lname` 인자를 지정하지 않는 경우, 타일 색인에 소스 데이터셋에 있는 모든 레이어를 독립적인 레코드로 추가해야 한다고 가정합니다.
 
-If the tile index already exists it will be appended to, otherwise it
-will be created.
+기존 타일 색인이 존재하는 경우 해당 파일에 추가(append)할 것이고, 존재하지 않는다면 새 타일 색인 파일을 생성할 것입니다.
 
-Example
+예시
 -------
 
-This example would create a shapefile (:file:`tindex.shp`) containing
-a tile index of the ``BL2000_LINK`` layers in all the NTF files
-in the :file:`wrk` directory:
+이 예시는 :file:`wrk` 디렉터리에 있는 모든 NTF 파일의 ``BL2000_LINK`` 레이어들의 타일 색인을 담고 있는 shapefile(:file:`tindex.shp`)을 생성할 것입니다:
 
 .. code-block::
 

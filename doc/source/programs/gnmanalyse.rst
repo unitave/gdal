@@ -6,11 +6,11 @@ gnmanalyse
 
 .. only:: html
 
-    Analyses networks
+    네트워크를 분석합니다.
 
 .. Index:: gnmanalyse
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -23,49 +23,49 @@ Synopsis
             [[-dsco NAME=VALUE] ...][-lco NAME=VALUE]
             <gnm_name>
 
-Description
+설명
 -----------
 
-The :program:`gnmanalyse` program provides analysing capabilities of geographical networks in GDAL. The results of calculations are return in an OGRLayer format or as a console text output if such layer is undefined. All calculations are made considering the blocking state of features.
+:program:`gnmanalyse` 프로그램은 GDAL의 지리 네트워크를 분석하는 기능을 가지고 있습니다. 계산 결과를 OGRLayer 포맷으로, 또는 해당 레이어가 정의되지 않은 경우 콘솔 텍스트 출력으로 반환합니다. 모든 계산은 객체의 차단 상태를 고려해서 이루어집니다.
 
 .. program:: gnmanalyse
 
 .. option:: dijkstra <start_gfid> <end_gfid>
 
-    Calculates the best path between two points using Dijkstra algorithm from start_gfid point to end_gfid point.
+    데이크스트라(Dijkstra) 알고리즘을 이용해서 start_gfid 포인트에서 end_gfid 포인트까지 두 포인트 사이의 최적 경로를 계산합니다.
 
 .. option:: kpaths <start_gfid> <end_gfid>
 
-    Calculates K shortest paths between two points using Yen's algorithm (which internally uses Dijkstra algorithm for single path calculating) from start_gfid point to end_gfid point.
+    (내부적으로 단일 경로 계산에 데이크스트라 알고리즘을 사용하는) 옌(Yen) 알고리즘을 사용해서 start_gfid 포인트에서 end_gfid 포인트까지 두 포인트 사이의 K번째 최단 경로를 계산합니다.
 
 .. option:: resource
 
-    Calculates the "resource distribution". The connected components search is performed using breadth-first search and starting from that features which are marked by rules as 'EMITTERS'.
+    "리소스 분포(resource distribution)"를 계산합니다. 너비 우선 탐색(breadth-first search) 기법을 사용해서 규칙이 'EMITTERS'로 표시한 객체들로부터 연결 요소 검색을 수행합니다.
 
 .. option:: -d <ds_name>
 
-    The name and path of the dataset to save the layer with resulting paths. Not need to be existed dataset.
+    산출 경로를 가진 레이어를 저장할 데이터셋의 이름과 경로입니다. 기존 데이터셋일 필요는 없습니다.
 
 .. option:: -f <ds_format>
 
-    Define this to set the format of newly created dataset.
+    새로 생성되는 데이터셋의 포맷을 설정합니다.
 
 .. option:: -l <layer_name>
 
-    The name of the resulting layer. If the layer exist already - it will be rewritten.
+    산출 레이어의 이름입니다. 레이어가 이미 존재하는 경우 레이어를 재작성할 것입니다.
 
 .. option:: <gnm_name>
 
-    The network to work with (path and name).
+    작업할 네트워크 (경로와 이름)
 
 .. option:: -dsco NAME=VALUE
 
-    Dataset creation option (format specific)
+    데이터셋 생성 옵션 (특정 포맷 지원)
 
 .. option:: -lco NAME=VALUE
 
-    Layer creation option (format specific)
+    레이어 생성 옵션 (특정 포맷 지원)
 
 .. option:: -alo NAME=VALUE
 
-    Algorithm option (format specific)
+    알고리즘 옵션 (특정 포맷 지원)

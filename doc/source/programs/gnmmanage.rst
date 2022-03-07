@@ -6,11 +6,11 @@ gnmmanage
 
 .. only:: html
 
-    Manages networks
+    네트워크를 관리합니다.
 
 .. Index:: gnmmanage
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -28,95 +28,95 @@ Synopsis
             <gnm_name> [<layer> [<layer> ...]]
 
 
-Description
+설명
 -----------
 
-The :program:`gnmmanage` program can perform various managing operations on geographical networks in GDAL. In addition to creating and deleting networks this includes capabilities of managing network's features, topology and rules.
+:program:`gnmmanage` 프로그램은 GDAL의 지리 네트워크(geographical network) 상에서 다양한 관리 작업을 수행할 수 있습니다. 이 프로그램은 네트워크 생성 및 삭제는 물론 네트워크의 객체, 위상 및 규칙을 관리하는 기능을 가지고 있습니다.
 
 .. program:: gnmmanage
 
 .. option:: -info
 
-    Different information about network: system and class layers, network metadata, network spatial reference.
+    시스템 및 클래스 레이어, 네트워크 메타데이터, 네트워크 특수 참조 등 네트워크에 대한 다양한 정보를 출력합니다.
 
 .. option:: create
 
-    Create network.
+    네트워크를 생성합니다.
 
     .. option:: -f <format_name>
 
-        Output file format name.
+        산출물 파일 포맷의 이름
 
     .. option:: -t_srs <srs_name>
 
-        Spatial reference input.
+        대상 공간 좌표계
 
     .. option:: -dsco NAME=VALUE
 
-        Network creation option set as pair name=value.
+        name=value 쌍으로 설정하는 네트워크 설정 옵션
 
 .. option:: import <src_dataset_name>
 
-    Import layer with dataset name to copy.
+    복사할 데이터셋의 이름으로 레이어 가져오기
 
     .. option:: -l layer_name
 
-    Layer name in dataset. If unset, 0 layer is copied.
+    데이터셋에 있는 레이어 이름입니다. 설정하지 않는 경우 0번 레이어를 복사합니다.
 
 .. option:: connect <gfid_src> <gfid_tgt> <gfid_con>
 
-    Make a topological connection, where the gfid_src and gfid_tgt are vertices and gfid_con is edge (gfid_con can be -1, so the system edge will be inserted).
+    gfid_src와 gfid_tgt가 꼭짓점이고 gfid_con이 경계인 위상 연결을 생성합니다. (시스템 경계를 삽입하려면 gfid_con을 -1로 지정하십시오.)
 
-    Manually assign the following values: 
+    다음 값들을 직접 할당할 수 있습니다:
 
     .. option:: -c <cost>
 
-        Cost / weight
+        비용/가중치
 
     .. option:: -ic <invcost>
 
-        Inverse cost
+        역비용(inverse cost)
 
     .. option:: -dir <dir>
 
-        Direction of the edge.
+        경계의 방향
 
 .. option:: disconnect <gfid_src> <gfid_tgt> <gfid_con>
 
-    Removes the connection from the graph.
+    네트워크 그래프에서 연결성을 제거합니다.
 
 .. option:: rule <rule_str>
 
-    Creates a rule in the network by the given rule_str string.
+    지정한 rule_str 문자열로 네트워크에 규칙을 생성합니다.
 
 .. option:: autoconnect <tolerance>
 
-    Create topology automatically with the given double tolerance and layer names. In no layer name provided all layers of network will be used.
+    지정한 Double 데이터 유형 허용 오차와 레이어 이름으로 위상을 자동 생성합니다. 레이어 이름을 지정하지 않으면 네트워크의 모든 레이어를 사용할 것입니다.
 
 .. option:: delete
 
-    Delete network.
+    네트워크를 삭제합니다.
 
 .. option:: change
 
-    Change blocking state of network edges or vertices.
+    네트워크 경계 또는 꼭짓점의 차단 상태(blocking state)를 변경합니다.
 
     .. option:: -bl <gfid>
 
-        Block feature before the main operation. Blocking features are saved in the special layer.
+        주요 작업 전에 객체를 차단합니다. 차단한 객체는 특수 레이어에 저장됩니다.
 
     .. option:: -unbl <gfid>
 
-        Unblock feature before the main operation.
+        주요 작업 전에 객체를 차단 해제합니다.
 
     .. option:: -unblall
 
-        Unblock all blocked features before the main operation.
+        주요 작업 전에 차단된 객체를 모두 차단 해제합니다.
 
 .. option:: <gnm_name>
 
-    The network to work with (path and name).
+    작업할 네트워크 (경로와 이름)
 
 .. option:: <layer>
 
-    The network layer name.
+    네트워크 레이어의 이름

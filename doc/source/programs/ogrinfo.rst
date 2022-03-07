@@ -6,12 +6,11 @@ ogrinfo
 
 .. only:: html
 
-    Lists information about an OGR-supported data source. With SQL statements
-    it is also possible to edit data.
+    OGR 지원 데이터소스에 대한 정보를 목록화합니다. SQL 선언문을 사용하면 데이터를 편집할 수도 있습니다.
 
 .. Index:: ogrinfo
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -25,145 +24,114 @@ Synopsis
             [-fielddomain name]
             <datasource_name> [<layer> [<layer> ...]]
 
-Description
+설명
 -----------
 
-The :program:`ogrinfo` program lists various information about an OGR-supported data
-source to stdout (the terminal). By executing SQL statements it is also possible to
-edit data.
+:program:`ogrinfo` 프로그램은 stdout(터미널)에 OGR이 지원하는 데이터소스에 대한 다양한 정보의 목록을 출력합니다. SQL 선언문을 실행하면 데이터를 편집할 수도 있습니다.
 
 .. program:: ogrinfo
 
 .. option:: -ro
 
-    Open the data source in read-only mode.
+    데이터소스를 읽기전용 모드로 엽니다.
 
 .. option:: -al
 
-    List all features of all layers (used instead of having to give layer names
-    as arguments).
+    모든 레이어의 모든 객체를 목록화합니다. (레이어명을 인자로 넘겨야 할 때 대신 사용합니다)
 
 .. option:: -rl
 
-    Enable random layer reading mode, i.e. iterate over features in the order
-    they are found in the dataset, and not layer per layer. This can be
-    significantly faster for some formats (for example OSM, GMLAS).
+    임의의 레이어 읽기 모드를 활성화합니다. 예를 들면 레이어별로가 아니라 데이터셋에 있는 객체의 순서대로 읽기를 반복합니다. 몇몇 포맷의 경우 (예: OSM, GMLAS) 읽어오는 속도가 훨씬 빠를 수 있습니다.
 
     .. versionadded:: 2.2
 
 .. option:: -so
 
-    Summary Only: suppress listing of individual features and show only
-    summary information like projection, schema, feature count and extents.
+    요약만(Summary Only): 개별 객체 목록을 출력하지 않고 투영볍, 스키마, 객체 개수 및 범위 같은 요약 정보만 출력합니다.
 
 .. option:: -q
 
-    Quiet verbose reporting of various information, including coordinate
-    system, layer schema, extents, and feature count.
+    좌표계, 레이어 스키마, 범위 및 객체 개수를 포함하는 다양한 정보를 자세히 리포트하지 않습니다. (침묵 모드)
 
 .. option:: -where <restricted_where>
 
-    An attribute query in a restricted form of the queries used in the SQL
-    `WHERE` statement. Only features matching the attribute query will be
-    reported. Starting with GDAL 2.1, the ``\filename`` syntax can be used to
-    indicate that the content is in the pointed filename.
+    SQL `WHERE` 선언문에서 사용되는 쿼리의 제약 양식으로 된 속성 쿼리입니다. 속성 쿼리와 일치하는 객체만 리포트할 것입니다. GDAL 2.1버전부터, 지정한 파일명에 내용이 있다는 사실을 나타내기 위한 ``\filename`` 문법을 사용할 수 있습니다.
 
 .. option:: -sql <statement>
 
-    Execute the indicated SQL statement and return the result. Starting with
-    GDAL 2.1, the ``@filename`` syntax can be used to indicate that the content is
-    in the pointed filename. Data can also be edited with SQL INSERT, UPDATE,
-    DELETE, DROP TABLE, ALTER TABLE etc. Editing capabilities depend on the selected
-    ``dialect``.
-
+    지정한 SQL 선언문을 실행해서 결과를 반환합니다. GDAL 2.1버전부터, 지정한 파일명에 내용이 있다는 사실을 나타내기 위한 ``@filename`` 문법을 사용할 수 있습니다. SQL INSERT, UPDATE, DELETE, DROP TABLE, ALTER TABLE 등의 명령어로 데이터도 편집할 수 있습니다. 편집 능력은 선택한 ``dialect`` 에 따라 달라집니다.
 
 .. option:: -dialect <dialect>
 
-    SQL dialect. In some cases can be used to use (unoptimized) :ref:`ogr_sql_dialect` instead
-    of the native SQL of an RDBMS by passing the ``OGRSQL`` dialect value.
-    The :ref:`sql_sqlite_dialect` dialect can be select with the ``SQLITE``
-    and ``INDIRECT_SQLITE`` dialect values, and this can be used with any datasource.
+    SQL 방언(dialect)입니다. 어떤 경우 ``OGRSQL`` 을 전송해서 RDBMS의 네이티브 SQL 대신 (최적화되지 않은) :ref:`ogr_sql_dialect` 을 사용하기 위해 쓰일 수도 있습니다. 모든 데이터소스에서 ``SQLITE`` 및 ``INDIRECT_SQLITE`` 방언 값으로 :ref:`sql_sqlite_dialect` 도 사용할 수 있습니다.
 
 .. option:: -spat <xmin> <ymin> <xmax> <ymax>
 
-    The area of interest. Only features within the rectangle will be reported.
+    관심 영역(area of interest)입니다. 이 직사각형 내부에 있는 객체만 리포트할 것입니다.
 
 .. option:: -geomfield <field>
 
-    Name of the geometry field on which the spatial filter operates.
+    공간 필터가 작동하는 도형 필드의 이름입니다.
 
 .. option:: -fid <fid>
 
-    If provided, only the feature with this feature id will be reported.
-    Operates exclusive of the spatial or attribute queries. Note: if you want
-    to select several features based on their feature id, you can also use the
-    fact the 'fid' is a special field recognized by OGR SQL. So, `-where "fid in (1,3,5)"`
-    would select features 1, 3 and 5.
+    이 옵션을 지정하는 경우, 이 객체 ID를 가진 객체만 리포트할 것입니다. 공간 또는 속성 쿼리를 제외하고 작동합니다. 주의: 객체 ID를 기반으로 객체 여러 개를 선택하려는 경우, 'fid'가 OGR SQL이 인식하는 특수 필드라는 사실도 이용할 수 있습니다. 즉 `-where "fid in (1,3,5)"` 는 객체 1, 3, 5를 선택할 것입니다.
 
 .. option:: -fields YES|NO:
 
-    If set to ``NO``, the feature dump will not display field values. Default value
-    is ``YES``.
+    ``NO`` 로 설정하면, 객체 덤프가 필드값을 출력하지 않을 것입니다. 기본값은 ``YES`` 입니다.
 
 .. option:: -fielddomain <domain_name>
 
     .. versionadded:: 3.3
 
-    Display details about a field domain.
+    필드 도메인에 대한 상세 정보를 출력합니다.
 
 .. option:: -geom YES|NO|SUMMARY|WKT|ISO_WKT
 
-    If set to ``NO``, the feature dump will not display the geometry. If set to
-    ``SUMMARY``, only a summary of the geometry will be displayed. If set to
-    ``YES`` or ``ISO_WKT``, the geometry will be reported in full OGC WKT format.
-    If set to ``WKT`` the geometry will be reported in legacy ``WKT``. Default
-    value is ``YES``. (WKT and ``ISO_WKT`` are available starting with GDAL 2.1,
-    which also changes the default to ISO_WKT)
+    ``NO`` 로 설정하면, 객체 덤프가 도형을 출력하지 않을 것입니다. ``SUMMARY`` 로 설정하면, 도형의 요약 정보만 출력할 것입니다. ``YES`` or ``ISO_WKT`` 로 설정하는 경우, 도형을 완전한 OGC WKT 서식으로 리포트할 것입니다. ``WKT`` 로 설정하면 도형을 예전(legacy) ``WKT`` 로 리포트할 것입니다. 기본값은 ``YES`` 입니다. (GDAL 2.1 버전부터 WKT와 ``ISO_WKT`` 를 사용할 수 있는데, 이 버전부터 기본값이 ISO_WKT로 변경되었습니다.)
 
 .. option:: -oo NAME=VALUE
 
-    Dataset open option (format-specific)
+    데이터 열기 옵션 (특정 포맷 지원)
 
 .. option:: -nomd
 
-    Suppress metadata printing. Some datasets may contain a lot of metadata
-    strings.
+    메타데이터를 출력하지 않습니다. 몇몇 데이터셋은 수많은 메타데이터 문자열을 가지고 있을 수도 있습니다.
 
 .. option:: -listmdd
 
-    List all metadata domains available for the dataset.
+    데이터셋에서 사용할 수 있는 모든 메타데이터 도메인을 목록화합니다.
 
 .. option:: -mdd <domain>
 
-    Report metadata for the specified domain. ``all`` can be used to report
-    metadata in all domains.
+    지정한 도메인에 있는 메타데이터를 리포트합니다. 모든 도메인에 있는 메타데이터를 리포트하길 원한다면 ``all`` 을 사용하면 됩니다.
 
 .. option:: -nocount
 
-    Suppress feature count printing.
+    객체 개수를 출력하지 않습니다.
 
 .. option:: -noextent
 
-    Suppress spatial extent printing.
+    공간 범위를 출력하지 않습니다.
 
 .. option:: -nogeomtype
 
-    Suppress layer geometry type printing.
+    레이어 도형 유형을 출력하지 않습니다.
 
     .. versionadded:: 3.1
 
 .. option:: --formats
 
-    List the format drivers that are enabled.
+    활성화된 포맷 드라이버를 목록화합니다.
 
 .. option:: -wkt_format <format>
 
-    The WKT format used to display the SRS.
-    Currently supported values for the ``format`` are:
+    공간 좌표계를 출력하기 위해 쓰이는 WKT 서식입니다. 현재 다음과 같은 ``format`` 값을 지원합니다:
 
     ``WKT1``
 
-    ``WKT2`` (latest WKT version, currently *WKT2_2018*)
+    ``WKT2`` (최신 WKT 버전, 현재 *WKT2_2018*)
 
     ``WKT2_2015``
 
@@ -173,24 +141,18 @@ edit data.
 
 .. option:: <datasource_name>
 
-    The data source to open. May be a filename, directory or other virtual
-    name. See the OGR Vector Formats list for supported datasources.
+    열어볼 데이터소스입니다. 파일, 디렉터리 또는 기타 가상 이름일 수도 있습니다. 어떤 데이터소스를 지원하는지 알고 싶다면 OGR 벡터 포맷 목록을 참조하십시오.
 
 .. option:: <layer>
 
-    One or more layer names may be reported.  If no layer names are passed then
-    ogrinfo will report a list of available layers (and their layer wide
-    geometry type). If layer name(s) are given then their extents, coordinate
-    system, feature count, geometry type, schema and all features matching
-    query parameters will be reported to the terminal. If no query parameters
-    are provided, all features are reported.
+    레이어 이름을 하나 이상 리포트할 수도 있습니다. 어떤 레이어 이름도 전송(pass)되지 않는 경우 ogrinfo가 사용할 수 있는 레이어 목록(과 사용할 수 있는 레이어들 전체의 도형 유형)을 리포트할 것입니다. 레이어 이름(들)을 지정하면 레이어의 범위, 좌표계, 객체 개수, 도형 유형, 스키마 및 쿼리 파라미터와 일치하는 모든 객체를 터미널로 리포트할 것입니다. 쿼리 파라미터를 하나도 지정하지 않으면 모든 객체를 리포트합니다.
 
-Geometries are reported in OGC WKT format.
+도형은 OGC WKT 서식으로 리포트됩니다.
 
-Examples
+예시
 --------
 
-Example of reporting the names of the layers in a NTF file:
+NTF 파일에 있는 레이어들의 이름을 리포트하는 예시:
 
 .. code-block::
 
@@ -203,7 +165,7 @@ Example of reporting the names of the layers in a NTF file:
     # 3: BL2000_COLLECTIONS (None)
     # 4: FEATURE_CLASSES (None)
 
-Example of retrieving a summary (``-so``) of a layer without showing details about every single feature:
+모든 객체별로 상세 정보를 출력하지 않고 레이어의 요약 정보를 (``-so``) 가져오는 예시:
 
 .. code-block::
 
@@ -237,8 +199,7 @@ Example of retrieving a summary (``-so``) of a layer without showing details abo
       # featurecla: String (50.0)
 
 
-Example of using an attribute query to restrict the output of the features
-in a layer:
+레이어에 있는 객체를 제한적으로 산출하기 위해 속성 쿼리를 사용하는 예시:
 
 .. code-block::
 
@@ -298,7 +259,7 @@ in a layer:
     # 1069117.600,419794.100 1069115.100,419796.300 1069109.100,419801.800
     # 1069106.800,419805.000  1069107.300)
 
-Example of updating a value of an attribute in a shapefile with SQL by using the SQLite dialect:
+SQLite 방언을 사용해서 shapefile의 속성값을 SQL로 업데이트하는 예시:
 
 .. code-block::
 

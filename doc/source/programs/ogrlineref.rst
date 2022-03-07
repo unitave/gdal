@@ -6,11 +6,11 @@ ogrlineref
 
 .. only:: html
 
-    Create linear reference and provide some calculations using it.
+    선형 참조를 생성하고 이를 이용한 계산을 수행합니다.
 
 .. Index:: ogrlineref
 
-Synopsis
+개요
 --------
 
 .. code-block::
@@ -26,147 +26,134 @@ Synopsis
            [-get_coord] [-m position]
            [-get_subline] [-mb position] [-me position]
 
-Description
+설명
 -----------
 
-The :program:`ogrlineref` program can be used for:
+:program:`ogrlineref` 프로그램을 사용해서:
 
--  create linear reference file from input data
+-  입력 데이터로부터 선형 참조(linear reference) 파일을 생성할 수 있습니다.
+-  경로 상에 있는 입력 좌표(포인트)의 투영법에 대한 "선형 참조된" 거리를 반환할 수 있습니다.
+-  "선형 참조된" 거리에 따라 경로 상에 있는 좌표(포인트)를 반환할 수 있습니다.
+-  "선형 참조된" 시작 및 종단 거리에 따라 경로의 일부분을 반환할 수 있습니다.
 
--  return the "linear referenced" distance for the projection of the
-   input coordinates (point) on the path
-
--  return the coordinates (point) on the path according to the "linear
-   referenced" distance
-
--  return the portion of the path according to the "linear referenced"
-   begin and end distances
-
-The :program:`ogrlineref` creates a linear reference - a file containing
-a segments of special length (e.g. 1 km in reference units) and get coordinates,
-linear referenced distances or sublines (subpaths) from this file.
-The utility not required the ``M`` or ``Z`` values in geometry.
-The results can be stored in any OGR supported format.
-Also some information is written to the stdout.
+:program:`ogrlineref` 는 선형 참조 - 특수한 (예를 들어 참조 단위로 된 1km) 길이의 선분들을 담고 있는 파일을 생성하고 이 파일로부터 좌표, 선형 참조된 거리 또는 하위 라인(하위 경로)를 계산합니다. 이 유틸리티에 도형의 ``M`` 또는 ``Z`` 값은 필수가 아닙니다. 산출물을 OGR이 지원하는 모든 포맷으로 저장할 수 있습니다. 또한 표준 출력(stdout)에 몇몇 정보도 작성합니다.
 
 .. option:: --help-general
 
-    Show the usage.
+    활용법을 출력합니다.
 
 .. option:: -progress
 
-    Show progress.
+    진행 상황을 출력합니다.
 
 .. option:: -quiet
 
-    Suppress all messages except errors and results.
+    오류 및 결과를 제외한 모든 메시지를 출력하지 않습니다.
 
 .. option:: -f <format_name>
 
-    Select an output format name. The default is to create a shapefile.
+    산출물 포맷 이름을 선택합니다. 기본값은 shapefile을 생성하는 것입니다.
 
 .. option:: -dsco <NAME=VALUE>
 
-    Dataset creation option (format specific)
+    데이터셋 생성 옵션 (특정 포맷 지원)
 
 .. option:: -lco <NAME=VALUE>
 
-    Layer creation option (format specific).
+    레이어 생성 옵션 (특정 포맷 지원)
 
 .. option:: -create
 
-    Create the linear reference file (linestring of parts).
+    선형 참조 파일(부분들의 라인스트링)을 생성합니다.
 
 .. option:: -l <src_line_datasource_name>
 
-    The path to input linestring datasource (e.g. the road)
+    입력 라인스트링 (예: 도로 등) 데이터소스를 가리키는 경로입니다.
 
 .. option:: -ln <layer_name>
 
-    The layer name in datasource
+    데이터소스에 있는 레이어 이름입니다.
 
 .. option:: -lf <field_name>
 
-    The field name of unique values to separate the input lines (e.g.
-    the set of roads).
+    입력 라인들을 (예: 도로 집합 등으로) 구분하기 위한 단일(unique) 값들의 필드 이름입니다.
 
 .. option:: -p <src_repers_datasource_name>
 
-    The path to linear references points (e.g. the road mile-stones)
+    선형 참조 포인트를 (예: 도로 이정표 등을) 가리키는 경로입니다.
 
 .. option:: -pn <layer_name>
 
-    The layer name in datasource
+    데이터소스에 있는 레이어 이름입니다.
 
 .. option:: -pm <pos_field_name>
 
-    The field name of distances along path (e.g. mile-stones values)
+    경로를 따라 측정한 거리의 (예: 이정표 값 등의) 필드 이름입니다.
 
 .. option:: -pf <field_name>
 
-    The field name of unique values to map input reference points to lines.
+    라인에 입력 참조 포인트를 매핑하기 위한 단일(unique) 값들의 필드 이름입니다.
 
 .. option:: -r <src_parts_datasource_name>
 
-    The path to linear reference file.
+    선형 참조 파일을 가리키는 경로입니다.
 
 .. option:: -rn <layer_name>
 
-    The layer name in datasource
+    데이터소스에 있는 레이어 이름입니다.
 
 .. option:: -o <dst_datasource_name>
 
-    The path to output linear reference file (linestring datasource)
+    산출 선형 참조 파일(라인스트링 데이터소스)을 가리키는 경로입니다.
 
 .. option:: -on <layer_name>
 
-    The layer name in datasource
+    데이터소스에 있는 레이어 이름입니다.
 
 .. option:: -of <field_name>
 
-    The field name for storing the unique values of input lines
+    입력 라인의 단일(unique) 값들을 저장하기 위한 필드의 이름입니다.
 
 .. option:: -s <step>
 
-    The part size in linear units
+    부분의 크기를 선형 단위로 설정합니다.
 
 .. option:: -get_pos
 
-    Return linear referenced position for input X, Y
+    입력 X, Y에 대해 선형 참조된 위치를 반환합니다.
 
 .. option:: -x <long>
 
-    Input X coordinate
+    입력 X 좌표
 
 .. option:: -y <lat>
 
-    Input Y coordinate
+    입력 Y 좌표
 
 .. option:: -get_coord
 
-    Return point on path for input linear distance
+    입력 선형 거리에 대한 경로 상 포인트를 반환합니다.
 
 .. option:: -m <position>
 
-    The input linear distance
+    입력 선형 거리입니다.
 
 .. option:: -get_subline
 
-    Return the portion of the input path from and to input linear positions.
+    입력 경로에서 입력 선형 위치로부터 입력 선형 위치까지의 부분을 반환합니다.
 
 .. option:: -mb <position>
 
-    The input begin linear distance
+    입력 시작 선형 거리
 
 .. option:: -me <position>
 
-    The input end linear distance
+    입력 종단 선형 거리
 
-Example
+예시
 -------
 
-This example would create a shapefile (:file:`parts.shp`) containing
-a data needed for linear referencing (1 km parts):
+이 예시는 선형 참조에 필요한 데이터를 (1km 부분들을) 담고 있는 shapefile(:file:`parts.shp`)을 생성할 것입니다.
 
 .. code-block::
 

@@ -1,57 +1,39 @@
 .. _vector_common_options:
 
 ================================================================================
-Common options for vector programs
+벡터 프로그램 용 공통 옵션
 ================================================================================
 
-All GDAL OGR command line programs support the following common options.
+GDAL/OGR 명령줄 프로그램들은 모두 다음 공통 옵션을 지원합니다.
 
 .. option:: --version
 
-    Report the version of GDAL and exit.
+    GDAL 버전을 리포트한 다음 엑시트합니다.
 
 .. option:: --build
 
-    Report detailed information about GDAL in use.
+    사용 중인 GDAL에 대한 상세 정보를 리포트한 다음 엑시트합니다.
 
 .. option:: --formats
 
-    List all vector formats supported by this GDAL build (read-only and
-    read-write) and exit. The format support is indicated as follows:
-    ``ro`` is read-only driver; ``rw`` is read or write (i.e. supports
-    :cpp:func:`CreateCopy`); ``rw+`` is read, write and update (i.e. supports
-    Create). A ``v`` is appended for formats supporting virtual IO
-    (``/vsimem``, ``/vsigzip``, ``/vsizip``, etc). A ``s`` is appended for
-    formats supporting subdatasets.
+    현재 GDAL 빌드가 지원하는 모든 (읽기전용 및 읽기쓰기) 벡터 포맷들의 목록을 표시한 다음 엑시트합니다. 포맷 지원은 다음과 같이 표시됩니다: ``ro`` 는 읽기전용(read-only)이고, ``rw`` 는 읽기 또는 쓰기를 허용하며 (예: :cpp:func:`CreateCopy` 를 지원) ``rw+`` 는 읽기, 쓰기와 업데이트를 허용하는 (예: Create를 지원) 드라이버입니다. ``v`` 는 가상 IO(``/vsimem``, ``/vsigzip``, ``/vsizip`` 등등)를 지원하는 포맷에 붙으며, ``s`` 는 하위 데이터셋을 지원하는 포맷에 붙습니다.
 
 .. option:: --format <format>
 
-    List detailed information about a single format driver.
-    The format should be the short name reported in the :option:`--formats`
-    list, such as GML.
+    단일 포맷 드라이버에 대한 상세 정보를 목록화합니다. 이때 포맷의 이름은 GML처럼 :option:`--formats` 목록에 표시된 단축명이어야 합니다.
 
 .. option:: --optfile <filename>
 
-    Read the named file and substitute the contents into the command line
-    options list. Lines beginning with ``#`` will be ignored.
-    Multi-word arguments may be kept together with double quotes.
+    지정한 파일을 읽고 그 내용을 명령줄 옵션 목록에 대체시킵니다. ``#`` 으로 시작하는 행은 무시할 것입니다. 여러 단어로 이루어진 인자는 큰따옴표로 묶일 수도 있습니다.
 
 .. option:: --config <key> <value>
 
-    Sets the named configuration keyword to the given value, as opposed to
-    setting them as environment variables. Some common configuration keywords
-    are SHAPE_ENCODING (force shapefile driver to read DBF files with the given
-    character encoding) and CPL_TEMPDIR (define the location of temporary files).
-    Individual drivers may be influenced by other :ref:`configuration options <list_config_options>`.
+    지정한 환경설정 키워드를 환경 변수로 설정하는 대신 입력된 값으로 설정합니다. 공통 환경설정 키워드로는 SHAPE_ENCODING(shapefile 드라이버가 지정한 문자 인코딩으로 DBF 파일을 읽도록 강제)과 CPL_TEMPDIR(임시 파일의 위칭를 정의) 등이 있습니다. 기타 :ref:`환경설정 옵션 <list_config_options>` 이 개별 드라이버에 영향을 미칠 수도 있습니다.
 
 .. option:: --debug <value>
 
-    Control what debugging messages are emitted.
-    A value of ON will enable all debug messages.
-    A value of OFF will disable all debug messages.
-    Otherwise, a debug messege will be emitted if its
-    category appears somewhere in the value string.
+    디버그 작업 메시지가 어떤 내용을 내놓을지를 제어합니다. 값을 ON으로 설정하면 모든 디버그 메시지를 활성화할 것입니다. 값을 OFF로 설정하면 모든 디버그 메시지를 비활성화합니다. 다른 값으로 설정하는 경우, 디버그 카테고리가 <value> 문자열에 포함되어 있는 메시지만 내놓을 것입니다.
 
 .. option:: --help-general
 
-    Gives a brief usage message for the generic GDAL OGR command line options and exit.
+    일반적인 GDAL/OGR 명령줄 옵션을 위한 간단한 활용법 메시지를 표시한 뒤 엑시트합니다.

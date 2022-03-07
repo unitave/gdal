@@ -77,7 +77,7 @@ GDAL 2.1.0부터 벡터 데이터를 래스터 데이터의 좌표계로 실시�
 
 .. option:: -dialect <dialect>
 
-    SQL 방언(dialect)입니다. 어떤 경우 OGRSQL을 전송해서 RDBMS의 네이티브 SQL 대신 (최적화되지 않은) OGR SQL을 사용하기 위해 쓰일 수도 있습니다. 모든 데이터소스에서 "SQLITE" 방언도 사용할 수 있습니다.
+    SQL 방언(dialect)입니다. 어떤 경우 ``OGRSQL`` 을 전송해서 RDBMS의 네이티브 SQL 대신 (최적화되지 않은) :ref:`ogr_sql_dialect` 을 사용하기 위해 쓰일 수도 있습니다. 모든 데이터소스에서 ``SQLITE`` 방언도 사용할 수 있습니다.
 
     .. versionadded:: 2.1
 
