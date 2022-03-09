@@ -1,27 +1,20 @@
 .. _raster.blx:
 
 ================================================================================
-BLX -- Magellan BLX Topo File Format
+BLX -- Magellan BLX Topo 파일 포맷
 ================================================================================
 
 .. shortname:: BLX
 
 .. built_in_by_default::
 
-BLX is the format for storing topographic data in Magellan GPS units.
-This driver supports both reading and writing. In addition the 4
-overview levels inherent in the BLX format can be used with the driver.
+BLX는 지형 데이터를 Magellan GPS 단위로 저장하기 위한 포맷입니다. 이 드라이버는 읽기와 쓰기 둘 다 지원합니다. 여기에 더해 드라이버가 BLX 포맷에 내장된 오버뷰 수준 4개도 사용할 수 있습니다.
 
-The BLX format is tile based, for the moment the tile size is fixed to
-128x128 size. Furthermore the dimensions must be a multiple of the tile
-size.
+BLX 포맷은 타일 기반으로, 현재로서는 타일 크기가 128x128로 고정되어 있습니다. 뿐만 아니라 파일 범위(dimension)가 이 타일 크기의 배수여야만 합니다.
 
-The data type is fixed to Int16 and the value for undefined values is
-fixed to -32768. In the BLX format undefined values are only really
-supported on tile level. For undefined pixels in non-empty tiles see the
-FILLUNDEF/FILLUNDEFVAL options.
+데이터 유형은 Int16으로 고정되어 있고 정의되지 않은 값의 값은 -32768로 고정되어 있습니다. BLX 포맷에서 정의되지 않은 값은 타일 수준에서만 실제로 지원됩니다. 비어 있지 않은 타일에 있는 정의되지 않은 값에 대해서는 FILLUNDEF/FILLUNDEFVAL 옵션을 살펴보십시오.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -30,24 +23,17 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Georeferencing
+지리참조
 --------------
 
-The BLX projection is fixed to WGS84 and georeferencing from BLX is
-supported in the form of one tiepoint and pixelsize.
+BLX 투영법은 WGS84로 고정되어 있고 BLX로부터의 지리참조는 GCP 측량 관련 원격 지점(tie point) 1개와 픽셀 크기라는 형태로 지원합니다.
 
-Creation Issues
+생성 문제점
 ---------------
 
-Creation Options:
+생성 옵션:
 
--  **ZSCALE=1**: Set the desired quantization increment for write
-   access. A higher value will result in better compression and lower
-   vertical resolution.
--  **BIGENDIAN=YES**: If BIGENDIAN is defined, the output file will be
-   in XLB format (big endian blx).
--  **FILLUNDEF=YES**: If FILLUNDEF is yes the value of FILLUNDEFVAL will
-   be used instead of -32768 for non-empty tiles. This is needed since
-   the BLX format only support undefined values for full tiles, not
-   individual pixels.
--  **FILLUNDEFVAL=0**: See FILLUNDEF
+-  **ZSCALE=1**: 쓰기 접근을 위한, 원하는 양자화 증가량(quantization increment)을 설정합니다. 높은 값을 설정할수록 더 나은 압축과 더 낮은 수직 해상도를 내놓을 것입니다.
+-  **BIGENDIAN=YES**: BIGENDIAN을 정의하는 경우, XLB 포맷(빅 엔디언(big endian) BLX) 파일을 산출할 것입니다.
+-  **FILLUNDEF=YES**: FILLUNDEF를 YES로 설정하는 경우 비어 있지 않은 타일에 있는 정의되지 않은 값에 -32768 대신 FILLUNDEFVAL 값을 사용할 것입니다. 이 옵션이 필요한 이유는 BLX 포맷이 개별 픽셀이 아니라 전체 타일에 대해서만 정의되지 않은 값을 지원하기 때문입니다.
+-  **FILLUNDEFVAL=0**: FILLUNDEF 옵션 참조

@@ -1,51 +1,38 @@
 .. _raster.bsb:
 
 ================================================================================
-BSB -- Maptech/NOAA BSB Nautical Chart Format
+BSB -- Maptech/NOAA BSB 해도(海圖) 포맷
 ================================================================================
 
 .. shortname:: BSB
 
 .. built_in_by_default::
 
-BSB Nautical Chart format is supported for read access, including
-reading the colour table and the reference points (as GCPs). Note that
-the .BSB files cannot be selected directly. Instead select the .KAP
-files. Versions 1.1, 2.0 and 3.0 have been tested successfully.
+BSB 해도(Nautical Chart) 포맷은 색상표 및 기준점(reference point)을 (GCP로) 읽어오는 것을 포함하는 읽기 접근을 위해 지원됩니다. .BSB 파일을 직접 선택할 수 없다는 사실을 기억하십시오. 그 대신 .KAP 파일을 선택하십시오. 1.1, 2.0 및 3.0버전은 테스트에 성공했습니다.
 
-This driver should also support GEO/NOS format as supplied by Softchart.
-These files normally have the extension .nos with associated .geo files
-containing georeferencing ... the .geo files are currently ignored.
+이 드라이버는 소프트차트(Softchart) 사가 제공하는 GEO/NOS 포맷도 지원할 것입니다. 이 포맷은 일반적으로 지리참조를 담고 있는 .GEO 파일과 데이터를 담고 있는 .NOS 파일로 이루어져 있습니다만... 현재 .GEO 파일은 무시됩니다.
 
-This driver is based on work by Mike Higgins. See the
-frmts/bsb/bsb_read.c files for details on patents affecting BSB format.
+이 드라이버는 마이크 히긴스(Mike Higgins)의 작업을 바탕으로 개발되었습니다. BSB 포맷에 영향을 미치는 특허에 대한 자세한 내용을 알고 싶다면 frmts/bsb/bsb_read.c 파일을 읽어보세요.
 
-It is possible to select an alternate color
-palette via the BSB_PALETTE configuration option. The default value is
-RGB. Other common values that can be found are : DAY, DSK, NGT, NGR,
-GRY, PRC, PRG...
+BSB_PALETTE 환경설정 옵션을 통해 대체 색상표를 선택할 수 있습니다. 기본값은 RGB입니다. 사용할 수 있는 다른 값으로는 DAY, DSK, NGT, NGR, GRY, PRC, PRG 등이 있습니다.
 
-NOTE: Implemented as ``gdal/frmts/bsb/bsbdataset.cpp``.
+주의: ``gdal/frmts/bsb/bsbdataset.cpp`` 로 구현되었습니다.
 
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
 .. supports_virtualio::
 
-Metadata
+메타데이터
 --------
 
-The following metadata items may be reported:
+다음 메타데이터 항목을 리포트할 수도 있습니다:
 
-- **BSB_KNP**: content of the KNP/ header field, giving information on the
-  coordinate reference system.
+- **BSB_KNP**: KNP/ 헤더 필드의 내용. 좌표계에 대한 정보를 제공합니다.
 
-- **BSB_KNQ**: content of the KNQ/ header field, giving information on the
-  coordinate reference system.
+- **BSB_KNQ**: KNQ/ 헤더 필드의 내용. 좌표계에 대한 정보를 제공합니다.
 
-- **BSB_CUTLINE**: (starting with GDAL 3.1). When PLY/ header is present,
-  Well-Known text representation of a polygon with coordinates in longitude,
-  latitude order, representing the cutline of the chart.
+- **BSB_CUTLINE**: (GDAL 3.1버전부터) PLY/ 헤더가 존재하는 경우, 해도의 설명문구(cutline)를 나타내는 경도/위도 순서 좌표를 가진 폴리곤을 WKT로 표현합니다.

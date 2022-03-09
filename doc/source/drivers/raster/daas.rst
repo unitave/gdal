@@ -1,7 +1,7 @@
 .. _raster.daas:
 
 ================================================================================
-DAAS (Airbus DS Intelligence Data As A Service driver)
+DAAS (공공 서비스로서의 에어버스 DS 정보 데이터 드라이버)
 ================================================================================
 
 .. shortname:: DAAS
@@ -10,94 +10,65 @@ DAAS (Airbus DS Intelligence Data As A Service driver)
 
 .. build_dependencies:: libcurl
 
-This driver can connect to the Airbus DS Intelligence Data As A Service
-API. GDAL/OGR must be built with Curl support in order for the DAAS
-driver to be compiled.
+이 드라이버는 공공 서비스로서의 에어버스 DS 정보 데이터 API에 연결할 수 있습니다. DAAS 드라이버를 컴파일하려면 GDAL/OGR을 cURL 지원과 함께 빌드해야만 합니다.
 
-Orthorectified (with geotransform) and raw (with RPCs) images are
-supported.
+(지리변형을 가진) 정사보정 및 (RPC를 가진) 원본(raw) 이미지를 지원합니다.
 
-Overviews are supported.
+오버뷰도 지원합니다.
 
-The API is not publicly available but will be released soon. Further
-information will be found here: https://api.oneatlas.airbus.com/
+이 API는 공개되어 있지 않지만 곧 배포될 것입니다. 더 자세한 내용은 다음에서 찾아보십시오: https://api.oneatlas.airbus.com/
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
-Dataset name syntax
+데이터셋 이름 문법
 -------------------
 
-The nominal syntax to open a datasource is :
+데이터베이스를 열기 위한 명목상의 문법은 다음과 같습니다:
 
 ::
 
    DAAS:https://example.com/path/to/image/metadata
 
-A more minimal syntax can be used:
+더 미니멀한 문법도 사용할 수 있습니다:
 
 ::
 
    DAAS:
 
-provided that the GET_METADATA_URL open option is filled.
+이때 GET_METADATA_URL 열기 옵션을 설정했다고 가정합니다.
 
-Authentication
+인증
 --------------
 
-Access to the API requires an authentication token. There are two
-methods supported:
+API에 접근하기 위해서는 인증 토큰이 필수입니다. 다음 두 메소드를 지원합니다:
 
--  Authentication with an API key and a client id. They must be provided
-   respectively with the API_KEY open option (or :decl_configoption:`GDAL_DAAS_API_KEY`
-   configuration option) and the CLIENT_ID open option (or
-   :decl_configoption:`GDAL_DAAS_CLIENT_Id` configuration option). In that case, the driver will
-   authenticate against the authentication endpoint to get an access
-   token.
--  Directly providing the access token with the ACCESS_TOKEN open option
-   (or :decl_configoption:`GDAL_DAAS_ACCESS_TOKEN` configuration option).
+-  API 키와 클라이언트 ID로 인증합니다. 각각 API_KEY 열기 옵션(또는 :decl_configoption:`GDAL_DAAS_API_KEY` 환경설정 옵션)과 CLIENT_ID 열기 옵션(또는 :decl_configoption:`GDAL_DAAS_CLIENT_ID` 환경설정 옵션)으로 지정해야만 합니다. 이런 경우, 접근 토큰을 얻기 위해 드라이버가 인증 종단점을 대상으로 인증할 것입니다.
+-  ACCESS_TOKEN 열기 옵션(또는 :decl_configoption:`GDAL_DAAS_ACCESS_TOKEN` 환경설정 옵션)으로 접근 토큰을 직접 제공합니다.
 
-In both cases, the X_FORWARDED_USER open option (or
-:decl_configoption:`GDAL_DAAS_X_FORWARDED_USER` configuration option) can be specified to
-fill the HTTP X-Forwarded-User header in requests sent to the DAAS
-service endpoint with the user from which the request originates from.
+두 경우 모두, X_FORWARDED_USER 열기 옵션(또는 :decl_configoption:`GDAL_DAAS_X_FORWARDED_USER` 환경설정 옵션)을 지정해서, 요청을 발송한 사용자 정보로 DAAS 서비스 종단점으로 전송되는 요청에 있는 HTTP X-Forwarded-User 헤더를 채울 수 있습니다.
 
-See https://api.oneatlas.airbus.com/guides/g-authentication/ for further
-details
+더 자세한 내용은 https://api.oneatlas.airbus.com/guides/g-authentication/ 를 살펴보십시오.
 
-Open options
+열기 옵션
 ------------
 
-The following open options are available :
+다음과 같은 열기 옵션들을 사용할 수 있습니다:
 
--  **GET_METADATA_URL**\ =value: URL to the GetImageMetadata endpoint.
-   Required if not specified in the connection string.
--  **API_KEY**\ =value: API key for authentication. If specified, must
-   be used together with the CLIENT_ID option. Can be specified also
-   through the GDAL_DAAS_API_KEY configuration option.
--  **CLIENT_ID**\ =value: Client id for authentication. If specified,
-   must be used together with the API_KEY option. Can be specified also
-   through the GDAL_DAAS_CLIENT_ID configuration option.
--  **ACCESS_TOKEN**\ =value: Access token. Can be specified also through
-   the GDAL_DAAS_ACCESS_TOKEN configuration option. Exclusive of
-   API_KEY/CLIENT_ID
--  **X_FORWARDED_USER**\ =value: User from which the request originates
-   from. Can be specified also through the GDAL_DAAS_X_FORWARDED_USER
-   configuration option.
--  **BLOCK_SIZE**\ =value. Size of a block in pixels requested to the
-   server. Defaults to 512 pixels. Between 64 and 8192.
--  **PIXEL_ENCODING**\ =value. Format in which pixels are queried.
-   Defaults to
+-  **GET_METADATA_URL**\ =value: GetImageMetadata 종단점을 가리키는 URL입니다. 연결 문자열에 지정되지 않은 경우 필수적입니다.
+-  **API_KEY**\ =value: 인증 용 API 키입니다. 지정하는 경우, CLIENT_ID 옵션과 함께 사용해야만 합니다. GDAL_DAAS_API_KEY 환경설정 옵션으로도 지정할 수 있습니다.
+-  **CLIENT_ID**\ =value: 인증 용 클라이언트 ID입니다. 지정하는 경우, API_KEY 옵션과 함께 사용해야만 합니다. GDAL_DAAS_CLIENT_ID 환경설정 옵션으로도 지정할 수 있습니다.
+-  **ACCESS_TOKEN**\ =value: 접근 토큰입니다. GDAL_DAAS_ACCESS_TOKEN 환경설정 옵션으로도 지정할 수 있습니다. API_KEY/CLIENT_ID와 함께 사용할 수 없습니다.
+-  **X_FORWARDED_USER**\ =value: 요청을 발송한 사용자입니다. GDAL_DAAS_X_FORWARDED_USER 환경설정 옵션으로도 지정할 수 있습니다.
+-  **BLOCK_SIZE**\ =value: 서버에 요청하는 블록의 픽셀 단위 크기입니다. 기본값은 512픽셀입니다. 64에서 8192까지 지정할 수 있습니다.
+-  **PIXEL_ENCODING**\ =value: 이 포맷으로 픽셀을 요청합니다. 기본값은
 
-   -  **AUTO**: for 1, 3 or 4-band images of type Byte, resolves to PNG.
-      Otherwise to RAW
-   -  **RAW**: compatible of all images. Pixels are requested in a
-      uncompressed raw format.
-   -  **PNG**: compatible of 1, 3 or 4-band images of type Byte
-   -  **JPEG**: compatible of 1 or 3-band images of type Byte
-   -  **JPEG2000**: compatible of all images. Requires GDAL to be built
-      with one of its JPEG2000-capable drivers.
+   -  **AUTO**: 바이트 유형의 밴드 1개, 3개 또는 4개 밴드 이미지인 경우, PNG로 지정합니다. 그렇지 않다면 원본(raw)으로 지정합니다.
+   -  **RAW**: 모든 이미지 유형과 호환됩니다. 픽셀을 비압축 원본(raw) 포맷으로 요청합니다.
+   -  **PNG**: 바이트 유형의 밴드 1개, 3개 또는 4개 밴드 이미지와 호환됩니다.
+   -  **JPEG**: 바이트 유형의 밴드 1개 또는 3개 밴드 이미지와 호환됩니다.
+   -  **JPEG2000**: 모든 이미지 유형과 호환됩니다. GDAL을 반드시 GDAL이 지원하는 JPEG2000 호환 드라이버 가운데 하나와 함께 빌드해야 합니다.
 
--  **MASKS**\ =YES/NO. Whether to expose mask bands. Default to YES.
+-  **MASKS**\ =YES/NO: 마스크 밴드를 노출시킬지 여부를 선택합니다. 기본값은 YES입니다.

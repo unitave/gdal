@@ -1,46 +1,32 @@
 .. _raster.byn:
 
 ================================================================================
-BYN - Natural Resources Canada's Geoid file format (.byn)
+BYN - 캐나다 천연자원 지오이드 파일 포맷 (.byn)
 ================================================================================
 
 .. shortname:: BYN
 
 .. built_in_by_default:: 
 
-Files with extension ".byn" have a binary format. The format includes
-two sections which are the Header and the Data. The data are stored by
-rows starting from the north. Each row is stored from the west to the
-east. The data are either short (2 bytes) or standard (4 bytes)
-integers. The size of the bytes is defined in the header.
+".byn" 확장자를 가진 파일은 바이터리 포맷입니다. 이 포맷은 헤더 및 데이터라는 두 부분을 포함합니다. 데이터는 북쪽에서 시작하는 행으로 저장됩니다. 각 행은 서쪽에서 동쪽 방향으로 저장됩니다. 이 데이터는 Short(2바이트) 또는 표준(4바이트) 정수 유형입니다. 헤더에서 바이트 크기를 정의합니다.
 
-The total size of the file is 80 bytes + (Row x Column x (2 or 4) bytes)
-where Row is the number of rows in the grid and Column is the number of
-columns in the grid. Row and Column can be calculated by these two
-equations:
+파일의 총 용량은 80바이트 + (Row * Column * (2 또는 4)바이트)로, Row는 그리드에 있는 행의 개수이며 Column은 그리드 열의 개수를 뜻합니다. 다음 방정식 2개로 Row와 Column의 값을 계산할 수 있습니다:
 
-Row = (North Boundary - South Boundary) / (NS Spacing) + 1
+Row = (북쪽 경계 - 남쪽 경계) / (남북 방향 간격) + 1
 
-Column = (East Boundary - West Boundary) / (EW Spacing) + 1
+Column = (동쪽 경계 - 서쪽 경계) / (동서 방향 간격) + 1
 
-The ".byn" files may contain undefined data. Depending if the data are
-stored as 2-byte or 4-byte integers, the undefined data are expressed
-the following way:
+".byn" 파일이 정의되지 않은 데이터를 담고 있을 수도 있습니다. 데이터가 2바이트 정수형 또는 4바이트 정수형으로 저장되었냐에 따라, 정의되지 않은 데이터를 다음과 같이 표현합니다:
 
-4-byte data (Standard integer): 9999.0 \* Factor, the Factor is given in
-the header
+4바이트 데이터(표준 정수형): 9999.0 \* Factor, 헤더에서 Factor를 정의합니다.
 
-2 byte data (Short integer): 32767
+2바이트 데이터(Short 정수형): 32767
 
-Most of the parameters in the ".byn" header can be read by clicking the
-“Information” icon in software GPS-H.
+GPS-H 소프트웨어에서 “Information” 아이콘을 클릭하면 ".byn" 헤더에 있는 대부분의 파라미터를 읽어올 수 있습니다.
 
-NOTE: Files with extension ".err" are also in the ".byn" format. An
-".err" file usually contains the error estimates of the ".byn" file of
-the same name (e.g., CGG2013n83.byn and CGG2013n83.err). The ".err" file
-will have variable Data equal to 1 or 3.
+주의: ".err" 확장자를 가진 파일도 ".byn" 포맷입니다. ".err" 파일은 일반적으로 같은 이름을 가진 (예: CGG2013n83.byn과 CGG2013n83.err) ".byn" 파일의 오류 추정(error estimates)을 담고 있습니다. ".err" 파일은 1 또는 3이라는 값을 가지는 Data 변수를 가질 것입니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -54,28 +40,20 @@ Driver capabilities
 Factor
 ------
 
-When translating from or into BYN file to or from another formats the
-scale will affect the result profoundly.
+BYN 파일을 다른 포맷으로 또는 다른 포맷을 BYN 파일로 변환하는 경우 척도(scale)가 산출물에 지대한 영향을 미칠 것입니다.
 
-Translating to a format that supports Scale (GTIFF for example) will
-maintain the data type and thescale information. The pixel values are
-perfectly preserved.
+(예를 들어 GTIFF처럼) 척도를 지원하는 포맷으로 변환하면 데이터 유형 및 척도 정보를 유지할 것입니다. 픽셀 값도 완벽하게 보전됩니다.
 
-Translating to a format that does not support Scale will maintain the
-data type but without the Scale, meaning loss of information on every
-pixels.
+척도를 지원하지 않는 포맷으로 변환하면 데이터 유형은 유지하지만 척도 정보는 사라집니다. 모든 픽셀에서 정보가 손실된다는 뜻입니다.
 
-The solution to the problem above is to use "-unscale" and "-ot Float32"
-when using gdal_translate or GDAL API. That will produce a dataset
-without scale but with the correct pixel information. Ex.:
+이 문제에 대한 해결책은 gdal_translate 또는 GDAL API 사용 시 "-unscale"과 "-ot Float32"를 사용하는 것입니다. 이 옵션들을 사용하면 척도는 없지만 정확한 픽셀 정보를 가진 데이터셋을 생성할 것입니다. 예시:
 
 gdal_translate CGG2013an83.err test2.tif -unscale -ot Float32
 
-NOTE: The BYN header variable **Factor** is the inverse of GDAL
-**Scale**. (Scale = 1.0 / Factor).
+주의: BYN 헤더 변수 **Factor** 는 GDAL **Scale** 의 역수입니다. (Scale = 1.0 / Factor)
 
-See Also
+참고
 --------
 
--  Implemented as ``gdal/frmts/raw/byndataset.{h,cpp}``.
--  `www.nrcan.gc.ca <https://www.nrcan.gc.ca>`__
+-  ``gdal/frmts/raw/byndataset.{h,cpp}`` 로 구현되었습니다.
+-  `www.nrcan.gc.ca <https://www.nrcan.gc.ca>`_

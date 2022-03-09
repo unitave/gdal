@@ -1,34 +1,25 @@
 .. _raster.cosar:
 
 ================================================================================
-COSAR -- TerraSAR-X Complex SAR Data Product
+COSAR -- TerraSAR-X 복소수형 SAR 데이터 상품
 ================================================================================
 
 .. shortname:: COSAR
 
 .. built_in_by_default::
 
-This driver provides the capability to read TerraSAR-X complex data.
-While most users will receive products in GeoTIFF format (representing
-detected radiation reflected from the targets, or geocoded data),
-ScanSAR products will be distributed in COSAR format.
+이 드라이버는 TerraSAR-X 복소수형(complex) 데이터를 읽어올 수 있는 케이퍼빌리티를 제공합니다. 사용자 대부분은 이 상품을 (대상으로부터 반사된 방사선 탐지 또는 지오코딩된 데이터를 표현하는) GeoTIFF 포맷으로 받게 되겠지만, ScanSAR 상품은 COSAR 포맷으로 배포될 것입니다.
 
-Essentially, COSAR is an annotated binary matrix, with each sample held
-in 4 bytes (16 bits real, 16 bits imaginary) stored with the most
-significant byte first (Big Endian). Within a COSAR container there are
-one or more "bursts" which represent individual ScanSAR bursts. Note
-that if a Stripmap or Spotlight product is held in a COSAR container it
-is stored in a single burst.
+본질적으로, COSAR는 주석이 달린 바이너리 매트릭스입니다. 각 샘플이 최상위 바이트(most significant byte)를 첫 번째로 저장한 (빅 엔디언) 4바이트를 담고 있습니다. (이때 16비트는 실수, 16비트는 허수입니다.) COSAR 컨테이너 내부에는 개별 ScanSAR 돌발 노이즈를 표현하는 "돌발(burst)"이 하나 이상 존재합니다. COSAR 컨테이너가 StripMap 또는 SpotLight 상품을 담고 있는 경우 단일 돌발로 저장한다는 사실을 기억하십시오.
 
-Support for ScanSAR data is currently under way, due to the difficulties
-in fitting the ScanSAR "burst" identifiers into the GDAL model.
+ScanSAR 데이터 지원은 현재 개발 중입니다. ScanSAR의 "돌발" 식별자를 GDAL 모델에 맞추는 작업이 어려움을 겪고 있기 때문입니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_virtualio::
 
-See Also
+참고
 --------
 
--  DLR Document TX-GS-DD-3307 "Level 1b Product Format Specification."
+-  DLR 문서 TX-GS-DD-3307 "Level 1b 상품 포맷 사양"

@@ -1,12 +1,12 @@
 .. _raster.coasp:
 
 ================================================================================
-COASP --  DRDC COASP SAR Processor Raster
+COASP --  DRDC COASP SAR 프로세서 래스터
 ================================================================================
 
 .. shortname:: COASP
 
 .. built_in_by_default::
 
-NOTE: Implemented as ``gdal/frmts/coasp/coasp_dataset.cpp``.
+주의: ``gdal/frmts/coasp/coasp_dataset.cpp`` 로 구현되었습니다.
 

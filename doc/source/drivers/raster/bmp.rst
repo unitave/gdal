@@ -1,29 +1,20 @@
 .. _raster.bmp:
 
 ================================================================================
-BMP -- Microsoft Windows Device Independent Bitmap
+BMP -- 마이크로소프트 윈도우 장치 독립형 비트맵
 ================================================================================
 
 .. shortname:: BMP
 
 .. built_in_by_default::
 
-MS Windows Device Independent Bitmaps supported by the Windows kernel
-and mostly used for storing system decoration images. Due to the nature
-of the BMP format it has several restrictions and could not be used for
-general image storing. In particular, you can create only 1-bit
-monochrome, 8-bit pseudocoloured and 24-bit RGB images only. Even
-grayscale images must be saved in pseudocolour form.
+윈도우 커널이 마이크로소프트 윈도우 장치 독립형 비트맵을 지원하며, 대부분의 경우 시스템 장식 이미지를 저장하기 위해 사용합니다. BMP 포맷의 본질 때문에 몇 가지 제약조건을 가지고 있어서 일반적인 이미지 저장에 사용할 수 없습니다. 자세히 말하자면 1비트 흑백, 8비트 의사색상, 그리고 24비트 RGB 이미지만 생성할 수 있습니다. 회색조 이미지조차 의사색상 형태로 저장해야만 합니다.
 
-This driver supports reading almost any type of the BMP files and could
-write ones which should be supported on any Windows system. Only single-
-or three- band files could be saved in BMP file. Input values will be
-resampled to 8 bit.
+이 드라이버는 거의 모든 유형의 BMP 파일을 읽을 수 있으며 모든 윈도우 시스템이 지원해야 할 BMP 파일을 작성할 수 있습니다. 단일 밴드 또는 밴드 3개를 가진 파일만 BMP 파일로 저장할 수 있습니다. 입력 값들은 8비트로 리샘플링될 것입니다.
 
-If an ESRI world file exists with the .bpw, .bmpw or .wld extension, it
-will be read and used to establish the geotransform for the image.
+.bpw, .bmpw 또는 .wld 확장자를 가진 ESRI World 파일이 존재하는 경우, 해당 파일을 읽어와서 이미지의 지리변형(geotransform)을 확인하기 위해 사용할 것입니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -34,15 +25,13 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Creation Options
+생성 옵션
 ----------------
 
--  **WORLDFILE=YES**: Force the generation of an associated ESRI world
-   file (with the extension .wld).
+-  **WORLDFILE=YES**: 관련 ESRI World 파일을 (확장자는 .wld로) 강제로 생성합니다.
 
-See Also
+참고
 --------
 
--  Implemented as ``gdal/frmts/bmp/bmpdataset.cpp``.
--  `Wikipedia BMP file
-   format <https://en.wikipedia.org/wiki/BMP_file_format>`__
+-  ``gdal/frmts/bmp/bmpdataset.cpp`` 로 구현되었습니다.
+-  `위키피디아 BMP 파일 포맷 <https://en.wikipedia.org/wiki/BMP_file_format>`_

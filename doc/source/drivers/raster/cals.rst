@@ -10,65 +10,36 @@ CALS -- CALS Type 1
 
 .. built_in_by_default::
 
-CALS Type 1 rasters are untiled back and white rasters made of a
-2048-byte text header in the MIL-STD-1840 standard, followed by a single
-datastream compressed with CCITT/ITU-T Recommendation 6, aka Group 6,
-aka CCITT FAX 4. CALS Type 1 rasters are one of the 4 types of formats
-described by MIL-PRF-28002C (this standard is now deprecated). Other
-types are not handled by this driver.
+CALS Type 1 래스터는 MIL-STD-1840 표준으로 된 2048바이트 헤더와 그 뒤를 따르는 Group 6 또는 CCITT FAX 4라고도 하는 CCITT/ITU-T Recommendation 6으로 압축된 단일 데이터스트림으로 구성된, 타일화 해제된 흑백 래스터입니다. 이 뒤에 옵니다. CALS Type 1 래스터는 (현재는 퇴출된) MIL-PRF-28002C 표준이 설명하는 4개의 포맷 유형 가운데 하나입니다. 이 드라이버는 다른 유형들은 처리하지 않습니다.
 
-This driver supports reading and creation of CALS Type 1 rasters. Update
-of existing rasters is not supported.
+이 드라이버는 CALS Type 1 래스터의 읽기 및 생성을 지원합니다. 기존 래스터의 업데이트는 지원하지 않습니다.
 
-A CALS dataset is exposed by the driver as a single-band 1-bit raster
-with a 2-entry color table. The first entry (0) is white
-(RGB=255,255,255) and the second entry (1) is black (RGB=0,0,0).
+이 드라이버는 CALS 데이터셋을 2개 항목 색상표를 가진 단일 밴드 1비트 래스터로 노출시킵니다. 첫 번째 항목(0)은 하얀색(RGB=255,255,255)이고 두 번째 항목(1)은 검은색(RGB=0,0,0)입니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
 
 .. supports_virtualio::
 
-Metadata
---------
+메타데이터
+---------
 
-The following metadata items might be exposed by the driver (or read
-from the input dataset to generate a cor
+드라이버가 다음 메타데이터 항목들을 노출시킬 수도 있습니다. (또는 입력 데이터셋으로부터 읽어와서 generate a cor
 
--  **PIXEL_PATH**: First value of the "rorient" header field, measured
-   in degrees counterclockwise from the positive horizontal axis (east).
-   The pel path value represents the number of degrees the image would
-   have to be rotated counterclockwise in order to display the image
-   with proper viewing orientation. The permissible values for the pixel
-   path direction shall be "0", "90", "180", or "270". 0 is the typical
-   value. If PIXEL_PATH=0 and LINE_PROGRESSION=270, neither are
-   reported.
--  **LINE_PROGRESSION**: Second value of the "rorient" header field. The
-   line progression direction is measured in degrees counterclockwise
-   from the pel path direction. The permissible values for the line
-   progression direction shall be "90" or "270". 270 is the typical
-   value. If PIXEL_PATH=0 and LINE_PROGRESSION=270, neither are
-   reported.
--  **TIFFTAG_XRESOLUTION**: Scan X resolution in dot per inch, from the
-   "rdensty" header field. TIFFTAG_XRESOLUTION and TIFFTAG_YRESOLUTION
-   are always equal in CALS.
--  **TIFFTAG_YRESOLUTION**: Scan Y resolution in dot per inch, from the
-   "rdensty" header field. TIFFTAG_XRESOLUTION and TIFFTAG_YRESOLUTION
-   are always equal in CALS.
+-  **PIXEL_PATH**: 헤더의 "rorient" 필드의 첫 번째 값으로, 양의 수평 축(동쪽)으로부터 도 단위 반시계 방향으로 측정한 값입니다. 이 픽셀 경로 값은 적절한 방향(orientation)으로 이미지를 표시하기 위해 이미지를 몇 도나 반시계 방향으로 기울여야 할지를 나타냅니다. 픽셀 경로 방향에 사용할 수 있는 값은 "0", "90", "180", 또는 "270"입니다. 주로 사용되는 값은 0입니다. PIXEL_PATH=0이고 LINE_PROGRESSION=270인 경우, 둘 다 리포트하지 않습니다.
+-  **LINE_PROGRESSION**: 헤더의 "rorient" 필드의 두 번째 값입니다. 라인 진행 방향은 픽셀 경로 방향으로부터 도 단위 반시계 방향으로 측정한 값입니다. 라인 진행 방향에 사용할 수 있는 값은 "90" 또는 "270"입니다. 주로 사용되는 값은 270입니다. PIXEL_PATH=0이고 LINE_PROGRESSION=270인 경우, 둘 다 리포트하지 않습니다.
+-  **TIFFTAG_XRESOLUTION**: 헤더의 "rdensty" 필드의 값으로, X 해상도를 인치 당 도트 단위로 스캔한 값입니다. CALS에서는 TIFFTAG_XRESOLUTION 값과 TIFFTAG_YRESOLUTION 값이 항상 동일합니다.
+-  **TIFFTAG_YRESOLUTION**: 헤더의 "rdensty" 필드의 값으로, Y 해상도를 인치 당 도트 단위로 스캔한 값입니다. CALS에서는 TIFFTAG_XRESOLUTION 값과 TIFFTAG_YRESOLUTION 값이 항상 동일합니다.
 
-Creation issues
+생성 문제점
 ---------------
 
-Only single band 1-bit rasters are valid input to create a new CALS
-file. If the input raster has no color table, 0 is assumed to be black
-and 1 to be white. If the input raster has a (2 entries) color table,
-the value for the black and white color will be determined from the
-color table.
+새 CALS 파일을 생성하기 위해서는 단일 밴드 1비트 래스터만 입력해야 합니다. 입력 래스터에 색상표가 없다면, 0을 검은색으로 1을 하얀색으로 가정합니다. 입력 래스터에 (2개 항목) 색상표가 있는 경우, 색상표로부터 검은색과 하얀색의 값을 결정할 것입니다.
 
-See Also
+참고
 --------
 
--  `MIL-PRF-28002C <http://everyspec.com/MIL-PRF/MIL-PRF-010000-29999/MIL-PRF-28002C_4830/>`__
--  `MIL-STD-1840C <http://everyspec.com/MIL-STD/MIL-STD-1800-1999/MIL-STD-1840C_4779/>`__
+-  `MIL-PRF-28002C <http://everyspec.com/MIL-PRF/MIL-PRF-010000-29999/MIL-PRF-28002C_4830/>`_
+-  `MIL-STD-1840C <http://everyspec.com/MIL-STD/MIL-STD-1800-1999/MIL-STD-1840C_4779/>`_

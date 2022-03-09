@@ -1,27 +1,22 @@
 .. _raster.ceos:
 
 ================================================================================
-CEOS -- CEOS Image
+CEOS -- CEOS 이미지
 ================================================================================
 
 .. shortname:: CEOS
 
 .. built_in_by_default::
 
-This is a simple, read-only reader for ceos image files. To use, select
-the main imagery file. This driver reads only the image data, and does
-not capture any metadata, or georeferencing.
+CEOS 이미지 파일을 위한, 단순한 읽기 전용 판독기입니다. 사용하려면 주 영상 파일을 선택하십시오. 이 드라이버는 이미지 데이터만 읽어오고 어떤 메타데이터나 지리참조도 가져오지 않습니다.
 
-This driver is known to work with CEOS data produced by Spot Image, but
-will have problems with many other data sources. In particular, it will
-only work with eight bit unsigned data.
+이 드라이버는 스팟이미지(Spot Image) 사가 생산하는 CEOS 데이터를 작업하기 위한 것으로 알려졌지만, 이 회사의 다른 데이터소스를 작업하려 한다면 문제가 발생할 것입니다. 이를테면 이 드라이버는 부호 없는 8비트 데이터만 작업할 수 있습니다.
 
-See the separate `SAR_CEOS <#SAR_CEOS>`__ driver for access to SAR CEOS
-data products.
+SAR CEOS 데이터 상품에 접근하려 한다면 개별 `SAR_CEOS <#SAR_CEOS>`_ 드라이버를 읽어보십시오.
 
-NOTE: Implemented as ``gdal/frmts/ceos/ceosdataset.cpp``.
+주의: ``gdal/frmts/ceos/ceosdataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::

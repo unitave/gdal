@@ -8,9 +8,9 @@ CTable2 -- CTable2 Datum Grid Shift
 
 .. built_in_by_default::
 
-NOTE: Implemented as ``gdal/frmts/raw/ctable2dataset.cpp``.
+주의: ``gdal/frmts/raw/ctable2dataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
