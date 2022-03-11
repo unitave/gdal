@@ -1,52 +1,44 @@
 .. _raster.derived:
 
 ================================================================================
-DERIVED -- Derived subdatasets driver
+DERIVED -- 파생된 하위 데이터셋 드라이버
 ================================================================================
 
 .. shortname:: DERIVED
 
 .. built_in_by_default::
 
-This driver allows accessing subdatasets derived from a given
-dataset. Those derived datasets have the same projection reference,
-geo-transform and metadata than the original dataset, but derives new
-pixel values using gdal pixel functions.
+이 드라이버는 입력 데이터셋으로부터 파생된 하위 데이터셋에 접근할 수 있게 해줍니다. 이 파생된 데이터셋들은 원본 데이터셋과 동일한 투영법 참조, 지리변형 및 메타데이터를 가지고 있지만, GDAL 픽셀 함수를 이용해서 새 픽셀 값을 파생시킵니다.
 
-Available functions
+사용할 수 있는 함수들
 -------------------
 
-Available derived datasets are:
+다음과 같은 파생 데이터셋을 사용할 수 있습니다:
 
--  AMPLITUDE: Amplitude of pixels from input bands
--  PHASE: Phase of pixels from input bands
--  REAL: Real part of pixels from input bands
--  IMAG: Imaginary part of pixels from input bands
--  CONJ: Conjugate of pixels from input bands
--  INTENSITY: Intensity (squared amplitude) of pixels from input bands
--  LOGAMPLITUDE: Log10 of amplitude of pixels from input bands
+-  AMPLITUDE: 입력 밴드로부터 나온 픽셀들의 진폭
+-  PHASE: 입력 밴드로부터 나온 픽셀들의 페이즈(phase)
+-  REAL: 입력 밴드로부터 나온 픽셀들의 실수 부분
+-  IMAG: 입력 밴드로부터 나온 픽셀들의 허수 부분
+-  CONJ: 입력 밴드로부터 나온 픽셀들의 켤레(conjugate)
+-  INTENSITY: 입력 밴드로부터 나온 픽셀들의 강도(진폭의 제곱)
+-  LOGAMPLITUDE: 입력 밴드로부터 나온 픽셀들의 진폭의 Log10
 
-Note: for non-complex data types, only LOGAMPLITUDE will be listed.
+주의: 복소수 데이터 유형이 아닌 경우, LOGAMPLITUDE만 사용할 수 있습니다.
 
-A typical use is to directly access amplitude, phase or log-amplitude of
-any complex dataset.
+일반적으로 모든 복소수 데이터셋의 진폭, 페이즈 또는 진폭 로그에 직접 접근하기 위해 사용됩니다.
 
-Accessing derived subdatasets
+파생 하위 데이터셋에 접근
 -----------------------------
 
-Derived subdatasets are stored in the DERIVED_SUBDATASETS metadata
-domain, and can be accessed using the following syntax:
+파생 하위 데이터셋은 DERIVED_SUBDATASETS 메타데이터 도메인에 저장되며, 다음 문법을 사용해서 접근할 수 있습니다:
 
 ::
 
      DERIVED_SUBDATASET:FUNCTION:dataset_name
 
-where function is one of AMPLITUDE, PHASE, REAL, IMAG, CONJ, INTENSITY,
-LOGAMPLITUDE. So as to ensure numerical precision, all derived
-subdatasets bands will have Float64 or CFloat64 precision (depending on
-the function used).
+이때 함수는 AMPLITUDE, PHASE, REAL, IMAG, CONJ, INTENSITY, LOGAMPLITUDE 가운데 하나입니다. 따라서 숫자의 정확도를 보장하기 위해 모든 파생 하위 데이터셋 밴드는 (사용한 함수에 따라) Float64 또는 CFloat64 정확도를 가지게 될 것입니다.
 
-For instance:
+예시:
 
 ::
 
@@ -160,15 +152,10 @@ For instance:
    Center      (    2.5,    3.0)
    Band 1 Block=5x6 Type=Float64, ColorInterp=Undefined
 
-Listing available subdatasets
+사용할 수 있는 하위 데이터셋 목록
 -----------------------------
 
-Available subdatasets are reported in the DERIVED_SUBDATASETS metadata
-domain. Only functions that make sense will be reported for a given
-dataset, which means that AMPLITUDE, PHASE, REAL, IMAG, CONJ and
-INTENSITY will only be reported if the dataset has at least one complex
-band. Nevertheless, even if not reported, those derived datasets are
-still reachable with the syntax presented above.
+DERIVED_SUBDATASETS 메타데이터 도메인에 사용할 수 있는 하위 데이터셋들을 리포트합니다. 입력 데이터셋에 사용할 수 있는 함수만 리포트할 것입니다. 즉 데이터셋이 복소수 유형 밴드를 최소한 1개 이상 가지고 있는 경우에만 AMPLITUDE, PHASE, REAL, IMAG, CONJ 및 INTENSITY를 리포트할 것입니다. 그럼에도, 리포트되지 않았더라도 앞에서 설명한 문법으로 파생 데이터셋에 접근할 수 있습니다.
 
 ::
 
@@ -243,7 +230,7 @@ still reachable with the syntax presented above.
    Center      (    2.5,    3.0)
    Band 1 Block=5x6 Type=CInt16, ColorInterp=Gray
 
-See Also:
+참고:
 ---------
 
--  :ref:`Using Derived Bands part of the GDAL VRT tutorial <vrt_derived_bands>`
+-  :ref:`GDAL VRT 예제의 파생 밴드 사용하기 부분 <vrt_derived_bands>`
