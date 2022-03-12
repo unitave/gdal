@@ -8,20 +8,14 @@ EIR -- Erdas Imagine Raw
 
 .. built_in_by_default::
 
-GDAL supports the Erdas Imagine Raw format for read access including 1,
-2, 4, 8, 16 and 32bit unsigned integers, 16 and 32bit signed integers
-and 32 and 64bit complex floating point. Georeferencing is supported.
+GDAL은 1, 2, 4, 8, 16 및 32비트 부호 없는 정수형, 16 및 32비트 부호 있는 정수형 그리고 32 및 64비트 복소수 부동소수점형을 포함하는 읽기 접근을 위해 Erdas Imagine Raw 포맷을 지원합니다. 지리참조도 지원합니다.
 
-To open a dataset select the file with the header information. The
-driver finds the image file from the header information. Erdas documents
-call the header file the "raw" file and it may have the extension .raw
-while the image file that contains the actual raw data may have the
-extension .bl.
+데이터셋을 열려면 헤더 정보를 가지고 있는 파일을 선택하십시오. 이 드라이버는 헤더 정보로부터 이미지 파일을 찾습니다. Erdas 문서에서는 헤더 파일을 "raw" 파일이라 부르는데, 이 파일은 .raw 확장자를 가질 수도 있는 반면 실제 raw 데이터를 담고 있는 이미지 파일은 .bl 확장자를 가질 수도 있습니다.
 
-NOTE: Implemented as ``gdal/frmts/raw/eirdataset.cpp``.
+주의: ``gdal/frmts/raw/eirdataset.cpp`` 로 구현되었습니다.
 
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
