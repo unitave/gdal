@@ -1,26 +1,22 @@
 .. _raster.doq2:
 
 ================================================================================
-DOQ2 -- New Labelled USGS DOQ
+DOQ2 -- 새 명찰 USGS DOQ
 ================================================================================
 
 .. shortname:: DOQ2
 
 .. built_in_by_default::
 
-Support for read access, including reading of an affine georeferencing
-transform, capture of the projection string and reading of other
-auxiliary fields as metadata. This format is the new, labelled DOQ
-(Digital Ortho Quad) format from the USGS.
+이 드라이버는 지리참조 아핀 변환(affine transform) 읽기와 투영법 문자열 수집 및 기타 보조 필드를 메타데이터로 읽어오기를 포함하는 읽기 접근을 지원합니다. USGS가 개발한 새로운 명찰(labelled) DOQ(Digital Ortho Quad) 포맷입니다.
 
-This driver was implemented by Derrick J Brashear.
+데릭 J. 브래시어(Derrick J. Brashear)가 이 드라이버를 구현했습니다.
 
-NOTE: Implemented as ``gdal/frmts/raw/doq2dataset.cpp``.
+주의: ``gdal/frmts/raw/doq2dataset.cpp`` 로 구현되었습니다.
 
-See Also: `USGS DOQ
-Standards <http://rockyweb.cr.usgs.gov/nmpstds/doqstds.html>`__
+참고: `USGS DOQ 표준 <http://rockyweb.cr.usgs.gov/nmpstds/doqstds.html>`_
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
