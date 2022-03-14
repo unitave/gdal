@@ -1,67 +1,37 @@
 .. _raster.fits:
 
 ================================================================================
-FITS -- Flexible Image Transport System
+FITS -- 유연한 이미지 전송 시스템(Flexible Image Transport System)
 ================================================================================
 
 .. shortname:: FITS
 
 .. build_dependencies:: libcfitsio
 
-FITS is a format used mainly by astronomers, but it is a relatively
-simple format that supports arbitrary image types and multi-spectral
-images, and so has found its way into GDAL. FITS support is implemented
-in terms of the standard `CFITSIO
-library <http://heasarc.gsfc.nasa.gov/docs/software/fitsio/fitsio.html>`__,
-which you must have on your system in order for FITS support to be
-enabled (see :ref:`notes on CFITSIO linking <notes-on-cfitsio-linking>`).
-Both reading and writing of FITS files is supported.
+FITS는 주로 우주비행사들이 사용하는 포맷이지만, 임의의 이미지 유형들 및 다중 스펙트럼 이미지를 지원하는 상대적으로 단순한 포맷이기 때문에 GDAL이 지원합니다. 표준 `CFITSIO 라이브러리 <http://heasarc.gsfc.nasa.gov/docs/software/fitsio/fitsio.html>`_ 로 FITS 지원을 구현했기 때문에, 사용자 시스템에서 FITS 지원을 활성화하려면 사용자 시스템에 이 라이브러리가 설치되어 있어야만 합니다. (:ref:`CFITSIO 링크 작업에 대한 메모 <notes-on-cfitsio-linking>` 를 참조하십시오.) FITS 파일 읽기 및 쓰기 둘 다 지원합니다.
 
-Starting from version 3.0
-georeferencing system support is implemented via the conversion of
-WCS (World Coordinate System) keywords.
-Only Latitude - Longitude systems (see the `FITS standard document
-<https://fits.gsfc.nasa.gov/standard40/fits_standard40aa-le.pdf#subsection.8.3>`_)
-have been implemented, those for which remote sensing processing is commonly used.
-As 3D Datum information is missing in FITS/WCS standard, Radii and target bodies
-are translated using the planetary extension proposed `here
-<https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2018EA000388>`_. 
+표준 3.0버전부터, WCS(World Coordinate System) 키워드 변환을 통해 지리참조 좌표계를 구현했습니다. 원격 탐사 처리 과정에서 흔히 쓰이는 위도-경도 좌표계들만 (`FITS 표준 문서 <https://fits.gsfc.nasa.gov/standard40/fits_standard40aa-le.pdf#subsection.8.3>`_ 참조) 구현되었습니다. FITS/WCS 표준에 3차원 원점(datum)이 누락되었기 때문에, `여기 <https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2018EA000388>`_ 에서 제안하는 행성 확장 프로그램을 이용해서 반경 및 대상 천체를 변환합니다.
 
-Non-standard header keywords that are present in the FITS file will be
-copied to the dataset's metadata when the file is opened, for access via
-GDAL methods. Similarly, non-standard header keywords that the user
-defines in the dataset's metadata will be written to the FITS file when
-the GDAL handle is closed.
+파일을 열 때 GDAL 메소드를 통한 접근을 위해 데이터셋의 메타데이터에 FITS 파일에 존재하는 비표준 헤더 키워드를 복사할 것입니다. 마찬가지로, GDAL 처리를 종료할 때 FITS 파일에 사용자가 데이터셋의 메타데이터에 정의한 비표준 헤더 키워드를 작성할 것입니다.
 
-Note to those familiar with the CFITSIO library: The automatic rescaling
-of data values, triggered by the presence of the BSCALE and BZERO header
-keywords in a FITS file, is disabled in GDAL < v3.0. Those header keywords are
-accessible and updatable via dataset metadata, in the same was as any
-other header keywords, but they do not affect reading/writing of data
-values from/to the file. Starting from version 3.0 BZERO and BSCALE keywords
-are managed via standard :cpp:func:`GDALRasterBand::GetOffset` / :cpp:func:`GDALRasterBand::SetOffset`
-and :cpp:func:`GDALRasterBand::GetScale` / :cpp:func:`GDALRasterBand::SetScale` GDAL functions and no more
-referred as metadata.
+CFITSIO 라이브러리에 친숙한 사용자에게: GDAL 3.0 미만 버전에서는 FITS 파일에 BSCALE 및 BZERO 헤더 키워드가 존재하는 경우 촉발되는 데이터 값의 자동 크기 조정이 비활성화됩니다. 다른 모든 헤더 키워드와 마찬가지로 이 헤더 키워드들도 데이터셋 메타데이터를 통해 접근 및 업데이트할 수 있지만, 이 키워드들이 파일로부터 데이터 값 읽기 또는 파일에 데이터 값을 쓰기에 영향을 미치지는 않습니다. GDAL 3.0버전부터, BZERO 및 BSCALE 키워드를 더 이상 메타데이터로 참조하지 않고서도 표준 :cpp:func:`GDALRasterBand::GetOffset` / :cpp:func:`GDALRasterBand::SetOffset` 및 :cpp:func:`GDALRasterBand::GetScale` / :cpp:func:`GDALRasterBand::SetScale` GDAL 함수를 통해 관리할 수 있습니다.
 
-Multiple image support
+다중 이미지 지원
 ----------------------
 
-Starting with GDAL 3.2, Multi-Extension FITS (MEF) files that contain one or
-more extensions following the primary HDU are supported. When more than 2 image
-HDUs are found, they are reported as subdatasets.
+GDAL 3.2버전부터, 제1 HDU 뒤에 하나 이상의 확장자를 담고 있는 MEF(Multi-Extension FITS) 파일을 지원합니다. 2개 이상의 이미지 HDU가 검색된 경우, 이 이미지들을 하위 데이터셋으로 리포트합니다.
 
-The connection string for a given subdataset/HDU is ``FITS:"filename.fits":hdu_number``
+입력 데이터셋/HDU를 위한 연결 문자열은 ``FITS:"filename.fits":hdu_number`` 입니다.
 
-Binary table support
+바이너리 테이블 지원
 --------------------
 
-Starting with GDAL 3.2, binary tables will be exposed as vector layers (update
-and creation support from GDAL 3.2.1).
+GDAL 3.2버전부터, 바이너리 테이블을 벡터 레이어로 노출시킬 것입니다. (업데이트 및 생성은 GDAL 3.2.1부터 지원합니다.)
 
-The FITS data types are mapped to OGR data types as the following:
+FITS 데이터 유형은 OGR 데이터 유형에 다음과 같이 매핑됩니다:
 
 .. list-table:: Data types
-   :header-rows: 1
+   :header-rows: 0
 
    * - TFORM value
      - TSCAL, TOFFSET value
@@ -247,7 +217,7 @@ to the physical value (only applies to numeric data types)
 TNULL headers are used for integer numeric data types and for a single-occurence
 field to set a OGR field to NULL.
 
-Layer creation options
+레이어 생성 옵션
 ----------------------
 
 The following layer creation options are available:
@@ -270,7 +240,7 @@ When using ogr2ogr or :cpp:func:`GDALVectorTranslate` with a FITS source, the
 FITS header will be taken into account, in particular to help to determine the
 FITS data type of target columns.
 
-Examples
+예시
 --------
 
 * Listing subdatasets in a MEF .fits:
@@ -330,31 +300,31 @@ Examples
         $ ogr2ogr out.fits my.gpkg my_table
 
 
-Other
+기타
 -----
 
-NOTE: Implemented as ``gdal/frmts/fits/fitsdataset.cpp``.
+주의: ``gdal/frmts/fits/fitsdataset.cpp`` 로 구현되었습니다.
 
 .. _notes-on-cfitsio-linking:
 
-Notes on CFITSIO linking in GDAL
---------------------------------
-Linux
+GDAL에서의 CFITSIO 링크 작업에 대한 메모
+--------------------------------------
+리눅스
 ^^^^^
-From source
+소스로부터
 """""""""""
 Install CFITSIO headers from your distro (eg, cfitsio-devel on Fedora; libcfitsio-dev on Debian-Ubuntu), then compile GDAL as usual. CFITSIO will be automatically detected and linked.
 
-From distros
-""""""""""""
+배포판으로부터
+"""""""""""""
 On Fedora/CentOS install CFITSIO then GDAL with dnf (yum): cfitsio is automatically linked.
 
-MacOSX
+맥OS
 ^^^^^^
 The last versions of the MacOSX packages are not linked against CFITSIO.
 Install CFITSIO as described in the `official documentation <https://heasarc.gsfc.nasa.gov/docs/software/fitsio/fitsio_macosx.html>`__.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
