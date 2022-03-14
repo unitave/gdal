@@ -33,178 +33,178 @@ FITS 데이터 유형은 OGR 데이터 유형에 다음과 같이 매핑됩니�
 .. list-table:: Data types
    :header-rows: 0
 
-   * - TFORM value
-     - TSCAL, TOFFSET value
-     - Occurrence count
-     - OGR field type
-     - OGR field subtype
-   * - 'L' (Logical)
-     - ignored
+   * - TFORM 값
+     - TSCAL, TOFFSET 값
+     - 발생 횟수
+     - OGR 필드 유형
+     - OGR 필드 하위 유형
+   * - 'L' (진릿값)
+     - 무시됨
      - 1
      - OFTInteger
      - OFSTBoolean
-   * - 'L' (Logical)
-     - ignored
-     - > 1
+   * - 'L' (진릿값)
+     - 무시됨
+     - 1 초과
      - OFTIntegerList
      - OFSTBoolean
-   * - 'X' (bit)
-     - ignored
+   * - 'X' (비트)
+     - 무시됨
      - each bit mapped to a OGR field
      - OFTInteger
      - OFSTNone
-   * - 'B' (unsigned byte)
-     - 1, 0 (unsigned byte) or 1, -128 (signed byte)
+   * - 'B' (부호 없는 바이트)
+     - 1, 0 (부호 없는 바이트) or 1, -128 (부호 있는 바이트)
      - 1
      - OFTInteger
      - OFSTNone
-   * - 'B' (unsigned byte)
-     - 1, 0 (unsigned byte) or 1, -128 (signed byte)
-     - > 1
+   * - 'B' (부호 없는 바이트)
+     - 1, 0 (부호 없는 바이트) or 1, -128 (부호 있는 바이트)
+     - 1 초과
      - OFTIntegerList
      - OFSTNone
-   * - 'I' (16 bit signed integer)
+   * - 'I' (16비트 부호 있는 정수)
      - 1, 0
      - 1
      - OFTInteger
      - OFSTInt16
-   * - 'I' (16 bit integer, interpreted as unsigned)
+   * - 'I' (16비트 정수, 부호 없는 것으로 해석)
      - 1, 32768
      - 1
      - OFTInteger
      - OFSTNone
-   * - 'I' (16 bit signed integer)
+   * - 'I' (16비트 부호 있는 정수)
      - other than (1,0) and (1,32768)
      - 1
      - OFTReal
      - OFSTNone
-   * - 'I' (16 bit integer)
+   * - 'I' (16비트 정수)
      - 1, 0
-     - >1
+     - 1 초과
      - OFTIntegerList
      - OFSTInt16
-   * - 'I' (16 bit integer, interpreted as unsigned)
+   * - 'I' (16비트 정수, 부호 없는 것으로 해석)
      - 1, 32768
-     - >1
+     - 1 초과
      - OFTIntegerList
      - OFSTNone
-   * - 'I' (16 bit signed integer)
+   * - 'I' (16비트 부호 있는 정수)
      - other than (1, 0) and (1, 32768)
-     - > 1
+     - 1 초과
      - OFTRealList
      - OFSTNone
-   * - 'J' (32 bit signed integer)
+   * - 'J' (32비트 부호 있는 정수)
      - 1, 0
      - 1
      - OFTInteger
      - OFSTNone
-   * - 'J' (32 bit integer, interpreted as unsigned)
+   * - 'J' (32비트 정수, 부호 없는 것으로 해석)
      - 1, 2147483648
      - 1
      - OFTInteger
      - OFSTNone
-   * - 'J' (32 bit signed integer)
+   * - 'J' (32비트 부호 있는 정수)
      - other than (1, 0) and (1, 2147483648)
      - 1
      - OFTReal
      - OFSTNone
-   * - 'J' (32 bit integer)
+   * - 'J' (32비트 정수)
      - 1, 0
-     - >1
+     - 1 초과
      - OFTIntegerList
      - OFSTNone
-   * - 'J' (32 bit integer, interpreted as unsigned)
+   * - 'J' (32비트 정수, 부호 없는 것으로 해석)
      - 1, 2147483648
-     - >1
+     - 1 초과
      - OFTIntegerList
      - OFSTNone
-   * - 'J' (32 bit signed integer)
+   * - 'J' (32비트 부호 있는 정수)
      - other than (1, 0) and (1, 2147483648)
-     - > 1
+     - 1 초과
      - OFTRealList
      - OFSTNone
-   * - 'K' (64 bit signed integer)
+   * - 'K' (64비트 부호 있는 정수)
      - 1, 0
      - 1
      - OFTInteger64
      - OFSTNone
-   * - 'K' (64 bit signed integer)
+   * - 'K' (64비트 부호 있는 정수)
      - other than (1, 0)
      - 1
      - OFTReal
      - OFSTNone
-   * - 'K' (64 bit signed integer)
+   * - 'K' (64비트 부호 있는 정수)
      - 1, 0
-     - > 1
+     - 1 초과
      - OFTInteger64
      - OFSTNone
-   * - 'K' (64 bit signed integer)
+   * - 'K' (64비트 부호 있는 정수)
      - other than (1, 0)
-     - > 1
+     - 1 초과
      - OFTRealList
      - OFSTNone
-   * - 'A' (character)
-     - ignored
+   * - 'A' (문자)
+     - 무시됨
      - if TFORM='Axxx' and no TDIM header
      - OFTString
      - OFSTNone
-   * - 'A' (character)
-     - ignored
+   * - 'A' (문자)
+     - 무시됨
      - TDIM for 2D field, or variable length ('PA')
      - OFTStringList
      - OFSTNone
-   * - 'E' (single precision floating point)
+   * - 'E' (단정밀도 부동소수점)
      - 1, 0
      - 1
      - OFTReal
      - OFSTFloat32
-   * - 'E' (single precision floating point)
+   * - 'E' (단정밀도 부동소수점)
      - other than (1, 0)
      - 1
      - OFTReal
      - OFSTNone
-   * - 'E' (single precision floating point)
+   * - 'E' (단정밀도 부동소수점)
      - 1, 0
-     - > 1
+     - 1 초과
      - OFTRealList
      - OFSTFloat32
-   * - 'E' (single precision floating point)
+   * - 'E' (단정밀도 부동소수점)
      - other than (1, 0)
-     - > 1
+     - 1 초과
      - OFTRealList
      - OFSTNone
-   * - 'D' (double precision floating point)
+   * - 'D' (배정밀도 부동소수점)
      - any
      - 1
      - OFTReal
      - OFSTNone
-   * - 'D' (double precision floating point)
+   * - 'D' (배정밀도 부동소수점)
      - any
-     - > 1
+     - 1 초과
      - OFTRealList
      - OFSTNone
-   * - 'C' (single precision complex)
+   * - 'C' (단정밀도 복소수)
      - any
      - 1
      - OFTString whose value is of the form "x + yj"
      - OFSTNone
-   * - 'C' (single precision complex)
+   * - 'C' (단정밀도 복소수)
      - any
-     - > 1
+     - 1 초과
      - OFTStringList whose values are of the form "x + yj"
      - OFSTNone
-   * - 'M' (double precision complex)
+   * - 'M' (배정밀도 복소수)
      - any
      - 1
      - OFTString whose value is of the form "x + yj"
      - OFSTNone
-   * - 'M' (double precision complex)
+   * - 'M' (배정밀도 복소수)
      - any
-     - > 1
+     - 1 초과
      - OFTStringList whose values are of the form "x + yj"
      - OFSTNone
 
-Fields with a repeat count > 1 expressing fixed size arrays, or fields using
+Fields with a repeat count 1 초과 expressing fixed size arrays, or fields using
 array descriptors 'P' and 'Q' for variable length arrays are mapped to OGR OFTxxxxxList
 data types. The potential 2D structure of such field has no direct equivalence in
 OGR, so OGR will expose a linear structure. For fixed size arrays, the user can retrieve
