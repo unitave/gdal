@@ -1,32 +1,24 @@
 .. _raster.gff:
 
 ================================================================================
-GFF -- Sandia National Laboratories GSAT File Format
+GFF -- 샌디아 국립 연구소 GSAT 파일 포맷
 ================================================================================
 
 .. shortname:: GFF
 
 .. built_in_by_default::
 
-This read-only GDAL driver is designed to provide access to processed
-data from Sandia National Laboratories' various experimental sensors.
-The format is essentially an arbitrary length header containing
-instrument configuration and performance parameters along with a binary
-matrix of 16- or 32-bit complex or byte real data.
+이 읽기전용 GDAL 드라이버는 샌디아 국립 연구소(Sandia National Laboratories)의 여러 가지 실험적인 센서에서 처리된 데이터에 접근하기 위해 설계되었습니다. 이 포맷은 본질적으로 기구(instrument) 환경설정 및 성능 파라미터를 담고 있는 임의의 길이의 헤더를 가진 16비트 또는 32비트 복소수 또는 실수 바이트 데이터 유형 행렬입니다.
 
-The GFF format was implemented based on the Matlab code provided by
-Sandia to read the data. The driver supports all types of data (16-bit
-or 32-bit complex, real bytes) theoretically, however due to a lack of
-data only 32-bit complex data has been tested.
+GFF 포맷은 샌디아가 데이터를 읽기 위해 제공하는 매트랩(MATLAB) 코드를 기반으로 구현되었습니다. 이 드라이버는 이론적으로 모든 유형의 (16비트 또는 32비트 복소수 또는 실수 바이트형) 데이터를 지원하지만, 데이터 부족으로 인해 32비트 복소수 데이터만 테스트되었습니다.
 
-Sandia provides some sample data at
-http://www.sandia.gov/radar/complex-data/.
+샌디아는 http://www.sandia.gov/radar/complex-data/ 에 몇몇 샘플 데이터를 제공하고 있습니다.
 
-The extension for GFF formats is .gff.
+GFF 포맷 확장자는 .gff입니다.
 
-NOTE: Implemented as ``gdal/frmts/gff/gff_dataset.cpp``.
+주의: ``gdal/frmts/gff/gff_dataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_virtualio::
