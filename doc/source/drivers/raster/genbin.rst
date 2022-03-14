@@ -1,17 +1,14 @@
 .. _raster.genbin:
 
 ================================================================================
-GenBin -- Generic Binary (.hdr labelled)
+GenBin -- 일반 바이너리 (.hdr 명찰)
 ================================================================================
 
 .. shortname:: GenBin
 
 .. built_in_by_default::
 
-This driver supporting reading "Generic Binary" files labelled with a
-.hdr file, but distinct from the more common ESRI labelled .hdr format
-(EHdr driver). The origin of this format is not entirely clear. The .hdr
-files supported by this driver are look something like this:
+이 드라이버는 .hdr 파일로 라벨링된 "일반 바이너리(Generic Binary)" 파일 읽기를 지원하지만, 더 많이 사용되는 ESRI 명찰(Labelled) .hdr 포맷(EHdr 드라이버)과는 다릅니다. 이 포맷의 기원은 확실하지 않습니다. 이 드라이버가 지원하는 .hdr 파일은 다음과 비슷하게 보입니다:
 
 ::
 
@@ -22,13 +19,11 @@ files supported by this driver are look something like this:
    ...
    }}}
 
-Pixel data types of U8, U16, S16, F32, F64, and U1 (bit) are supported.
-Georeferencing and coordinate system information should be supported
-when provided.
+U8, U16, S16, F32, F64, 그리고 U1 (비트) 픽셀 데이터 유형을 지원합니다. 지리참조 및 좌표계 정보가 있을 경우 지원할 것입니다.
 
-NOTE: Implemented as ``gdal/frmts/raw/genbindataset.cpp``.
+주의: ``gdal/frmts/raw/genbindataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_virtualio::
