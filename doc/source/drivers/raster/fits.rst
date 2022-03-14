@@ -204,46 +204,29 @@ FITS 데이터 유형은 OGR 데이터 유형에 다음과 같이 매핑됩니�
      - 값이 "x + yj" 형태인 OFTStringList
      - OFSTNone
 
-Fields with a repeat count 1 초과 expressing fixed size arrays, or fields using
-array descriptors 'P' and 'Q' for variable length arrays are mapped to OGR OFTxxxxxList
-data types. The potential 2D structure of such field has no direct equivalence in
-OGR, so OGR will expose a linear structure. For fixed size arrays, the user can retrieve
-the value of the TDIMxx header in the layer metadata to recover the dimensionality
-of the field.
+고정 크기 배열을 표현하는, 반복 횟수가 1을 초과하는 필드 또는 변수 길이 배열에 배열 서술자(descriptor) 'P'와 'Q'를 사용하는 필드를 OGR OFTxxxxxList 데이터 유형과 매핑합니다. OGR이 이런 필드의 잠재적인 2차원 구조에 직접 대응하지 못 하기 때문에, OGR은 선형 구조를 노출시킬 것입니다. 고정 크기 배열의 경우, 사용자가 레이어 메타데이터에 있는 TDIMxx 헤더의 값을 가져와서 필드의 차원수(dimensionality)를 복구할 수 있습니다.
 
-Fields that have TSCAL and/or TZERO headers are automatically scaled and offset
-to the physical value (only applies to numeric data types)
+(숫자 데이터 유형에 대해서만) TSCAL 그리고/또는 TZERO 헤더를 가진 필드를 자동적으로 크기 조정하고 실제 값(physical value)으로 오프셋합니다.
 
-TNULL headers are used for integer numeric data types and for a single-occurence
-field to set a OGR field to NULL.
+정수 숫자 데이터 유형과 단일 발생 필드에 쓰이는 TNULL 헤더를 사용해서 OGR 필드를 NULL로 설정할 수 있습니다.
 
 레이어 생성 옵션
 ----------------------
 
-The following layer creation options are available:
+다음과 같은 레이어 생성 옵션을 사용할 수 있습니다:
 
-- **REPEAT_{fieldname}=number**. For a given field (substitute {fieldname} by its
-  name) of type IntegerList, Integer64List
-  or RealList, specify a fixed number of elements. Otherwise those fields will be
-  created as variable-length FITS columns, which can have performance impact on
-  creation.
+- **REPEAT_{fieldname}=number**.  지정한 (자신의 이름으로 {fieldname}을 대체하는) IntegerList, Integer64List 또는 RealList 유형의 필드에 대해, 고정된 개수의 요소들을 지정합니다. 이렇게 하지 않으면 이런 필드들을 변수 길이의 FITS 열로 생성할 것인데, 생성 작업 속도에 영향을 미칠 수도 있습니다.
 
-- **COMPUTE_REPEAT=AT_FIELD_CREATION/AT_FIRST_FEATURE_CREATION**. For fields of
-  type IntegerList, Integer64List or RealList, specifies when they are mapped to
-  a FITS column type. The default is AT_FIELD_CREATION, and implies that they
-  will be created as variable-length FITS columns, unless a REPEAT_{fieldname}
-  option is specified. When AT_FIRST_FEATURE_CREATION is specified, the number of
-  elements in the first feature will be taken into account to create fixed-size
-  FITS columns.
+- **COMPUTE_REPEAT=AT_FIELD_CREATION/AT_FIRST_FEATURE_CREATION**. 
+  IntegerList, Integer64List 또는 RealList 유형의 필드들이 FITS 열 유형에 매핑될 시점을 지정합니다.
+  기본값은 AT_FIELD_CREATION으로, REPEAT_{fieldname} 옵션을 지정하지 않는 한 이런 필드들을 변수 길이의 FITS 열로 생성할 것이라는 사실을 의미합니다. AT_FIRST_FEATURE_CREATION으로 지정하면, 첫 번째 객체의 요소 개수를 연산에 넣어서 고정 크기 FITS 열을 생성합니다.
 
-When using ogr2ogr or :cpp:func:`GDALVectorTranslate` with a FITS source, the
-FITS header will be taken into account, in particular to help to determine the
-FITS data type of target columns.
+FITS 소스를 ogr2ogr 또는 :cpp:func:`GDALVectorTranslate` 와 사용 시, FITS 헤더를 연산에 넣을 것입니다. 특히 대상 열의 FITS 데이터 유형을 결정하기 위해서 말입니다.
 
 예시
 --------
 
-* Listing subdatasets in a MEF .fits:
+* 하위 데이터셋들을 MEF .fits로 목록화:
 
     ::
 
@@ -266,7 +249,7 @@ FITS data type of target columns.
         Lower Right (  512.0,  512.0)
         Center      (  256.0,  256.0)
 
-* Opening a given raster HDU:
+* 지정한 래스터의 HDU 열기:
 
     ::
 
@@ -285,14 +268,14 @@ FITS data type of target columns.
         Center      (    0.5,    1.0)
         Band 1 Block=1x1 Type=Byte, ColorInterp=Undefined
 
-* Listing potential binary tables in a FITS file:
+* FITS 파일에 있는 잠재적 바이너리 테이블 목록화:
 
     ::
 
         $ ogrinfo my.fits
 
 
-* Converting a GeoPackage layer into a FITS binary table:
+* GeoPackage 레이어를 FITS 바이너리 테이블로 변환:
 
 
     ::
@@ -313,16 +296,15 @@ GDAL에서의 CFITSIO 링크 작업에 대한 메모
 ^^^^^
 소스로부터
 """""""""""
-Install CFITSIO headers from your distro (eg, cfitsio-devel on Fedora; libcfitsio-dev on Debian-Ubuntu), then compile GDAL as usual. CFITSIO will be automatically detected and linked.
+사용자의 배포판으로부터 CFITSIO 헤더를 (예를 들면 페도라에서는 cfitsio-devel, 데비안-우분투에서는 libcfitsio-dev) 설치한 다음, 평소대로 GDAL을 컴파일하십시오. CFITSIO를 자동으로 탐지해서 링크시킬 것입니다.
 
 배포판으로부터
 """""""""""""
-On Fedora/CentOS install CFITSIO then GDAL with dnf (yum): cfitsio is automatically linked.
+페도라/CentOS에서 dnf(yum)로 CFITSIO를 그 다음에 GDAL을 설치하십시오: CFITSIO를 자동으로 링크시킬 것입니다.
 
 맥OS
 ^^^^^^
-The last versions of the MacOSX packages are not linked against CFITSIO.
-Install CFITSIO as described in the `official documentation <https://heasarc.gsfc.nasa.gov/docs/software/fitsio/fitsio_macosx.html>`__.
+맥OS X 패키지 최신 버전은 CFITSIO를 대상으로 링크되지 않습니다. `공식 문서 <https://heasarc.gsfc.nasa.gov/docs/software/fitsio/fitsio_macosx.html>`_ 에 설명된 대로 CFITSIO를 설치하십시오.
 
 드라이버 케이퍼빌리티
 -------------------
