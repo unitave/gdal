@@ -1,55 +1,52 @@
 .. _raster.georaster:
 
 ================================================================================
-Oracle Spatial GeoRaster
+오라클 공간 지오래스터
 ================================================================================
 
 .. shortname:: GeoRaster
 
-.. build_dependencies:: Oracle client libraries
+.. build_dependencies:: 오라클 클라이언트 라이브러리들
 
-This driver supports reading and writing raster data in Oracle Spatial
-GeoRaster format (10g or later). The Oracle Spatial GeoRaster driver is
-optionally built as a GDAL plugin, but it requires Oracle client
-libraries.
+이 드라이버는 (10g버전 이상의) 오라클 공간 지오래스터(Oracle Spatial GeoRaster) 포맷 래스터 데이터 읽기 및 쓰기를 지원합니다. GDAL 플러그인으로 오라클 공간 지오래스터 드라이버를 빌드할 수 있는 옵션이 있지만, 오라클 클라이언트 라이브러리가 반드시 필요합니다.
 
-When opening a GeoRaster, its name should be specified in the form:
+지오래스터를 열 때, 지오래스터의 이름을 다음 양식으로 지정해야 합니다:
 
-| georaster:<user>{,/}<pwd>{,@}[db],[schema.][table],[column],[where]
-| georaster:<user>{,/}<pwd>{,@}[db],<rdt>,<rid>
+::
 
-Where:
+    georaster:<user>{,/}<pwd>{,@}[db],[schema.][table],[column],[where]
+    georaster:<user>{,/}<pwd>{,@}[db],<rdt>,<rid>
 
-| user   = Oracle server user's name login
-| pwd    = user password
-| db     = Oracle server identification (database name)
-| schema = name of a schema
-| table  = name of a GeoRaster table (table that contains GeoRaster
-  columns)
-| column = name of a column data type MDSYS.SDO_GEORASTER
-| where  = a simple where clause to identify one or multiples
-  GeoRaster(s)
-| rdt    = name of a raster data table
-| rid    = numeric identification of one GeoRaster
+이때:
 
-Examples:
+  - user   = 오라클 서버 로그인을 위한 사용자 이름
+  - pwd    = 사용자 비밀번호
+  - db     = 오라클 서버 식별 정보(데이터베이스 이름)
+  - schema = 스키마 이름
+  - table  = 지오래스터 테이블 이름 (지오래스터 열을 담고 있는 테이블)
+  - column = MDSYS.SDO_GEORASTER 데이터 유형의 열 이름
+  - where  = 하나 이상의 지오래스터(들)를 식별하기 위한 단순 WHERE 문
+  - rdt    = 래스터 데이터 테이블 이름
+  - rid    = 지오래스터 1개의 숫자형 식별 정보
 
-| geor:scott,tiger,demodb,table,column,id=1
-| geor:scott,tiger,demodb,table,column,"id = 1"
-| "georaster:scott/tiger@demodb,table,column,gain>10"
-| "georaster:scott/tiger@demodb,table,column,city='Brasilia'"
-| georaster:scott,tiger,,rdt_10$,10
-| geor:scott/tiger,,rdt_10$,10
+예시:
 
-Note: do note use space around the field values and the commas.
+::
 
-Note: like in the last two examples, the database name field could be
-left empty (",,") and the TNSNAME will be used.
+    geor:scott,tiger,demodb,table,column,id=1
+    geor:scott,tiger,demodb,table,column,"id = 1"
+    "georaster:scott/tiger@demodb,table,column,gain>10"
+    "georaster:scott/tiger@demodb,table,column,city='Brasilia'"
+    georaster:scott,tiger,,rdt_10$,10
+    geor:scott/tiger,,rdt_10$,10
 
-Note: If  the query results in more than one GeoRaster it will be
-treated as a GDAL metadata's list of sub-datasets (see below)
+주의: 필드값을 둘러싸는 공백과 쉼표를 사용해야 합니다.
 
-Driver capabilities
+주의: 마지막 두 예시처럼, 데이터베이스 이름 항목을 비워둘 수 있으며 (",,") 이 경우 TNSNAME을 사용할 것입니다.
+
+주의: 쿼리 결과 하나 이상의 지오래스터를 반환하는 경우 GDAL 메타데이터의 하위 데이터셋 목록으로 취급할 것입니다. (아래 내용 참조)
+
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -60,50 +57,49 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Browsing the database for GeoRasters
+지오래스터 데이터베이스 탐색
 ------------------------------------
 
-By providing some basic information the GeoRaster driver is capable of
-listing the existing rasters stored on the server:
+몇몇 기본 정보를 지정해주면, 지오래스터 드라이버가 서버에 저장된 기존 래스터들을 목록화할 수 있습니다:
 
-To list all the GeoRaster table on the server that belongs to that user
-name and database:
+    다음 사용자 이름과 데이터베이스에 속해 있는 서버의 모든 지오래스터 테이블을 목록화하려면:
+    
+        ::
+        
+            % gdalinfo georaster:scott/tiger@db1
 
-% gdalinfo georaster:scott/tiger@db1
+    다음 테이블에 존재하는 모든 지오래스터 유형 열을 목록화하려면:
 
-| To list all the GeoRaster type columns that exist in that table:
+        ::
+        
+            % gdalinfo georaster:scott/tiger@db1,table_name
 
-.. container::
+    다음 명령어는 다음 테이블에 저장된 모든 지오래스터 객체를 목록화할 것입니다:
 
-   % gdalinfo georaster:scott/tiger@db1,table_name
+        ::
+        
+            % gdalinfo georaster:scott/tiger@db1,table_name,georaster_column
 
-That will list all the GeoRaster objects stored in that table.
+    다음 명령어는 다음 테이블에 존재하는 모든 지오래스터를 WHERE 문에 따라 목록화할 것입니다:
 
-.. container::
+        ::
+        
+            % gdalinfo
+            georaster:scott/tiger@db1,table_name,georaster_column,city='Brasilia'
 
-   % gdalinfo georaster:scott/tiger@db1,table_name,georaster_column
+이 쿼리들의 결과가 다음 예시와 같은 GDAL 메타데이터 하위 데이터셋으로 반환된다는 사실을 기억하십시오:
 
-That will list all the GeoRaster existing on that table according to a
-Where clause.
+    ::
+    
+        % gdalinfo georaster:scott/tiger
+        Driver: GeoRaster/Oracle Spatial GeoRaster
+        Subdatasets:
+        SUBDATASET_1_NAME=georaster:scott,tiger,,LANDSAT
+        SUBDATASET_1_DESC=Table:LANDSAT
+        SUBDATASET_2_NAME=georaster:scott,tiger,,GDAL_IMPORT
+        SUBDATASET_2_DESC=Table:GDAL_IMPORT
 
-.. container::
-
-   % gdalinfo
-   georaster:scott/tiger@db1,table_name,georaster_column,city='Brasilia'
-
-|
-| Note that the result of those queries are returned as GDAL metadata
-  sub-datasets, e.g.:
-
-| % gdalinfo georaster:scott/tiger
-| Driver: GeoRaster/Oracle Spatial GeoRaster
-| Subdatasets:
-| SUBDATASET_1_NAME=georaster:scott,tiger,,LANDSAT
-  SUBDATASET_1_DESC=Table:LANDSAT
-  SUBDATASET_2_NAME=georaster:scott,tiger,,GDAL_IMPORT
-  SUBDATASET_2_DESC=Table:GDAL_IMPORT
-
-Creation Options
+생성 옵션
 ----------------
 
 -  **BLOCKXSIZE**: The number of pixel columns on raster block.
