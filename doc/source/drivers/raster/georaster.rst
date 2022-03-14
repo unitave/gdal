@@ -259,6 +259,7 @@ WHERE 구문 또는 RDT와 RID 쌍을 사용하면 지오래스터를 식별할 
 GDAL을 이용하는 응용 프로그램은 이론적으로 다른 모든 포맷과 마찬가지로 지오래스터를 읽고 쓸 수 있지만, 대부분의 경우 파일 시스템 상에 있는 파일에 우선 접근하려는 경향이 있습니다. 이때 한 가지 대안은 지오래스터 설명을 표현하는 VRT를 다음과 같이 생성하는 것입니다:
 
 ::
+
     % gdal_translate -of VRT geor:scott/tiger@dbdemo,landsat,scene,id=54
     view_54.vrt
     % openenv view_54.vrt
