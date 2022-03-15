@@ -1,8 +1,7 @@
 .. _raster.grib:
 
 ================================================================================
-GRIB -- 바이너리 형식의 WMO 일반 정규 배포 정보
-(WMO General Regularly-distributed Information in Binary form)
+GRIB -- 바이너리 형식의 WMO 일반 정규 배포 정보 (WMO General Regularly-distributed Information in Binary form)
 ================================================================================
 
 .. shortname:: GRIB
