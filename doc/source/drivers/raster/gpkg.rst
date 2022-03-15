@@ -1,52 +1,39 @@
 .. _raster.gpkg:
 
 ================================================================================
-GPKG -- GeoPackage raster
+GPKG -- 지오패키지 래스터
 ================================================================================
 
 .. shortname:: GPKG
 
-.. build_dependencies:: libsqlite3 (and any or all of PNG, JPEG, WEBP drivers)
+.. build_dependencies:: libsqlite3 (그리고 PNG, JPEG, WEBP 드라이버 가운데 하나 또는 전부)
 
-This driver implements full read/creation/update
-of tables containing raster tiles in the `OGC GeoPackage format
-standard <http://www.geopackage.org/spec/>`__. The GeoPackage standard
-uses a SQLite database file as a generic container, and the standard
-defines:
+이 드라이버는 `OGC 지오패키지(GeoPackage) 포맷 표준 <http://www.geopackage.org/spec/>`_ 래스터 타일을 담고 있는 테이블의 완전한 읽기/생성/업데이트를 구현합니다. 지오패키지 표준은 SQLite 데이터베이스 파일을 일반 컨테이너로 사용하며, 다음을 정의하고 있습니다:
 
--  Expected metadata tables (``gpkg_contents``,
-   ``gpkg_spatial_ref_sys``, ``gpkg_tile_matrix``,
-   ``gpkg_tile_matrix_set``, ...)
--  Tile format encoding (PNG and JPEG for base specification, WebP as
-   extension) and tiling conventions
--  Naming and conventions for extensions
+-  예상 메타데이터 테이블 (``gpkg_contents``, ``gpkg_spatial_ref_sys``, ``gpkg_tile_matrix``, ``gpkg_tile_matrix_set`` 등등)
+-  타일 포맷 인코딩(기반 사양은 PNG와 JPEG, 확장 사양은 WebP) 및 타일 작업 규범
+-  확장자 명명 및 규범
 
-This driver reads and writes SQLite files from the file system, so it
-must be run by a user with read/write access to the files it is working
-with.
+이 드라이버는 파일 시스템에서 SQLite 파일을 읽고 쓰기 때문에, 작업 파일에 읽기/쓰기 접근 권한을 가진 사용자가 이 드라이버를 실행해야만 합니다.
 
-The driver can also handle GeoPackage vectors. See :ref:`GeoPackage
-vector <vector.gpkg>` documentation page
+이 드라이버는 지오패키지 벡터도 처리할 수 있습니다. :ref:`지오패키지 벡터 <vector.gpkg>` 문서도 읽어보십시오.
 
-Various kind of input datasets can be converted to GeoPackage raster :
+다양한 입력 데이터셋 유형을 지오패키지 래스터로 변환할 수 있습니다:
 
--  Single band grey level
--  Single band with R,G,B or R,G,B,A color table
--  Two bands: first band with grey level, second band with alpha channel
--  Three bands: Red, Green, Blue
--  Four band: Red, Green, Blue, Alpha
+-  회색조 수준 단일 밴드
+-  RGB 또는 RGBA 색상표를 가진 단일 밴드
+-  2밴드: 첫 번째 밴드는 회색조 수준, 두 번째 밴드는 알파 채널
+-  3밴드: 적색(Red), 녹색(Green), 청색(Blue)
+-  4밴드: 적색(Red), 녹색(Green), 청색(Blue), 알파(Alpha)
 
-GeoPackage rasters only support Byte data type.
+지오패키지 래스터는 바이트 데이터 유형만 지원합니다.
 
-All raster extensions standardized by the GeoPackage specification are
-supported in read and creation :
+지오패키지 사양으로 표준화된 모든 래스터 확장자를 읽기 및 생성 지원합니다:
 
--  *gpkg_webp*: when storing WebP tiles, provided that GDAL is compiled
-   against libwebp.
--  *gpkg_zoom_other*: when resolution of consecutive zoom levels does
-   not vary with a factor of 2.
+-  *gpkg_webp*: WebP 타일을 저장하는 경우, GDAL이 libwebp를 대상으로 컴파일되었다고 가정
+-  *gpkg_zoom_other*: 연속하는 확대/축소 수준들의 해상도가 2배수로 변화하지 않는 경우
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -57,531 +44,310 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Opening options
+열기 옵션
 ---------------
 
-By default, the driver will expose a GeoPackage dataset as a four band
-(Red,Green, Blue,Alpha) dataset, which gives the maximum compatibility
-with the various encodings of tiles that can be stored. It is possible
-to specify an explicit number of bands with the BAND_COUNT opening
-option.
+이 드라이버는 기본적으로 지오패키지 데이터셋을 최대한 다양한 인코딩으로 타일을 저장할 수 있는 능력을 가진 4밴드(RGBA) 데이터셋으로 노출시킵니다. BAND_COUNT 열기 옵션으로 밴드 개수를 명확하게 지정할 수 있습니다.
 
-The driver will use the geographic/projected extent indicated in the
-`gpkg_contents <http://www.geopackage.org/spec/#_contents>`__ table, and
-do necessary clipping, if needed, to respect that extent. However that
-information being optional, if omitted, the driver will use the extent
-provided by the
-`gpkg_tile_matrix_set <http://www.geopackage.org/spec/#_tile_matrix_set>`__,
-which covers the extent at all zoom levels. The user can also specify
-the USE_TILE_EXTENT=YES open option to use the actual extent of tiles at
-the maximum zoom level. Or it can specify any of MINX/MINY/MAXX/MAXY to
-have a custom extent.
+이 드라이버는 `gpkg_contents <http://www.geopackage.org/spec/#_contents>`_ 테이블에 지정된 지리/투영 범위를 사용하는데, 해당 범위를 따르기 위해 필요하다면 잘라내기 작업을 수행할 것입니다. 하지만 이 정보는 선택적인 옵션으로, 이 옵션이 없을 경우 `gpkg_tile_matrix_set <http://www.geopackage.org/spec/#_tile_matrix_set>`_ 이 제공하는, 모든 확대/축소 수준의 범위를 커버하는 범위를 사용할 것입니다. 사용자가 최대 확대/축소 수준의 실제 타일 범위를 사용하려는 경우 USE_TILE_EXTENT=YES 열기 옵션을 지정하면 됩니다. 또는 사용자 지정 범위를 사용하려면 MINX/MINY/MAXX/MAXY 가운데 어떤 것이든 지정하면 됩니다.
 
-The following open options are available:
+다음 열기 옵션들을 사용할 수 있습니다:
 
--  **TABLE**\ =table_name: Name of the table containing the tiles
-   (called `"Tile Pyramid User Data
-   Table" <http://www.geopackage.org/spec/#tiles_user_tables>`__ in the
-   GeoPackage specification language). If the GeoPackage dataset only
-   contains one table, this option is not necessary. Otherwise, it is
-   required.
--  **ZOOM_LEVEL**\ =value: Integer value between 0 and the maximum
-   filled in the *gpkg_tile_matrix* table. By default, the driver will
-   select the maximum zoom level, such as at least one tile at that zoom
-   level is found in the raster table.
--  **BAND_COUNT**\ =1/2/3/4: Number of bands of the dataset exposed
-   after opening. Some conversions will be done when possible and
-   implemented, but this might fail in some cases, depending on the
-   BAND_COUNT value and the number of bands of the tile. Defaults to 4
-   (which is the always safe value).
--  **MINX**\ =value: Minimum longitude/easting of the area of interest.
--  **MINY**\ =value: Minimum latitude/northing of the area of interest.
--  **MAXX**\ =value: Maximum longitude/easting of the area of interest.
--  **MAXY**\ =value: Maximum latitude/northing of the area of interest.
--  **USE_TILE_EXTENT**\ =YES/NO: Whether to use the extent of actual
-   existing tiles at the zoom level of the full resolution dataset.
-   Defaults to NO.
--  **TILE_FORMAT**\ =PNG_JPEG/PNG/PNG8/JPEG/WEBP: Format used to store
-   tiles. See :ref:`raster.gpkg.tile_formats`. Only used in
-   update mode. Defaults to PNG_JPEG.
--  **QUALITY**\ =1-100: Quality setting for JPEG and WEBP compression.
-   Only used in update mode. Default to 75.
--  **ZLEVEL**\ =1-9: DEFLATE compression level for PNG tiles. Only used
-   in update mode. Default to 6.
--  **DITHER**\ =YES/NO: Whether to use Floyd-Steinberg dithering (for
-   TILE_FORMAT=PNG8). Only used in update mode. Defaults to NO.
+-  **TABLE**\ =table_name: 타일을 담고 있는 테이블의 이름입니다. (지오패키지 사양 용어로는 `"타일 피라미드 사용자 데이터 테이블" <http://www.geopackage.org/spec/#tiles_user_tables>`_ 이라고 합니다.) 지오패키지 데이터셋이 테이블 하나만 담고 있는 경우, 이 옵션은 필요없습니다. 테이블이 하나 이상이라면 필수입니다.
+-  **ZOOM_LEVEL**\ =value: 0에서 *gpkg_tile_matrix* 테이블의 최대값 사이의 정수값입니다. 이 드라이버는 기본적으로 래스터 테이블에서 해당 확대/축소 수준의 타일을 최소한 1개는 찾도록 최대 확대/축소 수준을 선택할 것입니다.
+-  **BAND_COUNT**\ =1/2/3/4: 데이터셋을 연 다음 노출되는 밴드 개수입니다. 구현되어 있고 사용할 수 있는 경우 몇몇 변환 작업을 수행할 것이지만, BAND_COUNT 값과 타일의 밴드 개수에 따라 실패하는 경우도 생길 수 있습니다. 기본값은 (언제나 안전한 값인) 4입니다.
+-  **MINX**\ =value: 관심 영역의 최소 경도/편동(easting)입니다.
+-  **MINY**\ =value: 관심 영역의 최소 위도/편북(northing)입니다.
+-  **MAXX**\ =value: 관심 영역의 최대 경도/편동(easting)입니다.
+-  **MAXY**\ =value: 관심 영역의 최대 위도/편북(northing)입니다.
+-  **USE_TILE_EXTENT**\ =YES/NO: 전체 해상도 데이터셋의 확대/축소 수준의 실제 기존 타일들의 범위를 사용할지 여부를 선택합니다. 기본값은 NO입니다.
+-  **TILE_FORMAT**\ =PNG_JPEG/PNG/PNG8/JPEG/WEBP: 타일을 저장하기 위해 쓰이는 포맷입니다. :ref:`raster.gpkg.tile_formats` 단락을 참조하십시오. 업데이트 모드에서만 사용합니다. 기본값은 PNG_JPEG입니다.
+-  **QUALITY**\ =1-100: JPEG 및 WEBP 압축의 경우 품질을 설정합니다. 업데이트 모드에서만 사용합니다. 기본값은 75입니다.
+-  **ZLEVEL**\ =1-9: PNG 타일 용 DEFLATE 압축 수준을 설정합니다. 업데이트 모드에서만 사용합니다. 기본값은 6입니다.
+-  **DITHER**\ =YES/NO: (TILE_FORMAT=PNG8일 때) 플로이드-스타인버그 디더링(Floyd–Steinberg dithering)을 사용할지 여부를 선택합니다. 업데이트 모드에서만 사용합니다. 기본값은 NO입니다.
 
-Note: open options are typically specified with "-oo name=value" syntax
-in most GDAL utilities, or with the GDALOpenEx() API call.
+주의: 대부분의 GDAL 유틸리티에서는 일반적으로 오픈 옵션을 "-oo name=value" 문법 또는 GDALOpenEx() API 호출로 지정합니다.
 
-Creation issues
+생성 문제점
 ---------------
 
-Depending of the number of bands of the input dataset and the tile
-format selected, the driver will do the necessary conversions to be
-compatible with the tile format.
+이 드라이버는 입력 데이터셋의 밴드 개수와 선택한 타일 포맷에 따라 타일 포맷을 호환시키기 위한 필수 변환 작업을 수행할 것입니다.
 
-To add several tile tables to a GeoPackage dataset (seen as GDAL
-subdatasets), or to add a tile table to an existing vector-only
-GeoPackage, the generic APPEND_SUBDATASET=YES creation option must be
-provided.
+지오패키지 데이터셋에 타일 테이블 여러 개를 (GDAL 하위 데이터셋으로 간주해서) 추가하려면, 또는 기존 벡터 전용 지오패키지에 타일 테이블을 추가하려면, 일반 APPEND_SUBDATASET=YES 생성 옵션을 반드시 지정해야만 합니다.
 
-Fully transparent tiles will not be written to the database, as allowed
-by the format.
+완전히 투명한 타일은 포맷이 지원하더라도 데이터베이스에 작성되지 않을 것입니다.
 
-The driver implements the Create() and IWriteBlock() methods, so that
-arbitrary writing of raster blocks is possible, enabling the direct use
-of GeoPackage as the output dataset of utilities such as gdalwarp.
+이 드라이버는 Create() 및 IWriteBlock()을 구현하기 때문에, 지오패키지를 gdalwarp 같은 유틸리티들의 산출 데이터셋으로 직접 사용할 수 있도록 래스터 블록을 임의(arbitrary) 작성할 수 있습니다.
 
-On creation, raster blocks can be written only if the geotransformation
-matrix has been set with SetGeoTransform() This is effectively needed to
-determine the zoom level of the full resolution dataset based on the
-pixel resolution, dataset and tile dimensions.
+생성 작업 시, SetGeoTransform()으로 지리변형(geotransformation) 행렬을 설정한 경우에만 래스터 블록을 작성할 수 있습니다. 픽셀 해상도, 데이터셋, 그리고 타일 크기를 바탕으로 전체 해상도 데이터셋의 확대/축소 수준을 결정하기 위해서는 실질적으로 지리변형 행렬이 필요합니다.
 
-Technical/implementation note: when a dataset is opened with a
-non-default area of interest (i.e. use of MINX,MINY,MAXX,MAXY or
-USE_TILE_EXTENT open option), or when creating/ opening a dataset with a
-non-custom tiling scheme, it is possible that GDAL blocks do not exactly
-match a single GeoPackage tile. In which case, each GDAL block will
-overlap four GeoPackage tiles. This is easily handled on the read side,
-but on creation/update side, such configuration could cause numerous
-decompression/ recompression of tiles to be done, which might cause
-unnecessary quality loss when using lossy compression (JPEG, WebP). To
-avoid that, the driver will create a temporary database next to the main
-GeoPackage file to store partial GeoPackage tiles in a lossless (and
-uncompressed) way. Once a tile has received data for its four quadrants
-and for all the bands (or the dataset is closed or explicitly flushed
-with FlushCache()), those uncompressed tiles are definitely transferred
-to the GeoPackage file with the appropriate compression. All of this is
-transparent to the user of GDAL API/utilities
+기술/구현 메모: 데이터셋을 기본값이 아닌 관심 영역으로 여는 경우 (예를 들어 MINX,MINY,MAXX,MAXY 또는 USE_TILE_EXTENT 열기 옵션을 사용하는 경우) 또는 데이터셋을 사용자 지정(custom)이 아닌 타일 작업 스키마로 생성/열기하는 경우, GDAL 블록들이 단일 지오패키지 타일과 정확히 일치하지 않을 가능성이 있습니다. 이런 경우, 각 GDAL 블록이 지오패키지 타일 4개와 중첩할 것입니다. 읽어오는 경우에는 쉽게 처리할 수 있지만, 생성/업데이트하는 경우에는 이런 환경설정이 수많은 타일들을 압축 해제/재압축시켜야 하는 상황을 일으킬 수 있습니다. 이런 상황이 발생하면 손실 압축 방식(JPEG, WebP)을 사용하는 경우 불필요한 품질 저하가 일어날 수도 있습니다. 이렇게 되는 일을 피하기 위해, 이 드라이버는 주 지오패키지 테이블 외에 부분 지오패키지 타일들을 비손실 (그리고 비압축) 방식으로 저장하기 위한 임시 데이터베이스를 생성할 것입니다. 그리고 타일이 자신의 4분면 및 모든 밴드의 데이터를 받은 다음 (또는 데이터셋을 닫거나, 캐시에서 데이터셋을 FlushCache()로 확실하게 제거한 다음) 지오패키지 테이블에 이 비압축 타일들을 적절한 방식으로 압축해서 확실히 전송합니다. GDAL API/유틸리티 사용자에게 이 모든 과정을 공개합니다.
 
-The driver updates the GeoPackage ``last_change`` timestamp when the file is
-created or modified. If consistent binary output is required for
-reproducibility, the timestamp can be forced to a specific value by setting the
-:decl_configoption:`OGR_CURRENT_DATE` global configuration option.
-When setting the option, take care to meet the specific time format
-requirement of the GeoPackage standard,
-e.g. `for version 1.2 <https://www.geopackage.org/spec120/#r15>`__.
+이 드라이버는 파일 생성 또는 수정 시 지오패키지 ``last_change`` 타임스탬프를 업데이트합니다. 재현성(reproducibility)을 위해 일관적인 바이너리 산출물이 필요한 경우, 전체 수준 환경설정 옵션 :decl_configoption:`OGR_CURRENT_DATE` 를 설정하면 타임스탬프를 특정값으로 설정하도록 강제할 수 있습니다. 이 옵션을 설정할 때 지오패키지 표준, 예를 들어 `1.2버전 <https://www.geopackage.org/spec120/#r15>`_ 의 특정한 시간 서식 요구 사항을 만족시키도록 주의하십시오.
 
 
 .. _raster.gpkg.tile_formats:
 
-Tile formats
+타일 포맷
 ~~~~~~~~~~~~
 
-Tiled rasters
+타일 래스터
 ^^^^^^^^^^^^^
 
-GeoPackage can store tiles in different formats, PNG and/or JPEG for the
-baseline specification, and WebP for extended GeoPackage. Support for
-those tile formats depend if the underlying drivers are available in
-GDAL, which is generally the case for PNG and JPEG, but not necessarily
-for WebP since it requires GDAL to be compiled against the optional
-libwebp.
+지오패키지는 타일을 서로 다른 포맷으로 저장할 수 있습니다. PNG 그리고/또는 JPEG을 기본 사양으로 사용하고, WebP를 확장 지오패키지 사양으로 사용합니다. 이런 타일 포맷 지원은 GDAL에서 기저 드라이버를 사용할 수 있는지에 따라 달라집니다. PNG와 JPEG의 경우 일반적으로 기저 드라이버를 사용할 수 있지만, WebP의 경우 GDAL이 선택적인 libwebp를 대상으로 컴파일되어야 하기 때문에 기저 드라이버를 반드시 사용할 수 있다고 장담할 수는 없습니다.
 
-By default, GDAL will use a mix of PNG and JPEG tiles (PNG_JPEG tile
-format, or AUTO). PNG tiles will be used to store tiles that are not
-completely opaque, either because input dataset has an alpha channel
-with non fully opaque content, or because tiles are partial due to
-clipping at the right or bottom edges of the raster, or when a dataset
-is opened with a non-default area of interest, or with a non-custom
-tiling scheme. On the contrary, for fully opaque tiles, JPEG format will
-be used.
+GDAL은 기본적으로 PNG와 JPEG을 혼합해서 사용할 것입니다. 입력 데이터셋이 완전히 불투명하지 않은 내용을 가진 알파 밴드를 가졌거나, 래스터의 우측 또는 하단 경계에서 래스터를 잘라냈거나, 데이터셋을 기본값이 아닌 관심 영역으로 또는 사용자 지정(custom)이 아닌 타일 작업 스키마로 열었기 때문에 완전히 불투명하지 않아진 타일을 저장하기 위해 PNG 파일을 사용할 것입니다. 그 반대로, 완전히 불투명한 타일은 JPEG으로 저장할 것입니다.
 
-It is possible to select one unique tile format by setting the
-creation/open option TILE_FORMAT to one of PNG, JPEG or WEBP. When using
-JPEG, the alpha channel will not be stored. When using WebP, the
-`gpkg_webp <http://www.geopackage.org/spec/#extension_tiles_webp>`__
-extension will be registered. The lossy compression of WebP is used.
-Note that a recent enough libwebp (>=0.1.4) must be used to support
-alpha channel in WebP tiles.
+TILE_FORMAT 생성/열기 옵션을 PNG, JPEG 또는 WEBP 가운데 하나로 설정하면 유일한 타일 포맷 하나만 선택할 수도 있습니다. JPEG을 선택한 경우, 알파 채널을 저장하지 않을 것입니다. WebP를 선택한 경우, `gpkg_webp <http://www.geopackage.org/spec/#extension_tiles_webp>`_ 확장자를 등록할 것입니다. WebP의 손실 압축 방식을 사용합니다. WebP 타일에서 알파 채널을 지원하려면 최신 (0.1.4버전 이상의) libwebp을 사용해야만 한다는 사실을 기억하십시오.
 
-PNG8 can be selected to use 8-bit PNG with a color table up to 256
-colors. On creation, an optimized color table is computed for each tile.
-The DITHER option can be set to YES to use Floyd/Steinberg dithering
-algorithm, which spreads the quantization error on neighbouring pixels
-for better rendering (note however than when zooming in, this can cause
-non desirable visual artifacts). Setting it to YES will generally cause
-less effective compression. Note that at that time, such an 8-bit PNG
-formulation is only used for fully opaque tiles, as the median-cut
-algorithm currently implemented to compute the optimal color table does
-not support alpha channel (even if PNG8 format would potentially allow
-color table with transparency). So when selecting PNG8, non fully opaque
-tiles will be stored as 32-bit PNG.
+256색까지 지원하는 색상표를 가진 8비트 PNG를 사용하려면 PNG8을 선택하면 됩니다. 생성 작업 시, 각 타일에 최적화된 색상표를 계산합니다. 플로이드-스타인버그 디더링 알고리즘을 사용하려면 DITHER 옵션을 YES로 설정하면 됩니다. 이 알고리즘은 더 나은 렌더링을 위해 양자화 오류를 이웃하는 픽셀로 분산시킵니다. (하지만 이미지 확대 시 시각적으로 바람직하지 않은 결과를 보게 될 수 있다는 사실을 기억하십시오.) 일반적으로, DITHER 옵션을 YES로 설정하면 더 비효율적으로 압축하게 될 것입니다. 이때 8비트 PNG 같은 포맷은 완전히 불투명한 타일에만 사용된다는 사실을 기억하십시오. (PNG8 포맷이 투명도를 가진 색상표를 지원할 수는 있지만) 현재 최적 색상표를 계산하기 위해 구현된 중앙값 절단(Median Cut) 알고리즘이 알파 채널을 지원하지 않기 때문입니다. 따라서 PNG8을 선택하는 경우, 완전히 불투명하지 않은 타일은 32비트 PNG로 저장될 것입니다.
 
-Tiled gridded coverage data
+타일 그리드화된 커버리지 데이터
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Since GDAL 2.3, `tiled gridded coverage
-data <http://docs.opengeospatial.org/is/17-066r1/17-066r1.html#27>`__
-can be stored using PNG unsigned 16bit tiles (with potential offset and
-scaling so as to be able to represent floating point data) or TIFF
-32-bit floating-point LZW compressed tiles.
+GDAL 2.3버전부터, (부동소수점 데이터 유형으로 표현될 수 있도록 해주는 잠재적인 오프셋과 척도를 가진) PNG 부호 없는 16비트 타일, 또는 TIFF 32비트 부동소수점형 LZW 압축 타일을 이용해서 `타일 그리드화 커버리지 데이터 <http://docs.opengeospatial.org/is/17-066r1/17-066r1.html#27>`_ 를 저장할 수 있습니다.
 
-When converting a GDAL Int16 or UInt16 dataset, PNG tiles will be used.
-When converting a GDAL Float32 dataset, TIFF tiles will be used by
-default, unless PNG is explicitly selected, in which case scaling and
-offsetting will be automatically computed for each tile.
+GDAL Int16 또는 UInt16 데이터셋으로 변환 시, PNG 타일을 사용할 것입니다. GDAL Float32 데이터셋으로 변환 시, 명확하게 PNG를 지정하지 않는 한, 기본적으로 TIFF 타일을 사용할 것입니다. 명확하게 PNG를 지정한 경우, 각 타일에 대해 크기 조정 및 오프셋을 자동으로 계산할 것입니다.
 
 .. warning::
 
-    The `tiled gridded
-    extension <http://www.geopackage.org/spec/#extension_tiled_gridded_elevation_data>`__
-    initially implemented in GDAL 2.2 was not officially adopted and had
-    been later reworked by OGC. The adopted `tiled gridded coverage
-    data <http://docs.opengeospatial.org/is/17-066r1/17-066r1.html#27>`__
-    has a few differences that will make GDAL 2.2 datasets not be compliant
-    with the final extension. GDAL 2.3 can open those GDAL 2.2-generated
-    files.
+    처음으로 GDAL 2.2버전에 구현되었던 `타일 그리드화 확장 <http://www.geopackage.org/spec/#extension_tiled_gridded_elevation_data>`_ 은 공식적으로 도입된 것이 아니어서, 후에 OGC가 재작업했습니다. 이때 도입된 `타일 그리드화 커버리지 데이터 <http://docs.opengeospatial.org/is/17-066r1/17-066r1.html#27>`_ 에는 몇 가지 차이점이 있기 때문에, GDAL 2.2 데이터셋이 최종 확장 사양과 호환되지 않을 것입니다. GDAL 2.3버전에서 이런 GDAL 2.2 생성 파일을 열 수 있습니다.
 
 .. _raster.gpkg.tiling_schemes:
 
-Tiling schemes
+타일 작업 스키마
 ~~~~~~~~~~~~~~
 
-By default, conversion to GeoPackage will create a custom tiling scheme,
-such that the input dataset can be losslessly converted, both at the
-pixel and georeferencing level (if using a lossless tile format such as
-PNG). That tiling scheme is such that its origin (*min_x*, *max_y*) in
-the
-`gpkg_tile_matrix_set <http://www.geopackage.org/spec/#_tile_matrix_set>`__
-table perfectly matches the top left corner of the dataset, and the
-selected resolution (*pixel_x_size*, *pixel_y_size*) at the computed
-maximum zoom_level of the
-`gpkg_tile_matrix <http://www.geopackage.org/spec/#_tile_matrix>`__
-table will match the pixel width and height of the raster.
+기본적으로, 지오패키지로 변환 시 (PNG 같은 비손실 타일 포맷을 사용하는 경우) 입력 데이터를 픽셀 및 지리참조 두 수준에서 손실 없이 변환할 수 있는 사용자 지정 타일 작업 스키마를 생성하게 됩니다. 이 타일 작업 스키마는 `gpkg_tile_matrix_set <http://www.geopackage.org/spec/#_tile_matrix_set>`_ 에 있는 타일 원점(*min_x*, *max_y*)이 데이터셋의 좌상단 모서리와 정확히 일치하고, `gpkg_tile_matrix <http://www.geopackage.org/spec/#_tile_matrix>`_ 테이블의 계산된 최대 확대/축소 수준에서 선택된 해상도(*pixel_x_size*, *pixel_y_size*)가 래스터의 픽셀 너비 및 높이와 일치하도록 생성됩니다.
 
-However to ease interoperability with other implementations, and enable
-use of GeoPackage with tile servicing software, it is possible to select
-a predefined tiling scheme that has world coverage. The available tiling
-schemes are :
+하지만 구현된 다른 기능과 작업 호환을 쉽게 하려면 그리고 지오패키지를 타일 서비스 소프트웨어와 함께 사용할 수 있도록 하려면, 지구 전체를 커버하는, 사전 정의된 다음과 같은 타일 작업 스키마를 사용할 수도 있습니다:
 
--  *GoogleMapsCompatible*, as described in WMTS 1.0 specification, Annex
-   E.4. That tiling schemes consists of a single 256x256 tile at its
-   zoom level 0, in EPSG:3857 CRS, with extent in easting and northing
-   in the range [-20037508.34,20037508.34].
--  *InspireCRS84Quad*, as described in `Inspire View
-   Services <http://inspire.ec.europa.eu/documents/Network_Services/TechnicalGuidance_ViewServices_v3.0.pdf>`__.
-   That tiling schemes consists of two 256x256 tiles at its zoom level
-   0, in EPSG:4326 CRS, with extent in longitude in the range [-180,180]
-   and in latitude in the range [-90,90].
--  *PseudoTMS_GlobalGeodetic*, based on the
-   `global-geodetic <http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification#global-geodetic>`__
-   profile of OSGeo TMS (Tile Map Service) specification. This has
-   exactly the same definition as *InspireCRS84Quad* tiling scheme. Note
-   however that full interoperability with TMS is not possible due to
-   the origin of numbering of tiles being the top left corner in
-   GeoPackage (consistently with WMTS convention), whereas TMS uses the
-   bottom left corner as origin.
--  *PseudoTMS_GlobalMercator*, based on the
-   `global-mercator <http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification#global-mercator>`__
-   profile of OSGeo TMS (Tile Map Service) specification. That tiling
-   schemes consists of four 256x256 tiles at its zoom level 0, in
-   EPSG:3857 CRS, with extent extent in easting and northing in the
-   range [-20037508.34,20037508.34]. The same remark as with
-   PseudoTMS_GlobalGeodetic applies regarding interoperability with TMS.
--  *GoogleCRS84Quad*, as described in `OGC 07-057r7 WMTS
-   1.0 <http://portal.opengeospatial.org/files/?artifact_id=35326>`__
-   specification, Annex E.3. That tiling schemes consists of a single
-   256x256 tile at its zoom level 0, in EPSG:4326 CRS, with extent in
-   longitude and latitude in the range [-180,180]. Consequently, at zoom
-   level 0, 64 lines are unused at the top and bottom of that tile. This
-   may cause issues with some implementations of the specification, and
-   there are some ambiguities about the exact definition of this tiling
-   scheme. Using InspireCRS84Quad/PseudoTMS_GlobalGeodetic instead is
-   therefore recommended.
-   NOTE: `OGC WMTS Simple Profile
-   13-082r2 <http://docs.opengeospatial.org/is/13-082r2/13-082r2.html#30>`__
-   changed the definition of GoogleCRS84Quad (so not implemented by the
-   driver). The new definition includes a -1 level (that cannot be
-   modeled in GeoPackage given constraints on zoom_level being positive
-   or 0), with a single tile at origin -180,90 and whose bottom 128
-   lines are empty. Levels 0 or greater are identical to the
-   InspireCRS84Quad tiling scheme. So for practical purposes,
-   InspireCRS84Quad in GeoPackage is conformant to the new
-   GoogleCRS84Quad definition.
+-  *GoogleMapsCompatible*, WMTS 1.0 사양에서 설명하는 Annex E.4입니다. 이 타일 작업 스키마는 [-20037508.34,20037508.34] 사이에 있는 편동과 편북 단위의 범위를 가진 EPSG:3857 좌표계의 확대/축소 0수준에서 크기 256x256인 단일 타일로 이루어져 있습니다.
+-  *InspireCRS84Quad*, `인스파이어 뷰 서비스(Inspire View Services) <http://inspire.ec.europa.eu/documents/Network_Services/TechnicalGuidance_ViewServices_v3.0.pdf>`_ 문서에서 설명하는 이 타일 작업 스키마는 [-180,180] 사이에 있는 경도와 [-90,90] 사이에 있는 위도 단위의 범위를 가진 EPSG:4326 좌표계의 확대/축소 0수준에서 크기 256x256인 타일 2개로 이루어져 있습니다.
+-  *PseudoTMS_GlobalGeodetic*, 이 타일 작업 스키마는 OSGeo TMS(Tile Map Service) 사양의 `global-geodetic <http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification#global-geodetic>`_ 프로파일을 기반으로 합니다. 이 스키마는 *InspireCRS84Quad* 타일 작업 스키마와 정확히 동일하게 정의됩니다. 하지만 TMS가 좌하단 모서리를 원점으로 사용하는 반면 지오패키지는 (WMTS 규범을 준수하도록) 좌상단 모서리를 타일 번호 원점으로 삼기 때문에 TMS와 완전한 작업 호환은 불가능하다는 사실을 기억하십시오.
+-  *PseudoTMS_GlobalMercator*, 이 타일 작업 스키마는 OSGeo TMS(Tile Map Service) 사양의 `global-mercator <http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification#global-mercator>`_ 프로파일을 기반으로 합니다. 이 타일 작업 스키마는 [-20037508.34,20037508.34] 사이에 있는 편동과 편북 단위의 범위를 가진 EPSG:3857 좌표계의 확대/축소 0수준에서 크기 256x256인 타일 4개로 이루어져 있습니다. TMS와의 작업 호환성에 대해서는 PseudoTMS_GlobalGeodetic과 동일합니다.
+-  *GoogleCRS84Quad*, `OGC 07-057r7 WMTS 1.0 <http://portal.opengeospatial.org/files/?artifact_id=35326>`_ 사양에서 설명하는 Annex E.3입니다. 이 타일 작업 스키마는 [-180,180] 사이에 있는 경도와 위도 단위의 범위를 가진 EPSG:4326 좌표계의 확대/축소 0수준에서 크기 256x256인 단일 타일로 이루어져 있습니다. 그 결과 확대/축소 0수준에서 해당 타일의 최상단 및 최하단에 있는 라인 64개를 사용하지 않습니다. 이로 인해 몇몇 사양 구현에 문제가 생길 수도 있고, 이 타일 작업 스키마의 정확한 정의가 약간 모호해지기도 합니다. 따라서 이 스키마 대신 InspireCRS84Quad 또는 PseudoTMS_GlobalGeodetic 스키마를 사용하도록 권장합니다.
 
-In all the above tiling schemes, consecutive zoom levels defer by a
-resolution of a factor of two.
+   주의: `OGC WMTS 단순 프로파일 13-082r2 <http://docs.opengeospatial.org/is/13-082r2/13-082r2.html#30>`_ 부터 GoogleCRS84Quad 정의를 변경했습니다. (즉 드라이버에 구현되지 않았습니다.) 이 새로운 정의는 원점이 (-180,90)이고 최하단 라인 128개가 비어 있는 단일 타일을 가진 -1수준을 포함합니다. (지오패키지의 zoom_level은 0부터 시작하는 양의 값이기 때문에, 지오패키지에서 이 정의를 모델링할 수 없습니다.) 0수준부터는 InspireCRS84Quad 타일 작업 스키마와 동일합니다. 따라서 실용적인 목적을 위해, 지오패키지의 InspireCRS84Quad는 새로운 GoogleCRS84Quad 정의를 준수합니다.
 
-Starting with GDAL 3.2, it is also possible to use a Tile Matrix Set definition,
-encoded as a JSon file, according to the `OGC Two Dimensional Tile Matrix Set standard`_
-Examples of such files can be found at http://schemas.opengis.net/tms/1.0/json/examples/
-The GDAL data directory also contains files prefixed with ``tms_`` and with a ``.json``
-extension. If there is a ``tms_FOO.json`` file, then ``FOO`` can be used as the
-value of the TILING_SCHEME creation option. There are restrictions on the types
-of tile matrix set supported:
+이 모든 사전 정의 타일 작업 스키마에서, 연속되는 확대/축소 수준은 2배수의 해상도만큼씩 달라집니다.
 
-* all zoom levels must have the same origin
-* consecutive zoom levels defer by a resolution of a factor of two.
-* all zoom levels must have the same tile dimension
-* variable matrix width tile set are not supported.
+GDAL 3.2버전부터, `OGC 2차원 타일 행렬 집합 표준`_ 에 따라 JSON 파일로 인코딩된 타일 행렬 집합 정의도 사용할 수 있습니다. http://schemas.opengis.net/tms/1.0/json/examples/ 에서 이런 파일의 예시를 찾아볼 수 있습니다. GDAL data 디렉터리도 ``tms_`` 접두어와 ``.json`` 확장자를 가진 파일들을 담고 있습니다. ``tms_FOO.json`` 파일이 존재한다면, ``FOO`` 를 TILING_SCHEME 생성 옵션의 값으로 사용할 수 있습니다. 지원하는 타일 행렬 집합의 유형에 대한 제약 조건이 존재합니다:
 
-.. _`OGC Two Dimensional Tile Matrix Set standard`: http://docs.opengeospatial.org/is/17-083r2/17-083r2.html
+* 모든 확대/축소 수준이 동일한 원점이어야만 합니다.
+* 연속되는 확대/축소 수준은 2배수의 해상도만큼씩 달라집니다.
+* 모든 확대/축소 수준이 동일한 타일 크기여야만 합니다.
+* 변동(variable) 행렬 너비 타일 집합은 지원하지 않습니다.
 
-Nodata value
+.. _`OGC 2차원 타일 행렬 설정 표준`: http://docs.opengeospatial.org/is/17-083r2/17-083r2.html
+
+NODATA 값
 ~~~~~~~~~~~~
 
-The concept of the nodata value is only supported for tiled gridded
-elevation datasets. For regular tiled rasters, the alpha band must
-rather be used.
+타일 그리드화 표고 데이터셋만 NODATA 값이라는 개념을 지원합니다. 정규 타일 래스터의 경우, NODATA 대신 알파 밴드를 사용해야만 합니다.
 
-For Float32 datasets with TIFF tiles, the concepts of nodata in GDAL and
-null_value in the GeoPackage internals perfectly match.
+TIFF 타일을 가진 Float32 데이터셋이라면, GDAL에서의 NODATA 개념과 지오패키지 내부의 null_value가 정확하게 일치합니다.
 
-For Int16, UInt16 or Float32 with PNG tiles, GDAL will generally remap
-the input nodata value to another value.
+PNG 타일을 가진 Int16, UInt16 또는 Float32 데이터셋의 경우, GDAL은 보통 입력 NODATA 값을 또다른 값으로 다시 매핑할 것입니다.
 
-On writing, for PNG tiles, the behavior is the following one:
+PNG 타일의 경우, 작성 시 습성이 다음과 같습니다:
 
-============== =================================================== =====================================================
-GDAL data type Input GDAL nodata value                             null_value in GPKG gpkg_2d_gridded_coverage_ancillary
-Int16          Any                                                 65535
-UInt16         X (if coverage offset == 0 and coverage scale == 1) X
-Float32        Any                                                 65535
-============== =================================================== =====================================================
+.. list-table:: PNG 타일 작성 습성
+   :header-rows: 1
 
-On reading, for PNG tiles, the behavior is the following one:
+   * - GDAL 데이터 유형
+     - 입력 GDAL NODATA 값
+     - GPKG gpkg_2d_gridded_coverage_ancillary의 null_value
+   * - Int16
+     - 모든 값
+     - 65535
+   * - UInt16
+     - X (커버리지 오프셋이 0이고 커버리지 척도가 1인 경우)
+     - X
+   * - Float32
+     - 모든 값
+     - 65535
 
-============== ===================================================== =========================
-GDAL data type null_value in GPKG gpkg_2d_gridded_coverage_ancillary Exposed GDAL nodata value
-Int16          >= 32768                                              -32768
-Int16          X <= 32767                                            X
-UInt16         X                                                     X
-Float32        X                                                     X
-============== ===================================================== =========================
+PNG 타일의 경우, 읽기 시 습성이 다음과 같습니다:
 
-Thus, perfect roundtripping is achieved in the following cases:
+.. list-table:: PNG 타일 읽기 습성
+   :header-rows: 1
 
-============== =================================================== =====================================================
-GDAL data type GDAL nodata value                                   null_value in GPKG gpkg_2d_gridded_coverage_ancillary
-Int16          -32768                                              65535
-UInt16         X (if coverage offset == 0 and coverage scale == 1) X
-Float32        65535                                               65535
-============== =================================================== =====================================================
+   * - GDAL 데이터 유형
+     - GPKG gpkg_2d_gridded_coverage_ancillary의 null_value
+     - 노출된 GDAL NODATA 값
+   * - Int16
+     - 32768 이상
+     - -32768
+   * - Int16
+     - X (32767 이하)
+     - X
+   * - UInt16
+     - X
+     - X
+   * - Float32
+     - X
+     - X
 
-Creation options
+따라서, 다음과 같은 경우 완벽한 (데이터를 내보냈다가 손실 없이 무결하게 다시 가져오는) 라운드트립을 할 수 있습니다:
+
+.. list-table:: PNG 타일 라운드트립 달성 조건
+   :header-rows: 1
+
+   * - GDAL 데이터 유형
+     - 입력 GDAL NODATA 값
+     - GPKG gpkg_2d_gridded_coverage_ancillary의 null_value
+   * - Int16
+     - -32768
+     - 65535
+   * - UInt16
+     - X (커버리지 오프셋이 0이고 커버리지 척도가 1인 경우)
+     - X
+   * - Float32
+     - 65535
+     - 65535
+
+생성 옵션
 ~~~~~~~~~~~~~~~~
 
-The following creation options are available:
+다음과 같은 생성 옵션들을 사용할 수 있습니다:
 
--  **RASTER_TABLE**\ =string. Name of tile user table. By default, based
-   on the filename (i.e. if filename is foo.gpkg, the table will be
-   called "foo").
--  **APPEND_SUBDATASET**\ =YES/NO: If set to YES, an existing GeoPackage
-   will not be priorly destroyed, such as to be able to add new content
-   to it. Defaults to NO.
--  **RASTER_IDENTIFIER**\ =string. Human-readable identifier (e.g. short
-   name), put in the *identifier* column of the *gpkg_contents* table.
--  **RASTER_DESCRIPTION**\ =string. Human-readable description, put in
-   the *description* column of the *gpkg_contents* table.
--  **BLOCKSIZE**\ =integer. Block size in width and height in pixels.
-   Defaults to 256. Maximum supported is 4096. Should not be set when
-   using a non-custom TILING_SCHEME.
--  **BLOCKXSIZE**\ =integer. Block width in pixels. Defaults to 256.
-   Maximum supported is 4096.
--  **BLOCKYSIZE**\ =integer. Block height in pixels. Defaults to 256.
-   Maximum supported is 4096.
--  **TILE_FORMAT**\ =PNG_JPEG/PNG/PNG8/JPEG/WEBP/TIFF/AUTO: Format used
-   to store tiles. See :ref:`raster.gpkg.tile_formats`.
-   Defaults to AUTO.
--  **QUALITY**\ =1-100: Quality setting for JPEG and WEBP compression.
-   Default to 75.
--  **ZLEVEL**\ =1-9: DEFLATE compression level for PNG tiles. Default to
-   6.
--  **DITHER**\ =YES/NO: Whether to use Floyd-Steinberg dithering (for
-   TILE_FORMAT=PNG8). Defaults to NO.
+-  **RASTER_TABLE**\ =string. 사용자 테이블의 이름입니다. 기본적으로 소스 파일명을 기반으로 합니다. (예를 들어 파일명이 foo.gpkg라면, 테이블 이름은 "foo"가 될 것입니다.)
+-  **APPEND_SUBDATASET**\ =YES/NO: YES로 설정하면 기존 테이블에 새 내용을 추가할 수 있도록, 사전에 기존 지오패키지 테이블을 삭제하지 않을 것입니다. 기본값은 NO입니다.
+-  **RASTER_IDENTIFIER**\ =string. 사람이 읽을 수 있는 (예: 단축명) 식별자로, *gpkg_contents* 테이블의 *identifier* 열에 삽입됩니다.
+-  **RASTER_DESCRIPTION**\ =string. 사람이 읽을 수 있는 설명으로, *gpkg_contents* 테이블의 *description* 열에 삽입됩니다.
+-  **BLOCKSIZE**\ =integer. 블록 크기를 픽셀 단위 너비와 높이로 설정합니다. 기본값은 256입니다. 최대 4096까지 지원합니다. 사용자 지정(custom)이 아닌 TILING_SCHEME을 사용하는 경우 설정해서는 안 됩니다.
+-  **BLOCKXSIZE**\ =integer. 블록 너비를 픽셀 단위로 설정합니다. 기본값은 256입니다. 최대 4096까지 지원합니다.
+-  **BLOCKYSIZE**\ =integer. 블록 높이를 픽셀 단위로 설정합니다. 기본값은 256입니다. 최대 4096까지 지원합니다.
+-  **TILE_FORMAT**\ =PNG_JPEG/PNG/PNG8/JPEG/WEBP/TIFF/AUTO: 타일을 저장하기 위해 쓰이는 포맷입니다. :ref:`raster.gpkg.tile_formats` 단락을 참조하십시오. 기본값은 AUTO입니다.
+-  **QUALITY**\ =1-100: JPEG 및 WEBP 압축의 품질을 설정합니다. 기본값은 75입니다.
+-  **ZLEVEL**\ =1-9: PNG 타일 용 DEFLATE 압축 수준을 설정합니다. 기본값은 6입니다.
+-  **DITHER**\ =YES/NO: (TILE_FORMAT=PNG8일 때) 플로이드-스타인버그 디더링(Floyd–Steinberg dithering)을 사용할지 여부를 선택합니다. 기본값은 NO입니다.
 -  **TILING_SCHEME**\ =CUSTOM/GoogleCRS84Quad/GoogleMapsCompatible/InspireCRS84Quad/PseudoTMS_GlobalGeodetic/PseudoTMS_GlobalMercator/other.
-   See :ref:`raster.gpkg.tiling_schemes`. Defaults to CUSTOM.
-   Starting with GDAL 3.2, the value of TILING_SCHEME can also be the filename
-   of a JSON file according to the `OGC Two Dimensional Tile Matrix Set standard`_,
-   a URL to such file, the radical of a definition file in the GDAL data directory
-   (e.g. ``FOO`` for a file named ``tms_FOO.json``) or the inline JSON definition.
-   Note: the TILING_SCHEME option with a non-CUSTOM value is best used
-   with the gdal_translate utility / CreateCopy() API operation. If used
-   with gdalwarp, it requires setting the -tr switch to the exact value
-   expected by one zoom level of the tiling scheme.
--  **ZOOM_LEVEL_STRATEGY**\ =AUTO/LOWER/UPPER. Strategy to determine
-   zoom level. Only used by CreateCopy() for TILING_SCHEME different
-   from CUSTOM. LOWER will select the zoom level immediately below the
-   theoretical computed non-integral zoom level, leading to subsampling.
-   On the contrary, UPPER will select the immediately above zoom level,
-   leading to oversampling. Defaults to AUTO which selects the closest
-   zoom level.
--  **RESAMPLING**\ =NEAREST/BILINEAR/CUBIC/CUBICSPLINE/LANCZOS/MODE/AVERAGE.
-   Resampling algorithm. Only used by CreateCopy() for TILING_SCHEME
-   different from CUSTOM. Defaults to BILINEAR.
--  **PRECISION**\ =floating_point_value_in_vertical_units: Smallest
-   significant value. Only used for tile gridded coverage datasets.
-   Defaults to 1.
--  **UOM**\ =string: (GDAL >= 2.3) Unit of Measurement. Only used for
-   tiled gridded coverage datasets. Also set through SetUnitType()
--  **FIELD_NAME**\ =string: (GDAL >= 2.3) Field name. Only used for
-   tiled gridded coverage datasets. Defaults to Height.
--  **QUANTITY_DEFINITION**\ =string: (GDAL >= 2.3) Description of the
-   field. Only used for tiled gridded coverage datasets. Defaults to
-   Height.
--  **GRID_CELL_ENCODING**\ =grid-value-is-center/grid-value-is-area/
-   grid-value-is-corner: (GDAL >= 2.3) Grid cell encoding. Only used for
-   tiled gridded coverage datasets. Defaults to grid-value-is-center,
-   when AREA_OR_POINT metadata item is not set.
--  **VERSION**\ =AUTO/1.0/1.1/1.2/1.3: (GDAL >= 2.2) Set GeoPackage version
-   (for application_id and user_version fields). In AUTO mode, this will
-   be equivalent to 1.2 starting with GDAL 2.3.
-   1.3 is available starting with GDAL 3.3
--  **ADD_GPKG_OGR_CONTENTS**\ =YES/NO: (GDAL >= 2.2) Defines whether to
-   add a gpkg_ogr_contents table to keep feature count for vector
-   layers, and associated triggers. Defaults to YES.
+   :ref:`raster.gpkg.tiling_schemes` 단락을 참조하십시오. 기본값은 CUSTOM입니다.
 
-Overviews
+   GDAL 3.2버전부터, `OGC 2차원 타일 행렬 집합 표준`_ 을 따르는 JSON 파일의 파일명, 해당 파일을 가리키는 URL, GDAL data 디렉터리에 있는 정의 파일의 어근(예를 들면 파일명이 ``tms_FOO.json`` 인 경우 ``FOO``), 또는 그때 그때 즉시 처리하는(inline) JSON 정의를 TILING_SCHEME의 값으로 사용할 수 있습니다.
+
+   주의: 사용자 지정(custom)이 아닌 TILING_SCHEME 옵션은 gdal_translate 유틸리티 또는 CreateCopy() API 작업에 최적화되어 있습니다. gdalwarp 유틸리티에 사용하는 경우, 타일 작업 스키마의 어떤 확대/축소 수준이 기대하는 값을 뽑아내기 위한 -tr 스위치를 반드시 설정해야 합니다.
+-  **ZOOM_LEVEL_STRATEGY**\ =AUTO/LOWER/UPPER. 확대/축소 수준을 결정할 전략을 선택합니다. TILING_SCHEME이 CUSTOM이 아닌 경우에만 CreateCopy()가 사용합니다. LOWER는 내장되지 않은, 이론적으로 계산된 내장되지 않은 확대/축소 수준 바로 아래의 확대/축소 수준을 선택하고 서브샘플링 작업을 수행할 것입니다. UPPER는 그 반대로 바로 위의 확대/축소 수준을 선택하고 오버샘플링 작업을 수행할 것입니다. 기본값은 가장 가까운 확대/축소 수준을 선택하는 AUTO입니다.
+-  **RESAMPLING**\ =NEAREST/BILINEAR/CUBIC/CUBICSPLINE/LANCZOS/MODE/AVERAGE. 리샘플링 알고리즘을 선택합니다. TILING_SCHEME이 CUSTOM이 아닌 경우에만 CreateCopy()가 사용합니다. 기본값은 BILINEAR입니다.
+-  **PRECISION**\ =floating_point_value_in_vertical_units: 최소 중요값(significant value)입니다. 타일 그리드화 커버리지 데이터셋에만 사용합니다. 기본값은 1입니다.
+-  **UOM**\ =string: (GDAL 2.3버전 이상) 측정 단위입니다. 타일 그리드화 커버리지 데이터셋에만 사용합니다. SetUnitType()을 통해서도 설정할 수 있습니다.
+-  **FIELD_NAME**\ =string: (GDAL 2.3버전 이상) 필드 이름입니다. 타일 그리드화 커버리지 데이터셋에만 사용합니다. 기본값은 Height입니다.
+-  **QUANTITY_DEFINITION**\ =string: (GDAL 2.3버전 이상) 필드의 설명입니다. 타일 그리드화 커버리지 데이터셋에만 사용합니다. 기본값은 Height입니다.
+-  **GRID_CELL_ENCODING**\ =grid-value-is-center/grid-value-is-area/grid-value-is-corner: (GDAL 2.3버전 이상) 그리드 셀 인코딩입니다. 타일 그리드화 커버리지 데이터셋에만 사용합니다. 기본값은 grid-value-is-center로, 이때 AREA_OR_POINT 메타데이터 항목은 설정되지 않습니다.
+-  **VERSION**\ =AUTO/1.0/1.1/1.2/1.3: (GDAL 2.2버전 이상) (application_id 및 user_version 필드를 위한) GeoPackage 버전을 설정합니다. AUTO 모드에서는, GDAL 2.3버전부터 1.2에 대응합니다. GDAL 3.3버전부터는 1.3을 사용할 수 있습니다.
+-  **ADD_GPKG_OGR_CONTENTS**\ =YES/NO: (GDAL 2.2버전 이상) 벡터 레이어의 객체 개수와 관련 트리거를 보전하기 위한 gpkg_ogr_contents 테이블을 추가할지 여부를 정의합니다. 기본값은 YES입니다.
+
+오버뷰
 ---------
 
-gdaladdo / BuildOverviews() can be used to compute overviews.
-Power-of-two overview factors (2,4,8,16,...) should be favored to be
-conformant with the baseline GeoPackage specification. Use of other
-overview factors will work with the GDAL driver, and cause the
-`gpkg_zoom_other <http://www.geopackage.org/spec/#extension_zoom_other_intervals>`__
-extension to be registered, but that could potentially cause
-interoperability problems with other implementations that do not support
-that extension.
+gdaladdo 또는 BuildOverviews()를 사용해서 오버뷰를 계산할 수 있습니다. 기본 지오패키지 사양을 준수하려면 2의 거듭제곱 오버뷰 인자(2, 4, 8, 16, ...)를 사용해야 합니다. 다른 오버뷰 인자를 사용하면, GDAL 드라이버에서 작동도 하고 `gpkg_zoom_other <http://www.geopackage.org/spec/#extension_zoom_other_intervals>`_ 확장 사양을 등록도 할 것이지만, 해당 확장 사양을 지원하지 않는 다른 구현 기능들과 작업 호환이 안 되는 문제를 발생시킬 수도 있습니다.
 
-Overviews can also be cleared with the -clean option of gdaladdo (or
-BuildOverviews() with nOverviews=0)
+gdaladdo의 -clean 옵션으로 (또는 BuildOverviews()의 nOverviews=0 파라미터로) 오버뷰를 제거할 수도 있습니다.
 
-Metadata
+메타데이터
 --------
 
-GDAL uses the standardized
-```gpkg_metadata`` <http://www.geopackage.org/spec/#_metadata_table>`__
-and
-```gpkg_metadata_reference`` <http://www.geopackage.org/spec/#_metadata_reference_table>`__
-tables to read and write metadata.
+GDAL은 표준화된 ```gpkg_metadata`` <http://www.geopackage.org/spec/#_metadata_table>`_ 및 ```gpkg_metadata_reference`` <http://www.geopackage.org/spec/#_metadata_reference_table>`_ 테이블을 사용해서 메타데이터를 읽고 씁니다.
 
-GDAL metadata, from the default metadata domain and possibly other
-metadata domains, is serialized in a single XML document, conformant
-with the format used in GDAL PAM (Persistent Auxiliary Metadata)
-.aux.xml files, and registered with md_scope=dataset and
-md_standard_uri=http://gdal.org in gpkg_metadata. In
-gpkg_metadata_reference, this entry is referenced with a
-reference_scope=table and table_name={name of the raster table}
+기본 메타데이터 도메인과 아마도 다른 메타데이터 도메인에서 나온 GDAL 메타데이터는 GDAL PAM(Persistent Auxiliary Metadata) .aux.xml 파일에서 쓰이는 서식을 준수하는 단일 XML 문서 안에 나열되고, gpkg_metadata에 md_scope=dataset 및 md_standard_uri=http://gdal.org 로 등록됩니다. gpkg_metadata_reference에서는 이 항목을 reference_scope=table 및 table_name={래스터 테이블의 이름}으로 참조합니다.
 
-It is possible to read and write metadata that applies to the global
-GeoPackage, and not only to the raster table, by using the *GEOPACKAGE*
-metadata domain.
+*GEOPACKAGE* 메타데이터 도메인을 사용하면 래스터 테이블뿐만 아니라 전체 수준 지오패키지에 적용되는 메타데이터를 읽고 쓸 수 있습니다.
 
-Metadata not originating from GDAL can be read by the driver and will be
-exposed as metadata items with keys of the form GPKG_METADATA_ITEM_XXX
-and values the content of the *metadata* columns of the gpkg_metadata
-table. Update of such metadata is not currently supported through GDAL
-interfaces ( although it can be through direct SQL commands).
+GDAL에서 나오지 않은 메타데이터의 경우, 이 드라이버는 이를 읽어와서 GPKG_METADATA_ITEM_XXX 형태의 키와 gpkg_metadata 테이블의 *metadata* 열에 있는 값을 사용해서 메타데이터 항목으로 노출시킬 것입니다. 이런 메타데이터를 GDAL 인터페이스를 통해 업데이트하는 기능은 아직 지원하지 않습니다. (하지만 직접 SQL 명령어(Direct SQL Command)를 통해서는 업데이트할 수 있습니다.)
 
-The specific DESCRIPTION and IDENTIFIER metadata item of the default
-metadata domain can be used in read/write to read from/update the
-corresponding columns of the gpkg_contents table.
+읽기/쓰기에 기본 메타데이터 도메인의 특정 DESCRIPTION 및 IDENTIFIER 메타데이터 항목을 사용하면 gpkg_contents 테이블의 대응하는 각 열을 읽기/업데이트할 수 있습니다.
 
-You can set the CREATE_METADATA_TABLES configuration option to NO to
-avoid creating and filling the metadata tables.
+메타데이터 테이블을 생성하고 값을 채워넣는 일을 피하려면 CREATE_METADATA_TABLES 환경설정 옵션을 NO로 설정하면 됩니다.
 
-Level of support of GeoPackage Extensions
+지오패키지 확장 지원 수준
 -----------------------------------------
 
-(Restricted to those have a raster scope)
+(래스터 범위를 가지고 있는 지오패키지에 한합니다)
 
 .. list-table:: Extensions
    :header-rows: 1
 
-   * - Extension name
-     - OGC adopted extension ?
-     - Supported by GDAL?
-   * - `Zoom Other intervals <http://www.geopackage.org/guidance/extensions/zoom_other_intervals.html>`__
-     - Yes
-     - Yes
-   * - `Tiles Encoding WebP <http://www.geopackage.org/guidance/extensions/tiles_encoding_webp.html>`__
-     - Yes
-     - Yes
-   * - `Metadata <http://www.geopackage.org/guidance/extensions/metadata.html>`__
-     - Yes
-     - Yes
-   * - `WKT for Coordinate Reference Systems <http://www.geopackage.org/guidance/extensions/wkt_for_crs.md>`__ (WKT v2)
-     - Yes
-     - Partially, since GDAL 2.2. GDAL can read databases using this extension. GDAL 3.0 brings support for the WKT v2 entry.
-   * - `Tiled Gridded Coverage Data <http://www.geopackage.org/guidance/extensions/tiled_gridded_coverage_data.html>`__
-     - Yes
-     - Yes, since GDAL 2.3 (GDAL 2.2 supported a preliminary version of this extension)
+   * - 확장 이름
+     - OGC 도입 확장인가?
+     - GDAL이 지원하는가?
+   * - `다른 간격의 확대/축소 <http://www.geopackage.org/guidance/extensions/zoom_other_intervals.html>`_
+     - ○
+     - ○
+   * - `WebP 타일 인코딩 <http://www.geopackage.org/guidance/extensions/tiles_encoding_webp.html>`_
+     - ○
+     - ○
+   * - `메타데이터 <http://www.geopackage.org/guidance/extensions/metadata.html>`_
+     - ○
+     - ○
+   * - `좌표계 용 WKT <http://www.geopackage.org/guidance/extensions/wkt_for_crs.md>`_ (WKT v2)
+     - ○
+     - GDAL 2.2버전 부터 부분 지원. GDAL이 이 확장 사양으로 데이터베이스를 읽어올 수 있습니다. GDAL 3.0버전부터 WKT v2 항목을 지원합니다.
+   * - `타일 그리드화 커버리지 데이터 <http://www.geopackage.org/guidance/extensions/tiled_gridded_coverage_data.html>`_
+     - ○
+     - ○, GDAL 2.3버전부터 (GDAL 2.2는 이 확장 사양의 초기 버전을 지원합니다.)
 
-Examples
+예시
 --------
 
--  Simple translation of a GeoTIFF into GeoPackage. The table 'byte'
-   will be created with the tiles.
+-  GeoTIFF를 지오패키지로 단순 변환(translation)합니다. 타일과 함께 'byte' 테이블이 생성될 것입니다.
 
    ::
 
       gdal_translate -of GPKG byte.tif byte.gpkg
 
--  Translation of a GeoTIFF into GeoPackage using WebP tiles
+-  GeoTIFF를 WebP 타일을 사용하는 지오패키지로 변환합니다.
 
    ::
 
       gdal_translate -of GPKG byte.tif byte.gpkg -co TILE_FORMAT=WEBP
 
--  Translation of a GeoTIFF into GeoPackage using GoogleMapsCompatible
-   tiling scheme (with reprojection and resampling if needed)
+-  GeoTIFF를 (필요한 경우 재투영 및 리샘플링을 거친) GoogleMapsCompatible 타일 작업 스키마를 사용하는 지오패키지로 변환합니다.
 
    ::
 
       gdal_translate -of GPKG byte.tif byte.gpkg -co TILING_SCHEME=GoogleMapsCompatible
 
--  Building of overviews of an existing GeoPackage, and forcing JPEG
-   tiles
+-  기존 지오패키지의 오버뷰를 작성하고, JPEG 타일을 강제로 생성합니다.
 
    ::
 
       gdaladdo -r cubic -oo TILE_FORMAT=JPEG my.gpkg 2 4 8 16 32 64
 
--  Addition of a new subdataset to an existing GeoPackage, and choose a
-   non default name for the raster table.
+-  기존 지오패키지에 새 하위 데이터셋을 추가하고, 래스터 테이블에 기본값이 아닌 이름을 명명합니다.
 
    ::
 
       gdal_translate -of GPKG new.tif existing.gpkg -co APPEND_SUBDATASET=YES -co RASTER_TABLE=new_table
 
--  Reprojection of an input dataset to GeoPackage
+-  입력 데이터셋을 지오패키지로 재투영합니다.
 
    ::
 
       gdalwarp -of GPKG in.tif out.gpkg -t_srs EPSG:3857
 
--  Open a specific raster table in a GeoPackage
+-  지오패키지에 있는 특정 래스터 테이블을 엽니다.
 
    ::
 
       gdalinfo my.gpkg -oo TABLE=a_table
 
-See Also
+참고
 --------
 
--  :ref:`GeoPackage vector <vector.gpkg>` documentation page
--  `Getting Started With
-   GeoPackage <http://www.geopackage.org/guidance/getting-started.html>`__
--  `OGC GeoPackage format standard <http://www.geopackage.org/spec/>`__
-   specification, HTML format (current/development version of the
-   standard)
--  `OGC GeoPackage Encoding
-   Standard <http://www.opengeospatial.org/standards/geopackage>`__ page
--  `SQLite <http://sqlite.org/>`__
--  :ref:`PNG driver <raster.png>` documentation page
--  :ref:`JPEG driver <raster.jpeg>` documentation page
--  :ref:`WEBP driver <raster.webp>` documentation page
--  `OGC 07-057r7 WMTS
-   1.0 <http://portal.opengeospatial.org/files/?artifact_id=35326>`__
-   specification
--  `OSGeo TMS (Tile Map
-   Service) <http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification>`__
-   specification
+-  :ref:`지오패키지 벡터 <vector.gpkg>` 문서 페이지
+-  `지오패키지 알아보기 <http://www.geopackage.org/guidance/getting-started.html>`_
+-  `OGC 지오패키지 포맷 표준 <http://www.geopackage.org/spec/>`_ 사양, HTML 포맷 (표준의 현재/개발 버전)
+-  `OGC 지오패키지 인코딩 표준 <http://www.opengeospatial.org/standards/geopackage>`_ 페이지
+-  `SQLite <http://sqlite.org/>`_
+-  :ref:`PNG 드라이버 <raster.png>` 문서 페이지
+-  :ref:`JPEG 드라이버 <raster.jpeg>` 문서 페이지
+-  :ref:`WEBP 드라이버 <raster.webp>` 문서 페이지
+-  `OGC 07-057r7 WMTS 1.0 <http://portal.opengeospatial.org/files/?artifact_id=35326>`_ 사양
+-  `OSGeo TMS(Tile Map Service) <http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification>`_ 사양
 
-Other notes
+기타
 -----------
 
-Development of raster support in the GeoPackage driver was financially
-supported by `Safe Software <http://www.safe.com>`__.
+GeoPackage 드라이버의 래스터 지원은 `세이프 소프트웨어 <http://www.safe.com>`_ 의 재정 지원으로 개발되었습니다.

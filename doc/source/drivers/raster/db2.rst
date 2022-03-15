@@ -10,17 +10,17 @@ DB2 래스터
 
 .. note::
 
-    DB2 드라이버는 SQLITE 기능을 그에 대응하는 DB2 기능으로 대체한 OGR/DB2 GeoPackage(GPKG) 드라이버의 소스코드에 크게 바탕을 두고 있습니다. DB2 드라이버를 개발하기 위해 필요했던 노력을 극적으로 줄여준 GeoPackage 드라이버 개발자들에게 감사의 말을 전합니다. 공통 기능을 공유하기 위해 클래스 구조를 재작성하는 일이 과연 실용적인 것인지에 대한 연구가 언젠가 진행되어도 좋을 겁니다.
+    DB2 드라이버는 SQLITE 기능을 그에 대응하는 DB2 기능으로 대체한 OGR/DB2 지오패키지(GeoPackage; GPKG) 드라이버의 소스코드에 크게 바탕을 두고 있습니다. DB2 드라이버를 개발하기 위해 필요했던 노력을 극적으로 줄여준 지오패키지 드라이버 개발자들에게 감사의 말을 전합니다. 공통 기능을 공유하기 위해 클래스 구조를 재작성하는 일이 과연 실용적인 것인지에 대한 연구가 언젠가 진행되어도 좋을 겁니다.
 
-    DB2 드라이버는 GeoPackage 표준을 대부분 구현했지만, DB2 테이블 이름에서 "gpkg\_" 접두어를 "gpkg."로 대체해서 고유(distinct) 데이터베이스 스키마에 할당했다는 차이가 있습니다.
+    DB2 드라이버는 지오패키지 표준을 대부분 구현했지만, DB2 테이블 이름에서 "gpkg\_" 접두어를 "gpkg."로 대체해서 고유(distinct) 데이터베이스 스키마에 할당했다는 차이가 있습니다.
 
-    이 문서의 내용 대부분은 :ref:`raster.gpkg` 문서에서 가져왔습니다. GeoPackage 표준에 대한 참조는 그대로 두었습니다. 구현에 대한 참조는 DB2로 변경했습니다. "DB2 타일"을 참조해야 하는지 또는 "GeoPackage 타일"을 참조해야 하는지 명확하지 않은 경우도 가끔 있습니다.
+    이 문서의 내용 대부분은 :ref:`raster.gpkg` 문서에서 가져왔습니다. 지오패키지 표준에 대한 참조는 그대로 두었습니다. 구현에 대한 참조는 DB2로 변경했습니다. "DB2 타일"을 참조해야 하는지 또는 "지오패키지 타일"을 참조해야 하는지 명확하지 않은 경우도 가끔 있습니다.
 
-이 드라이버는 래스터 타일을 `OGC GeoPackage 포맷 표준 <http://www.geopackage.org/spec/>`_ 으로 담고 있는 테이블의 완전한 읽기/생성/업데이트 기능을 구현했습니다. GeoPackage 표준은 SQLite 데이터베이스 파일을 일반 컨테이너로 사용하며, 다음을 정의하고 있습니다:
+이 드라이버는 `OGC 지오패키지 포맷 표준 <http://www.geopackage.org/spec/>`_ 래스터 타일을 담고 있는 테이블의 완전한 읽기/생성/업데이트를 구현합니다. 지오패키지 표준은 SQLite 데이터베이스 파일을 일반 컨테이너로 사용하며, 다음을 정의하고 있습니다:
 
 -  예상 메타데이터 테이블 (``gpkg.contents``, ``gpkg.spatial_ref_sys``, ``gpkg.tile_matrix``, ``gpkg.tile_matrix_set`` 등등)
--  타일 포맷 인코딩(기반 사양은 PNG 및 JPEG for base specification, 확장 사양은 WebP) 및 타일 작업 규범
--  확장자의 명명 및 규범
+-  타일 포맷 인코딩(기반 사양은 PNG 및 JPEG, 확장 사양은 WebP) 및 타일 작업 규범
+-  확장자 명명 및 규범
 
 이 드라이버는 DB2 데이터베이스의 DB2 테이블을 읽고 쓰기 때문에 이 드라이버가 작업하는 데이터베이스에 대한 생성 권한을 가지고 있는 사용자가 실행해야만 합니다.
 
@@ -28,7 +28,7 @@ DB2 래스터
 
 다양한 입력 데이터셋 유형을 DB2 래스터로 변환할 수 있습니다:
 
--  단일 밴드 회색조 수준
+-  회색조 수준 단일 밴드 
 -  RGB 또는 RGBA 색상표를 가진 단일 밴드
 -  2밴드: 첫 번째 밴드는 회색조 수준, 두 번째 밴드는 알파 채널
 -  3밴드: 적색(Red), 녹색(Green), 청색(Blue)
@@ -36,7 +36,7 @@ DB2 래스터
 
 DB2 래스터는 바이트 데이터 유형만 지원합니다.
 
-GeoPackage 사양으로 표준화된 모든 래스터 확장자를 읽기 및 생성 지원합니다:
+지오패키지 사양으로 표준화된 모든 래스터 확장자를 읽기 및 생성 지원합니다:
 
 -  *gpkg.webp*: WebP 타일을 저장하는 경우, GDAL이 libwebp를 대상으로 컴파일되었다고 가정
 -  *gpkg.zoom_other*: 연속하는 확대/축소 수준들의 해상도가 2배수로 변화하지 않는 경우
@@ -59,7 +59,7 @@ GeoPackage 사양으로 표준화된 모든 래스터 확장자를 읽기 및 �
 
 다음 열기 옵션들을 사용할 수 있습니다:
 
--  **TABLE**\ =table_name: 타일을 담고 있는 테이블의 이름입니다. (GeoPackage 사양 용어로는 `"타일 피라미드 사용자 데이터 테이블" <http://www.geopackage.org/spec/#tiles_user_tables>`_ 이라고 합니다.) DB2 데이터셋이 테이블 하나만 담고 있는 경우, 이 옵션은 필요없습니다. 테이블이 하나 이상이라면 필수입니다.
+-  **TABLE**\ =table_name: 타일을 담고 있는 테이블의 이름입니다. (지오패키지 사양 용어로는 `"타일 피라미드 사용자 데이터 테이블" <http://www.geopackage.org/spec/#tiles_user_tables>`_ 이라고 합니다.) DB2 데이터셋이 테이블 하나만 담고 있는 경우, 이 옵션은 필요없습니다. 테이블이 하나 이상이라면 필수입니다.
 -  **ZOOM_LEVEL**\ =value: 0에서 *gpkg.tile_matrix* 테이블의 최대값 사이의 정수값입니다. 이 드라이버는 기본적으로 래스터 테이블에서 해당 확대/축소 수준의 타일을 최소한 1개는 찾도록 최대 확대/축소 수준을 선택할 것입니다.
 -  **BAND_COUNT**\ =1/2/3/4: 데이터셋을 연 다음 노출되는 밴드 개수입니다. 구현되어 있고 사용할 수 있는 경우 몇몇 변환 작업을 수행할 것이지만, BAND_COUNT 값과 타일의 밴드 개수에 따라 실패하는 경우도 생길 수 있습니다. 기본값은 (언제나 안전한 값인) 4입니다.
 -  **MINX**\ =value: 관심 영역의 최소 경도/편동(easting)입니다.
@@ -77,7 +77,7 @@ GeoPackage 사양으로 표준화된 모든 래스터 확장자를 읽기 및 �
 생성 문제점
 ---------------
 
-이 드라이버는 입력 데이터셋의 밴드 개수와 선택한 타일 포맷에 따라 타일 포맷을 호환시키기 위해 필수 변환 작업을 수행할 것입니다.
+이 드라이버는 입력 데이터셋의 밴드 개수와 선택한 타일 포맷에 따라 타일 포맷을 호환시키기 위한 필수 변환 작업을 수행할 것입니다.
 
 DB2 데이터셋에 타일 테이블 여러 개를 (GDAL 하위 데이터셋으로 간주해서) 추가하려면, 또는 기존 벡터 전용 DB2에 타일 테이블을 추가하려면, 일반 APPEND_SUBDATASET=YES 생성 옵션을 반드시 지정해야만 합니다.
 
@@ -109,9 +109,9 @@ TILE_FORMAT 생성/열기 옵션을 PNG, JPEG 또는 WEBP 가운데 하나로 �
 
 -  *GoogleCRS84Quad*, `OGC 07-057r7 WMTS 1.0 <http://portal.opengeospatial.org/files/?artifact_id=35326>`_ 사양에서 설명하는 Annex E.3입니다. 이 타일 작업 스키마는 [-180,180] 사이에 있는 경도와 위도 단위의 범위를 가진 EPSG:4326 좌표계의 확대/축소 0수준에서 크기 256x256인 단일 타일로 이루어져 있습니다. 그 결과 확대/축소 0수준에서 해당 타일의 최상단 및 최하단에 있는 라인 64개를 사용하지 않습니다. 이로 인해 몇몇 사양 구현에 문제가 생길 수도 있고, 이 타일 작업 스키마의 정확한 정의가 약간 모호해지기도 합니다. 따라서 이 스키마 대신 InspireCRS84Quad 또는 PseudoTMS_GlobalGeodetic 스키마를 사용하도록 권장합니다.
 -  *GoogleMapsCompatible*, WMTS 1.0 사양에서 설명하는 Annex E.4입니다. 이 타일 작업 스키마는 [-20037508.34,20037508.34] 사이에 있는 편동과 편북 단위의 범위를 가진 EPSG:3857 좌표계의 확대/축소 0수준에서 크기 256x256인 단일 타일로 이루어져 있습니다.
--  *InspireCRS84Quad*, as described in `인스파이어 뷰 서비스(Inspire View Services) <http://inspire.ec.europa.eu/documents/Network_Services/TechnicalGuidance_ViewServices_v3.0.pdf>`_ 문서에서 설명하는 이 타일 작업 스키마는 [-180,180] 사이에 있는 경도와 [-90,90] 사이에 있는 위도 단위의 범위를 가진 EPSG:4326 좌표계의 확대/축소 0수준에서 크기 256x256인 타일 2개로 이루어져 있습니다.
--  *PseudoTMS_GlobalGeodetic*, 이 타일 작업 스키마는 OSGeo TMS(Tile Map Service)의 `global-geodetic <http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification#global-geodetic>`_ 프로파일을 기반으로 합니다. 이 스키마는 *InspireCRS84Quad* 타일 작업 스키마와 정확히 동일하게 정의됩니다. 하지만 TMS가 좌하단 모서리를 원점으로 사용하는 반면 DB2는 (WMTS 규범을 준수하도록) 좌상단 모서리를 타일 번호 원점으로 삼기 때문에 TMS와 완전한 작업 호환은 불가능하다는 사실을 기억하십시오.
--  *PseudoTMS_GlobalMercator*, 이 타일 작업 스키마는 OSGeo TMS(Tile Map Service)의 `global-mercator <http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification#global-mercator>`_ 프로파일을 기반으로 합니다. 이 타일 작업 스키마는 [-20037508.34,20037508.34] 사이에 있는 편동과 편북 단위의 범위를 가진 EPSG:3857 좌표계의 확대/축소 0수준에서 크기 256x256인 타일 4개로 이루어져 있습니다. TMS와의 작업 호환성에 대해서는 PseudoTMS_GlobalGeodetic과 동일합니다.
+-  *InspireCRS84Quad*, `인스파이어 뷰 서비스(Inspire View Services) <http://inspire.ec.europa.eu/documents/Network_Services/TechnicalGuidance_ViewServices_v3.0.pdf>`_ 문서에서 설명하는 이 타일 작업 스키마는 [-180,180] 사이에 있는 경도와 [-90,90] 사이에 있는 위도 단위의 범위를 가진 EPSG:4326 좌표계의 확대/축소 0수준에서 크기 256x256인 타일 2개로 이루어져 있습니다.
+-  *PseudoTMS_GlobalGeodetic*, 이 타일 작업 스키마는 OSGeo TMS(Tile Map Service) 사양의 `global-geodetic <http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification#global-geodetic>`_ 프로파일을 기반으로 합니다. 이 스키마는 *InspireCRS84Quad* 타일 작업 스키마와 정확히 동일하게 정의됩니다. 하지만 TMS가 좌하단 모서리를 원점으로 사용하는 반면 DB2는 (WMTS 규범을 준수하도록) 좌상단 모서리를 타일 번호 원점으로 삼기 때문에 TMS와 완전한 작업 호환은 불가능하다는 사실을 기억하십시오.
+-  *PseudoTMS_GlobalMercator*, 이 타일 작업 스키마는 OSGeo TMS(Tile Map Service) 사양의 `global-mercator <http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification#global-mercator>`_ 프로파일을 기반으로 합니다. 이 타일 작업 스키마는 [-20037508.34,20037508.34] 사이에 있는 편동과 편북 단위의 범위를 가진 EPSG:3857 좌표계의 확대/축소 0수준에서 크기 256x256인 타일 4개로 이루어져 있습니다. TMS와의 작업 호환성에 대해서는 PseudoTMS_GlobalGeodetic과 동일합니다.
 
 이 모든 사전 정의 타일 작업 스키마에서, 연속되는 확대/축소 수준은 2배수의 해상도만큼씩 달라집니다.
 
@@ -138,7 +138,7 @@ TILE_FORMAT 생성/열기 옵션을 PNG, JPEG 또는 WEBP 가운데 하나로 �
 오버뷰
 ---------
 
-gdaladdo 또는 BuildOverviews()를 사용해서 오버뷰를 계산할 수 있습니다. 기본 GeoPackage 사양을 준수하려면 2의 거듭제곱 오버뷰 인자(2, 4, 8, 16, ...)를 사용해야 합니다. 다른 오버뷰 인자를 사용하면, GDAL 드라이버에서 작동도 하고 `gpkg.zoom_other <http://www.geopackage.org/spec/#extension_zoom_other_intervals>`_ 확장자를 등록도 할 것이지만, 해당 확장자를 지원하지 않는 다른 구현 기능들과 작업 호환이 안 되는 문제를 발생시킬 수도 있습니다.
+gdaladdo 또는 BuildOverviews()를 사용해서 오버뷰를 계산할 수 있습니다. 기본 지오패키지 사양을 준수하려면 2의 거듭제곱 오버뷰 인자(2, 4, 8, 16, ...)를 사용해야 합니다. 다른 오버뷰 인자를 사용하면, GDAL 드라이버에서 작동도 하고 `gpkg.zoom_other <http://www.geopackage.org/spec/#extension_zoom_other_intervals>`_ 확장 사양을 등록도 할 것이지만, 해당 확장 사양을 지원하지 않는 다른 구현 기능들과 작업 호환이 안 되는 문제를 발생시킬 수도 있습니다.
 
 gdaladdo의 -clean 옵션으로 (또는 BuildOverviews()의 nOverviews=0 파라미터로) 오버뷰를 제거할 수도 있습니다.
 
