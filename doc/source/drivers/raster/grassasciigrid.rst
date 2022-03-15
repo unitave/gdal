@@ -1,27 +1,20 @@
 .. _raster.grassasciigrid:
 
 ================================================================================
-GRASSASCIIGrid -- GRASS ASCII Grid
+GRASSASCIIGrid -- GRASS 아스키 그리드
 ================================================================================
 
 .. shortname:: GRASSASCIIGrid
 
 .. built_in_by_default::
 
-Supports reading GRASS ASCII grid format (similar to Arc/Info ASCIIGRID
-command).
+이 드라이버는 (Arc/Info 아스키 그리드와 유사한) GRASS 아스키 그리드 포맷 읽기를 지원합니다.
 
-By default, the datatype returned for GRASS ASCII grid datasets by GDAL
-is autodetected, and set to Float32 for grid with floating point values
-or Int32 otherwise. This is done by analysing the format of the null
-value and the first 100k bytes of data of the grid. You can also
-explicitly specify the datatype by setting the GRASSASCIIGRID_DATATYPE
-configuration option (Int32, Float32 and Float64 values are supported
-currently)
+기본적으로 GDAL이 GRASS 아스키 그리드 데이터셋에 반환하는 데이터 유형을 자동 탐지해서, 부동소수점형 값을 가진 그리드의 경우 Float32로 설정하고 그렇지 않은 경우 Int32로 설정합니다. 이 과정은 NULL 값의 서식과 그리드 데이터의 처음 100KB를 분석해서 이루어집니다. GRASSASCIIGRID_DATATYPE 환경설정 옵션을 설정하면 데이터 유형을 명확하게 지정할 수도 있습니다. (현재 Int32, Float32 및 Float64로 지정할 수 있습니다.)
 
-NOTE: Implemented as ``gdal/frmts/aaigrid/aaigriddataset.cpp``.
+주의: ``gdal/frmts/aaigrid/aaigriddataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
