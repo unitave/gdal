@@ -31,7 +31,7 @@ GDAL 3.2버전부터, 바이너리 테이블을 벡터 레이어로 노출시킬
 FITS 데이터 유형은 OGR 데이터 유형에 다음과 같이 매핑됩니다:
 
 .. list-table:: Data types
-   :header-rows: 0
+   :header-rows: 1
 
    * - TFORM 값
      - TSCAL, TOFFSET 값
