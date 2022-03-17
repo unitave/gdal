@@ -1,25 +1,20 @@
 .. _raster.gsbg:
 
 ================================================================================
-GSBG -- Golden Software Binary Grid File Format
+GSBG -- 골든소프트웨어 바이너리 그리드 파일 포맷
 ================================================================================
 
 .. shortname:: GSBG
 
 .. built_in_by_default::
 
-This is the binary (non-human-readable) version of one of the raster
-formats used by Golden Software products (such as the Surfer series).
-Like the ASCII version, this format is supported for both reading and
-writing (including create, delete, and copy). Currently the associated
-formats for color, metadata, and shapes are not supported.
+이 포맷은 (Surfer 시리즈 같은) 골든소프트웨어(Golden Software) 상품에 쓰이는 래스터 포맷 가운데 하나의 바이너리(인간이 읽을 수 없는) 버전입니다. 아스키 버전과 마찬가지로, 이 포맷의 읽기와 (생성, 삭제, 복사를 포함하는) 쓰기를 지원합니다. 현재 색상, 메타데이터 및 도형 관련 포맷은 지원하지 않습니다.
 
-Surfer 8 uses a fixed nodata value at 1.701410009187828e+38. When writing a
-GSBG dataset, GDAL remaps the user-specified input nodata value to 1.701410009187828e+38.
+Surfer 8은 고정값 1.701410009187828e+38을 NODATA 값으로 사용합니다. GSBG 데이터셋 작성 시, GDAL은 사용자가 지정한 입력 NODATA 값을 1.701410009187828e+38로 다시 매핑합니다.
 
-NOTE: Implemented as ``gdal/frmts/gsg/gsbgdataset.cpp``.
+주의: ``gdal/frmts/gsg/gsbgdataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::

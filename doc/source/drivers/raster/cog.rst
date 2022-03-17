@@ -31,18 +31,18 @@ COG -- 클라우드 최적화 GeoTIFF 생성기
 
 -  **BLOCKSIZE=n**: 타일 너비와 높이를 픽셀 단위로 설정합니다. 기본값은 512입니다.
 
--  **COMPRESS=[NONE/LZW/JPEG/DEFLATE/ZSTD/WEBP/LERC/LERC_DEFLATE/LERC_ZSTD/LZMA]**: 사용할 압축 방법을 설정합니다.
+-  **COMPRESS=[NONE/LZW/JPEG/DEFLATE/ZSTD/WEBP/LERC/LERC_DEFLATE/LERC_ZSTD/LZMA]**: 사용할 압축 방식을 설정합니다.
    GDAL 3.4버전부터 기본값은 ``LZW`` 입니다. (이전 버전까지 기본값은 ``NONE`` 이었습니다.)
 
-   * ``JPEG`` 은 일반적으로 (채널 당 8비트인) 바이트 유형 데이터에만 사용해야 합니다. 하지만 GDAL이 내부 libtiff와 libjpeg으로 빌드된 경우, TIFF 파일을 (NBITS 값이 12인 UInt16 데이터 유형 밴드로 보이는) 12비트 JPEG 압축 TIFF로 읽고 쓸 수 있습니다. 더 자세한 내용은 `"TIFF에서 8비트 및 12비트 JPEG" <http://trac.osgeo.org/gdal/wiki/TIFF12BitJPEG>`_ 위키 페이지를 참조하십시오. COG 드라이버의 경우, 밴드 3개 또는 4개 이미지를 위한 JPEG 압축은 자동적으로 Y, Cb, Cr 구성 요소를 4:2:2로 서브샘플링한 PHOTOMETRIC=YCBCR 색 공간(color space)을 선택합니다.
+   * ``JPEG`` 은 일반적으로 (채널 당 8비트인) 바이트 데이터 유형에만 사용해야 합니다. 하지만 GDAL이 내부 libtiff와 libjpeg으로 빌드된 경우, TIFF 파일을 (NBITS 값이 12인 UInt16 데이터 유형 밴드로 보이는) 12비트 JPEG 압축 TIFF로 읽고 쓸 수 있습니다. 더 자세한 내용은 `"TIFF에서 8비트 및 12비트 JPEG" <http://trac.osgeo.org/gdal/wiki/TIFF12BitJPEG>`_ 위키 페이지를 참조하십시오. COG 드라이버의 경우, 밴드 3개 또는 4개 이미지를 위한 JPEG 압축은 자동적으로 Y, Cb, Cr 구성 요소를 4:2:2로 서브샘플링한 PHOTOMETRIC=YCBCR 색 공간(color space)을 선택합니다.
 
-   * ``LZW``, ``DEFLATE`` and ``ZSTD`` 압축은 PREDICTOR 생성 옵션과 함께 사용할 수 있습니다.
+   * ``LZW``, ``DEFLATE`` 및 ``ZSTD`` 압축은 PREDICTOR 생성 옵션과 함께 사용할 수 있습니다.
 
-   * ``ZSTD`` 는 내부 libtiff를 사용하며 GDAL이 libzstd 1.0 이상 버전을 대상으로 빌드된 경우 또는 zstd를 지원하는 외부 libtiff를 대상으로 빌드된 경우 사용할 수 있습니다.
+   * ``ZSTD`` 압축은 내부 libtiff를 사용하고 GDAL이 libzstd 1.0 이상 버전을 대상으로 빌드된 경우 또는 zstd를 지원하는 외부 libtiff를 대상으로 빌드된 경우 사용할 수 있습니다.
 
-   * ``LERC`` 는 내부 libtiff를 사용하는 경우 사용할 수 있습니다.
+   * ``LERC`` 압축은 내부 libtiff를 사용하는 경우 사용할 수 있습니다.
 
-   * ``LERC_ZSTD`` 는 ``LERC`` 과 ``ZSTD`` 를 사용할 수 있는 경우 사용할 수 있습니다.
+   * ``LERC_ZSTD`` 압축은 ``LERC`` 과 ``ZSTD`` 를 사용할 수 있는 경우 사용할 수 있습니다.
 
 -  **LEVEL=integer_value**: DEFLATE/ZSTD/LERC_DEFLATE/LERC_ZSTD/LZMA 압축 수준입니다. 숫자가 낮을수록 압축 속도는 빨라지지만 압축 효율은 떨어집니다. 1로 설정하면 속도가 가장 빠릅니다.
 
@@ -112,13 +112,11 @@ COG -- 클라우드 최적화 GeoTIFF 생성기
   ``1.1`` 은 OGC 표준 19-008로, 1.0의 애매했던 표현을 고치고 대부분 좌표계의 수직 부분의 처리 과정에 있던 모순들을 수정한 진화형입니다.
   ``AUTO`` 모드(기본값)는 인코딩할 좌표계가 수직 구성요소를 가지고 있거나 3차원 좌표계가 아니라면 일반적으로 1.0을 선택할 것입니다. 수직 구성요소를 가지고 있거나 3차원 좌표계인 경우 1.1을 선택합니다.
 
-  .. note::
-
-    GeoTIFF 1.1의 경우 쓰기를 지원하려면 libgeotiff 1.6.0 이상 버전이 필요합니다.
+  .. note:: GeoTIFF 1.1의 경우 쓰기를 지원하려면 libgeotiff 1.6.0 이상 버전이 필요합니다.
 
 - **SPARSE_OK=TRUE/FALSE** (GDAL 3.2 이상): 
   디스크에서 비어 있는 블록을 생략해야 할지 여부를 선택합니다.
-  이 옵션을 설정한 경우, (파일 안에 대응하는 블록이 이미 할당되어 있는 경우가 아니라면) 모든 픽셀이 0 또는 NODATA 값인 어떤 블록도 작성되지 못 할 것입니다. 희소(sparse) 파일은 작성되지 않는 블록을 위한 타일/스트립 오프셋을 하나도 가지고 있지 않아 디스크 공간을 절약합니다. 하지만, GDAL이 아닌 대부분의 패키지는 이런 파일을 읽어오지 못 합니다.
+  이 옵션을 설정한 경우, (파일 안에 대응하는 블록이 이미 할당되어 있는 경우가 아니라면) 모든 픽셀이 0 또는 NODATA 값인 어떤 블록도 작성되지 못 할 것입니다. 희소(sparse) 타일/스트립 오프셋이 0인 블록을 작성하지 않기 때문에 디스크 공간을 절약합니다. 하지만, GDAL이 아닌 대부분의 패키지는 이런 파일을 읽어오지 못 합니다.
   읽기라는 관점에서 보면, 비어 있지 않은 타일 뒤에 생략된 타일이 존재하는 경우 최적화된 판독기가 TileByteCounts 배열에 GET 요청을 추가로 전송해야 할 수도 있습니다.
   기본값은 FALSE입니다.
 

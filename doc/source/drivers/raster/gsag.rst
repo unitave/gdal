@@ -1,22 +1,18 @@
 .. _raster.gsag:
 
 ================================================================================
-GSAG -- Golden Software ASCII Grid File Format
+GSAG -- 골든소프트웨어 아스키 그리드 파일 포맷
 ================================================================================
 
 .. shortname:: GSAG
 
 .. built_in_by_default::
 
-This is the ASCII-based (human-readable) version of one of the raster
-formats used by Golden Software products (such as the Surfer series).
-This format is supported for both reading and writing (including create,
-delete, and copy). Currently the associated formats for color, metadata,
-and shapes are not supported.
+이 포맷은 (Surfer 시리즈 같은) 골든소프트웨어(Golden Software) 상품에 쓰이는 래스터 포맷 가운데 하나의 아스키 기반(인간이 읽을 수 있는) 버전입니다. 이 포맷의 읽기와 (생성, 삭제, 복사를 포함하는) 쓰기를 지원합니다. 현재 색상, 메타데이터 및 도형 관련 포맷은 지원하지 않습니다.
 
-NOTE: Implemented as ``gdal/frmts/gsg/gsagdataset.cpp``.
+주의: ``gdal/frmts/gsg/gsagdataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::

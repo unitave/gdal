@@ -1,16 +1,16 @@
 .. _raster.gsc:
 
 ================================================================================
-GSC -- GSC Geogrid
+GSC -- GSC 지리 그리드(geogrid)
 ================================================================================
 
 .. shortname:: GSC
 
 .. built_in_by_default::
 
-NOTE: Implemented as ``gdal/frmts/raw/gscdataset.cpp``.
+주의: ``gdal/frmts/raw/gscdataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_virtualio::

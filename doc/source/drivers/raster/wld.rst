@@ -1,22 +1,21 @@
 .. _raster.wld:
 
 ================================================================================
-WLD -- ESRI World File
+WLD -- ESRI 월드 파일
 ================================================================================
 
-A world file file is a plain ASCII text file consisting of six values
-separated by newlines. The format is:
+월드 파일이란 줄바꿈으로 구분된 값 6개로 이루어진 평문 아스키 텍스트 파일입니다. 서식은 다음과 같습니다:
 
 .. code-block::
 
-    pixel X size
-    rotation about the Y axis (usually 0.0)
-    rotation about the X axis (usually 0.0)
-    negative pixel Y size
-    X coordinate of upper left pixel center
-    Y coordinate of upper left pixel center
+    픽셀 X 크기
+    Y축 기준 기울기 (일반적으로 0.0)
+    X축 기준 기울기 (일반적으로 0.0)
+    음의 값인 픽셀 Y 크기
+    좌상단 픽셀 중심의 X 좌표
+    좌상단 픽셀 중심의 Y 좌표
 
-For example:
+예시:
 
 .. code-block::
 
@@ -27,7 +26,6 @@ For example:
    440750.0000000000
    3751290.0000000000
 
-You can construct that file simply by using your favorite text editor.
+사용자가 선호하는 텍스트 편집기를 이용해서 이 파일을 간단하게 작성할 수 있습니다.
 
-World file usually has suffix ``.wld``, but sometimes it may has ``.tfw``,
-``.tifw``, ``.jgw`` or other suffixes depending on the image file it comes with.
+월드 파일의 확장자는 보통 ``.wld`` 이지만, 함께 사용되는 이미지 파일에 따라 ``.tfw``, ``.tifw``, ``.jgw`` 또는 다른 확장자를 사용할 수도 있습니다.
