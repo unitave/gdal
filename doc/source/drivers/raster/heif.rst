@@ -1,47 +1,41 @@
 .. _raster.heif:
 
 ================================================================================
-HEIF / HEIC -- ISO/IEC 23008-12:2017 High Efficiency Image File Format
+HEIF / HEIC -- ISO/IEC 23008-12:2017 고효율 이미지 파일 포맷
 ================================================================================
 
 .. versionadded:: 3.2
 
 .. shortname:: HEIF
 
-.. build_dependencies:: libheif (>= 1.1), built against libde265
+.. build_dependencies:: libheif (1.1 이상 버전), libde265 대상으로 빌드
 
-High Efficiency Image File Format (HEIF) is a container format for individual images and image sequences.
-The driver has mostly been developed and tested to be able to read images using
-the High Efficiency Video Coding (HEVC, ITU-T H.265) codec. Such images are
-usually called HEIC (HEVC in HEIF) files, and have the .heic extension.
-iOS 11 can generate such files.
+고효율 이미지 파일 포맷(High Efficiency Image File Format; HEIF)은 개별 이미지 및 이미지 시퀀스를 위한 컨테이너 포맷입니다.
+이 드라이버는 주로 고효율 비디오 코딩(High Efficiency Video Coding; HEVC, ITU-T H.265) 코덱을 사용하는 이미지를 읽을 수 있도록 개발되고 테스트되었습니다. 이런 이미지를 보통 HEIC(HEVC 압축 HEIF)이라고 하는데, .heic 확장자를 사용합니다.
+iOS 11이 이런 파일을 생성할 수 있습니다.
 
-libheif 1.4 or later is needed to support images with more than 8-bits per channel.
+채널 당 8비트 이상을 가진 이미지를 지원하려면 libheif 1.4 이상 버전이 필요합니다.
 
-The driver can read EXIF metadatata (exposed in the ``EXIF`` metadata domain)
-and XMP metadata (exposed in the ``xml:XMP`` metadata domain)
+이 드라이버는 (``EXIF`` 메타데이터 도메인에 노출돼 있는) EXIF 메타데이터와 (``xml:XMP`` 메타데이터 도메인에 노출돼 있는) XMP 메타데이터를 읽어올 수 있습니다.
 
-The driver will expose the thumbnail as an overview (when its number of bands
-matches the one of the full resolution image)
+이 드라이버는 (섬네일의 밴드 개수가 전체 해상도 이미지의 밴드 개수와 일치하는 경우) 섬네일을 오버뷰로 노출시킬 것입니다.
 
-If a file contains several top-level images, they will be exposed as GDAL subdatasets.
+HEIF 파일이 최상위 이미지 여러 개를 담고 있는 경우, GDAL 하위 데이터셋으로 노출시킬 것입니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_virtualio:: if libheif >= 1.4
 
 
-Built hints on Windows
-----------------------
+윈도우 상에서의 빌드 힌트
+-----------------------
 
-* Download source archives for libheif at
-  https://github.com/strukturag/libheif and libde265 at
-  https://github.com/strukturag/libde265
+* https://github.com/strukturag/libheif 에서 libheif 용 소스 압축 파일을, https://github.com/strukturag/libde265 에서 libde265 용 소스 압축 파일을 다운로드하십시오.
 
-* Unpack the archives (for example libde265-1.0.5.tar.gz and libheif-1.7.0.tar.gz)
+* 압축 파일을 (예를 들면 libde265-1.0.5.tar.gz 및 libheif-1.7.0.tar.gz 파일을) 압축 해제하십시오.
 
-* Build libde265:
+* libde265 빌드:
 
     ::
 
@@ -55,10 +49,9 @@ Built hints on Windows
         copy libde265\de265-version.h c:/dev/install-libheif/include/libde265
         cd ..
 
-* Build libheif with libde265 support:
+* libheif를 libde265 지원과 함께 빌드:
 
     ::
-
 
         cd libheif-1.7.0
         mkdir build
@@ -70,7 +63,7 @@ Built hints on Windows
             -DLIBDE265_LIBRARIES=c:/dev/install-libheif/lib/libde265
 
 
-* Add in GDAL's nmake.local the following lines before building GDAL:
+* GDAL을 빌드하기 전에 GDAL의 nmake.local 파일에 다음 내용을 추가하십시오:
 
     ::
 

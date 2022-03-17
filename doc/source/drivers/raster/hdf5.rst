@@ -1,7 +1,7 @@
 .. _raster.hdf5:
 
 ================================================================================
-HDF5 -- Hierarchical Data Format Release 5 (HDF5)
+HDF5 -- 계층적 데이터 형식(Hierarchical Data Format) 배포판 5 (HDF5)
 ================================================================================
 
 .. shortname:: HDF5
@@ -10,9 +10,9 @@ HDF5 -- Hierarchical Data Format Release 5 (HDF5)
 
 .. build_dependencies:: libhdf5
 
-This driver intended for HDF5 file formats importing.
+이 드라이버는 HDF5 파일 포맷을 가져오기 위해 개발되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
@@ -21,34 +21,20 @@ Driver capabilities
 
     .. supports_virtualio::
 
-Multiple Image Handling (Subdatasets)
+다중 이미지 처리(하위 데이터셋)
 -------------------------------------
 
-Hierarchical Data Format is a container for several different datasets.
-For data storing. HDF contains multidimensional arrays filled by data.
-One HDF file may contain several arrays. They may differ in size, number
-of dimensions.
+계층적 데이터 형식(Hierarchical Data Format)은 몇 가지 서로 다른 데이터셋을 담기 위한 컨테이너입니다. 데이터 저장을 위해, HDF는 데이터로 채워진 다중 차원 배열을 담고 있습니다. HDF 파일 하나가 서로 다른 배열 여러 개를 담을 수도 있습니다. 이 배열들은 차원의 크기, 개수가 다를 수도 있습니다.
 
-The first step is to get a report of the components images (arrays) in
-the file using **gdalinfo**, and then to import the desired images using
-gdal_translate. The **gdalinfo** utility lists all multidimensional
-subdatasets from the input HDF file. The name of individual images
-(subdatasets) are assigned to the **SUBDATASET_n_NAME** metadata item.
-The description for each image is found in the **SUBDATASET_n_DESC**
-metadata item. For HDF5 images the subdataset names will be formatted
-like this:
+1단계로 **gdalinfo** 를 이용해서 파일의 구성요소 이미지(배열)의 리포트를 수집한 다음 **gdal_translate** 를 이용해서 원하는 이미지를 가져옵니다. **gdalinfo** 유틸리티는 입력 HDF 파일로부터 모든 다중 차원 하위 데이터셋의 목록을 수집합니다. 개별 이미지(하위 데이터셋)의 이름은 **SUBDATASET_n_NAME** 메타데이터 항목에 할당되어 있습니다. 각 이미지의 설명은 **SUBDATASET_n_DESC** 메타데이터 항목에 있습니다. HDF5 이미지의 경우 하위 데이터셋 이름이 다음과 같은 서식일 것입니다:
 
 *HDF5:file_name:subdataset*
 
-| where:
-| *file_name* is the name of the input file, and
-| *subdataset* is the dataset name of the array to use (for internal use
-  in GDAL).
+이때 *file_name* 은 입력 파일의 이름이고, *subdataset* 은 (GDAL 내부에서) 사용할 배열의 데이터셋 이름입니다.
 
-On the second step you should provide this name for **gdalinfo** or
-**gdal_translate** for actual reading of the data.
+2단계에서는 데이터를 실제로 읽어오기 위해 **gdalinfo** 또는 **gdal_translate** 에 이 이름을 지정해줘야 합니다.
 
-For example, we want to read data from the OMI/Aura Ozone (O3) dataset:
+예를 들어, OMI/Aura Ozone (O3) 데이터셋으로부터 데이터를 읽어오려면:
 
 ::
 
@@ -127,8 +113,7 @@ For example, we want to read data from the OMI/Aura Ozone (O3) dataset:
    Lower Right (  512.0,  512.0)
    Center      (  256.0,  256.0)
 
-Now select one of the subdatasets, described as
-``[1645x60] CloudFraction (32-bit floating-point)``:
+이제 ``[1645x60] CloudFraction (32-bit floating-point)`` 라고 설명된 하위 데이터셋 1개를 선택합니다:
 
 ::
 
@@ -165,77 +150,50 @@ Now select one of the subdatasets, described as
    GCP[  6]: Id=, Info=
              (12.5,0.5) -> (162.987,-85.2337,0)
    ... 3000 GCPs are read from the file if Latitude and Longitude arrays are presents
+   Corner Coordinates: Upper Left (0.0, 0.0) Lower Left (0.0, 1645.0) Upper Right (60.0, 0.0) Lower Right (60.0, 1645.0) Center (30.0, 822.5)
+   Band 1 Block=60x1 Type=Float32, ColorInterp=Undefined Open GDAL Datasets: 1 N DriverIsNULL 512x512x0
 
-Corner Coordinates: Upper Left ( 0.0, 0.0) Lower Left ( 0.0, 1645.0)
-Upper Right ( 60.0, 0.0) Lower Right ( 60.0, 1645.0) Center ( 30.0,
-822.5) Band 1 Block=60x1 Type=Float32, ColorInterp=Undefined Open GDAL
-Datasets: 1 N DriverIsNULL 512x512x0
+또는 이 데이터셋으로부터 이미지 밴드를 읽어오기 위해 **gdal_translate** 를 사용할 수도 있습니다.
 
-You may use **gdal_translate** for reading image bands from this
-dataset.
+GDAL에 **SUBDATASET_n_NAME** 으로 표시된 줄의 내용을 **HDF4_SDS:** 접두어를 포함해서 정확하게 지정해야 한다는 사실을 기억하십시오.
 
-Note that you should provide exactly the contents of the line marked
-**SUBDATASET_n_NAME** to GDAL, including the **HDF5:** prefix.
+이 드라이버의 목적은 원격 탐사 및 지리공간 데이터셋을 래스터 이미지 (2차원 또는 3차원 배열) 형태로 가져오기 위한 것일 뿐입니다. HDF 파일에 담겨 있는 모든 데이터를 탐색하길 바란다면 다른 도구를 사용해야 합니다. (이 페이지의 마지막 부분에 있는 링크를 통해 다른 HDF 도구들에 관한 정보를 찾아볼 수 있습니다.)
 
-This driver is intended only for importing remote sensing and geospatial
-datasets in form of raster images(2D or 3D arrays). If you want explore
-all data contained in HDF file you should use another tools (you can
-find information about different HDF tools using links at end of this
-page).
-
-Georeference
+지리참조
 ------------
 
-There is no universal way of storing georeferencing in HDF files.
-However, some product types have mechanisms for saving georeferencing,
-and some of these are supported by GDAL. Currently supported are
-(*subdataset_type* shown in parenthesis):
+HDF 파일에 지리참조 정보를 저장하는 보편적인 방법은 없습니다. 하지만 일부 상품 유형이 지리참조 정보를 저장하기 위한 메커니즘을 가지고 있고, GDAL이 이 가운데 몇몇을 지원합니다. 현재 지원되는 방법은 다음과 같습니다(*subdataset_type* 은 괄호 안에 있습니다):
 
 -  HDF5 OMI/Aura Ozone (O3) Total Column 1-Orbit L2 Swath 13x24km
    (**Level-2 OMTO3**)
 
 
-Multi-file support
+다중 파일 지원
 ------------------
 
-Starting with GDAL 3.1, the driver supports opening datasets split over
-several files using the 'family' HDF5 file driver. For that, GDAL must be
-provided with the filename of the first part, containing in it a single '0'
-(zero) character, or ending with 0.h5 or 0.hdf5
+GDAL 3.1버전부터, 이 드라이버는 파일 여러 개로 분할된 데이터셋을 'family' HDF5 파일 드라이버를 이용해서 열기를 지원합니다. 이를 위해 GDAL에 이름에 단일 '0' 문자를 담고 있거나 0.h5 또는 0.hdf5로 끝나는 첫 부분의 파일명을 지정해줘야만 합니다.
 
-Multidimensional API support
+다중 차원 API 지원
 ----------------------------
 
 .. versionadded:: 3.1
 
-The HDF5 driver supports the :ref:`multidim_raster_data_model` for reading
-operations.
+HDF5 드라이버는 읽기 작업을 위해 :ref:`multidim_raster_data_model` 을 지원합니다.
 
-Driver building
----------------
+드라이버 빌드 작업
+----------------
 
-This driver built on top of NCSA HDF5 library, so you need to download
-prebuild HDF5 libraries: HDF5-1.6.4 library or higher. You also need
-zlib 1.2 and szlib 2.0. For windows user be sure to set the attributes
-writable (especially if you are using Cygwin) and that the DLLs can be
-located somewhere by your PATH environment variable. You may also
-download source code NCSA HDF Home Page (see links below).
+이 드라이버는 NCSA HDF 라이브러리를 바탕으로 빌드되었기 때문에, 사전 빌드된 HDF5-1.6.4버전 이상의 HDF5 라이브러리를 다운로드해야 합니다. zlib 1.2 및 szlib 2.0도 필요합니다. 윈도우 사용자의 경우 (특히 Cygwin을 사용하는 경우) 속성을 반드시 쓰기 가능으로 설정해야 하며, 사용자의 PATH 환경설정 변수에 포함되는 위치에 DLL을 설치해야 합니다. NCSA HDF 홈페이지에서 소스 코드를 다운로드할 수도 있습니다. (아래 링크 참조)
 
-See Also
+참고
 --------
 
-Implemented as ``gdal/frmts/hdf5/hdf5dataset.cpp`` and
-``gdal/frmts/hdf5/hdf5imagedataset.cpp``.
+``gdal/frmts/hdf5/hdf5dataset.cpp`` 및 ``gdal/frmts/hdf5/hdf5imagedataset.cpp`` 로 구현되었습니다.
 
-`The NCSA HDF5 Download
-Page <http://hdf.ncsa.uiuc.edu/HDF5/release/obtain5.html>`__ at the
-`National Center for Supercomputing
-Applications <http://www.ncsa.uiuc.edu/>`__
+`미국 국립 수퍼컴퓨팅 응용 연구소(National Center for Supercomputing Applications) <http://www.ncsa.uiuc.edu/>`_ 의 `NCSA HDF5 다운로드 페이지 <http://hdf.ncsa.uiuc.edu/HDF5/release/obtain5.html>`_
 
-`The HDFView is a visual tool for browsing and editing NCSA HDF4 and
-HDF5 files. <http://hdf.ncsa.uiuc.edu/hdf-java-html/hdfview/>`__
+`HDFView <http://hdf.ncsa.uiuc.edu/hdf-java-html/hdfview/>`_ 는 NCSA HDF4 및 HDF5 파일을 탐색하고 편집하기 위한 시각적 도구입니다.
 
-Documentation to individual products, supported by this driver:
+이 드라이버가 지원하는 개별 상품에 관한 문서:
 
--  `OMTO3: OMI/Aura Ozone (O3) Total Column 1-Orbit L2 Swath 13x24km
-   V003 <https://disc.gsfc.nasa.gov/uui/datasets/OMTO3_V003/summary>`__
+-  `OMTO3: OMI/Aura Ozone (O3) Total Column 1-Orbit L2 Swath 13x24km V003 <https://disc.gsfc.nasa.gov/uui/datasets/OMTO3_V003/summary>`_
