@@ -1,50 +1,29 @@
 .. _raster.Idrisi:
 
 ================================================================================
-RST -- Idrisi Raster Format
+RST -- Idrisi 래스터 포맷
 ================================================================================
 
 .. shortname:: RST
 
 .. built_in_by_default::
 
-This format is basically a raw one. There is just one band per files,
-except in the RGB24 data type where the Red, Green and Blue bands are
-store interleaved by pixels in the order Blue, Green and Red. The others
-data type are unsigned 8 bits integer with values from 0 to 255 or
-signed 16 bits integer with values from -32.768 to 32.767 or 32 bits
-single precision floating point.32 bits. The description of the file is
-stored in a accompanying text file, extension RDC.
+이 포맷은 기본적으로 RAW 포맷입니다. 적색, 녹색, 청색 밴드를 픽셀이 청색, 녹색, 적색 순서로 교차삽입되는 형태로 저장하는 RGB24 데이터 유형을 제외하면 파일 당 밴드가 하나뿐입니다. 밴드 데이터 유형은 0에서 255 사이의 값을 가진 부호 없는 8비트 정수형, -32,768에서 32,767 사이의 값을 가진 부호 있는 16비트 정수형, 또는 32비트 단정밀도 부동소수점형을 지원합니다. 파일 설명은 확장자가 .rdc인 관련 텍스트 파일에 저장됩니다.
 
-The RDC image description file doesn't include color table, or detailed
-geographic referencing information. The color table if present can be
-obtained by another accompanying file using the same base name as the
-RST file and SMP as extension.
+RDC 이미지 설명 파일은 색상표 또는 상세 지리참조 정보를 포함하지 않습니다. 색상표가 존재하는 경우, RST 파일과 동일한 기반 이름(base name)을 가지고 있고 확장자가 .smp인 또다른 관련 파일에 있을 것입니다.
 
-For geographical referencing identification, the RDC file contains
-information that points to a file that holds the geographic reference
-details. Those files uses extension REF and  resides in the same folder
-as the RST image or more likely in the Idrisi installation folders.
+지리참조 식별 정보의 경우, RDC 파일이 지리참조 상세 정보를 가지고 있는 파일을 가리키는 정보를 담고 있습니다. 이 파일의 확장자는 .ref이며 RST 이미지와 같은 폴더에 있거나, 없다면 Idrisi 설치 폴더에 있는 경우가 많습니다.
 
-Therefore the presence or absence of the Idrisi software in the running
-operation system will determine the way that this driver will work. By
-setting the environment variable IDRISIDIR pointing to the Idrisi main
-installation folder will enable GDAL to find more detailed information
-about geographical reference and projection in the REF files.
+즉 실행 중인 운영 체제에 설치된 Idrisi 소프트웨어가 있느냐 없느냐에 따라 이 드라이버가 작동하기도 하고 작동하지 않기도 합니다. Idrisi 주 설치 폴더를 가리키는 환경 변수 IDRISIDIR를 설정하면, GDAL이 REF 파일에 있는 지리참조 및 투영법에 관한 더 상세한 정보를 찾을 수 있습니다.
 
-Note that the RST driver recognizes the name convention used in Idrisi
-for UTM and State Plane geographic reference so it doesn't need to
-access the REF files. That is the case for RDC file that specify
-"utm-30n" or "spc87ma1" in the "ref. system" field. Note that exporting
-to RST in any other geographical reference system will generate a
-suggested REF content in the comment section of the RDC file.
+RST 드라이버는 Idrisi에서 UTM 및 미국 주(州) 평면 좌표계(State Plane Coordinate System; SPCS)의 지리참조 용 명명 규범을 인식하기 때문에 UTM 또는 SPCS를 사용하는 파일의 경우 REF 파일에 접근할 필요가 없다는 사실을 기억해두십시오. RDC 파일의 "ref. system" 필드에 "utm-30n" 또는 "spc87ma1"을 지정한 데이터셋이 바로 이런 경우입니다. 이와 다른 지리 좌표계를 사용하는 경우, RST로 내보낼 때 RDC 파일의 주석 부분에 REF 내용을 생성할 것입니다.
 
--  ".rst" the raw image file
--  ".rdc" the description file
--  ".smp" the color table file
--  ".ref" the geographical reference file
+-  ".rst" RAW 이미지 파일
+-  ".rdc" 설명 파일
+-  ".smp" 색상표 파일
+-  ".ref" 지리참조 파일
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -55,8 +34,8 @@ Driver capabilities
 
 .. supports_virtualio::
 
-See Also
+참고
 --------
 
--  Implemented as ``gdal/frmts/idrisi/IdrisiDataset.cpp``.
--  `www.idrisi.com <http://www.idrisi.com>`__
+-  ``gdal/frmts/idrisi/IdrisiDataset.cpp`` 로 구현되었습니다.
+-  `www.idrisi.com <http://www.idrisi.com>`_

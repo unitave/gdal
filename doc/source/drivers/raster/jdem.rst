@@ -1,29 +1,24 @@
 .. _raster.jdem:
 
 ================================================================================
-JDEM -- Japanese DEM (.mem)
+JDEM -- 일본 DEM (.mem)
 ================================================================================
 
 .. shortname:: JDEM
 
 .. built_in_by_default::
 
-GDAL includes read support for Japanese DEM files, normally having the
-extension .mem. These files are a product of the Japanese Geographic
-Survey Institute.
+GDAL은 보통 .mem 확장자를 가지는 일본 DEM 파일 읽기 지원을 포함하고 있습니다. 일본 국토지리원이 이 파일을 개발했습니다.
 
-These files are represented as having one 32bit floating band with
-elevation data. The georeferencing of the files is returned as well as
-the coordinate system (always lat/long on the Tokyo datum).
+이 파일은 표고 데이터를 가진 32비트 부동소수점형 밴드 1개를 가지고 있는 것으로 나타납니다. 파일의 지리참조 정보는 물론 (항상 동경 원점 상의 위도/경도인) 좌표계 정보도 반환합니다.
 
-There is no update or creation support for this format.
+이 포맷의 업데이트 또는 생성은 지원하지 않습니다.
 
-NOTE: Implemented as ``gdal/frmts/jdem/jdemdataset.cpp``.
+주의: ``gdal/frmts/jdem/jdemdataset.cpp`` 로 구현되었습니다.
 
-See Also: `Geographic Survey Institute (GSI) Web
-Site. <http://www.gsi.go.jp/ENGLISH/>`__
+참고: `일본 국토지리원 웹사이트 <http://www.gsi.go.jp/ENGLISH/>`_
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
