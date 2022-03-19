@@ -1,48 +1,25 @@
 .. _raster.jp2kak:
 
 ================================================================================
-JP2KAK -- JPEG-2000 (based on Kakadu)
+JP2KAK -- 카카두 기반 JPEG2000 드라이버
 ================================================================================
 
 .. shortname:: JP2KAK
 
-.. build_dependencies:: Kakadu library
+.. build_dependencies:: 카카두(Kakadu) 라이브러리
 
-Most forms of JPEG2000 JP2 and JPC compressed images (ISO/IEC 15444-1)
-can be read with GDAL using a driver based on the Kakadu library. As
-well, new images can be written. Existing images cannot be updated in
-place.
+GDAL은 카카두 라이브러리 기반 드라이버를 이용해서 JPEG2000 JP2 및 JPC 압축 이미지(ISO/IEC 15444-1) 형식 대부분을 읽어올 수 있고, 새 이미지를 작성할 수도 있습니다. 기존 이미지의 제자리(in place) 업데이트는 지원하지 않습니다.
 
-The JPEG2000 file format supports lossy and lossless compression of 8bit
-and 16bit images with 1 or more bands (components). Via the `GeoJP2
-(tm) <https://web.archive.org/web/20151028081930/http://www.lizardtech.com/download/geo/geotiff_box.txt>`__
-mechanism, GeoTIFF style coordinate system and georeferencing
-information can be embedded within the JP2 file. JPEG2000 files use a
-substantially different format and compression mechanism than the
-traditional JPEG compression and JPEG JFIF format. They are distinct
-compression mechanisms produced by the same group. JPEG2000 is based on
-wavelet compression.
+JPEG2000 파일 포맷은 밴드(구성요소)를 1개 이상 가지고 있는 8비트 및 16비트 이미지의 손실 및 비손실 압축을 지원합니다. `GeoJP2
+(tm) <https://web.archive.org/web/20151028081930/http://www.lizardtech.com/download/geo/geotiff_box.txt>`_ 메커니즘을 통해 JP2 파일 안에 GeoTIFF 스타일 좌표계와 지리참조 정보를 내장시킬 수도 있습니다. JPEG2000 파일은 전통적인 JPEG 압축 및 JPEG JFIF 포맷과는 상당히 다른 포맷과 압축 메커니즘을 사용합니다. 같은 그룹이 뚜렷이 다른 새 압축 메커니즘을 개발했습니다. JPEG2000은 웨이블릿 압축 기반입니다.
 
-The JPEG2000 driver documented on this page (the JP2KAK driver) is
-implemented on top of the proprietary
-`Kakadu <http://www.kakadusoftware.com/>`__ library. This is a high
-quality and high performance JPEG2000 library in wide used in the
-geospatial and general imaging community. However, it is not free, and
-so normally builds of GDAL from source will not include support for this
-driver unless the builder purchases a license for the library and
-configures accordingly.
+이 페이지에 문서화된 JPEG2000 (JP2KAK) 드라이버는 상용 `카카두(Kakadu) <http://www.kakadusoftware.com/>`_ 라이브러리를 기반으로 구현되었습니다. 카카두는 지리공간 및 일반 영상 커뮤니티에서 광범위하게 사용되는 고품질/고성능 JPEG2000 라이브러리입니다. 하지만 무료가 아니기 때문에, GDAL을 빌드하는 사용자가 카카두 라이브러리의 사용 권한을 구매하고 그에 맞춰 환경설정하지 않는 이상, 일반적으로 소스로부터 JP2KAK 드라이버 지원을 포함하는 GDAL을 빌드할 수는 없습니다.
 
-When reading images this driver will represent the bands as being Byte
-(8bit unsigned), 16 bit signed/unsigned, and 32 bit signed/unsigned. Georeferencing and
-coordinate system information will be available if the file is a GeoJP2
-(tm) file. Files color encoded in YCbCr color space will be
-automatically translated to RGB. Paletted images are also supported.
+이미지를 읽어올 때 이 드라이버는 밴드를 바이트형(부호 없는 8비트), 부호 있는/부호 없는 16비트, 부호 있는/부호 없는 32비트로 표현할 것입니다. 입력 파일이 GeoJP2 (tm) 파일이라면 지리참조와 좌표계 정보도 사용할 수 있을 것입니다. YCbCr 색 공간에 색상 인코딩된 파일은 RGB로 자동 변환할 것입니다. 색상표 이미지도 지원합니다.
 
-XMP metadata can be extracted from JPEG2000
-files, and will be stored as XML raw content in the xml:XMP metadata
-domain.
+JPEG2000 파일로부터 XMP 메타데이터를 추출할 수 있고, xml:XMP 메타데이터 도메인에 추출한 메타데이터를 XML 원본(raw) 내용으로 저장할 것입니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -51,158 +28,123 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Configuration Options
+환경설정 옵션
 ---------------------
 
-The JP2KAK driver supports the following `Config
-Options <http://trac.osgeo.org/gdal/wiki/ConfigOptions>`__. These
-runtime options can be used to alter the behavior of the driver.
+JP2KAK 드라이버는 다음 `런타임 환경설정 옵션 <http://trac.osgeo.org/gdal/wiki/ConfigOptions>`_ 을 지원합니다. 이 옵션들을 사용하면 드라이버의 습성을 변경할 수 있습니다.
 
--  **JP2KAK_THREADS**\ =n: By default an effort is made to take
-   advantage of multi-threading on multi-core computers using default
-   rules from the Kakadu library. This option may be set to a value of
-   zero to avoid using additional threads or to a specific count to
-   create the requested number of worker threads.
--  **JP2KAK_FUSSY**\ =YES/NO: This can be set to YES to turn on fussy
-   reporting of problems with the JPEG2000 data stream. Defaults to NO.
--  **JP2KAK_RESILIENT**\ =YES/NO: This can be set to YES to force Kakadu
-   to maximize resilience with incorrectly created JPEG2000 data files,
-   likely at some cost in performance. This is likely to be necessary
-   if, among other reasons, you get an error message about "Expected to
-   find EPH marker following packet header" or error reports indicating
-   the need to run with the resilient and sequential flags on. Defaults
-   to NO.
+-  **JP2KAK_THREADS=n**:
+   카카두 라이브러리의 기본 규칙을 따라 멀티코어 컴퓨터 상에서는 기본적으로 멀티스레딩을 활용하려 시도할 것입니다. 추가 스레드를 사용하지 않으려면 이 옵션의 값을 0으로 설정하면 됩니다. 또는 특정값을 설정하면 요청한 개수만큼의 작업자 스레드를 생성할 것입니다.
 
-Georeferencing
+-  **JP2KAK_FUSSY=YES/NO**:
+   이 옵션을 YES로 설정하면 JPEG2000 데이터 스트림의 문제점을 퍼지(fuzzy)하게 리포트합니다. 기본값은 NO입니다.
+
+-  **JP2KAK_RESILIENT=YES/NO**:
+   이 옵션을 YES로 설정하면 성능/속도를 희생하더라도 카카두 라이브러리가 잘못 생성된 JPEG2000 데이터 파일을 최대한 허용하도록 강제합니다. 특히 "패킷 헤더 뒤에 와야 할 EPH 마커를 찾을 수 없습니다"라는 오류 메시지가 발생하거나, 순차(sequence) 플래그를 활성화하고 탄력적(resilient)으로 실행해야 한다는 의미의 오류 메시지가 발생하는 경우 이 옵션이 필요할 것입니다.
+
+지리참조 작업
 --------------
 
-Georeferencing information can come from different sources : internal
-(GeoJP2 or GMLJP2 boxes), worldfile .j2w/.wld sidecar files, or PAM
-(Persistent Auxiliary metadata) .aux.xml sidecar files. By default,
-information is fetched in following order (first listed is the most
-prioritary): PAM, GeoJP2, GMLJP2, WORLDFILE.
+내부(GeoJP2 또는 GMLJP2 경계 상자), 월드 파일 .j2w/.wld 사이드카 파일, 또는 PAM(Persistent Auxiliary metadata) .aux.xml 사이드카 파일 등 서로 다른 소스들로부터 지리참조 정보를 얻을 수 있습니다. 기본적으로 PAM, GeoJP2, GMLJP2, WORLDFILE 순서대로 파일을 수집합니다. (첫 항목을 가장 우선합니다.)
 
-Starting with GDAL 2.2, the allowed sources and their priority order can
-be changed with the GDAL_GEOREF_SOURCES configuration option (or
-GEOREF_SOURCES open option) whose value is a comma-separated list of the
-following keywords : PAM, GEOJP2, GMLJP2, INTERNAL (shortcut for
-GEOJP2,GMLJP2), WORLDFILE, NONE. First mentioned sources are the most
-prioritary over the next ones. A non mentioned source will be ignored.
+GDAL 2.2버전부터, GDAL_GEOREF_SOURCES 환경설정 옵션으로 (또는 GEOREF_SOURCES 열기 옵션으로) 사용할 수 있는 소스와 그 우선 순위를 변경할 수 있습니다. 이 옵션의 값은 PAM, GEOJP2, GMLJP2, (GEOJP2, GMLJP2로 가는 단축 키인) INTERNAL, WORLDFILE, NONE이라는 키워드를 쉼표로 구분한 목록입니다. 목록의 첫 항목이 가장 우선되는 소스입니다. 목록에 없는 소스는 무시할 것입니다.
 
-For example setting it to "WORLDFILE,PAM,INTERNAL" will make a
-geotransformation matrix from a potential worldfile prioritary over PAM
-or internal JP2 boxes. Setting it to "PAM,WORLDFILE,GEOJP2" will use the
-mentioned sources and ignore GMLJP2 boxes.
+예를 들어 이 옵션을 "WORLDFILE,PAM,INTERNAL"로 설정하면 PAM이나 내부 JP2 경계 상자보다 잠재적인 월드 파일의 지리변형 행렬을 우선할 것입니다. "PAM,WORLDFILE,GEOJP2"로 설정하면 설정된 소스를 이용하고 GMLJP2 경계 상자는 무시할 것입니다.
 
-Option Options
+열기 옵션
 --------------
 
-The following open option is available:
+다음과 같은 열기 옵션을 사용할 수 있습니다:
 
--  **1BIT_ALPHA_PROMOTION=YES/NO**: Whether a 1-bit alpha channel should
-   be promoted to 8-bit. Defaults to YES.
+-  **1BIT_ALPHA_PROMOTION=YES/NO**:
+   1비트 알파 채널을 8비트로 승격시켜야 할지 여부를 선택합니다. 기본값은 YES입니다.
 
--  **GEOREF_SOURCES=string**: (GDAL > 2.2) Define which georeferencing
-   sources are allowed and their priority order. See
-   `Georeferencing <#georeferencing>`__ paragraph.
+-  **GEOREF_SOURCES=string**:
+   (GDAL 2.2 이상 버전) 사용할 수 있는 지리참조 소스와 그 우선 순위를 정의합니다. `지리참조 작업 <#georeferencing>`_ 단락을 참조하십시오.
 
-Creation Issues
+생성 문제점
 ---------------
 
-JPEG2000 files can only be created using the CreateCopy mechanism to
-copy from an existing dataset.
+JPEG2000 파일은 기존 데이터셋에서 복사해오는 CreateCopy() 메커니즘을 통해서만 생성할 수 있습니다.
 
-JPEG2000 overviews are maintained as part of the mathematical
-description of the image. Overviews cannot be built as a separate
-process, but on read the image will generally be represented as having
-overview levels at various power of two factors.
+JPEG2000 오버뷰는 이미지의 수학적 서술의 일부로서 유지됩니다. 오버뷰를 개별 프로세스로 작성할 수는 없지만, 이미지를 읽어올 때 일반적으로 이미지가 2의 거듭제곱 인자 여러 개의 오버뷰 수준을 가지고 있는 것으로 표현될 것입니다.
 
-Creation Options:
+생성 옵션들:
 
--  **CODEC=JP2/J2K** Codec to use. If not specified, guess based on file
-   extension. If unknown, default to JP2
--  **QUALITY=n**: Set the compressed size ratio as a percentage of the
-   size of the uncompressed image. The default is 20 indicating that the
-   resulting image should be 20% of the size of the uncompressed image.
-   Actual final image size may not exactly match that requested
-   depending on various factors. A value of 100 will result in use of
-   the lossless compression algorithm . On typical image data, if you
-   specify a value greater than 65, it might be worth trying with
-   QUALITY=100 instead as lossless compression might produce better
-   compression than lossy compression.
--  **BLOCKXSIZE=n**: Set the tile width to use. Defaults to 20000.
--  **BLOCKYSIZE=n**: Set the tile height to use. Defaults to image
-   height.
--  **FLUSH=TRUE/FALSE**: Enable/Disable incremental flushing when
-   writing files. Required to be FALSE for RLPC and LRPC Corder. May use
-   a lot of memory when FALSE while writing large images. Defaults to
-   TRUE.
--  **GMLJP2=YES/NO**: Indicates whether a GML box conforming to the OGC
-   GML in JPEG2000 specification should be included in the file. Unless
-   GMLJP2V2_DEF is used, the version of the GMLJP2 box will be version
-   1. Defaults to YES.
--  **GMLJP2V2_DEF=filename**: Indicates whether
-   a GML box conforming to the `OGC GML in JPEG2000, version
-   2 <http://docs.opengeospatial.org/is/08-085r4/08-085r4.html>`__
-   specification should be included in the file. *filename* must point
-   to a file with a JSon content that defines how the GMLJP2 v2 box
-   should be built. See :ref:`GMLJP2v2 definition file
-   section <gmjp2v2def>` in documentation of
-   the JP2OpenJPEG driver for the syntax of the JSon configuration file.
-   It is also possible to directly pass the JSon content inlined as a
-   string. If filename is just set to YES, a minimal instance will be
-   built.
--  **GeoJP2=YES/NO**: Indicates whether a UUID/GeoTIFF box conforming to
-   the GeoJP2 (GeoTIFF in JPEG2000) specification should be included in
-   the file. Defaults to YES.
--  **LAYERS=n**: Control the number of layers produced. These are sort
-   of like resolution layers, but not exactly. The default value is 12
-   and this works well in most situations.
--  **ROI=xoff,yoff,xsize,ysize**: Selects a region to be a region of
-   interest to process with higher data quality. The various "R" flags
-   below may be used to control the amount better. For example the
-   settings "ROI=0,0,100,100", "Rweight=7" would encode the top left
-   100x100 area of the image with considerable higher quality compared
-   to the rest of the image.
+-  **CODEC=JP2/J2K**:
+   사용할 코덱을 지정합니다. 지정하지 않는 경우, 파일 확장자를 기반으로 추정합니다. 확장자를 식별할 수 없는 경우 기본값은 JP2입니다.
 
-The following creation options are tightly tied to the Kakadu library,
-and are considered to be for advanced use only. Consult Kakadu
-documentation to better understand their meaning.
+-  **QUALITY=n**:
+   압축 용량 비율을 비압축 이미지 용량의 백분율로 설정합니다. 기본값은 20으로, 산출 이미지 용량이 비압축 이미지 용량의 20%여야 한다는 뜻입니다. 여러 요인에 따라 실제 최종 이미지 용량이 설정한 값과 정확히 일치하지 않을 수도 있습니다. 값을 100으로 설정하면 비손실 압축 알고리즘을 이용할 것입니다. 일반적인 이미지 데이터의 경우, 65를 초과하는 값을 지정한다면 차라리 QUALITY=100을 사용하는 편이 나을 수도 있습니다. 비손실 압축이 손실 압축보다 더 나은 압축률을 보일 수도 있기 때문입니다.
 
--  **Corder**: Defaults to "PRCL".
--  **Cprecincts**: Defaults to
-   "{512,512},{256,512},{128,512},{64,512},{32,512},{16,512},{8,512},{4,512},{2,512}".
--  **ORGgen_plt**: Defaults to "yes".
--  **ORGgen_tlm**: Kakadu library default used.
--  **ORGtparts**: Kakadu library default used.
--  **Cmodes**: Kakadu library default used.
--  **Clevels**: Kakadu library default used.
--  **Rshift**: Kakadu library default used.
--  **Rlevels**: Kakadu library default used.
--  **Rweight**: Kakadu library default used.
--  **Qguard**: Kakadu library default used.
--  **Creversible**: If not set and QUALITY >= 99.5, set to "yes", otherwise to "false".
--  **Sprofile**: Kakadu library default used.
--  **RATE**: Kakadu library default used.
-   One or more bit-rates, expressed in terms of the ratio between the total number of compressed bits
-   (including headers) and the product of the largest horizontal and  vertical image component dimensions. A dash, -,
-   may be used in place of the first bit-rate in the list to indicate that the final quality layer should include all
-   compressed bits. If Clayers is not used, the number of layers is set to the number of rates specified here.
-   If Clayers is used to specify an actual number of quality layers, one of the following must be true: 1) the number
-   of rates specified here is identical to the specified number of layers; or 2) one or two rates are specified using
-   this argument.  When two rates are specified, the number of layers must be 2 or more and intervening layers will be
-   assigned roughly logarithmically spaced bit-rates. When only one rate is specified, an internal heuristic determines
-   a lower bound and logarithmically spaces the layer rates over the range. The rates have to be in ASC order.
+-  **BLOCKXSIZE=n**:
+   타일 너비를 설정합니다. 기본값은 20000입니다.
 
-Known Kakadu Issues
--------------------
+-  **BLOCKYSIZE=n**:
+   타일 높이를 설정합니다. 기본값은 이미지 높이입니다.
 
-Alpha Channel Writing in v7.8
+-  **FLUSH=TRUE/FALSE**:
+   파일 작성 시 증분(incremental) 플러시 작업을 활성화/비활성화합니다. RLPC 및 LRPC 부호기(corder)를 사용하는 경우 FALSE로 설정해야 합니다. 대용량 이미지 작성 시 FALSE로 설정하면 아주 많은 메모리를 사용할 수도 있습니다. 기본값은 TRUE입니다.
+
+-  **GMLJP2=YES/NO**:
+   JPEG2000 사양의 OGC GML을 준수하는 GML 경계 상자가 파일에 포함되어야 하는지를 선택합니다. GMLJP2V2_DEF를 사용하지 않는 이상, GMLJP2 경계 상자의 버전은 1일 것입니다. 기본값은 YES입니다.
+
+-  **GMLJP2V2_DEF=filename**:
+   `OGC GML-in-JPEG2000 버전 2 <http://docs.opengeospatial.org/is/08-085r4/08-085r4.html>`_ 사양을 준수하는 GML 경계 상자가 파일에 포함되어야 하는지를 선택합니다. *filename* 이 GMLJP2 v2 경계 상자를 어떻게 작성해야 할지 정의하는 JSON 콘텐츠를 가진 파일을 가리켜야만 합니다. JSON 환경설정 파일의 문법에 대해서는 JP2OpenJPEG 드라이버 문서에 있는 :ref:`GMLJP2v2 정의 파일 단락 <gmjp2v2def>` 을 참조하십시오. JSON 콘텐츠를 그때 그때 처리해서(inline) 문자열로 직접 전송할 수도 있습니다. filename을 그냥 YES로 설정하면, 최소한의 인스턴스만 빌드할 것입니다.
+
+-  **GeoJP2=YES/NO**:
+   GeoJP2 (GeoTIFF-in-JPEG2000) 사양을 준수하는 UUID/GeoTIFF 경계 상자가 파일에 포함되어야 하는지를 선택합니다. 기본값은 YES입니다.
+
+-  **LAYERS=n**:
+   생성하는 레이어 개수를 제어합니다. 이때 레이어는 해상도 레이어와 비슷하지만, 정확하게는 아닙니다. 기본값은 12로 대부분의 상황에서 잘 작동합니다.
+
+-  **ROI=xoff,yoff,xsize,ysize**:
+   더 높은 데이터 품질로 처리해야 할 관심 영역(region of interest)이 될 영역을 선택합니다. 총량(amount)을 더 잘 제어하기 위해 아래 나오는 여러 "R" 플래그를 사용할 수도 있습니다. 예를 들면 "ROI=0,0,100,100"을 설정하는 경우, "Rweight=7"을 설정하면 이미지의 좌상단 100x100 영역을 나머지 이미지보다 훨씬 높은 품질로 인코딩할 것입니다.
+
+다음 생성 옵션들은 카카두 라이브러리에 단단히 얽매여 있으며, 고급 사용자만을 위한 것으로 간주됩니다. 다음 옵션들의 의미를 더 잘 이해하고 싶다면 카카두 문서를 읽어보십시오.
+
+-  **Corder**: 기본값은 "PRCL"입니다.
+
+-  **Cprecincts**: 기본값은 "{512,512},{256,512},{128,512},{64,512},{32,512},{16,512},{8,512},{4,512},{2,512}" 입니다.
+
+-  **ORGgen_plt**: 기본값은 "yes"입니다.
+
+-  **ORGgen_tlm**: 카카두 라이브러리 기본값을 사용합니다.
+
+-  **ORGtparts**: 카카두 라이브러리 기본값을 사용합니다.
+
+-  **Cmodes**: 카카두 라이브러리 기본값을 사용합니다.
+
+-  **Clevels**: 카카두 라이브러리 기본값을 사용합니다.
+
+-  **Rshift**: 카카두 라이브러리 기본값을 사용합니다.
+
+-  **Rlevels**: 카카두 라이브러리 기본값을 사용합니다.
+
+-  **Rweight**: 카카두 라이브러리 기본값을 사용합니다.
+
+-  **Qguard**: 카카두 라이브러리 기본값을 사용합니다.
+
+-  **Creversible**: 이 옵션을 설정하지 않고 QUALITY를 99.5이상으로 설정하는 경우 "yes"로 설정하십시오. 그렇지 않은 경우 "false"로 설정하십시오.
+
+-  **Sprofile**: 카카두 라이브러리 기본값을 사용합니다.
+
+-  **RATE**: 카카두 라이브러리 기본값을 사용합니다.
+   압축된 (헤더 포함) 비트의 총 개수와 가장 큰 수평 및 수직 이미지 구성요소 크기 사이의 비율이라는 의미로 표현된 하나 이상의 비트레이트입니다.
+   최종 품질 레이어가 압축된 비트를 전부 포함해야 한다는 사실을 보여주기 위해 목록의 첫 번째 비트레이트 자리에 대시("-")를 사용할 수도 있습니다.
+   C레이어(Clayer)를 사용하지 않는 경우, 레이어 개수를 이 옵션에 지정한 레이트 개수로 설정합니다.
+   품질 레이어의 실제 개수를 지정하기 위해 C레이어를 사용하는 경우, 다음 조건들 가운데 하나는 반드시 참이어야만 합니다: 1) 이 옵션에 지정한 레이트 개수가 지정한 레이어 개수와 동일한 경우 또는 2) 이 인자를 사용해서 레이트 1개 또는 2개를 지정한 경우.
+   레이트 2개를 지정한 경우, 레이어 개수가 2개 이상이어야만 하며 그 사이에 오는 레이어에는 대략 로그 간격의 비트레이트를 할당할 것입니다.
+   레이트 1개만 지정한 경우, 내부 휴리스틱이 하한을 결정하고 전체 범위에 걸쳐 레이어 레이트들의 사이를 로그 간격으로 띄울 것입니다.
+   레이트들은 ASC 순서여야 합니다.
+
+카카두의 알려진 문제점들
+----------------------
+
+7.8버전에서 알파 채널 쓰기
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Kakadu v7.8 has a bug in jp2_channels::set_opacity_mapping that can
-cause an error when writing images with an alpha channel. Please upgrade
-to version 7.9.
+카카두 7.8버전은 jp2_channels::set_opacity_mapping에 알파 채널을 가진 이미지를 작성하는 경우 오류를 일으킬 수 있는 버그를 가지고 있습니다. 7.9버전으로 업그레이드해주십시오.
 
 ::
 
@@ -210,21 +152,19 @@ to version 7.9.
    create a Component Mapping (cmap) box, one of whose channels refers to
    a non-existent image component or palette lookup table. (code = 1)
 
-kdu_get_num_processors always returns 0 for some platforms
+일부 플랫폼에서 kdu_get_num_processors가 항상 0을 반환
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-On non-windows / non-mac installs (e.g. Linux), Kakadu might not include
-unistd.h in kdu_arch.cpp. This means that \_SC_NPROCESSORS_ONLN and
-\_SC_NPROCESSORS_CONF are not defined and kdu_get_num_processors will
-always return 0. Therefore the jp2kak driver might not default to
-creating worker threads.
+윈도우/맥이 아닌 (예: 리눅스) 플랫폼에 설치할 때, 카카두가 kdu_arch.cpp에 unistd.h를 포함시키지 않을 수도 있습니다. 즉 \_SC_NPROCESSORS_ONLN 및 \_SC_NPROCESSORS_CONF가 정의되지 않아 kdu_get_num_processors가 항상 0을 반환한다는 뜻입니다. 따라서 JP2KAK 드라이버가 기본적으로 작업자 스레드를 생성하지 못 하게 될 수도 있습니다.
 
-See Also
+참고
 --------
 
--  Implemented as `gdal/frmts/jp2kak/jp2kakdataset.cpp`.
--  If you're using a Kakadu release before v7.5, configure & compile
-   GDAL with eg.
-   `CXXFLAGS="-DKDU_MAJOR_VERSION=7 -DKDU_MINOR_VERSION=3 -DKDU_PATCH_VERSION=2"`
-   for Kakadu version 7.3.2.
--  Alternate :ref:`raster.jp2openjpeg` driver.
+-  ``gdal/frmts/jp2kak/jp2kakdataset.cpp`` 로 구현되었습니다.
+-  7.5버전 이전의 카카두 배포판을 사용하는 경우, 예를 들어 카카두 7.3.2버전이라면 다음과 같이 GDAL을 환경설정하고 컴파일해야 합니다:
+
+   ::
+
+       CXXFLAGS="-DKDU_MAJOR_VERSION=7 -DKDU_MINOR_VERSION=3 -DKDU_PATCH_VERSION=2"
+
+-  :ref:`raster.jp2openjpeg` 드라이버로 대체할 수 있습니다.
