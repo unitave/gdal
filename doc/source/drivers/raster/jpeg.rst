@@ -154,7 +154,7 @@ expressed in the below tables. Consult the EXIF specification for more
 information.
 
 ============================== ======== ========= ================ =============
-메타데이터 항목 이름               헥스 코드  유형       값의 개수          선택성
+메타데이터 항목 이름                헥스 코드  유형       값의 개수          선택성
 ============================== ======== ========= ================ =============
 EXIF_Document_Name             0x010D   ASCII     가변              선택적
 EXIF_ImageDescription          0x010E   ASCII     가변              권장
