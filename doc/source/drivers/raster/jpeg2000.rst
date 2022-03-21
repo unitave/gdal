@@ -1,7 +1,7 @@
 .. _raster.jpeg2000:
 
 ================================================================================
-JPEG2000 -- Implementation of the JPEG-2000 part 1
+JPEG2000 -- JPEG2000 파트1의 구현
 ================================================================================
 
 .. shortname:: JPEG2000
@@ -10,15 +10,13 @@ JPEG2000 -- Implementation of the JPEG-2000 part 1
 
 .. deprecated_driver:: version_targeted_for_removal: 3.5
    env_variable: GDAL_ENABLE_DEPRECATED_DRIVER_JPEG2000
-   message: You should consider using another driver, in particular the JP2OpenJPEG driver that is a better free and open source alternative.
+   주석: 이 드라이버보다는 다른 드라이버, 그 중에서도 특히 더 좋은 프리/오픈소스 대체제인 JP2OpenJPEG 드라이버를 사용하는 편이 좋습니다.
 
-This implementation based on JasPer software (see below).
+이 드라이버는 재스퍼(JasPer) 소프트웨어를 기반으로 구현되었습니다. (아래 참조)
 
-XMP metadata can be extracted from JPEG2000
-files, and will be stored as XML raw content in the xml:XMP metadata
-domain.
+JPEG2000 파일로부터 XMP 메타데이터를 추출할 수 있고, xml:XMP 메타데이터 도메인에 추출한 메타데이터를 XML 원본(raw) 내용으로 저장할 것입니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -27,165 +25,107 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Georeferencing
+지리참조 작업
 --------------
 
-Georeferencing information can come from different sources : internal
-(GeoJP2 or GMLJP2 boxes), worldfile .j2w/.wld sidecar files, or PAM
-(Persistent Auxiliary metadata) .aux.xml sidecar files. By default,
-information is fetched in following order (first listed is the most
-prioritary): PAM, GeoJP2, GMLJP2, WORLDFILE.
+내부(GeoJP2 또는 GMLJP2 경계 상자), 월드 파일 .j2w/.wld 사이드카 파일, 또는 PAM(Persistent Auxiliary metadata) .aux.xml 사이드카 파일 등 서로 다른 소스들로부터 지리참조 정보를 얻을 수 있습니다. 기본적으로 PAM, GeoJP2, GMLJP2, WORLDFILE 순서대로 정보를 수집합니다. (첫 항목을 가장 우선합니다.)
 
-Starting with GDAL 2.2, the allowed sources and their priority order can
-be changed with the GDAL_GEOREF_SOURCES configuration option (or
-GEOREF_SOURCES open option) whose value is a comma-separated list of the
-following keywords : PAM, GEOJP2, GMLJP2, INTERNAL (shortcut for
-GEOJP2,GMLJP2), WORLDFILE, NONE. First mentioned sources are the most
-prioritary over the next ones. A non mentioned source will be ignored.
+GDAL 2.2버전부터, GDAL_GEOREF_SOURCES 환경설정 옵션으로 (또는 GEOREF_SOURCES 열기 옵션으로) 사용할 수 있는 소스와 그 우선 순위를 변경할 수 있습니다. 이 옵션의 값은 PAM, GEOJP2, GMLJP2, (GEOJP2, GMLJP2로 가는 단축 키인) INTERNAL, WORLDFILE, NONE이라는 키워드를 쉼표로 구분한 목록입니다. 목록의 첫 항목이 가장 우선되는 소스입니다. 목록에 없는 소스는 무시할 것입니다.
 
-For example setting it to "WORLDFILE,PAM,INTERNAL" will make a
-geotransformation matrix from a potential worldfile prioritary over PAM
-or internal JP2 boxes. Setting it to "PAM,WORLDFILE,GEOJP2" will use the
-mentioned sources and ignore GMLJP2 boxes.
+예를 들어 이 옵션을 "WORLDFILE,PAM,INTERNAL"로 설정하면 PAM이나 내부 JP2 경계 상자보다 잠재적인 월드 파일의 지리변형 행렬을 우선할 것입니다. "PAM,WORLDFILE,GEOJP2"로 설정하면 설정된 소스를 이용하고 GMLJP2 경계 상자는 무시할 것입니다.
 
-Option Options
+열기 옵션
 --------------
 
-The following open option is available:
+다음 열기 옵션들을 사용할 수 있습니다:
 
--  **1BIT_ALPHA_PROMOTION=YES/NO**: Whether a 1-bit alpha channel should
-   be promoted to 8-bit. Defaults to YES.
+-  **1BIT_ALPHA_PROMOTION=YES/NO**:
+   1비트 알파 채널을 8비트로 승격시켜야 할지 여부를 선택합니다. 기본값은 YES입니다.
 
--  **GEOREF_SOURCES=string**: (GDAL > 2.2) Define which georeferencing
-   sources are allowed and their priority order. See
-   `Georeferencing <#georeferencing>`__ paragraph.
+-  **GEOREF_SOURCES=string**:
+   (GDAL 2.2 이상 버전) 사용할 수 있는 지리참조 소스와 그 우선 순위를 정의합니다. `지리참조 작업 <#georeferencing>`_ 단락을 참조하십시오.
 
-Creation Options
+생성 옵션
 ----------------
 
--  **WORLDFILE=ON**: Force the generation of an associated ESRI world
-   file (.wld).
--  **FORMAT=JP2|JPC**: Specify output file format.
--  **GMLJP2=YES/NO**: Indicates whether a GML
-   box conforming to the OGC GML in JPEG2000 specification should be
-   included in the file. Unless GMLJP2V2_DEF is used, the version of the
-   GMLJP2 box will be version 1. As implemented currently, the GMLJP2
-   box will be written after the codestream. Defaults to YES.
--  **GMLJP2V2_DEF=filename**: Indicates whether
-   a GML box conforming to the `OGC GML in JPEG2000, version
-   2 <http://docs.opengeospatial.org/is/08-085r4/08-085r4.html>`__
-   specification should be included in the file. *filename* must point
-   to a file with a JSon content that defines how the GMLJP2 v2 box
-   should be built. See :ref:`GMLJP2v2 definition file
-   section <gmjp2v2def>` in documentation of
-   the JP2OpenJPEG driver for the syntax of the JSon configuration file.
-   It is also possible to directly pass the JSon content inlined as a
-   string. If filename is just set to YES, a minimal instance will be
-   built. As implemented currently, the GMLJP2 box will be written after
-   the codestream.
--  **GeoJP2=YES/NO**: Require a modified Jasper with GeoJP2
-   support enabled) Indicates whether a UUID/GeoTIFF box conforming to
-   the GeoJP2 (GeoTIFF in JPEG2000) specification should be included in
-   the file. Defaults to YES.
--  **NBITS=int_value** : (GDAL >= 2.3) Bits (precision) for sub-byte
-   files (1-7), sub-uint16 (9-15).
+-  **WORLDFILE=ON**:
+   관련 ESRI 월드 파일(.wld)을 강제로 생성합니다.
 
--  Encoding parameters, directly delivered to the JasPer library
-   described in the JasPer documentation. Quoted from the docs:
+-  **FORMAT=JP2|JPC**:
+   산출 파일 포맷을 지정합니다.
 
-   \``The following options are supported by the encoder:
+-  **GMLJP2=YES/NO**:
+   JPEG2000 사양의 OGC GML을 준수하는 GML 경계 상자가 파일에 포함되어야 하는지를 선택합니다. GMLJP2V2_DEF를 사용하지 않는 이상, GMLJP2 경계 상자의 버전은 1일 것입니다. 현재 코드스트림 뒤에 GMLJP2 경계 상자를 작성도록 구현되었습니다. 기본값은 YES입니다.
 
-   +-----------------------+-----------------------+-----------------------+
-   | imgareatlx=x          | Set the x-coordinate  |                       |
-   |                       | of the top-left       |                       |
-   |                       | corner of the image   |                       |
-   |                       | area to x.            |                       |
-   +-----------------------+-----------------------+-----------------------+
-   | imgareatly=y          | Set the y-coordinate  |                       |
-   |                       | of the top-left       |                       |
-   |                       | corner of the image   |                       |
-   |                       | area to y.            |                       |
-   +-----------------------+-----------------------+-----------------------+
-   | tilegrdtlx=x          | Set the x-coordinate  |                       |
-   |                       | of the top-left       |                       |
-   |                       | corner of the tiling  |                       |
-   |                       | grid to x.            |                       |
-   +-----------------------+-----------------------+-----------------------+
-   | tilegrdtly=y          | Set the y-coordinate  |                       |
-   |                       | of the top-left       |                       |
-   |                       | corner of the tiling  |                       |
-   |                       | grid to y.            |                       |
-   +-----------------------+-----------------------+-----------------------+
-   | tilewidth=w           | Set the nominal tile  |                       |
-   |                       | width to w.           |                       |
-   +-----------------------+-----------------------+-----------------------+
-   | tileheight=h          | Set the nominal tile  |                       |
-   |                       | height to h.          |                       |
-   +-----------------------+-----------------------+-----------------------+
-   | prcwidth=w            | Set the precinct      |                       |
-   |                       | width to w. The       |                       |
-   |                       | argument w must be an |                       |
-   |                       | integer power of two. |                       |
-   |                       | The default value is  |                       |
-   |                       | 32768.                |                       |
-   +-----------------------+-----------------------+-----------------------+
-   | prcheight=h           | Set the precinct      |                       |
-   |                       | height to h. The      |                       |
-   |                       | argument h must be an |                       |
-   |                       | integer power of two. |                       |
-   |                       | The default value is  |                       |
-   |                       | 32768.                |                       |
-   +-----------------------+-----------------------+-----------------------+
-   | cblkwidth=w           | Set the nominal code  |                       |
-   |                       | block width to w. The |                       |
-   |                       | argument w must be an |                       |
-   |                       | integer power of two. |                       |
-   |                       | The default value is  |                       |
-   |                       | 64.                   |                       |
-   +-----------------------+-----------------------+-----------------------+
-   | cblkheight=h          | Set the nominal code  |                       |
-   |                       | block height to h.    |                       |
-   |                       | The argument h must   |                       |
-   |                       | be an integer power   |                       |
-   |                       | of two. The default   |                       |
-   |                       | value is 64.          |                       |
-   +-----------------------+-----------------------+-----------------------+
-   | mode=m                | Set the coding mode   |                       |
-   |                       | to m. The argument m  |                       |
-   |                       | must have one of the  |                       |
-   |                       | following values:     |                       |
-   |                       | ===== ============    |                       |
-   |                       | Value Description     |                       |
-   |                       | ===== ============    |                       |
-   |                       | int   integer mode    |                       |
-   |                       | real  real mode       |                       |
-   |                       | ===== ============    |                       |
-   |                       |                       |                       |
-   |                       | If lossless coding is |                       |
-   |                       | desired, the integer  |                       |
-   |                       | mode must be used. By |                       |
-   |                       | default, the integer  |                       |
-   |                       | mode is employed. The |                       |
-   |                       | choice of mode also   |                       |
-   |                       | determines which      |                       |
-   |                       | multicomponent and    |                       |
-   |                       | wavelet transforms    |                       |
-   |                       | (if any) are          |                       |
-   |                       | employed.             |                       |
-   +-----------------------+-----------------------+-----------------------+
-   | rate=r                | Specify the target    |                       |
-   |                       | rate. The argument r  |                       |
-   |                       | is a positive real    |                       |
-   |                       | number. Since a rate  |                       |
-   |                       | of one corresponds to |                       |
-   |                       | no compression, one   |                       |
-   |                       | should never need to  |                       |
-   |                       | explicitly specify a  |                       |
-   |                       | rate greater than     |                       |
-   |                       | one. By default, the  |                       |
-   |                       | target rate is        |                       |
-   |                       | considered to be      |                       |
-   |                       | infinite.             |                       |
+-  **GMLJP2V2_DEF=filename**:
+   `OGC GML-in-JPEG2000 버전 2.0 <http://docs.opengeospatial.org/is/08-085r4/08-085r4.html>`_ 사양을 준수하는 GML 경계 상자가 파일에 포함되어야 하는지를 선택합니다. *filename* 이 GMLJP2 v2 경계 상자를 어떻게 작성해야 할지 정의하는 JSON 콘텐츠를 가진 파일을 가리켜야만 합니다. JSON 환경설정 파일의 문법에 대해서는 JP2OpenJPEG 드라이버 문서에 있는 :ref:`GMLJP2v2 정의 파일 단락 <gmjp2v2def>` 을 참조하십시오. JSON 콘텐츠를 그때 그때 처리해서(inline) 문자열로 직접 전송할 수도 있습니다. filename을 그냥 YES로 설정하면, 최소한의 인스턴스만 빌드할 것입니다. 현재 코드스트림 뒤에 GMLJP2 경계 상자를 작성도록 구현되었습니다.
+
+-  **GeoJP2=YES/NO**: (GeoJP2를 지원하도록 빌드된 재스퍼 라이브러리 수정 버전이 필요합니다.) GeoJP2 (GeoTIFF-in-JPEG2000) 사양을 준수하는 UUID/GeoTIFF 경계 상자가 파일에 포함되어야 하는지를 선택합니다. 기본값은 YES입니다.
+
+-  **NBITS=int_value** :
+   (GDAL 2.3 이상 버전) sub-byte형 파일(1-7), sub-uint16형 파일(9-15)의 비트(정밀도)입니다.
+
+-  재스퍼 문서에 설명된, 재스퍼 라이브러리에 직접 전달되는 인코딩 파라미터들입니다. 다음은 해당 문서에서 발췌한 내용입니다:
+
+   인코더가 다음 옵션들을 지원합니다:
+
+.. list-table:: JasPer Encoding Parameters
+   :header-rows: 0
+
+   * - imgareatlx=x 
+     - 이미지 영역의 좌상단 모서리의 X좌표를 x로 설정합니다.
+     - 
+   * - imgareatly=y
+     - 이미지 영역의 좌상단 모서리의 Y좌표를 y로 설정합니다.
+     - 
+   * - tilegrdtlx=x
+     - 타일화 그리드의 좌상단 모서리의 X좌표를 x로 설정합니다.
+     - 
+   * - tilegrdtly=y
+     - 타일화 그리드의 좌상단 모서리의 Y좌표를 y로 설정합니다.
+     - 
+   * - tilewidth=w
+     - 명목상의 타일 너비를 w로 설정합니다.
+     - 
+   * - tilewidth=h
+     - 명목상의 타일 높이를 h로 설정합니다.
+     - 
+   * - prcwidth=w
+     - 구역(precinct) 너비를 w로 설정합니다. w인자는 2의 거듭제곱 정수여야만 합니다. 기본값은 32768입니다.
+     - 
+   * - prcheight=h
+     - 구역(precinct) 높이를 h로 설정합니다. h인자는 2의 거듭제곱 정수여야만 합니다. 기본값은 32768입니다.
+     - 
+   * - cblkwidth=w
+     - 명목상의 코드 블록 너비를 w로 설정합니다. w인자는 2의 거듭제곱 정수여야만 합니다. 기본값은 64입니다.
+     - 
+   * - cblkheight=h
+     - 명목상의 코드 블록 높이를 h로 설정합니다. h인자는 2의 거듭제곱 정수여야만 합니다. 기본값은 64입니다.
+     - 
+   * - mode=m
+     - 코딩 모드를 m으로 설정합니다. m인자는 다음 값들 가운데 하나여야만 합니다:
+       
+       :header-rows: 1
+       
+       * - 값
+         - 설명
+       * - int
+         - 정수형 모드
+       * - real
+         - 실수형 모드
+       
+       비손실 코딩을 원한다면 정수형 모드를 사용해야만 합니다. 기본값은 정수형 모드입니다. 코딩 모드를 선택하면 어떤 다중 구성요소 및 (존재하는 경우) 웨이블릿 변환을 사용할지도 결정됩니다.
+       - 
+     * - rate=r
+       - 대상의 압축률을 지정합니다. r인자는 양의 실수값입니다. 1로 지정하면 압축하지 않기 때문에, 1을 초과하는 값으로 지정할 필요는 없습니다. 기본적으로 대상 압축률을 무한대로 간주합니다.
+       - 
+     * - ilyrrates=[, ,. . . ,]
+       - 모든 중간(intermediate) 레이어의 압축률을 지정합니다. 이 옵션의 인자는 N개의 압축률을 쉼표로 구분한 목록입니다. 각 압축률은 양의 실수값입니다. 압축률은 점증해야만 합니다. 이 목록의 마지막 압축률은 (rate 옵션으로 지정한) 전체 압축률 미만 또는 동일해야 합니다.
+       - 
+      
+
+
+
    +-----------------------+-----------------------+-----------------------+
    | ilyrrates=[, ,. . . , | Specify the rates for |                       |
    | ]                     | any intermediate      |                       |
@@ -298,26 +238,23 @@ Creation Options
    |                       | guard bits to n.''    |                       |
    +-----------------------+-----------------------+-----------------------+
 
-See Also
+참고
 --------
 
--  Implemented as ``gdal/frmts/jpeg2000/jpeg2000dataset.cpp``.
--  You need modified JasPer library to build this driver with GeoJP2
-   support enabled. Modified version can be downloaded from
-   `http://download.osgeo.org/gdal/jasper-1.900.1.uuid.tar.gz <http://download.osgeo.org/gdal/jasper-1.900.1.uuid.tar.gz>`__
--  `Official JPEG-2000 page <http://www.jpeg.org/JPEG2000.html>`__
--  `The JasPer Project Home
-   Page <http://www.ece.uvic.ca/~mdadams/jasper/>`__
+-  ``gdal/frmts/jpeg2000/jpeg2000dataset.cpp`` 로 구현되었습니다.
 
-Other JPEG2000 GDAL drivers :
+-  이 드라이버가 GeoJP2를 지원하도록 빌드하려면 재스퍼 라이브러리를 수정해야 합니다. `여기 <http://download.osgeo.org/gdal/jasper-1.900.1.uuid.tar.gz>`_ 에서 수정 버전을 다운로드할 수 있습니다.
 
--  :ref:`JP2OpenJPEG: based on OpenJPEG library (open
-   source) <raster.jp2openjpeg>`
+-  `공식 JPEG2000 페이지 <http://www.jpeg.org/JPEG2000.html>`_
 
--  :ref:`JP2ECW: based on Erdas ECW library
-   (proprietary) <raster.jp2ecw>`
+-  `재스퍼 프로젝트 홈페이지 <http://www.ece.uvic.ca/~mdadams/jasper/>`_
 
--  :ref:`JP2MRSID: based on LizardTech MrSID library
-   (proprietary) <raster.jp2mrsid>`
+다른 JPEG2000 GDAL 드라이버:
 
--  :ref:`JP2KAK: based on Kakadu library (proprietary) <raster.jp2kak>`
+-  :ref:`JP2OpenJPEG: OpenJPEG 라이브러리 기반 (오픈소스) <raster.jp2openjpeg>`
+
+-  :ref:`JP2ECW: ERDAS ECW 라이브러리 기반 (상용) <raster.jp2ecw>`
+
+-  :ref:`JP2MRSID: 리저드테크 MrSID 라이브러리 (상용) <raster.jp2mrsid>`
+
+-  :ref:`JP2KAK: 카카두 라이브러리 기반 (상용) <raster.jp2kak>`
