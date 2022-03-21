@@ -81,7 +81,7 @@ GDAL 2.2버전부터, GDAL_GEOREF_SOURCES 환경설정 옵션으로 (또는 GEOR
    JPEG2000 사양의 OGC GML을 준수하는 GML 경계 상자가 파일에 포함되어야 하는지를 선택합니다. GMLJP2V2_DEF를 사용하지 않는 이상, GMLJP2 경계 상자의 버전은 1일 것입니다. 기본값은 YES입니다.
 
 -  **GMLJP2V2_DEF=filename**:
-   `OGC GML-in-JPEG2000 버전 2 <http://docs.opengeospatial.org/is/08-085r4/08-085r4.html>`_ 사양을 준수하는 GML 경계 상자가 파일에 포함되어야 하는지를 선택합니다. *filename* 이 GMLJP2 v2 경계 상자를 어떻게 작성해야 할지 정의하는 JSON 콘텐츠를 가진 파일을 가리켜야만 합니다. JSON 환경설정 파일의 문법에 대해서는 JP2OpenJPEG 드라이버 문서에 있는 :ref:`GMLJP2v2 정의 파일 단락 <gmjp2v2def>` 을 참조하십시오. JSON 콘텐츠를 그때 그때 처리해서(inline) 문자열로 직접 전송할 수도 있습니다. filename을 그냥 YES로 설정하면, 최소한의 인스턴스만 빌드할 것입니다.
+   `OGC GML-in-JPEG2000 버전 2.0 <http://docs.opengeospatial.org/is/08-085r4/08-085r4.html>`_ 사양을 준수하는 GML 경계 상자가 파일에 포함되어야 하는지를 선택합니다. *filename* 이 GMLJP2 v2 경계 상자를 어떻게 작성해야 할지 정의하는 JSON 콘텐츠를 가진 파일을 가리켜야만 합니다. JSON 환경설정 파일의 문법에 대해서는 JP2OpenJPEG 드라이버 문서에 있는 :ref:`GMLJP2v2 정의 파일 단락 <gmjp2v2def>` 을 참조하십시오. JSON 콘텐츠를 그때 그때 처리해서(inline) 문자열로 직접 전송할 수도 있습니다. filename을 그냥 YES로 설정하면, 최소한의 인스턴스만 빌드할 것입니다.
 
 -  **GeoJP2=YES/NO**:
    GeoJP2 (GeoTIFF-in-JPEG2000) 사양을 준수하는 UUID/GeoTIFF 경계 상자가 파일에 포함되어야 하는지를 선택합니다. 기본값은 YES입니다.

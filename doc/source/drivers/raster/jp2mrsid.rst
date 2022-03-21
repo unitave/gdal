@@ -1,20 +1,19 @@
 .. _raster.jp2mrsid:
 
 ================================================================================
-JP2MrSID -- JPEG2000 via MrSID SDK
+JP2MrSID -- MrSID SDK를 통한 JPEG2000
 ================================================================================
 
 .. shortname:: JP2MrSID
 
 .. build_dependencies:: MrSID SDK
 
-JPEG2000 file format is supported for reading with the MrSID DSDK. It is
-also supported for writing with the MrSID ESDK.
+MrSID DSDK로 JPEG2000 파일 포맷 읽기를 지원합니다.
+MrSID ESDK로 JPEG2000 파일 포맷 쓰기도 지원합니다.
 
-JPEG2000 MrSID support is only available with the version 5.x or newer
-DSDK and ESDK.
+DSDK 및 ESDK 5.x 이상 버전에서만 JPEG2000 MrSID 지원을 사용할 수 있습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -23,44 +22,28 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Georeferencing
+지리참조 작업
 --------------
 
-Georeferencing information can come from different sources : internal
-(GeoJP2 or GMLJP2 boxes), worldfile .j2w/.wld sidecar files, or PAM
-(Persistent Auxiliary metadata) .aux.xml sidecar files. By default,
-information is fetched in following order (first listed is the most
-prioritary): PAM, GeoJP2, GMLJP2, WORLDFILE.
+내부(GeoJP2 또는 GMLJP2 경계 상자), 월드 파일 .j2w/.wld 사이드카 파일, 또는 PAM(Persistent Auxiliary metadata) .aux.xml 사이드카 파일 등 서로 다른 소스들로부터 지리참조 정보를 얻을 수 있습니다. 기본적으로 PAM, GeoJP2, GMLJP2, WORLDFILE 순서대로 파일을 수집합니다. (첫 항목을 가장 우선합니다.)
 
-Starting with GDAL 2.2, the allowed sources and their priority order can
-be changed with the GDAL_GEOREF_SOURCES configuration option (or
-GEOREF_SOURCES open option) whose value is a comma-separated list of the
-following keywords : PAM, GEOJP2, GMLJP2, INTERNAL (shortcut for
-GEOJP2,GMLJP2), WORLDFILE, NONE. First mentioned sources are the most
-prioritary over the next ones. A non mentioned source will be ignored.
+GDAL 2.2버전부터, GDAL_GEOREF_SOURCES 환경설정 옵션으로 (또는 GEOREF_SOURCES 열기 옵션으로) 사용할 수 있는 소스와 그 우선 순위를 변경할 수 있습니다. 이 옵션의 값은 PAM, GEOJP2, GMLJP2, (GEOJP2, GMLJP2로 가는 단축 키인) INTERNAL, WORLDFILE, NONE이라는 키워드를 쉼표로 구분한 목록입니다. 목록의 첫 항목이 가장 우선되는 소스입니다. 목록에 없는 소스는 무시할 것입니다.
 
-For example setting it to "WORLDFILE,PAM,INTERNAL" will make a
-geotransformation matrix from a potential worldfile prioritary over PAM
-or internal JP2 boxes. Setting it to "PAM,WORLDFILE,GEOJP2" will use the
-mentioned sources and ignore GMLJP2 boxes.
+예를 들어 이 옵션을 "WORLDFILE,PAM,INTERNAL"로 설정하면 PAM이나 내부 JP2 경계 상자보다 잠재적인 월드 파일의 지리변형 행렬을 우선할 것입니다. "PAM,WORLDFILE,GEOJP2"로 설정하면 설정된 소스를 이용하고 GMLJP2 경계 상자는 무시할 것입니다.
 
-Creation Options
+생성 옵션
 ----------------
 
-If you have the MrSID ESDK (5.x or newer), it can be used to write
-JPEG2000 files. The following creation options are supported.
+MrSID ESDK(5.x 이상 버전)를 소유하고 있다면, ESDK를 이용해서 JPEG2000 파일을 작성할 수 있습니다. 다음과 같은 생성 옵션들을 지원합니다:
 
--  **WORLDFILE=YES**: to write an ESRI world file (with the extension
-   .j2w).
--  **COMPRESSION=n**: Indicates the desired compression ratio. Zero
-   indicates lossless compression. Twenty would indicate a 20:1
-   compression ratio (the image would be compressed to 1/20 its original
-   size).
--  **XMLPROFILE=[path to file]**: Indicates a path to an
-   Extensis-specific XML profile that can be used to set JPEG2000
-   encoding parameters. They can be created using the MrSID ESDK, or
-   with GeoExpress, or by hand using the following example as a
-   template:
+-  **WORLDFILE=YES**:
+   (.j2w 확장자를 가진) ESRI 월드 파일을 작성합니다.
+
+-  **COMPRESSION=n**:
+   원하는 압축률을 지정합니다. 0은 비손실 압축을 의미합니다. 20은 20:1 압축률을 의미할 것입니다. (이미지를 원본 용량의 1/20로 압축할 것입니다.)
+
+-  **XMLPROFILE=[path to file]**:
+   JPEG2000 인코딩 파라미터를 설정하는 데 사용할 수 있는 Extensis 특화 XML 프로파일을 가리키는 경로를 설정합니다. MrSID ESDK 또는 GeoExpress를 이용하거나, 다음 템플릿을 예시로 삼아 직접 입력해서 Extensis 특화 XML 프로파일을 생성할 수 있습니다:
 
    ::
 
@@ -98,8 +81,8 @@ JPEG2000 files. The following creation options are supported.
         </Codestream>
       </Jp2Profile>
 
-See Also
+참고
 --------
 
--  Implemented as ``gdal/frmts/mrsid/mrsiddataset.cpp``.
--  `Extensis web site <http://www.extensis.com/support/developers>`__
+-  ``gdal/frmts/mrsid/mrsiddataset.cpp`` 로 구현되었습니다.
+-  `Extensis 웹사이트 <http://www.extensis.com/support/developers>`_
