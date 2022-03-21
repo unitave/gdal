@@ -107,51 +107,25 @@ JPEG 파일 생성은 배치 (CreateCopy) 메소드로 구현되었습니다. �
 EXIF 및 GPS 태그
 -----------------
 
-The below tables list the EXIF and GPS tags that can be written.
+다음 표들은 작성할 수 있는 EXIF 및 GPS 태그들의 목록입니다.
 
--  The "메타데이터 항목 이름" column presents the name of the metadata
-   item to attach to the source dataset.
--  The "헥스 코드" column is the value of the corresponding TIFF EXIF/GPS
-   tag (for reference only)
--  | The "Type" column is the TIFF type associated.
+-  "메타데이터 항목 이름" 열은 소스 데이터셋에 추가할 메타데이터 항목의 이름입니다.
+-  "헥스 코드" 열은 대응하는 TIFF EXIF/GPS 태그의 값입니다. (참조 전용)
+-  "유형" 열은 관련 TIFF 유형입니다.
 
-   -  ASCII is for text values that are NUL-terminated (for a fixed
-      length tag, the length includes this NUL-terminating characters).
-      e.g EXIF_Make=the_make
-   -  BYTE/UNDEFINED is for values that can be made of any byte value.
-      The value of the corresponding GDAL metadata item must be a string
-      of hexadecimal formatted values, e.g EXIF_GPSVersionID=0x02 0x00
-      0x00 0x00. GDAL also accepts an ASCII string: e.g.
-      EXIF_ExifVersion=0231
-   -  SHORT is for unsigned integer values in the range [0,65535]. Some
-      tags may accept multiple values, in which case they must be
-      separated by space.
-   -  LONG is for unsigned integer values in the range [0,4294967295].
-      Some tags may accept multiple values, in which case they must be
-      separated by space.
-   -  RATIONAL is for positive floating-point values. Some tags may
-      accept multiple values, in which case they must be separated by
-      space. e.g EXIF_GPSLatitude=49 2 3.5
-   -  SRATIONAL is for positive or negative floating-point values. Some
-      tags may accept multiple values, in which case they must be
-      separated by space.
+   -  ASCII는 널 종단(NULL-terminated) 텍스트 값을 의미합니다. (고정 길이 태그의 경우, 길이에 이 널 종단 문자가 포함됩니다.) 예: EXIF_Make=the_make
+   -  BYTE/UNDEFINED는 어떤 바이트 값으로도 이루어질 수 있는 값입니다. 대응하는 GDAL 메타데이터 항목의 값이 EXIF_GPSVersionID=0x02 0x00 0x00 0x00 같은 16진수 서식 값의 문자열이어야만 합니다. GDAL은 EXIF_ExifVersion=0231 같은 ASCII 문자열도 입력받습니다.
+   -  SHORT은 [0,65535] 범위의 부호 없는 정수값입니다. 일부 태그는 값 여러 개를 설정할 수 있는데, 이때 공백으로 구분해야만 합니다.
+   -  LONG은 [0,4294967295] 범위의 부호 없는 정수값입니다. 일부 태그는 값 여러 개를 설정할 수 있는데, 이때 공백으로 구분해야만 합니다.
+   -  RATIONAL은 양의 부동소수점형 값입니다. 일부 태그는 값 여러 개를 설정할 수 있는데, 이때 EXIF_GPSLatitude=49 2 3.5와 같이 공백으로 구분해야만 합니다.
+   -  SRATIONAL은 양 또는 음의 부동소수점형 값입니다. 일부 태그는 값 여러 개를 설정할 수 있는데, 이때 공백으로 구분해야만 합니다.
 
-   When an item accepts a fixed number of values and that more are
-   provided, they will be truncated with a warning. In the case they are
-   less values provided than needed, they will be padded with
-   appropriate spaces / zeroes
+   고정 개수의 값을 받는 항목에 고정 개수보다 많은 값들을 설정하는 경우, 경고과 함께 값들을 잘라낼(truncate) 것입니다. 필요한 개수보다 적은 값들을 설정하는 경우, 뒤를 알맞은 공백과 0들로 채울 것입니다.
 
--  The "Number of values" column is the number of values for the item.
-   Might be "가변" if there is no restriction, or a fixed value. For
-   Type=ASCII, the fixed value includes the NUL-terminating byte, so the
-   number of actual printable characters is number of values - 1.
--  The "선택성" column indicates whether the item should be present
-   ("필수"), is "권장" or "선택적". GDAL does not enforce
-   this.
+-  "값의 개수" 열은 항목이 받는 값의 개수입니다. 제약 조건이 없다면 "가변(variable)"일 수도 있고, 아니면 고정값일 수도 있습니다. 유형이 ASCII인 경우 고정값이 널 종단 바이트를 포함하기 때문에, 실제로 출력 가능한 문자의 개수는 값의 개수에서 1을 뺀 숫자입니다.
+-  "선택성" 열은 항목이 존재해야 하는지("필수(mandatory)"), "권장(recommended)" 또는 "선택적(optional)"인지 나타냅니다. GDAL은 이 선택성을 강제하지 않습니다.
 
-Many items have more restrictions on the valid content that are not
-expressed in the below tables. Consult the EXIF specification for more
-information.
+많은 항목들이 다음 표에서 볼 수 없는 무결한 콘텐츠에 대한 제약 조건을 더 많이 가지고 있습니다. 자세한 정보를 원한다면 EXIF 사양 문서를 읽어보십시오.
 
 ============================== ======== ========= ================ =============
 메타데이터 항목 이름               헥스 코드  유형       값의 개수          선택성
