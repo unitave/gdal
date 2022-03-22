@@ -112,25 +112,21 @@ JPIPKAK 드라이버는 GDAL C++ 및 C API를 지원하도록 구현되었으며
    카카두 메커니즘을 환경설정하고 서버와 현재 뷰 윈도우 요청을 통신하기 위한 배경 스레드를 (이미 실행 중이 아니라면) 시작합니다. 이 배경 스레드는 JPIP 서버가 현재 뷰 윈도우 요청에 대한 "EOR(End Of Response)" 메시지를 보낼 때까지 ``kdu_cache`` 객체를 계속 업데이트합니다.
 
 .. _GDALLockBuffer:
-
 #. GDALLockBuffer
 
    LockBuffer를 호출하는 C API입니다.
 
 .. _LockBuffer:
-
 #. LockBuffer
 
    ``JPIPKAKAsyncRasterIO`` 에는 구현되지 않았습니다. ``JPIPKAKAsyncRasterIO->GetNextUpdatedRegion`` 에서 버퍼를 잠글 수 있습니다.
 
 .. _GDALGetNextUpdatedRegion:
-
 #. GDALGetNextUpdatedRegion
 
    GetNextUpdatedRegion을 호출하는 C API입니다.
 
 .. _GetNextUpdatedRegion:
-
 #. GetNextUpdatedRegion
 
    이 함수는 사용할 수 있는 데이터를 압축 해제해서 (``JPIPKAKDataset->BeginAsyncRasterIO`` 에 설정된 데이터셋 버퍼 유형에 따라) 이미지를 생성하고, 영역 포인터에 (요청한 폐기 수준에서) 압축 해제된 윈도우 너비 및 높이를 반환합니다. 클라이언트는 이를 이용해서 윈도우를 렌더링할 수 있습니다. 렌더링 작업의 상태는 ``GDALAsyncStatusType`` 의 ``GARIO_PENDING, GARIO_UPDATE, GARIO_ERROR, GARIO_COMPLETE`` 가운데 하나입니다. ``GARIO_UPDATE, GARIO_PENDING`` 은 전체 이미지 데이터를 얻기 위해 GetNextUpdatedRegion을 더 읽어와야 하는데, 이것이 JPIP의 진행형 렌더링입니다. ``GARIO_COMPLETE`` 은 윈도우가 완성되었다는 뜻입니다.
@@ -140,19 +136,16 @@ JPIPKAK 드라이버는 GDAL C++ 및 C API를 지원하도록 구현되었으며
    이 함수로 전송되는 영역은 참조로 전송되고, 압축 해제된 영역을 찾았다는 결과가 반환되는 경우 호출자가 이 영역을 읽을 수 있습니다. 이미지 데이터는 - 예를 들어 요청한 영역이 구성요소 3개를 가지고 있는 경우의 RGB처럼 - 버퍼 안에 빽빽히 채워져 있습니다.
 
 .. _GDALUnlockBuffer:
-
 #. GDALUnlockBuffer
 
    UnlockBuffer를 호출하는 C API입니다.
 
 .. _UnlockBuffer:
-
 #. UnlockBuffer
 
    ``JPIPKAKAsyncRasterIO`` 에는 구현되지 않았습니다. ``JPIPKAKAsyncRasterIO->GetNextUpdatedRegion`` 에서 버퍼 잠금을 해제할 수 있습니다.
 
 .. _Draw:
-
 #. Draw
 
    클라이언트가 이미지 데이터를 렌더링합니다.
