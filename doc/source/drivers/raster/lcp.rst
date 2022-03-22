@@ -109,80 +109,80 @@ LCP 헤더 서식
 0              4                long       crown fuels      수관 연소 물질이 없다면 20, 수관 연소 물질이 있다면 21 (수관 연소 물질 = 수관 높이, 수관 기준(base) 높이, 수관 부피 밀도)
 4              4                long       ground fuels     지표 연소 물질이 없다면 20, 지표 연소 물질이 있다면 21 (지표 연소 물질 = 분탄(duff) 하중, 조잡 목재)
 8              4                long       latitude         위도 (남반구의 경우 음의 값)
-12             8                double     loeast           offset to preserve coordinate precision (legacy from 16-bit OS days)
-20             8                double     hieast           offset to preserve coordinate precision (legacy from 16-bit OS days)
-28             8                double     lonorth          offset to preserve coordinate precision (legacy from 16-bit OS days)
-36             8                double     hinorth          offset to preserve coordinate precision (legacy from 16-bit OS days)
-44             4                long       loelev           minimum elevation
-48             4                long       hielev           maximum elevation
-52             4                long       numelev          number of elevation classes, -1 if > 100
-56             400              long       elevation values list of elevation values as longs
-456            4                long       loslope          minimum slope
-460            4                long       hislope          maximum slope
-464            4                long       numslope         number of slope classes, -1 if > 100
-468            400              long       slope values     list of slope values as longs
-868            4                long       loaspect         minimum aspect
-872            4                long       hiaspect         maximum aspect
-876            4                long       numaspects       number of aspect classes, -1 if > 100
-880            400              long       aspect values    list of aspect values as longs
-1280           4                long       lofuel           minimum fuel model value
-1284           4                long       hifuel           maximum fuel model value
-1288           4                long       numfuel          number of fuel models -1 if > 100
-1292           400              long       fuel values      list of fuel model values as longs
-1692           4                long       locover          minimum canopy cover
-1696           4                long       hicover          maximum canopy cover
-1700           4                long       numcover         number of canopy cover classes, -1 if > 100
-1704           400              long       cover values     list of canopy cover values as longs
-2104           4                long       loheight         minimum canopy height
-2108           4                long       hiheight         maximum canopy height
-2112           4                long       numheight        number of canopy height classes, -1 if > 100
-2116           400              long       height values    list of canopy height values as longs
-2516           4                long       lobase           minimum canopy base height
-2520           4                long       hibase           maximum canopy base height
-2524           4                long       numbase          number of canopy base height classes, -1 if > 100
-2528           400              long       base values      list of canopy base height values as longs
-2928           4                long       lodensity        minimum canopy bulk density
-2932           4                long       hidensity        maximum canopy bulk density
-2936           4                long       numdensity       number of canopy bulk density classes, -1 if >100
-2940           400              long       density values   list of canopy bulk density values as longs
-3340           4                long       loduff           minimum duff
-3344           4                long       hiduff           maximum duff
-3348           4                long       numduff          number of duff classes, -1 if > 100
-3352           400              long       duff values      list of duff values as longs
-3752           4                long       lowoody          minimum coarse woody
-3756           4                long       hiwoody          maximum coarse woody
-3760           4                long       numwoodies       number of coarse woody classes, -1 if > 100
-3764           400              long       woody values     list of coarse woody values as longs
-4164           4                long       numeast          number of raster columns
-4168           4                long       numnorth         number of raster rows
-4172           8                double     EastUtm          max X
-4180           8                double     WestUtm          min X
-4188           8                double     NorthUtm         max Y
-4196           8                double     SouthUtm         min Y
-4204           4                long       GridUnits        linear unit: 0 = meters, 1 = feet, 2 = kilometers
-4208           8                double     XResol           cell size width in GridUnits
-4216           8                double     YResol           cell size height in GridUnits
-4224           2                short      EUnits           elevation units: 0 = meters, 1 = feet
-4226           2                short      SUnits           slope units: 0 = degrees, 1 = percent
-4228           2                short      AUnits           aspect units: 0 = Grass categories, 1 = Grass degrees, 2 = azimuth degrees
-4230           2                short      FOptions         fuel model options: 0 = no custom models AND no conversion file, 1 = custom models BUT no conversion file, 2 = no custom models BUT conversion file, 3 = custom models AND conversion file needed
-4232           2                short      CUnits           canopy cover units: 0 = categories (0-4), 1 = percent
-4234           2                short      HUnits           canopy height units: 1 = meters, 2 = feet, 3 = m x 10, 4 = ft x 10
-4236           2                short      BUnits           canopy base height units: 1 = meters, 2 = feet, 3 = m x 10, 4 = ft x 10
-4238           2                short      PUnits           canopy bulk density units: 1 = kg/m^3, 2 = lb/ft^3, 3 = kg/m^3 x 100, 4 = lb/ft^3 x 1000
-4240           2                short      DUnits           duff units: 1 = Mg/ha x 10, 2 = t/ac x 10
-4242           2                short      WOptions         coarse woody options (1 if coarse woody band is present)
-4244           256              char[]     ElevFile         elevation file name
-4500           256              char[]     SlopeFile        slope file name
-4756           256              char[]     AspectFile       aspect file name
-5012           256              char[]     FuelFile         fuel model file name
-5268           256              char[]     CoverFile        canopy cover file name
-5524           256              char[]     HeightFile       canopy height file name
-5780           256              char[]     BaseFile         canopy base file name
-6036           256              char[]     DensityFile      canopy bulk density file name
-6292           256              char[]     DuffFile         duff file name
-6548           256              char[]     WoodyFile        coarse woody file name
-6804           512              char[]     Description      LCP file description
+12             8                double     loeast           좌표 정밀도를 보전하기 위한 오프셋 (16비트 OS 시절의 레거시)
+20             8                double     hieast           좌표 정밀도를 보전하기 위한 오프셋 (16비트 OS 시절의 레거시)
+28             8                double     lonorth          좌표 정밀도를 보전하기 위한 오프셋 (16비트 OS 시절의 레거시)
+36             8                double     hinorth          좌표 정밀도를 보전하기 위한 오프셋 (16비트 OS 시절의 레거시)
+44             4                long       loelev           최저 표고
+48             4                long       hielev           최대 표고
+52             4                long       numelev          표고 범주 개수, 100을 초과하는 경우 -1
+56             400              long       elevation values LONG형 표고값 목록
+456            4                long       loslope          최저 경사
+460            4                long       hislope          최고 경사
+464            4                long       numslope         경사 범주 개수, 100을 초과하는 경우 -1
+468            400              long       slope values     LONG형 경사값 목록
+868            4                long       loaspect         최소 경사 방향
+872            4                long       hiaspect         최대 경사 방향
+876            4                long       numaspects       경사 방향 범주 개수, 100을 초과하는 경우 -1
+880            400              long       aspect values    LONG형 경사 방향 값 목록
+1280           4                long       lofuel           최소 연소 물질 모델 값
+1284           4                long       hifuel           최대 연소 물질 모델 값
+1288           4                long       numfuel          연소 물질 모델 개수, 100을 초과하는 경우 -1
+1292           400              long       fuel values      LONG형 연소 물질 모델 값 목록
+1692           4                long       locover          최소 수관 차폐율
+1696           4                long       hicover          최대 수관 차폐율
+1700           4                long       numcover         수관 차폐율 범주 개수, 100을 초과하는 경우 -1
+1704           400              long       cover values     LONG형 수관 차폐율 값 목록
+2104           4                long       loheight         최소 수관 높이
+2108           4                long       hiheight         최대 수관 높이
+2112           4                long       numheight        수관 높이 범주 개수, 100을 초과하는 경우 -1
+2116           400              long       height values    LONG형 수관 높이 값 목록
+2516           4                long       lobase           최소 수관 기준 높이
+2520           4                long       hibase           최대 수관 기준 높이
+2524           4                long       numbase          수관 기준 높이 범주 개수, 100을 초과하는 경우 -1
+2528           400              long       base values      LONG형 수관 기준 높이 값 목록
+2928           4                long       lodensity        최소 수관 부피 밀도
+2932           4                long       hidensity        최대 수관 부피 밀도
+2936           4                long       numdensity       수관 부피 밀도 범주 개수, -1 if >100
+2940           400              long       density values   LONG형 수관 부피 밀도 값 목록
+3340           4                long       loduff           최소 분탄
+3344           4                long       hiduff           최대 분탄
+3348           4                long       numduff          분탄 범주 개수, 100을 초과하는 경우 -1
+3352           400              long       duff values      LONG형 duff 값 목록
+3752           4                long       lowoody          최소 조잡 목재
+3756           4                long       hiwoody          최대 조잡 목재
+3760           4                long       numwoodies       조잡 목재 범주 개수, 100을 초과하는 경우 -1
+3764           400              long       woody values     LONG형 조잡 목재 값 목록
+4164           4                long       numeast          래스터 열
+4168           4                long       numnorth         래스터 행
+4172           8                double     EastUtm          최대 X
+4180           8                double     WestUtm          최소 X
+4188           8                double     NorthUtm         최대 Y
+4196           8                double     SouthUtm         최소 Y
+4204           4                long       GridUnits        선형 단위: 0 = 미터, 1 = 피트, 2 = 킬로미터
+4208           8                double     XResol           GridUnits 단위 셀 크기의 너비
+4216           8                double     YResol           GridUnits 단위 셀 크기의 높이
+4224           2                short      EUnits           표고 단위: 0 = 미터, 1 = 피트
+4226           2                short      SUnits           경사 단위: 0 = 도, 1 = 백분율
+4228           2                short      AUnits           경사 방향 단위: 0 = GRASS 카테고리, 1 = GRASS 도, 2 = 방위각 도
+4230           2                short      FOptions         연소 물질 모델 옵션: 0 = 사용자 지정 모델과 변환 파일 둘 다 없음, 1 = 사용자 지정 모델은 있지만 변환 파일은 없음, 2 = 사용자 지정 모델은 없지만 변환 파일은 있음, 3 = 사용자 지정 모델과 변환 파일 둘 다 필요
+4232           2                short      CUnits           수관 차폐율 단위: 0 = 카테고리(0-4), 1 = 백분율
+4234           2                short      HUnits           수관 높이 단위: 1 = 미터, 2 = 피트, 3 = m x 10, 4 = 피트 x 10
+4236           2                short      BUnits           수관 기준 높이 단위: 1 = 미터, 2 = 피트, 3 = m x 10, 4 = 피트 x 10
+4238           2                short      PUnits           수관 부피 밀도 단위: 1 = kg/m^3, 2 = 파운드/ft^3, 3 = kg/m^3 x 100, 4 = 파운드/ft^3 x 1000
+4240           2                short      DUnits           분탄 단위: 1 = 메가그램/헥타르 x 10, 2 = 톤/에이커 x 10
+4242           2                short      WOptions         조잡 목재 옵션 (조잡 목재 밴드가 존재하는 경우 1)
+4244           256              char[]     ElevFile         표고 파일명
+4500           256              char[]     SlopeFile        경사 파일명
+4756           256              char[]     AspectFile       경사 방향 파일명
+5012           256              char[]     FuelFile         연소 물질 모델 파일명
+5268           256              char[]     CoverFile        수관 차폐율 파일명
+5524           256              char[]     HeightFile       수관 높이 파일명
+5780           256              char[]     BaseFile         수관 기준 높이 파일명
+6036           256              char[]     DensityFile      수관 부피 밀도 파일명
+6292           256              char[]     DuffFile         분탄 파일명
+6548           256              char[]     WoodyFile        조잡 목재 파일명
+6804           512              char[]     Description      LCP 파일 설명
 ============== ================ ========== ================ =================================================================================================================================================================================================
 
 *크리스 토니(Chris Toney), 2009년 2월 14일*
