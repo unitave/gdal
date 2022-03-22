@@ -1,35 +1,20 @@
 .. _raster.lcp:
 
 ================================================================================
-LCP -- FARSITE v.4 LCP Format
+LCP -- FARSITE v4 LCP 포맷
 ================================================================================
 
 .. shortname:: LCP
 
 .. built_in_by_default::
 
-FARSITE v. 4 landscape file (LCP) is a multi-band raster format used by
-wildland fire behavior and fire effect simulation models such as
-FARSITE, FLAMMAP, and FBAT (`www.fire.org <http://www.fire.org>`__). The
-bands of an LCP file store data describing terrain, tree canopy, and
-surface fuel. The `LANDFIRE Data Distribrution
-Site <https://landfire.cr.usgs.gov/viewer/>`__ distributes data in LCP
-format, and programs such as FARSITE and
-`LFDAT <http://www.landfire.gov/datatool.php>`__ can create LCP files
-from a set of input rasters.
+FARSITE v4 LCP(LandScaPe) 파일은 FARSITE, FLAMMAP, 그리고 FBAT (`www.fire.org <http://www.fire.org>`_) 같은 황무지 화재 습성 및 화재 영향 시뮬레이션 모델에 쓰이는 다중 밴드 래스터 포맷입니다. LCP 파일의 밴드에 지형, 수관(樹冠; tree canopy), 그리고 지표 연소 물질을 서술하는 데이터를 저장합니다. `LANDFIRE 데이터 배포 사이트 <https://landfire.cr.usgs.gov/viewer/>`_ 에서 LCP 포맷으로 된 데이터를 배포하며, FARSITE 및 `LFDAT <http://www.landfire.gov/datatool.php>`_ 같은 프로그램이 입력 래스터 집합으로부터 LCP 파일을 생성할 수 있습니다.
 
-An LCP file (.lcp) is basically a raw format with a 7,316-byte header
-described below. The data type for all bands is 16-bit signed integer.
-Bands are interleaved by pixel. Five bands are required: elevation,
-slope, aspect, fuel model, and tree canopy cover. Crown fuel bands
-(canopy height, canopy base height, canopy bulk density), and surface
-fuel bands (duff, coarse woody debris) are optional.
+LCP 파일(.lcp)은 기본적으로 아래에서 설명하는 7,316바이트 용량의 헤더를 가진 RAW 포맷입니다. 모든 밴드의 데이터 유형은 부호 있는 16비트 정수형입니다. 밴드는 픽셀 교차삽입 유형입니다. 표고, 경사, 경사 방향, 연소 물질 모델, 그리고 수관 차폐율(tree canopy cover) 5개의 밴드는 필수적입니다. 수관 연소 물질 밴드(수관 높이, 수관 기준(base) 높이, 수관 부피 밀도) 그리고 지표 연소 물질 밴드(분탄(duff), 조잡 목질 쇄설물(coarse woody debris))는 선택적입니다.
 
-The LCP driver reads the linear unit, cell size, and extent, but the LCP
-file does not specify the projection. UTM projections are typical, but
-other projections are possible.
+LCP 드라이버는 선형 단위, 셀 크기 그리고 범위를 읽어오지만, LCP 파일은 투영법을 지정하지 않습니다. 보통 UTM 투영법을 사용하지만, 다른 투영법일 수도 있습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -38,97 +23,92 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Metadata
---------
+메타데이터
+---------
 
-The GDAL LCP driver reports dataset- and band-level metadata:
+GDAL LCP 드라이버는 데이터셋 수준 및 밴드 수준 메타데이터를 리포트합니다:
 
-Dataset
+데이터셋
 ~~~~~~~
 
-   | LATITUDE: Latitude of the dataset, negative for southern hemisphere
-   | LINEAR_UNIT: Feet or meters
-   | DESCRIPTION: LCP file description
+-  LATITUDE: 데이터셋의 위도, 남반구의 경우 음의 값
 
-Band
+-  LINEAR_UNIT: 피트 또는 미터
+
+-  DESCRIPTION: LCP 파일 설명
+
+밴드
 ~~~~
 
-   | <band>_UNIT or <band>_OPTION: units or options code for the band
-   | <band>_UNIT_NAME or <band>_OPTION_DESC: descriptive name of
-     units/options
-   | <band>_MIN: minimum value
-   | <band>_MAX: maximum value
-   | <band>_NUM_CLASSES: number of classes, -1 if > 100
-   | <band>_VALUES: comma-delimited list of class values (fuel model
-     band only)
-   | <band>_FILE: original input raster file name for the band
+-  <band>_UNIT 또는 <band>_OPTION: 밴드 용 단위 또는 옵션 코드
 
-**Note:** The LCP driver derives from the RawDataset helper class
-declared in gdal/frmts/raw. It should be implemented as
-gdal/frmts/raw/lcpdataset.cpp.
+-  <band>_UNIT_NAME 또는 <band>_OPTION_DESC: 단위/옵션을 설명하는 이름
 
-Creation Options
+-  <band>_MIN: 최소값
+
+-  <band>_MAX: 최대값
+
+-  <band>_NUM_CLASSES: 범주(class) 개수, 100을 초과하는 경우 -1
+
+-  <band>_VALUES: 쉼표로 구분된 범주 값들의 목록 (연소 물질 모델 밴드 전용)
+
+-  <band>_FILE: 밴드의 원본 입력 래스터 파일명
+
+**주의**: LCP 드라이버는 gdal/frmts/raw에 선언된 RawDataset 도우미(helper) 클래스로부터 파생되었습니다. 따라서 gdal/frmts/raw/lcpdataset.cpp로 구현되어야 합니다.
+
+생성 옵션
 ----------------
 
-The LCP driver supports CreateCopy() and metadata values can be set via
-creation options. Below is a list of options with default values listed
-first.
+LCP 드라이버는 CreateCopy() 메소드를 지원하며, 생성 옵션을 통해 메타데이터 값을 설정할 수 있습니다. 다음은 기본값을 첫 항목으로 서술한 옵션 목록입니다:
 
-**ELEVATION_UNIT=[METERS/FEET]**: Vertical unit for elevation band.
+-  **ELEVATION_UNIT=[METERS/FEET]**:
+   표고 밴드 용 수직 단위입니다.
 
-**SLOPE_UNIT=[DEGREES/PERCENT]**
+-  **SLOPE_UNIT=[DEGREES/PERCENT]**
 
-**ASPECT_UNIT=[AZIMUTH_DEGREES/GRASS_CATEGORIES/GRASS_DEGREES]**
+-  **ASPECT_UNIT=[AZIMUTH_DEGREES/GRASS_CATEGORIES/GRASS_DEGREES]**
 
-**FUEL_MODEL_OPTION=[NO_CUSTOM_AND_NO_FILE/CUSTOM_AND_NO_FILE/
-NO_CUSTOM_AND_FILE/CUSTOM_AND_FILE]**: Specify whether or not custom
-fuel models are used, and if a custom fuel model file is present.
+-  **FUEL_MODEL_OPTION=[NO_CUSTOM_AND_NO_FILE/CUSTOM_AND_NO_FILE/NO_CUSTOM_AND_FILE/CUSTOM_AND_FILE]**:
+   사용자 지정 연소 물질 모델이 존재하는 경우, 사용자 지정 연소 물질 모델을 사용할지 여부를 지정합니다.
 
-**CANOPY_COV_UNIT=[PERCENT/CATEGORIES]**
+-  **CANOPY_COV_UNIT=[PERCENT/CATEGORIES]**
 
-**CANOPY_HT_UNIT=[METERS_X_10/FEET/METERS/FEET_X_10]**
+-  **CANOPY_HT_UNIT=[METERS_X_10/FEET/METERS/FEET_X_10]**
 
-**CBH_UNIT=[METERS_X_10/METERS/FEET/FEET_X_10]**
+-  **CBH_UNIT=[METERS_X_10/METERS/FEET/FEET_X_10]**
 
-**CBD_UNIT=[KG_PER_CUBIC_METER_X_100/POUND_PER_CUBIC_FOOT/
-KG_PER_CUBIC_METER/POUND_PER_CUBIC_FOOT_X_1000/TONS_PER_ACRE_X_100]**
+-  **CBD_UNIT=[KG_PER_CUBIC_METER_X_100/POUND_PER_CUBIC_FOOT/KG_PER_CUBIC_METER/POUND_PER_CUBIC_FOOT_X_1000/TONS_PER_ACRE_X_100]**
 
-**DUFF_UNIT=[MG_PER_HECTARE_X_10/TONS_PER_ACRE_X_10]**
+-  **DUFF_UNIT=[MG_PER_HECTARE_X_10/TONS_PER_ACRE_X_10]**
 
-**CALCULATE_STATS=[YES/NO]**: Calculate and write the min/max for each
-band and write the appropriate flags and values in the header. This is
-mostly a legacy feature used for creating legends.
+-  **CALCULATE_STATS=[YES/NO]**:
+   헤더에 각 밴드의 최소/최대값을 계산해서 작성하고, 적당한 플래그와 값을 작성합니다. 이 옵션은 대부분의 경우 범례를 생성하기 위해 쓰이는 레거시 기능입니다.
 
-**CLASSIFY_DATA=[YES/NO]**: Classify the data into 100 unique values or
-less and write and write the appropriate flags and values in the header.
-This is mostly a legacy feature used for creating legends.
+-  **CLASSIFY_DATA=[YES/NO]**:
+   헤더에 데이터를 유일값(unique value) 100개 이하로 범주화하고 작성한 다음, 적당한 플래그와 값을 작성합니다. 이 옵션은 대부분의 경우 범례를 생성하기 위해 쓰이는 레거시 기능입니다.
 
-**LINEAR_UNIT=[SET_FROM_SRS/METER/FOOT/KILOMETER]**: Set the linear
-unit, overriding (if it can be calculated) the value in the associated
-spatial reference. If no spatial reference is available, it defaults to
-METER.
+-  **LINEAR_UNIT=[SET_FROM_SRS/METER/FOOT/KILOMETER]**:
+   관련 공간 좌표계의 값을 (계산할 수 있는 경우) 대체하는 선형 단위를 설정합니다. 사용할 수 있는 공간 좌표계가 없다면, 기본값은 METER입니다.
 
-**LATITUDE=[-90-90]**: Override the latitude from the spatial reference.
-If no spatial reference is available, this should be set, otherwise
-creation will fail.
+-  **LATITUDE=[-90-90]**:
+   공간 좌표계의 위도를 대체합니다. 사용할 수 있는 공간 좌표계가 없는 경우 이 옵션을 설정해야 합니다. 그렇지 않으면 생성이 실패할 것입니다.
 
-**DESCRIPTION=[...]**: A short description(less than 512 characters) of
-the dataset
+-  **DESCRIPTION=[...]**:
+   데이터셋의 짧은 (512문자 미만) 설명입니다.
 
-Creation options that are units of linear measure are fairly lenient.
-METERS=METER and FOOT=FEET for the most part.
+선형 측정 단위 관련 생성 옵션은 꽤 유연합니다. 대부분의 경우 METERS와 METER를 동일하게 받아들이고 FOOT과 FEET도 마찬가지입니다.
 
-**Note:** CreateCopy does not scale or change any data. By setting the
-units for various bands, it is assumed that the values are in the
-specified units.
+**주의**: CreateCopy() 메소드는 어떤 데이터도 크기 조정하거나 변경하지 않습니다. 밴드 여러 개에 단위를 설정하면, 모든 밴드의 값이 지정한 단위를 사용한다고 가정합니다.
 
-**LCP header format:**
+LCP 헤더 서식
+-----------------
 
 ============== ================ ========== ================ =================================================================================================================================================================================================
-**Start byte** **No. of bytes** **Format** **Name**         **Description**
-0              4                long       crown fuels      20 if no crown fuels, 21 if crown fuels exist (crown fuels = canopy height, canopy base height, canopy bulk density)
-4              4                long       ground fuels     20 if no ground fuels, 21 if ground fuels exist (ground fuels = duff loading, coarse woody)
-8              4                long       latitude         latitude (negative for southern hemisphere)
+시작 바이트    바이트 개수      유형       이름             설명
+============== ================ ========== ================ =================================================================================================================================================================================================
+0              4                long       crown fuels      수관 연소 물질이 없다면 20, 수관 연소 물질이 있다면 21 (수관 연소 물질 = 수관 높이, 수관 기준(base) 높이, 수관 부피 밀도)
+4              4                long       ground fuels     지표 연소 물질이 없다면 20, 지표 연소 물질이 있다면 21 (지표 연소 물질 = 분탄(duff) 하중, 조잡 목재)
+8              4                long       latitude         위도 (남반구의 경우 음의 값)
 12             8                double     loeast           offset to preserve coordinate precision (legacy from 16-bit OS days)
 20             8                double     hieast           offset to preserve coordinate precision (legacy from 16-bit OS days)
 28             8                double     lonorth          offset to preserve coordinate precision (legacy from 16-bit OS days)
@@ -205,4 +185,4 @@ specified units.
 6804           512              char[]     Description      LCP file description
 ============== ================ ========== ================ =================================================================================================================================================================================================
 
-*Chris Toney, 2009-02-14*
+*크리스 토니(Chris Toney), 2009년 2월 14일*

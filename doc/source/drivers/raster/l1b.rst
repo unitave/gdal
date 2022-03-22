@@ -1,150 +1,97 @@
 .. _raster.l1b:
 
 ================================================================================
-L1B -- NOAA Polar Orbiter Level 1b Data Set (AVHRR)
+L1B -- NOAA 극궤도 위성 1b수준 데이터셋 (AVHRR)
 ================================================================================
 
 .. shortname:: L1B
 
 .. built_in_by_default::
 
-GDAL supports NOAA Polar Orbiter Level 1b Data Set format for reading.
-Now it can read NOAA-9(F) -- NOAA-17(M) datasets. NOTE: only AVHRR
-instrument supported now, if you want read data from other instruments,
-write to me (Andrey Kiselev, dron@ak4719.spb.edu). AVHRR LAC/HRPT (1 km
-resolution) and GAC (4 km resolution) should be processed correctly.
+GDAL은 NOAA 극궤도 위성 1b수준 데이터셋(NOAA Polar Orbiter Level 1b Data Set) 포맷의 읽기를 지원합니다. 현재 이 드라이버는 NOAA-9(F)에서 NOAA-17(M)까지의 데이터셋을 읽을 수 있습니다.
+주의: 현재 AVHRR 기기만 지원합니다. 다른 기기로부터 나온 데이터를 읽으려 하는 경우, 저자에게 연락하십시오. (안드레이 키셀료프(Andrey Kiselev), dron@ak4719.spb.edu) AVHRR LAC/HRPT(1km 해상도) 및 GAC(4km 해상도) 데이터는 정확하게 처리될 것입니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
 .. supports_virtualio::
 
-Georeference
+지리참조
 ------------
 
-Note, that GDAL simple affine georeference model completely unsuitable
-for the NOAA data. So you should not rely on it. It is recommended to
-use the thin plate spline warper (tps). Automatic image rectification
-can be done with ground control points (GCPs) from the input file.
+GDAL 단순 아핀 지리참조 모델은 NOAA 데이터에 전혀 적합하지 않다는 사실을 기억하십시오. 따라서 해당 모델에 의존해서는 안 됩니다. 박막 스플라인 왜곡기(TPS warper) 사용을 권장합니다. 입력 파일로부터 나온 지상기준점(GCP)을 이용하면 이미지를 자동 보정할 수 있습니다.
 
-NOAA stores 51 GCPs per scanline both in the LAC and GAC datasets. In
-fact you may get less than 51 GCPs, especially at end of scanlines.
-Another approach to rectification is manual selection of the GCPs using
-external source of georeference information.
+NOAA는 LAC 및 GAC 데이터셋 양쪽에 스캔 라인 당 GCP 51개를 저장합니다. 실제로는 - 특히 마지막 스캔 라인에서는 - 51개 미만의 GCP를 얻을 수도 있습니다. 보정 작업에 대한 다른 접근법으로는 외부 지리참조 정보 소스를 이용해서 GCP를 직접 선택하는 방법도 있습니다.
 
-A high density of GCPs will be reported, unless the L1B_HIGH_GCP_DENSITY
-configuration option is set to NO.
+L1B_HIGH_GCP_DENSITY 환경설정 옵션을 NO로 선택하지 않는 이상 고밀도의 GCP들을 리포트할 것입니다.
 
-Precision of the GCPs determination depends from the satellite type. In
-the NOAA-9 -- NOAA-14 datasets geographic coordinates of the GCPs stored
-in integer values as a 128th of a degree. So we can't determine
-positions more precise than 1/128=0.0078125 of degree (~28"). In NOAA-15
--- NOAA-17 datasets we have much more precise positions, they are stored
-as 10000th of degree.
+GCP들의 정밀도는 위성 유형에 따라 다르게 결정됩니다. NOAA-9 ~ NOAA-14 데이터셋에서는 GCP의 지리 좌표를 1/128도 단위의 정수값으로 저장합니다. 즉 1/128=0.0078125도(약 28")보다 정밀한 위치를 결정할 수 없다는 의미입니다. NOAA-15 ~ NOAA-17 데이터셋에서는 좌표를 1/10,000도 단위로 저장하기 때문에 더욱 정밀하게 위치를 결정할 수 있습니다.
 
-The GCPs will also be reported as a
-:ref:`geolocation array <rfc-41>`,
-with Lagrangian interpolation of the 51 GCPs per scanline to the number
-of pixels per scanline width.
+GCP는 스캔 라인 당 GCP 51개를 스캔 라인 너비 당 픽셀 개수로 라그랑주 보간한 :ref:`지리위치 배열 <rfc-41>` 로도 리포트될 것입니다.
 
-Image will be always returned with most northern scanline located at the
-top of image. If you want determine actual direction of the satellite
-moving you should look at **LOCATION** metadata record.
+최북단 스캔 라인이 항상 이미지 최상단에 위치하도록 이미지를 반환할 것입니다. 위성의 실제 이동 방향을 판단하고자 한다면 **LOCATION** 메타데이터 레코드를 살펴봐야 합니다.
 
-Data
-----
+데이터
+------
 
-| In case of NOAA-10 in channel 5 you will get repeated channel 4 data.
-| AVHRR/3 instrument (NOAA-15 -- NOAA-17) is a six channel radiometer,
-  but only five channels are transmitted to the ground at any given
-  time. Channels 3A and 3B cannot operate simultaneously. Look at
-  channel description field reported by ``gdalinfo`` to determine what
-  kind of channel contained in processed file.
+NOAA-10 위성의 경우 5번 채널에서 반복되는 4번 채널 데이터를 얻게 될 것입니다.
 
-Metadata
+AVHRR/3 기기(NOAA-15 ~ NOAA-17)는 6채널 복사계(radiometer)이지만, 언제나 5개 채널만 지상으로 전송됩니다. 3A 채널과 3B 채널이 동시에 작동하지 못 하기 때문입니다. 처리된 파일이 어떤 채널 유형을 담고 있는지 판단하려면 ``gdalinfo`` 가 리포트하는 채널 설명 필드를 살펴보십시오.
+
+메타데이터
+---------
+
+데이터셋으로부터 나온 파라미터 몇 개를 메타데이터 레코드로 저장합니다.
+
+메타데이터 레코드:
+
+-  **SATELLITE**: 위성 이름
+
+-  **DATA_TYPE**: 1b수준 (AVHRR HRPT/LAC/GAC) 데이터셋에 저장된 데이터 유형
+
+-  **REVOLUTION**:
+   궤도 번호. 정확한 궤도 번호와 1에서 2 정도 다를 수도 있다는 사실을 기억하십시오. (문서 기준)
+
+-  **SOURCE**: 수신 기지 이름
+
+-  **PROCESSING_CENTER**: 데이터 처리 센터 이름
+
+-  **START**: 첫 번째 스캔 라인 촬영 시간 (연도, 연도일(day-of-year), 일중밀리초(millisecond-of-day))
+
+-  **STOP**: 마지막 스캔 라인 촬영 시간 (연도, 연도일(day-of-year), 일중밀리초(millisecond-of-day))
+
+-  **LOCATION**:
+   AVHRR 지구 위치 표시. 위성이 저위도에서 고위도로 이동 시 **Ascending**, 그 반대의 경우 **Descending** 이 될 것입니다.
+
+L1B_FETCH_METADATA 환경설정 옵션을 YES로 설정했다면 메타데이터 레코드 대부분을 .CSV 파일로 작성할 수 있습니다. 기본적으로 파일명은 "[l1b_데이터셋_이름]_metadata.csv"가 되고, L1B 데이터셋과 동일한 디렉터리에 저장될 것입니다. L1B_METADATA_DIRECTORY 환경설정 옵션을 어떻게 정의하느냐에 따라 이 파일을 다른 디렉터리에 생성할 수도 있습니다. 이런 메타데이터를 해석려면, NOAA-14 이하의 경우 `PODUG 3.1 <http://www.ncdc.noaa.gov/oa/pod-guide/ncdc/docs/podug/html/c3/sec3-1.htm>`_ 문서를 그리고 NOAA-15 이상의 경우 `KLM 8.3.1.3.3.1 <http://www.ncdc.noaa.gov/oa/pod-guide/ncdc/docs/klm/html/c8/sec83133-1.htm>`_ 문서를 읽어보십시오.
+
+하위 데이터셋
+------------
+
+NOAA-14 이하 데이터셋은 각 스캔 라인 별로 (GAC 데이터의 경우 5번 샘플에서 시작해서 샘플 8개마다, HRPT/LAC/FRAC 데이터의 경우 25번 샘플에서 시작해서 샘플 40개마다) 최대 51개의 태양 고도각(solar zenith angle)을 담고 있는 L1B_SOLAR_ZENITH_ANGLES:"l1b_데이터셋_이름" 하위 데이터셋을 노출시킵니다.
+
+NOAA-15 이상 데이터셋은 각 스캔 라인 별로 (GAC 데이터의 경우 5번 샘플에서 시작해서 샘플 8개마다, HRPT/LAC/FRAC 데이터의 경우 25번 샘플에서 시작해서 샘플 40개마다) 값 51개를 가진 밴드 3개를 (태양 고도각, 위성 방위각 및 상대 방위각을) 담고 있는 L1B_ANGLES:"l1b_데이터셋_이름" 하위 데이터셋을 노출시킵니다.
+
+NOAA-15 이상 데이터셋은 주 L1B 데이터셋 밴드와 동일한 차원을 가진 밴드를 담고 있는 L1B_CLOUDS:"l1b_데이터셋_이름" 하위 데이터셋을 노출시킵니다. 각 픽셀의 값은 0 = 알 수 없음, 1 = 맑음, 2 = 흐림; 3 = 약간 흐림입니다.
+
+NODATA 마스크
+-------------
+
+자체 헤더에 스캔 라인이 누락되었다고 리포트하는 NOAA-15 이상 데이터셋은 누락된 스캔 라인을 표시하기 위해 데이터셋 별로 (:ref:`rfc-15` 를 따르는) 마스크 밴드를 노출시킬 것입니다.
+
+참고
 --------
 
-Several parameters, obtained from the dataset stored as metadata
-records.
+-  ``gdal/frmts/l1b/l1bdataset.cpp`` 로 구현되었습니다.
 
-Metadata records:
+-  NOAA 극궤도 위성 1b수준 데이터셋은 "POD 사용자 지침서"(TIROS-N ~ NOAA-14 위성) 및 "NOAA KLM 사용자 지침서"(NOAA-15 ~ NOAA-16 위성)에 문서화되어 있습니다. `NOAA 기술 문서 소개 페이지 <http://www2.ncdc.noaa.gov/docs/intro.htm>`_ 에서 이 지침서를 찾아볼 수 있습니다.
 
--  **SATELLITE**: Satellite name
--  **DATA_TYPE**: Type of the data, stored in the Level 1b dataset
-   (AVHRR HRPT/LAC/GAC).
--  **REVOLUTION**: Orbit number. Note that it can be 1 to 2 off the
-   correct orbit number (according to documentation).
--  **SOURCE**: Receiving station name.
--  **PROCESSING_CENTER**: Name of data processing center.
--  **START**: Time of first scanline acquisition (year, day of year,
-   millisecond of day).
--  **STOP**: Time of last scanline acquisition (year, day of year,
-   millisecond of day).
--  **LOCATION**: AVHRR Earth location indication. Will be **Ascending**
-   when satellite moves from low latitudes to high latitudes and
-   **Descending** in other case.
+-  L1B 데이터셋은 매우 다양한 변이형들을 가지고 있습니다. 공식 NOAA 문서에 실려 있지 않은 헤더 위치 변이형도 있습니다. GDAL L1B 드라이버가 데이터셋을 식별하지 못 하는 경우, `pytroll <http://www.pytroll.org/>`_ 패키지가 해당 데이터셋을 식별할 수 있을지도 모릅니다.
 
-Most metadata records can be written to a .CSV
-file when the L1B_FETCH_METADATA configuration file is set to YES. By
-default, the filename will be called "[l1b_dataset_name]_metadata.csv",
-and located in the same directory as the L1B dataset. By defining the
-L1B_METADATA_DIRECTORY configuration option, it is possible to create
-that file in another directory. The documentation to interpret those
-metadata is `PODUG
-3.1 <http://www.ncdc.noaa.gov/oa/pod-guide/ncdc/docs/podug/html/c3/sec3-1.htm>`__
-for NOAA <=14 and `KLM
-8.3.1.3.3.1 <http://www.ncdc.noaa.gov/oa/pod-guide/ncdc/docs/klm/html/c8/sec83133-1.htm>`__
-for NOAA >=15.
+-  아서 P. 크랙넬(Arthur P. Cracknell)이 저술하고 테일러&프랜시스(Taylor and Francis Ltd.) 사가 1997년 출판한 "The Advanced Very High Resolution Radiometer (AVHRR)"(ISBN 0-7484-0209-8)에 훌륭하고 완전한 리뷰가 실려 있습니다.
 
-Subdatasets
------------
+-  `CLASS(Comprehensive Large Array-data Stewardship System) <http://www.class.noaa.gov/>`_ (예전의 SAA)에서 NOAA 데이터를 다운로드할 수 있습니다. 사실은 저자가 찾을 수 있었던 1b수준 데이터셋의 유일한 소스이기 때문에, 이 드라이버를 구현하면서 이곳에서 다운로드한 파일로만 테스트했습니다.
 
-NOAA <=14 datasets advertise a
-L1B_SOLAR_ZENITH_ANGLES:"l1b_dataset_name" subdataset that contains a
-maximum of 51 solar zenith angles for each scanline ( beginning at
-sample 5 with a step of 8 samples for GAC data, beginning at sample 25
-with a step of 40 samples for HRPT/LAC/FRAC data).
-
-NOAA >=15 datasets advertise a L1B_ANGLES:"l1b_dataset_name" subdataset
-that contains 3 bands (solar zenith angles, satellite zenith angles and
-relative azimuth angles) with 51 values for each scanline ( beginning at
-sample 5 with a step of 8 samples for GAC data, beginning at sample 25
-with a step of 40 samples for HRPT/LAC/FRAC data).
-
-NOAA >=15 datasets advertise a L1B_CLOUDS:"l1b_dataset_name" subdataset
-that contains a band of same dimensions as bands of the main L1B
-dataset. The values of each pixel are 0 = unknown; 1 = clear; 2 =
-cloudy; 3 = partly cloudy.
-
-Nodata mask
------------
-
-NOAA >=15 datasets that report in their header to have missing scan
-lines will expose a per-dataset mask band (following :ref:`rfc-15`) to
-indicate such scan lines.
-
-See Also
---------
-
--  Implemented as ``gdal/frmts/l1b/l1bdataset.cpp``.
--  NOAA Polar Orbiter Level 1b Data Set documented in the \``POD User's
-   Guide'' (TIROS-N -- NOAA-14 satellites) and in the \``NOAA KLM User's
-   Guide'' (NOAA-15 -- NOAA-16 satellites). You can find this manuals at
-   `NOAA Technical Documentation Introduction
-   Page <http://www2.ncdc.noaa.gov/docs/intro.htm>`__
--  There are a great variety of L1B datasets, sometimes with variations
-   in header locations that are not documented in the official NOAA
-   documentation. In case a dataset is not recognized by the GDAL L1B
-   driver, the `pytroll <http://www.pytroll.org/>`__ package might be
-   able to recognize it.
--  Excellent and complete review contained in the printed book \``The
-   Advanced Very High Resolution Radiometer (AVHRR)'' by Arthur P.
-   Cracknell, Taylor and Francis Ltd., 1997, ISBN 0-7484-0209-8.
--  NOAA data can be downloaded from the `Comprehensive Large Array-data
-   Stewardship System (CLASS) <http://www.class.noaa.gov/>`__ (former
-   SAA). Actually it is only source of Level 1b datasets for me, so my
-   implementation tested with that files only.
--  `NOAA spacecrafts status
-   page <http://www.oso.noaa.gov/poesstatus/>`__
+-  `NOAA 우주선 상태 페이지 <http://www.oso.noaa.gov/poesstatus/>`_
