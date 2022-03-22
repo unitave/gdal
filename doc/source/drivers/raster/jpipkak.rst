@@ -162,7 +162,7 @@ JPIPKAK - 설치 요구사항
 
 -  `Libcurl 7.9.4 <http://curl.haxx.se/>`_
 -  `OpenSSL 0.9.8K <http://www.openssl.org/>`_ (SSL이 필수인 경우, JPIPS 연결)
--  `카카두 <http://www.kakadusoftware.com>`_ (v5.2.6 및 v6와 테스트)
+-  `카카두 <http://www.kakadusoftware.com>`_ (v5.2.6 및 v6과 테스트)
 
 현재 윈도우 용 makefile만 제공하지만, 윈도우 의존성이 없기 때문에 리눅스 상에서도 컴파일될 것입니다.
 
