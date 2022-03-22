@@ -128,32 +128,32 @@ EXIF 및 GPS 태그
 많은 항목들이 다음 표에서 볼 수 없는 무결한 콘텐츠에 대한 제약 조건을 더 많이 가지고 있습니다. 자세한 정보를 원한다면 EXIF 사양 문서를 읽어보십시오.
 
 ============================== ======== ========= ================ =============
-메타데이터 항목 이름               헥스 코드  유형       값의 개수          선택성
+메타데이터 항목 이름            헥스코드 유형       값의 개수        선택성
 ============================== ======== ========= ================ =============
-EXIF_Document_Name             0x010D   ASCII     가변              선택적
-EXIF_ImageDescription          0x010E   ASCII     가변              권장
-EXIF_Make                      0x010F   ASCII     가변              권장
-EXIF_Model                     0x0110   ASCII     가변              권장
+EXIF_Document_Name             0x010D   ASCII     가변             선택적
+EXIF_ImageDescription          0x010E   ASCII     가변             권장
+EXIF_Make                      0x010F   ASCII     가변             권장
+EXIF_Model                     0x0110   ASCII     가변             권장
 EXIF_Orientation               0x0112   SHORT     1                권장
 EXIF_XResolution               0x011A   RATIONAL  1                **필수**
 EXIF_YResolution               0x011B   RATIONAL  1                **필수**
 EXIF_ResolutionUnit            0x0128   SHORT     1                **필수**
 EXIF_TransferFunction          0x012D   SHORT     768              선택적
-EXIF_Software                  0x0131   ASCII     가변              선택적
+EXIF_Software                  0x0131   ASCII     가변             선택적
 EXIF_DateTime                  0x0132   ASCII     20               권장
-EXIF_Artist                    0x013B   ASCII     가변              선택적
+EXIF_Artist                    0x013B   ASCII     가변             선택적
 EXIF_WhitePoint                0x013E   RATIONAL  2                선택적
 EXIF_PrimaryChromaticities     0x013F   RATIONAL  6                선택적
 EXIF_YCbCrCoefficients         0x0211   RATIONAL  3                선택적
 EXIF_YCbCrPositioning          0x0213   SHORT     1                **필수**
 EXIF_ReferenceBlackWhite       0x0214   RATIONAL  6                선택적
-EXIF_Copyright                 0x8298   ASCII     가변              선택적
+EXIF_Copyright                 0x8298   ASCII     가변             선택적
 EXIF_ExposureTime              0x829A   RATIONAL  1                권장
 EXIF_FNumber                   0x829D   RATIONAL  1                선택적
 EXIF_ExposureProgram           0x8822   SHORT     1                선택적
-EXIF_SpectralSensitivity       0x8824   ASCII     가변              선택적
-EXIF_ISOSpeedRatings           0x8827   SHORT     가변              선택적
-EXIF_OECF                      0x8828   UNDEFINED 가변              선택적
+EXIF_SpectralSensitivity       0x8824   ASCII     가변             선택적
+EXIF_ISOSpeedRatings           0x8827   SHORT     가변             선택적
+EXIF_OECF                      0x8828   UNDEFINED 가변             선택적
 EXIF_SensitivityType           0x8830   SHORT     1                선택적
 EXIF_StandardOutputSensitivity 0x8831   LONG      1                선택적
 EXIF_RecommendedExposureIndex  0x8832   LONG      1                선택적
@@ -178,19 +178,19 @@ EXIF_MeteringMode              0x9207   SHORT     1                선택적
 EXIF_LightSource               0x9208   SHORT     1                선택적
 EXIF_Flash                     0x9209   SHORT     1                권장
 EXIF_FocalLength               0x920A   RATIONAL  1                선택적
-EXIF_SubjectArea               0x9214   SHORT     가변              선택적
-EXIF_MakerNote                 0x927C   UNDEFINED 가변              선택적
-EXIF_UserComment               0x9286   UNDEFINED 가변              선택적
-EXIF_SubSecTime                0x9290   ASCII     가변              선택적
-EXIF_SubSecTime_Original       0x9291   ASCII     가변              선택적
-EXIF_SubSecTime_Digitized      0x9292   ASCII     가변              선택적
+EXIF_SubjectArea               0x9214   SHORT     가변             선택적
+EXIF_MakerNote                 0x927C   UNDEFINED 가변             선택적
+EXIF_UserComment               0x9286   UNDEFINED 가변             선택적
+EXIF_SubSecTime                0x9290   ASCII     가변             선택적
+EXIF_SubSecTime_Original       0x9291   ASCII     가변             선택적
+EXIF_SubSecTime_Digitized      0x9292   ASCII     가변             선택적
 EXIF_FlashpixVersion           0xA000   UNDEFINED 4                **필수**
 EXIF_ColorSpace                0xA001   SHORT     1                **필수**
 EXIF_PixelXDimension           0xA002   LONG      1                **필수**
 EXIF_PixelYDimension           0xA003   LONG      1                **필수**
 EXIF_RelatedSoundFile          0xA004   ASCII     13               선택적
 EXIF_FlashEnergy               0xA20B   RATIONAL  1                선택적
-EXIF_SpatialFrequencyResponse  0xA20C   UNDEFINED 가변              선택적
+EXIF_SpatialFrequencyResponse  0xA20C   UNDEFINED 가변             선택적
 EXIF_FocalPlaneXResolution     0xA20E   RATIONAL  1                선택적
 EXIF_FocalPlaneYResolution     0xA20F   RATIONAL  1                선택적
 EXIF_FocalPlaneResolutionUnit  0xA210   SHORT     1                선택적
@@ -199,7 +199,7 @@ EXIF_ExposureIndex             0xA215   RATIONAL  1                선택적
 EXIF_SensingMethod             0xA217   SHORT     1                선택적
 EXIF_FileSource                0xA300   UNDEFINED 1                선택적
 EXIF_SceneType                 0xA301   UNDEFINED 1                선택적
-EXIF_CFAPattern                0xA302   UNDEFINED 가변              선택적
+EXIF_CFAPattern                0xA302   UNDEFINED 가변             선택적
 EXIF_CustomRendered            0xA401   SHORT     1                선택적
 EXIF_ExposureMode              0xA402   SHORT     1                권장
 EXIF_WhiteBalance              0xA403   SHORT     1                권장
@@ -210,21 +210,21 @@ EXIF_GainControl               0xA407   RATIONAL  1                선택적
 EXIF_Contrast                  0xA408   SHORT     1                선택적
 EXIF_Saturation                0xA409   SHORT     1                선택적
 EXIF_Sharpness                 0xA40A   SHORT     1                선택적
-EXIF_DeviceSettingDescription  0xA40B   UNDEFINED 가변              선택적
+EXIF_DeviceSettingDescription  0xA40B   UNDEFINED 가변             선택적
 EXIF_SubjectDistanceRange      0xA40C   SHORT     1                선택적
 EXIF_ImageUniqueID             0xA420   ASCII     33               선택적
-EXIF_CameraOwnerName           0xA430   ASCII     가변              선택적
-EXIF_BodySerialNumber          0xA431   ASCII     가변              선택적
+EXIF_CameraOwnerName           0xA430   ASCII     가변             선택적
+EXIF_BodySerialNumber          0xA431   ASCII     가변             선택적
 EXIF_LensSpecification         0xA432   RATIONAL  4                선택적
-EXIF_LensMake                  0xA433   ASCII     가변              선택적
-EXIF_LensModel                 0xA434   ASCII     가변              선택적
-EXIF_LensSerialNumber          0xA435   ASCII     가변              선택적
+EXIF_LensMake                  0xA433   ASCII     가변             선택적
+EXIF_LensModel                 0xA434   ASCII     가변             선택적
+EXIF_LensSerialNumber          0xA435   ASCII     가변             선택적
 ============================== ======== ========= ================ =============
 
 GPS 태그:
 
 ========================= ======== ========= ================ ===========
-메타데이터 항목 이름          헥스 코드  유형       값의 개수          선택성
+메타데이터 항목 이름       헥스코드 유형       값의 개수        선택성
 ========================= ======== ========= ================ ===========
 EXIF_GPSVersionID         0x0000   BYTE      4                선택적
 EXIF_GPSLatitudeRef       0x0001   ASCII     2                선택적
@@ -234,7 +234,7 @@ EXIF_GPSLongitude         0x0004   RATIONAL  3                선택적
 EXIF_GPSAltitudeRef       0x0005   BYTE      1                선택적
 EXIF_GPSAltitude          0x0006   RATIONAL  1                선택적
 EXIF_GPSTimeStamp         0x0007   RATIONAL  3                선택적
-EXIF_GPSSatellites        0x0008   ASCII     가변              선택적
+EXIF_GPSSatellites        0x0008   ASCII     가변             선택적
 EXIF_GPSStatus            0x0009   ASCII     2                선택적
 EXIF_GPSMeasureMode       0x000A   ASCII     2                선택적
 EXIF_GPSDOP               0x000B   RATIONAL  1                선택적
@@ -244,7 +244,7 @@ EXIF_GPSTrackRef          0x000E   ASCII     2                선택적
 EXIF_GPSTrack             0x000F   RATIONAL  1                선택적
 EXIF_GPSImgDirectionRef   0x0010   ASCII     2                선택적
 EXIF_GPSImgDirection      0x0011   RATIONAL  1                선택적
-EXIF_GPSMapDatum          0x0012   ASCII     가변              선택적
+EXIF_GPSMapDatum          0x0012   ASCII     가변             선택적
 EXIF_GPSDestLatitudeRef   0x0013   ASCII     2                선택적
 EXIF_GPSDestLatitude      0x0014   RATIONAL  3                선택적
 EXIF_GPSDestLongitudeRef  0x0015   ASCII     2                선택적
@@ -253,8 +253,8 @@ EXIF_GPSDestBearingRef    0x0017   ASCII     2                선택적
 EXIF_GPSDestBearing       0x0018   RATIONAL  1                선택적
 EXIF_GPSDestDistanceRef   0x0019   ASCII     2                선택적
 EXIF_GPSDestDistance      0x001A   RATIONAL  1                선택적
-EXIF_GPSProcessingMethod  0x001B   UNDEFINED 가변              선택적
-EXIF_GPSAreaInformation   0x001C   UNDEFINED 가변              선택적
+EXIF_GPSProcessingMethod  0x001B   UNDEFINED 가변             선택적
+EXIF_GPSAreaInformation   0x001C   UNDEFINED 가변             선택적
 EXIF_GPSDateStamp         0x001D   ASCII     11               선택적
 EXIF_GPSDifferential      0x001E   SHORT     1                선택적
 EXIF_GPSHPositioningError 0x001F   RATIONAL  1                선택적
