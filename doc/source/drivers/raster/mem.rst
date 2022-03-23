@@ -1,33 +1,27 @@
 .. _raster.mem:
 
 ================================================================================
-MEM -- In Memory Raster
+MEM -- 인메모리 래스터
 ================================================================================
 
 .. shortname:: MEM
 
 .. built_in_by_default::
 
-GDAL supports the ability to hold rasters in a temporary in-memory
-format. This is primarily useful for temporary datasets in scripts or
-internal to applications. It is not generally of any use to application
-end-users.
+GDAL은 래스터를 임시 인메모리(in-memory) 포맷으로 가지고 있을 수 있는 기능을 지원합니다. 이 포맷은 스크립트로 되어 있는 또는 응용 프로그램 내부의 임시 데이터셋에 가장 유용합니다. 일반적으로 응용 프로그램 종단 사용자에게는 아무 쓸모도 없는 포맷입니다.
 
-Memory datasets should support for most kinds of auxiliary information
-including metadata, coordinate systems, georeferencing, GCPs, color
-interpretation, nodata, color tables and all pixel data types.
+인메모리 데이터셋은 메타데이터, 좌표계, 지리참조, GCP, 색상 해석, NODATA, 색상표 및 모든 픽셀 데이터 유형을 포함하는 보조 정보 유형 대부분을 지원해야 합니다.
 
-Dataset Name Format
+데이터셋 이름 서식
 -------------------
 
-It is possible to open an existing array in memory. To do so, construct
-a dataset name with the following format:
+메모리에 기존 배열을 열 수 있습니다. 이렇게 하려면, 데이터셋 이름을 다음 서식으로 구성하십시오:
 
 ::
 
      MEM:::option=value[,option=value...]
 
-For example:
+예시:
 
 ::
 
@@ -35,7 +29,7 @@ For example:
           PIXELOFFSET=3,LINEOFFSET=300,BANDOFFSET=1,
           GEOTRANSFORM=1.166396e+02/1.861068e-05/0.000000e+00/3.627969e+01/0.000000e+00/-1.861068e-05
 
-or
+또는
 
 ::
 
@@ -43,37 +37,42 @@ or
           PIXELOFFSET=3,LINEOFFSET=300,BANDOFFSET=1,
           GEOTRANSFORM=1.166396e+02/1.861068e-05/0.000000e+00/3.627969e+01/0.000000e+00/-1.861068e-05
 
--  DATAPOINTER: address of the first pixel of the first band. The
-   address can be represented as a hexadecimal or decimal value.
-   Hexadecimal values must be prefixed with '0x'. Some implementations
-   (notably Windows) doesn't print hexadecimal pointer values with a
-   leading '0x', so the prefix must be added. You can use
-   CPLPrintPointer to create a string with format suitable for use as a
-   DATAPOINTER.
--  PIXELS: Width of raster in pixels. (required)
--  LINES: Height of raster in lines. (required)
--  BANDS: Number of bands, defaults to 1. (optional)
--  DATATYPE: Name of the data type, as returned by GDALGetDataTypeName()
-   (eg. Byte, Int16) Defaults to Byte. (optional)
--  PIXELOFFSET: Offset in bytes between the start of one pixel and the
-   next on the same scanline. (optional)
--  LINEOFFSET: Offset in bytes between the start of one scanline and the
-   next. (optional)
--  BANDOFFSET: Offset in bytes between the start of one bands data and
-   the next.
--  GEOTRANSFORM: Set the affine transformation coefficients. 6 real
-   numbers with '/' as separator (optional)
+-  DATAPOINTER:
+   첫 번째 밴드의 첫 번째 픽셀의 주소입니다. 이 주소를 16진법 또는 10진법 값으로 표현할 수 있습니다. 16진법 값은 앞에 반드시 '0x'를 붙여야만 합니다. 몇몇 구현의 경우 (특히 윈도우 플랫폼) 16진법 포인터 값을 접두어 '0x' 없이 출력하기 때문에, '0x'를 반드시 추가해야만 합니다. DATAPOINTER로 사용하기에 적합한 서식으로 문자열을 생성하려면 CPLPrintPointer() 메소드를 사용하면 됩니다.
 
-Creation Options
+-  PIXELS:
+   픽셀 단위 래스터 너비입니다. (필수)
+
+-  LINES:
+   픽셀 단위 래스터 높이입니다. (필수)
+
+-  BANDS:
+   밴드 개수입니다. 기본값은 1입니다. (선택 옵션)
+
+-  DATATYPE:
+   GDALGetDataTypeName()이 반환하는 데이터 유형 이름입니다. (예: Byte, Int16) 기본값은 Byte입니다. (선택 옵션)
+
+-  PIXELOFFSET:
+   동일한 스캔 라인 상에 있는 어떤 픽셀의 시작과 다음 픽셀의 시작 사이의 바이트 단위 오프셋입니다. (선택 옵션)
+
+-  LINEOFFSET:
+   어떤 스캔 라인의 시작과 다음 스캔 라인의 시작 사이의 바이트 단위 오프셋입니다. (선택 옵션)
+
+-  BANDOFFSET:
+   어떤 밴드의 시작과 다음 밴드의 시작 사이의 바이트 단위 오프셋입니다.
+
+-  GEOTRANSFORM:
+   아핀 변환 계수를 설정합니다. '/'로 구분된 실수 6개입니다. (선택 옵션)
+
+생성 옵션
 ----------------
 
-There are no supported creation options.
+어떤 생성 옵션도 지원하지 않습니다.
 
-The MEM format is one of the few that supports the AddBand() method. The
-AddBand() method supports DATAPOINTER, PIXELOFFSET and LINEOFFSET
-options to reference an existing memory array.
+MEM 포맷은 AddBand() 메소드를 지원하는 몇 안 되는 포맷 가운데 하나입니다.
+AddBand() 메소드는 기존 인메모리 배열을 참조하기 위해 DATAPOINTER, PIXELOFFSET 및 LINEOFFSET 옵션을 지원합니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -82,9 +81,9 @@ Driver capabilities
 
 .. supports_georeferencing::
 
-Multidimensional API support
+다중 차원 API 지원
 ----------------------------
 
 .. versionadded:: 3.1
 
-The MEM driver supports the :ref:`multidim_raster_data_model`.
+MEM 드라이버는 :ref:`multidim_raster_data_model` 을 지원합니다.

@@ -1,39 +1,28 @@
 .. _raster.mff:
 
 ================================================================================
-MFF -- Vexcel MFF Raster
+MFF -- Vexcel MFF 래스터
 ================================================================================
 
 .. shortname:: MFF
 
 .. built_in_by_default::
 
-GDAL includes read, update, and creation support for Vexcel's MFF raster
-format. MFF dataset consist of a header file (typically with the
-extension .hdr) and a set of data files with extensions like .x00, .b00
-and so on. To open a dataset select the .hdr file.
+GDAL은 Vexcel MFF 래스터 포맷 읽기, 업데이트 및 생성을 지원합니다. MFF 데이터셋은 일반적으로 확장자가 .hdr인 헤더 파일과 확장자가 .x00, .b00 등등인 데이터 파일 집합으로 이루어져 있습니다.
 
-Reading lat/long GCPs (TOP_LEFT_CORNER, ...) is supported but there is
-no support for reading affine georeferencing or projection information.
+위도/경도 GCP(TOP_LEFT_CORNER, ...) 읽어오기를 지원하지만 아핀 지리참조 또는 투영법 정보 읽기는 지원하지 않습니다.
 
-Unrecognized keywords from the .hdr file are preserved as metadata.
+.hdr 파일에서 식별할 수 없는 키워드들을 메타데이터로 보전합니다.
 
-All data types with GDAL equivalents are supported, including 8, 16, 32
-and 64 bit data precisions in integer, real and complex data types. In
-addition tile organized files (as produced by the Vexcel SAR Processor -
-APP) are supported for reading.
+8비트, 16비트, 32비트 및 64비트 데이터 정밀도를 가진 정수, 실수 및 복소수 데이터 유형을 포함, GDAL이 지원하는 모든 데이터 유형을 지원합니다. 또한 (Vexcel SAR 처리기(어스뷰 APP)가 생성한) 타일 구조 파일 읽기도 지원합니다.
 
-On creation (with a format code of MFF) a simple, ungeoreferenced raster
-file is created.
+생성 작업 시 (MFF라는 포맷 코드를 가진) 단순하고 지리참조되지 않은 래스터 파일을 생성합니다.
 
-MFF files are not normally portable between systems with different byte
-orders. However GDAL honours the new BYTE_ORDER keyword which can take a
-value of LSB (Integer - little endian), and MSB (Motorola - big
-endian). This may be manually added to the .hdr file if required.
+MFF 파일은 일반적으로 서로 다른 바이트 순서를 가진 시스템들 사이에서 호환되지 않습니다. 하지만 GDAL은 LSB(정수형 -- 리틀 엔디언) 또는 MSB(모토로라 -- 빅 엔디언)로 설정할 수 있는 새 BYTE_ORDER 키워드를 존중합니다. 필요한 경우 .hdr 파일에 이 키워드를 직접 추가할 수도 있습니다.
 
-NOTE: Implemented as ``gdal/frmts/raw/mffdataset.cpp``.
+주의: ``gdal/frmts/raw/mffdataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::

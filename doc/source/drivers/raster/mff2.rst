@@ -1,41 +1,26 @@
 .. _raster.mff2:
 
 ================================================================================
-MFF2 -- Vexcel MFF2 Image
+MFF2 -- Vexcel MFF2 이미지
 ================================================================================
 
 .. shortname:: MFF2
 
 .. built_in_by_default::
 
-GDAL supports MFF2 Image raster file format for read, update, and
-creation. The MFF2 (Multi-File Format 2) format was designed to fit into
-Vexcel Hierarchical Key-Value (HKV) databases, which can store binary
-data as well as ASCII parameters. This format is primarily used
-internally to the Vexcel InSAR processing system.
+GDAL은 MFF2 이미지 래스터 파일 포맷 읽기, 업데이트 및 생성을 지원합니다. MMF2(Multi-File Format 2)는 바이너리 데이터는 물론 아스키 파라미터도 저장할 수 있는 Vexcel의 HKV(Hierarchical Key-Value) 데이터베이스에 딱 맞도록 설계되었습니다. 이 포맷은 주로 Vexcel InSAR 처리 시스템 내부에서 사용됩니다.
 
-To select an MFF2 dataset, select the directory containing the
-``attrib``, and ``image_data`` files for the dataset.
+MFF2 데이터셋을 선택하려면, 데이터셋 용 ``attrib`` 및 ``image_data`` 파일을 담고 있는 디렉터리를 선택하십시오.
 
-Currently only latitude/longitude and UTM projection are supported
-(georef.projection.name = ll or georef.projection.name = utm), with the
-affine transform computed from the lat/long control points. In any
-event, if GCPs are available in a georef file, they are returned with
-the dataset.
+현재 위도/경도 및 UTM 투영법만 (georef.projection.name = ll 또는 georef.projection.name = utm) 지원합니다. 아핀 변환은 위도/경도 기준점으로부터 계산합니다. 어떤 경우라도 ``georef`` 파일에 있는 GCP를 사용할 수 있다면 데이터셋을 GCP와 함께 반환합니다.
 
-Newly created files (with a type of ``MFF2``) are always just raw
-rasters with no georeferencing information. For read, and creation all
-data types (real, integer and complex in bit depths of 8, 16, 32) should
-be supported.
+새로 생성된 (``MFF2`` 유형인) 파일은 항상 지리참조 정보가 없는 RAW 래스터일 뿐입니다. 읽기 및 생성을 위해 모든 데이터 유형(비트 심도가 8, 16, 32인 실수, 정수 및 복소수형)을 지원해야 합니다.
 
-IMPORTANT: When creating a new MFF2, be sure to set the projection
-before setting the geotransform (this is necessary because the
-geotransform is stored internally as 5 latitude-longitude ground control
-points, and the projection is needed to do the conversion).
+중요: 새 MFF2 파일을 생성하는 경우, 지리변형을 설정하기 전에 투영법을 설정하도록 확인하십시오. (지리변형을 내부적으로 위도/경도 GCP 5개로 저장하는데, 이 변환 작업에 투영법이 필요하기 때문입니다.)
 
-NOTE: Implemented as ``gdal/frmts/raw/hkvdataset.cpp``.
+주의: ``gdal/frmts/raw/hkvdataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -46,27 +31,18 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Format Details
+포맷 상제 정보
 --------------
 
-MFF2 Top-level Structure
+MFF2 최상위 구조
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-An MFF2 "file" is actually a set of files stored in a directory
-containing an ASCII header file entitled "attrib", and binary image data
-entitled "image_data". Optionally, there may be an ASCII "georef" file
-containing georeferencing and projection information, and an
-"image_data_ovr" (for "image_data" binary image data) file containing
-tiled overviews of the image in TIFF format. The ASCII files are
-arranged in key=value pairs. The allowable pairs for each file are
-described below.
+MFF2 "파일"은 실제로는 "attrib"이라는 아스키 헤더 파일과 "image_data"라는 바이너리 이미지 데이터를 담고 있는 디렉터리에 저장된 파일 집합입니다. 지리참조 및 투영법 정보를 담고 있는 "georef" 파일과 ("image_data" 바이너리 이미지 데이터의) TIFF 포맷 타일화 오버뷰를 담고 있는 "image_data_ovr" 파일이 있을 수도 있습니다. 아스키 파일은 키=값 쌍으로 나열되어 있습니다. 각 파일에 사용할 수 있는 키=값 쌍을 설명합니다.
 
-The "attrib" File
+"attrib" 파일
 ~~~~~~~~~~~~~~~~~
 
-As a minimum, the "attrib" file must specify the image extents, pixel
-size in bytes, pixel encoding and datatype, and pixel byte order. For
-example,
+최소한, "attrib" 파일은 이미지 범위, 바이트 단위 픽셀 크기, 픽셀 인코딩 그리고 데이터 유형과 픽셀 바이트 순서를 지정해야만 합니다. 다음 예시는:
 
 ::
 
@@ -78,33 +54,24 @@ example,
    pixel.order    = { lsbf *msbf }
    version        = 1.1
 
-specifies an image that is 1040 lines by 800 pixels in extent. The
-pixels are 32 bits of real data in "most significant byte first" (msbf)
-order, encoded according to the ieee_754 specification. In MFF2, when a
-value must belong to a certain subset (eg. pixel.order must be either
-lsbf or msbf), all options are displayed between curly brackets, and the
-one appropriate for the current file is indicated with a "*".
+이미지 범위를 800픽셀 x 1040라인으로 지정합니다. 픽셀은 "최상위 바이트 우선(msbf)" 순서이며 IEEE_754 사양에 따라 인코딩된 32비트 실수 데이터 유형입니다. MFF2에서 값이 특정 하위 집합에 속해야만 하는 경우 (예를 들면 pixel.order의 값이 lsbf 또는 msbf 가운데 하나여야만 하는 경우) 모든 옵션을 중괄호({}) 사이에 출력하고, 현재 파일에 알맞은 옵션을 "*"로 표시합니다.
 
-The file may also contain the following lines indicating the number of
-channels of data, and how they are interleaved within the binary data
-file.
+이 파일은 데이터의 채널 개수와 채널이 바이너리 데이터 파일 내부에서 어떻게 교차삽입되는지를 나타내는 다음 줄들을 담고 있을 수도 있습니다.
 
 ::
 
    channel.enumeration = 1
    channel.interleave = { *pixel tile sequential }
 
-The "image_data" File
+"image_data" 파일
 ~~~~~~~~~~~~~~~~~~~~~
 
-The "image_data" file consists of raw binary data, with extents, pixel
-encoding, and number of channels as indicated in the "attrib" file.
+"image_data" 파일은 "attrib" 파일에서 지정하는 범위, 픽셀 인코딩, 채널 개수를 가진 RAW 바이너리 데이터로 이루어져 있습니다.
 
-The "georef" File
+"georef" 파일
 ~~~~~~~~~~~~~~~~~
 
-The "georef" file is used to describe the geocoding and projection
-information for the binary data. For example,
+"georef" 파일은 바이너리 데이터의 지오코딩 및 투영법 정보를 서술하는 데 쓰입니다. 다음 예시는:
 
 ::
 
@@ -122,57 +89,42 @@ information for the binary data. For example,
    projection.name              = ll
    spheroid.name                = wgs-84
 
-describes an orthogonal latitude/longitude (ll) projected image, with
-latitudes and longitudes based on the wgs-84 ellipsoid.
+WGS84 타원체 기반 위도와 경도를 사용하는 정사(正射; orthogonal) 위도/경도(ll) 투영 이미지를 서술하고 있습니다.
 
-Since MFF2 version 1.1, top_left refers to the top left corner of the
-top left pixel. top_right refers to the top right corner of the top
-right pixel. bottom_left refers to the bottom left corner of the bottom
-left pixel. bottom_right refers to the bottom right corner of the bottom
-right pixel. centre refers to the centre of the four corners defined
-above (center of the image).
+MFF2 1.1버전부터,
+top_left는 좌상단 픽셀의 좌상단 모서리를 의미합니다.
+top_right는 우상단 픽셀의 우상단 모서리를 의미합니다.
+bottom_left는 좌하단 픽셀의 좌하단 모서리를 의미합니다.
+bottom_right는 우하단 픽셀의 우하단 모서리를 의미합니다.
+centre는 앞에서 정의된 네 모서리의 중심(이미지의 중심)을 의미합니다.
 
-Mathematically, for an Npix by Nline image, the corners and centre in
-(pixel,line) coordinates for MFF2 version 1.1 are:
+N픽셀 x N라인 이미지의 경우, MFF2 1.1버전의 모서리와 중심의 (픽셀,라인) 좌표는 수학적으로 다음과 같습니다:
 
 ::
 
    top_left: (0,0)
-   top_right: (Npix,0)
-   bottom_left: (0,Nline)
-   bottom_right: (Npix,Nline)
-   centre: (Npix/2.0,Nline/2.0)
+   top_right: (N픽셀,0)
+   bottom_left: (0,N라인)
+   bottom_right: (N픽셀,N라인)
+   centre: (N픽셀/2.0,N라인/2.0)
 
-These calculations are done using floating point arithmetic (i.e. centre
-coordinates may take on non-integer values).
+이 계산은 부동소수점형 산술 연산으로 이루어집니다. (예를 들어 중심 좌표가 정수형 값이 아닐 수도 있기 때문입니다.)
 
-Note that the corners are always expressed in latitudes/longitudes, even
-for projected images.
+투영 이미지의 경우라도 모서리 좌표는 언제나 위도/경도로 표현된다는 사실을 기억하십시오.
 
-Supported projections
+지원하는 투영법
 ~~~~~~~~~~~~~~~~~~~~~
 
-ll- Orthogonal latitude/longitude projected image, with latitude
-parallel to the rows, longitude parallel to the columns. Parameters:
-spheroid name, projection.origin_longitude (longitude at the origin of
-the projection coordinates). If not set, this should default to the
-central longitude of the output image based on its projection
-boundaries.
+-  **ll**:
+   위도가 행과 평행하고 경도가 열과 평행한 정사 위도/경도 투영 이미지를 뜻합니다. 파라미터는 spheroid.name(회전 타원체 이름), projection.origin_longitude(투영 좌표계의 원점 위치의 경도)입니다. 후자를 지정하지 않는 경우, 기본값(산출 이미지의 투영 경계를 기반으로 하는 산출 이미지의 중심 경도)으로 설정될 것입니다.
 
-utm- Universal Transverse Mercator projected image. Parameters: spheroid
-name, projection.origin_longitude (central meridian for the utm
-projection). The central meridian must be the meridian at the centre of
-a UTM zone, i.e. 3 degrees, 9 degrees, 12 degrees, etc. If this is not
-specified or set a valid UTM central meridian, the reader should reset
-the value to the nearest valid central meridian based on the central
-longitude of the output image. The latitude at the origin of the UTM
-projection is always 0 degrees.
+-  **utm**:
+   UTM(Universal Transverse Mercator) 투영 이미지를 뜻합니다. 파라미터는 spheroid.name(회전 타원체 이름), projection.origin_longitude(UTM 투영법의 중앙 경선)입니다. 중앙 경선(central meridian)은 UTM 구역의 중심을 지나는 -- 예를 들면 3도, 9도, 12도 등등 -- 경선이어야만 합니다. 중앙 경선을 지정하지 않거나 무결하지 않은 UTM 중앙 경선을 설정하는 경우, 판독기가 산출 이미지의 중심 경도를 기반으로 이 파라미터의 값을 가장 가까운 무결한 중앙 경선으로 리셋할 것입니다. UTM 투영법의 원점을 지나는 위도는 언제나 0도입니다.
 
-Recognized ellipsoids
+인식하는 타원체
 ~~~~~~~~~~~~~~~~~~~~~
 
-MFF2 format associates the following names with ellipsoid equatorial
-radius and inverse flattening parameters:
+MFF2 포맷은 타원체 적도 반경(ellipsoid equatorial radius) 및 역 평탄화(inverse flattening) 파라미터를 다음과 같은 이름으로 연결시킵니다:
 
 ::
 
@@ -207,51 +159,50 @@ radius and inverse flattening parameters:
    ev-wgs-84:             6378137          298.252841
    ev-bessel:             6377397          299.1976073
 
-Explanation of fields
+필드 설명
 ~~~~~~~~~~~~~~~~~~~~~
 
-::
+-  **channel.enumeration**:
+   (다중 밴드에만 필요한 선택 옵션) 데이터의 채널 개수 (예: RGB의 경우 3)
 
-   channel.enumeration:  (optional- only needed for multiband)
-   Number of channels of data (eg. 3 for rgb)
+-  **channel.interleave = { *pixel tile sequential }**:
+   (다중 밴드에만 필요한 선택 옵션)
 
-   channel.interleave = { *pixel tile sequential } :  (optional- only
-   needed for multiband)
+   다중 밴드 데이터의 경우, 채널이 어떻게 교차삽입되는지 나타냅니다.
+   *pixel은 데이터가 [적색값 라인], [녹색값 라인], [청색값 라인] 또는 [적색 채널 전체], [녹색 채널 전체], [청색 채널 전체] 순서가 아니라 적색값, 녹색값, 청색값, 적색값, 녹색값, 청색값, ... 순서로 저장된다는 뜻입니다.
 
-   For multiband data, indicates how the channels are interleaved.  *pixel
-   indicates that data is stored red value, green value, blue value, red
-   value, green value, blue value etc. as opposed to (line of red values)
-   (line of green values) (line of blue values) or (entire red channel)
-   (entire green channel) (entire blue channel)
+-  **extent.cols**:
+   데이터의 열 개수입니다.
 
-   extent.cols:
-   Number of columns of data.
+-  **extent.rows**:
+   데이터의 행 개수입니다.
 
-   extent.rows:
-   Number of rows of data.
+-  **pixel.encoding = { *unsigned twos-complement ieee-754 }**:
+   pixel.size 및 pixel.field와 결합해서 데이터 유형을 결정합니다:
 
-   pixel.encoding = { *unsigned twos-complement ieee-754 }:
-   Combines with pixel.size and pixel.field to give the data type:
-   (encoding, field, size)- type
-   (unsigned, real, 8)- unsigned byte data
-   (unsigned, real, 16)- unsigned int 16 data
-   (unsigned, real, 32)- unsigned int 32 data
-   (twos-complement, real, 16)- signed int 16 data
-   (twos-complement, real, 32)- signed int 32 data
-   (twos-complement, complex, 64)- complex signed int 32 data
-   (ieee-754, real, 32)- real 32 bit floating point data
-   (ieee-754, real, 64)- real 64 bit floating point data
-   (ieee-754, complex, 64)- complex 32 bit floating point data
-   (ieee-754, complex, 128)- complex 64 bit floating point data
+   ========= ====== ==== =================================
+   인코딩    필드   크기 유형
+   ========= ====== ==== =================================
+   부호 없음 실수   8    부호 없는 바이트형 데이터
+   부호 없음 실수   16   부호 없는 16비트 정수형 데이터
+   부호 없음 실수   32   부호 없는 32비트 정수형 데이터
+   2의 보수  실수   16   부호 있는 16비트 정수형 데이터
+   2의 보수  실수   32   부호 있는 32비트 정수형 데이터
+   2의 보수  복소수 64   부호 있는 Int32 복소수 데이터
+   IEEE_754  실수   32   32비트 부동소수점형 실수 데이터
+   IEEE_754  실수   64   64비트 부동소수점형 실수 데이터
+   IEEE_754  복소수 64   32비트 부동소수점형 복소수 데이터
+   IEEE_754  복소수 128  64비트 부동소수점형 복소수 데이터
+   ========= ====== ==== =================================
 
-   pixel.size:
-   Size of one pixel of one channel (bits).
+-  **pixel.size**:
+   채널 1개의 픽셀 1개의 비트 단위 크기입니다.
 
-   pixel.field = { *real complex }:
-   Whether the data is real or complex.
+-  **pixel.field = { *real complex }**:
+   데이터가 실수인지 복소수인지 나타냅니다.
 
-   pixel.order = { *lsbf msbf }:
-   Byte ordering of the data (least or most significant byte first).
+-  **pixel.order = { *lsbf msbf }**:
+   데이터의 바이트 순서(최하위 바이트 우선 또는 최상위 바이트 우선)입니다.
 
-   version: (only in newer versions- if not present, older version is
-   assumed) Version of mff2.
+-  **version**:
+   (최신 버전에서만 나옵니다. 이 파라미터가 없다면 예전 버전으로 간주합니다.) MFF2의 버전입니다.
