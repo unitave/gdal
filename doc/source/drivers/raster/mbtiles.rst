@@ -8,48 +8,25 @@ MBTiles
 
 .. build_dependencies:: libsqlite3
 
-The MBTiles driver allows reading rasters in
-the MBTiles format, which is a specification for storing tiled map data
-in SQLite databases.
+MBTiles 드라이버는 SQLite 데이터베이스에 타일화 맵 데이터를 저장하기 위한 사양인 MBTiles 포맷에 있는 래스터를 읽어올 수 있습니다.
 
-Starting with GDAL 2.1, the MBTiles driver has creation and write
-support for MBTiles raster datasets.
+GDAL 2.1버전부터, MBTiles 드라이버는 MBTiles 래스터 데이터셋의 생성 및 쓰기를 지원합니다.
 
-Starting with GDAL 2.3, the MBTiles driver has read and write support
-for MBTiles vector datasets. For standalone Mapbox Vector Tile files or
-set of MVT files, see the :ref:`MVT <vector.mvt>` driver. Note: vector
-write support requires GDAL to be built with GEOS.
+GDAL 2.3버전부터, MBTiles 드라이버는 MBTiles 벡터 데이터셋 읽기 및 쓰기를 지원합니다. 독립형 맵박스 벡터 타일(Mapbox Vector Tile) 파일 또는 MVT 파일 집합의 경우, :ref:`MVT <vector.mvt>` 드라이버를 참조하십시오.
+주의: 벡터 쓰기를 지원하려면 GDAL을 GEOS와 함께 빌드해야 합니다.
 
-GDAL/OGR must be compiled with OGR SQLite driver support, and JPEG and
-PNG drivers.
+이 드라이버를 사용하려면 GDAL/OGR을 OGR SQLite 드라이버 지원, 그리고 JPEG 및 PNG 드라이버와 함께 컴파일해야만 합니다.
 
-The SRS is always the Pseudo-Mercator (a.k.a Google Mercator)
-projection.
+공간 좌표계는 항상 (구글 메르카토르 같은) 웹 메르카토르 투영법입니다.
 
-Starting with GDAL 2.3, the driver will open a dataset as RGBA. For
-previous versions, the driver will try to determine the number of bands
-by probing the content of one tile. It is possible to alter this
-behavior by defining the MBTILES_BAND_COUNT configuration option (or
-starting with GDAL 2.1, the BAND_COUNT open option) to the number of
-bands. The values supported are 1, 2, 3 or 4. Four band
-(Red,Green,Blue,Alpha) dataset gives the maximum compatibility with the
-various encodings of tiles that can be stored.
+GDAL 2.3버전부터, 이 드라이버는 데이터셋을 RGBA로 열 것입니다. 그 이전 버전들의 경우 드라이버가 타일 1개의 내용을 살펴서 밴드 개수를 판단하려 시도할 것입니다. MBTILES_BAND_COUNT 환경설정 옵션에 (또는 GDAL 2.1버전부터 BAND_COUNT 열기 옵션에) 밴드 개수를 정의하면 이 습성을 바꿀 수 있습니다. 이 옵션들에 설정할 수 있는 값은 1, 2, 3, 4 가운데 하나입니다. 저장할 수 있는, 다양하게 인코딩된 타일과 최고의 호환성을 보여주는 것은 4밴드(적색, 녹색, 청색, 알파) 데이터셋입니다.
 
-The driver will use the 'bounds' metadata in the metadata table and do
-necessary tile clipping, if needed, to respect that extent. However that
-information being optional, if omitted, the driver will use the extent
-of the tiles at the maximum zoom level. The user can also specify the
-USE_BOUNDS=NO open option to force the use of the actual extent of tiles
-at the maximum zoom level. Or it can specify any of MINX/MINY/MAXX/MAXY
-to have a custom extent.
+이 드라이버는 메타데이터 테이블에 있는 'bounds' 메타데이터를 읽어와서 -- 필요하다면 -- 해당 범위를 따르기 위해 필요한 타일 자르기를 수행할 것입니다. 하지만 이 정보는 선택 옵션으로, 생략하는 경우 드라이버가 최대 확대/축소 수준의 타일들의 범위를 사용할 것입니다. 최대 확대/축소 수준의 타일들의 실제 범위를 강제로 사용하고 싶다면 사용자도 USE_BOUNDS=NO 열기 옵션을 지정하면 됩니다. 또는 범위를 사용자 지정하고 싶은 경우 MINX/MINY/MAXX/MAXY 가운데 하나라도 지정하면 됩니다.
 
-The driver can retrieve pixel attributes encoded according to the
-UTFGrid specification available in some MBTiles files. They can be
-obtained with the gdallocationinfo utility, or with a
-GetMetadataItem("Pixel_iCol_iLine", "LocationInfo") call on a band
-object.
+이 드라이버는 -- 일부 MBTiles 파일에서 사용할 수 있는 -- UTFGrid 사양에 따라 인코딩된 픽셀 속성을 가져올 수 있습니다. gdallocationinfo 유틸리티를 사용하거나 밴드 객체에 GetMetadataItem("Pixel_iCol_iLine", "LocationInfo")을 호출하면 이 픽셀 정보를 수집할 수 있습니다.
 
-Driver capabilities
+
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -60,214 +37,181 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Opening options
+
+열기 옵션
 ---------------
 
-Starting with GDAL 2.1, the following open options are available:
+GDAL 2.1버전부터, 다음과 같은 열기 옵션들을 사용할 수 있습니다:
 
--  Raster and vector:
+-  래스터 및 벡터:
 
-   -  **ZOOM_LEVEL**\ =value: Integer value between 0 and the maximum
-      filled in the *tiles* table. By default, the driver will select
-      the maximum zoom level, such as at least one tile at that zoom
-      level is found in the 'tiles' table.
-   -  **USE_BOUNDS**\ =YES/NO: Whether to use the 'bounds' metadata,
-      when available, to determine the AOI. Defaults to YES.
-   -  **MINX**\ =value: Minimum easting (in EPSG:3857) of the area of
-      interest.
-   -  **MINY**\ =value: Minimum northing (in EPSG:3857) of the area of
-      interest.
-   -  **MAXX**\ =value: Maximum easting (in EPSG:3857) of the area of
-      interest.
-   -  **MAXY**\ =value: Maximum northing (in EPSG:3857) of the area of
-      interest.
+   -  **ZOOM_LEVEL=value**:
+      0에서 'tiles' 테이블에 있는 최대값 사이의 정수값을 설정합니다. 이 드라이버는 기본적으로 'tiles' 테이블에서 해당 확대/축소 수준의 타일을 최소한 1개는 찾도록 최대 확대/축소 수준을 선택할 것입니다.
 
--  Raster only:
+   -  **USE_BOUNDS=YES/NO**:
+      사용할 수 있는 경우 관심 영역을 판단하기 위해 'bounds' 메타데이터를 사용할지 여부를 선택합니다. 기본값은 YES입니다.
 
-   -  **BAND_COUNT**\ =AUTO/1/2/3/4: Number of bands of the dataset
-      exposed after opening. Some conversions will be done when possible
-      and implemented, but this might fail in some cases, depending on
-      the BAND_COUNT value and the number of bands of the tile. Defaults
-      to AUTO.
-   -  **TILE_FORMAT**\ =PNG/PNG8/JPEG: Format used to store tiles. See
-      `Tile formats <#tile_formats>`__ section. Only used in update
-      mode. Defaults to PNG.
-   -  **QUALITY**\ =1-100: Quality setting for JPEG compression. Only
-      used in update mode. Default to 75.
-   -  **ZLEVEL**\ =1-9: DEFLATE compression level for PNG tiles. Only
-      used in update mode. Default to 6.
-   -  **DITHER**\ =YES/NO: Whether to use Floyd-Steinberg dithering (for
-      TILE_FORMAT=PNG8). Only used in update mode. Defaults to NO.
+   -  **MINX=value**:
+      관심 영역의 (EPSG:3857의) 최소 편동을 설정합니다.
 
--  Vector only (GDAL >= 2.3):
+   -  **MINY=value**: 
+      관심 영역의 (EPSG:3857의) 최소 편북을 설정합니다.
 
-   -  **CLIP**\ =YES/NO: Whether to clip geometries of vector features
-      to tile extent. Defaults to YES.
-   -  **ZOOM_LEVEL_AUTO**\ =YES/NO: Whether to auto-select the zoom
-      level for vector layers according to the spatial filter extent.
-      Only for display purpose. Defaults to NO.
+   -  **MAXX=value**: 
+      관심 영역의 (EPSG:3857의) 최대 편동을 설정합니다.
 
-Raster creation issues
+   -  **MAXY=value**:
+      관심 영역의 (EPSG:3857의) 최대 편북을 설정합니다.
+
+-  래스터 전용:
+
+   -  **BAND_COUNT=AUTO/1/2/3/4**:
+      데이터셋을 연 다음 노출시킬 밴드 개수를 설정합니다. 몇몇 변환 작업이 구현되어 사용할 수 있는 경우 수행할 것이지만, BAND_COUNT 값과 타일의 밴드 개수에 따라 변환에 실패할 수도 있습니다. 기본값은 AUTO입니다.
+
+   -  **TILE_FORMAT=PNG/PNG8/JPEG**:
+      타일을 저장할 포맷을 설정합니다. `타일 포맷 <#raster.mbtiles.tile_formats>`_ 단락을 참조하십시오. 업데이트 모드에서만 사용할 수 있습니다. 기본값은 PNG입니다.
+
+   -  **QUALITY=1-100**:
+      JPEG 압축 품질을 설정합니다. 업데이트 모드에서만 사용할 수 있습니다. 기본값은 75입니다.
+
+   -  **ZLEVEL=1-9**:
+      PNG 타일 용 DEFLATE 압축 수준을 설정합니다. 업데이트 모드에서만 사용할 수 있습니다. 기본값은 6입니다.
+
+   -  **DITHER=YES/NO**:
+      (TILE_FORMAT을 PNG8로 설정한 경우) 플로이드-스타인버그 디더링을 사용할지 여부를 선택합니다. 업데이트 모드에서만 사용할 수 있습니다. 기본값은 NO입니다.
+
+-  벡터 전용(GDAL 2.3 이상 버전):
+
+   -  **CLIP=YES/NO**:
+      벡터 객체의 도형을 타일 범위에 맞춰 자를지 여부를 선택합니다. 기본값은 YES입니다.
+
+   -  **ZOOM_LEVEL_AUTO=YES/NO**:
+      벡터 레이어의 확대/축소 수준을 공간 필터 범위에 따라 자동 선택할지 여부를 선택합니다. 기본값은 NO입니다.
+
+
+래스터 생성 문제점
 ----------------------
 
-Depending of the number of bands of the input dataset and the tile
-format selected, the driver will do the necessary conversions to be
-compatible with the tile format. When using the CreateCopy() API (such
-as with gdal_translate), automatic reprojection of the input dataset to
-EPSG:3857 (WebMercator) will be done, with selection of the appropriate
-zoom level.
+이 드라이버는 입력 데이터셋의 밴드 개수와 선택한 타일 포맷에 따라 타일 포맷을 호환시키기 위한 필수 변환 작업을 수행할 것입니다. (gdal_translate 같은) CreateCopy() API 사용 시, 적절한 확대/축소 수준들을 선택해서 입력 데이터셋을 EPSG:3857(웹 메르카토르)로 자동 재투영할 것입니다.
 
-Fully transparent tiles will not be written to the database, as allowed
-by the format.
+포맷이 허용하는 대로, 완전히 투명한 타일은 데이터베이스에 작성되지 않을 것입니다.
 
-The driver implements the Create() and IWriteBlock() methods, so that
-arbitrary writing of raster blocks is possible, enabling the direct use
-of MBTiles as the output dataset of utilities such as gdalwarp.
+이 드라이버는 Create() 및 IWriteBlock() 메소드를 구현하기 때문에, 래스터 블록을 임의 작성할 수 있습니다. 즉 MBTiles를 gdalwarp 같은 유틸리티의 산출 데이터셋으로 직접 사용할 수 있다는 뜻입니다.
 
-On creation, raster blocks can be written only if the geotransformation
-matrix has been set with SetGeoTransform() This is effectively needed to
-determine the zoom level of the full resolution dataset based on the
-pixel resolution, dataset and tile dimensions.
+생성 작업 시, SetGeoTransform()으로 지리변형 행렬을 설정한 경우에만 래스터 블록을 작성할 수 있습니다. 픽셀 해상도, 데이터셋, 그리고 타일 크기를 기반으로 전체 해상도 데이터셋의 확대/축소 수준을 판단하기 위해서는 실질적으로 지리변형 행렬이 필요합니다.
 
-Technical/implementation note: in the general case, GDAL blocks do not
-exactly match a single MBTiles tile. In which case, each GDAL block will
-overlap four MBTiles tiles. This is easily handled on the read side, but
-on creation/update side, such configuration could cause numerous
-decompression/ recompression of tiles to be done, which might cause
-unnecessary quality loss when using lossy compression (JPEG). To avoid
-that, the driver will create a temporary database next to the main
-MBTiles file to store partial MBTiles tiles in a lossless (and
-uncompressed) way. Once a tile has received data for its four quadrants
-and for all the bands (or the dataset is closed or explicitly flushed
-with FlushCache()), those uncompressed tiles are definitely transferred
-to the MBTiles file with the appropriate compression. All of this is
-transparent to the user of GDAL API/utilities
+기술/구현 메모: 일반적인 경우, GDAL 블록들이 단일 MBTiles 타일과 정확히 일치하지 않을 가능성이 있습니다. 이런 경우 각 GDAL 블록이 MBTiles 타일 4개와 중첩할 것입니다. 읽어오는 경우에는 쉽게 처리할 수 있지만, 생성/업데이트하는 경우에는 이런 환경설정이 수많은 타일들을 압축 해제/재압축시켜야 하는 상황을 일으킬 수 있습니다. 이런 상황이 발생하면 손실 압축 방식(JPEG)을 사용하는 경우 불필요한 품질 저하가 일어날 수도 있습니다. 이렇게 되는 일을 피하기 위해, 이 드라이버는 주 MBTiles 파일 옆에 부분 MBTiles 타일들을 비손실 (그리고 비압축) 방식으로 저장하기 위한 임시 데이터베이스를 생성할 것입니다. 그리고 타일이 자신의 4분면 및 모든 밴드의 데이터를 받은 다음 (또는 데이터셋을 닫거나, 캐시에서 데이터셋을 FlushCache()로 확실하게 제거한 다음) MBTiles 파일에 이 비압축 타일들을 적절한 방식으로 압축해서 확실히 전송합니다. GDAL API/유틸리티 사용자에게 이 모든 과정을 공개합니다.
 
-Tile formats
+.. _raster.mbtiles.tile_formats:
+
+타일 포맷
 ~~~~~~~~~~~~
 
-MBTiles can store tiles in PNG or JPEG. Support for those tile formats
-depend if the underlying drivers are available in GDAL. By default, GDAL
-will PNG tiles.
+MBTiles는 타일을 PNG 또는 JPEG으로 저장할 수 있습니다. 이런 타일 포맷 지원은 GDAL에서 기저 드라이버를 사용할 수 있는지에 따라 달라집니다. GDAL은 기본적으로 PNG 타일을 사용할 것입니다.
 
-It is possible to select the tile format by setting the creation/open
-option TILE_FORMAT to one of PNG, PNG8 or JPEG. When using JPEG, the
-alpha channel will not be stored.
+TILE_FORMAT 생성/열기 옵션을 PNG, PNG8, 또는 JPEG 가운데 하나로 설정하면 타일 포맷을 선택할 수도 있습니다. JPEG을 선택한 경우, 알파 채널을 저장하지 않을 것입니다.
 
-PNG8 can be selected to use 8-bit PNG with a color table up to 256
-colors. On creation, an optimized color table is computed for each tile.
-The DITHER option can be set to YES to use Floyd/Steinberg dithering
-algorithm, which spreads the quantization error on neighbouring pixels
-for better rendering (note however than when zooming in, this can cause
-non desirable visual artifacts). Setting it to YES will generally cause
-less effective compression. Note that at that time, such an 8-bit PNG
-formulation is only used for fully opaque tiles, as the median-cut
-algorithm currently implemented to compute the optimal color table does
-not support alpha channel (even if PNG8 format would potentially allow
-color table with transparency). So when selecting PNG8, non fully opaque
-tiles will be stored as 32-bit PNG.
+256색까지 지원하는 색상표를 가진 8비트 PNG를 사용하려면 PNG8을 선택하면 됩니다. 생성 작업 시, 각 타일에 최적화된 색상표를 계산합니다. 플로이드-스타인버그 디더링 알고리즘을 사용하려면 DITHER 옵션을 YES로 설정하면 됩니다. 이 알고리즘은 더 나은 렌더링을 위해 양자화 오류를 이웃하는 픽셀로 분산시킵니다. (하지만 이미지 확대 시 시각적으로 바람직하지 않은 결과를 보게 될 수 있다는 사실을 기억하십시오.) 일반적으로, DITHER 옵션을 YES로 설정하면 더 비효율적으로 압축하게 될 것입니다. 이때 8비트 PNG 같은 포맷은 완전히 불투명한 타일에만 사용된다는 사실을 기억하십시오. (PNG8 포맷이 투명도를 가진 색상표를 지원할 수는 있지만) 현재 최적 색상표를 계산하기 위해 구현된 중앙값 절단(Median Cut) 알고리즘이 알파 채널을 지원하지 않기 때문입니다. 따라서 PNG8을 선택하는 경우, 완전히 불투명하지 않은 타일은 32비트 PNG로 저장될 것입니다.
 
-Vector creation issues
+
+벡터 생성 문제점
 ----------------------
 
-Tiles are generated with WebMercator (EPSG:3857) projection. It is possible
-to decide at which zoom level ranges a given layer is written. Several
-layers can be written but the driver has only write-once support for
-vector data. For writing several vector datasets into MBTiles file an
-intermediate format like GeoPackage must be used as a container so that
-all layers can be converted at the same time. Write-once support means also
-that existing vector layers can't be edited.
+웹 메르카토르(EPSG:3857) 투영법으로 타일을 생성합니다. 어떤 확대/축소 수준 범위에서 지정한 레이어를 작성할지 결정할 수도 있습니다. 레이어 여러 개를 작성할 수 있지만 벡터 데이터의 경우 이 드라이버는 한 번 작성(write-once)만 지원합니다. 벡터 데이터셋 여러 개를 MBTiles 파일로 작성하는 경우, GeoPackage 같은 중간 포맷을 컨테이너로 사용해야만 모든 레이어를 동시에 변환할 수 있습니다. 한 번 작성(write-once)만 지원한다는 것은 기존 벡터 레이어를 편집할 수 없다는 뜻도 됩니다.
    
 
-Creation options
+생성 옵션
 ----------------
 
-The following creation options are available:
+다음과 같은 생성 옵션들을 사용할 수 있습니다:
 
--  Raster and vector:
+-  래스터 및 벡터:
 
-   -  **NAME**\ =string. Tileset name, used to set the 'name' metadata
-      item. If not specified, the basename of the filename will be used.
-   -  **DESCRIPTION**\ =string. A description of the layer, used to set
-      the 'description' metadata item. If not specified, the basename of
-      the filename will be used.
-   -  **TYPE**\ =overlay/baselayer. The layer type, used to set the
-      'type' metadata item. Default to 'overlay'.
+   -  **NAME=string**:
+      'name' 메타데이터 항목을 설정하는 데 쓰이는 타일 집합 이름입니다. 지정하지 않는 경우, 파일명의 기본 이름(basename)을 사용할 것입니다.
 
--  Raster only:
+   -  **DESCRIPTION=string**:
+      'description' 메타데이터 항목을 설정하는 데 쓰이는 레이어 설명입니다. 지정하지 않는 경우, 파일명의 기본 이름(basename)을 사용할 것입니다.
 
-   -  **VERSION**\ =string. The version of the tileset, as a plain
-      number, used to set the 'version' metadata item. Default to '1.1'.
-   -  **BLOCKSIZE**\ =integer. (GDAL >= 2.3) Block/tile size in width
-      and height in pixels. Defaults to 256. Maximum supported is 4096.
-   -  **TILE_FORMAT**\ =PNG/PNG8/JPEG: Format used to store tiles. See
-      `Tile formats <#tile_formats>`__ section. Defaults to PNG.
-   -  **QUALITY**\ =1-100: Quality setting for JPEG compression. Default
-      to 75.
-   -  **ZLEVEL**\ =1-9: DEFLATE compression level for PNG tiles. Default
-      to 6.
-   -  **DITHER**\ =YES/NO: Whether to use Floyd-Steinberg dithering (for
-      TILE_FORMAT=PNG8). Defaults to NO.
-   -  **ZOOM_LEVEL_STRATEGY**\ =AUTO/LOWER/UPPER. Strategy to determine
-      zoom level. LOWER will select the zoom level immediately below the
-      theoretical computed non-integral zoom level, leading to
-      subsampling. On the contrary, UPPER will select the immediately
-      above zoom level, leading to oversampling. Defaults to AUTO which
-      selects the closest zoom level.
-   -  **RESAMPLING**\ =NEAREST/BILINEAR/CUBIC/CUBICSPLINE/LANCZOS/MODE/AVERAGE.
-      Resampling algorithm. Defaults to BILINEAR.
-   -  **WRITE_BOUNDS**\ =YES/NO: Whether to write the bounds 'metadata'
-      item. Defaults to YES.
+   -  **TYPE=overlay/baselayer**:
+      'type' 메타데이터 항목을 설정하는 데 쓰이는 레이어 유형입니다. 기본값은 'overlay'입니다.
 
--  Vector only (GDAL >= 2.3):
+-  래스터 전용:
 
-   -  **MINZOOM**\ =integer: Minimum zoom level at which tiles are
-      generated. Defaults to 0.
-   -  **MAXZOOM**\ =integer: Minimum zoom level at which tiles are
-      generated. Defaults to 5. Maximum supported value is 22
-   -  **CONF**\ =string: Layer configuration as a JSon serialized
-      string.
-   -  **SIMPLIFICATION**\ =float: Simplification factor for linear or
-      polygonal geometries. The unit is the integer unit of tiles after
-      quantification of geometry coordinates to tile coordinates.
-      Applies to all zoom levels, unless SIMPLIFICATION_MAX_ZOOM is also
-      defined.
-   -  **SIMPLIFICATION_MAX_ZOOM**\ =float: Simplification factor for
-      linear or polygonal geometries, that applies only for the maximum
-      zoom level.
-   -  **EXTENT**\ =positive_integer. Number of units in a tile. The
-      greater, the more accurate geometry coordinates (at the expense of
-      tile byte size). Defaults to 4096
-   -  **BUFFER**\ =positive_integer. Number of units for geometry
-      buffering. This value corresponds to a buffer around each side of
-      a tile into which geometries are fetched and clipped. This is used
-      for proper rendering of geometries that spread over tile
-      boundaries by some rendering clients. Defaults to 80 if
-      EXTENT=4096.
-   -  **COMPRESS**\ =YES/NO. Whether to compress tiles with the
-      Deflate/GZip algorithm. Defaults to YES. Should be left to YES for
-      FORMAT=MBTILES.
-   -  **TEMPORARY_DB**\ =string. Filename with path for the temporary
-      database used for tile generation. By default, this will be a file
-      in the same directory as the output file/directory.
-   -  **MAX_SIZE**\ =integer. Maximum size of a tile in bytes (after
-      compression). Defaults to 500 000. If a tile is greater than this
-      threshold, features will be written with reduced precision, or
-      discarded.
-   -  **MAX_FEATURES**\ =integer. Maximum number of features per tile.
-      Defaults to 200 000.
-   -  **BOUNDS**\ =min_long,min_lat,max_long,max_lat. Override default
-      value for bounds metadata item which is computed from the extent
-      of features written.
-   -  **CENTER**\ =long,lat,zoom_level. Override default value for
-      center metadata item, which is the center of BOUNDS at minimum
-      zoom level.
+   -  **VERSION=string**:
+      'version' 메타데이터 항목을 설정하는 데 쓰이는 평문 숫자로 된 타일 집합의 버전입니다. 기본값은 '1.1'입니다.
 
-Layer configuration (vector)
+   -  **BLOCKSIZE=integer**:
+      (GDAL 2.3 이상 버전) 블록/타일 크기를 픽셀 단위 너비와 높이로 설정합니다. 기본값은 256입니다. 최대 4096까지 지원합니다.
+
+   -  **TILE_FORMAT=PNG/PNG8/JPEG**:
+      타일을 저장하기 위해 쓰이는 포맷입니다. `타일 포맷 <#raster.mbtiles.tile_formats>`_ 단락을 참조하십시오. 기본값은 PNG입니다.
+
+   -  **QUALITY=1-100**:
+      JPEG 압축 품질을 설정합니다. 기본값은 75입니다.
+
+   -  **ZLEVEL=1-9**:
+      PNG 타일 용 DEFLATE 압축 수준을 설정합니다. 기본값은 6입니다.
+
+   -  **DITHER=YES/NO**:
+      (TILE_FORMAT을 PNG8로 설정한 경우) 플로이드-스타인버그 디더링을 사용할지 여부를 선택합니다. 기본값은 NO입니다.
+
+   -  **ZOOM_LEVEL_STRATEGY=AUTO/LOWER/UPPER**:
+      확대/축소 수준을 결정할 전략을 선택합니다. LOWER는 내장되지 않은, 이론적으로 계산된 확대/축소 수준 바로 아래의 확대/축소 수준을 선택하고 서브샘플링 작업을 수행할 것입니다. UPPER는 그 반대로 바로 위의 확대/축소 수준을 선택하고 오버샘플링 작업을 수행할 것입니다. 기본값은 가장 가까운 확대/축소 수준을 선택하는 AUTO입니다.
+
+
+   -  **RESAMPLING=NEAREST/BILINEAR/CUBIC/CUBICSPLINE/LANCZOS/MODE/AVERAGE**:
+      리샘플링 알고리즘을 선택합니다. 기본값은 BILINEAR입니다.
+
+   -  **WRITE_BOUNDS=YES/NO**:
+      'bounds' 메타데이터 항목을 작성할지 여부를 선택합니다. 기본값은 YES입니다.
+
+-  벡터 전용(GDAL 2.3 이상 버전):
+
+   -  **MINZOOM=integer**:
+      타일을 생성할 최소 확대/축소 수준을 설정합니다. 기본값은 0입니다.
+
+   -  **MAXZOOM=integer**:
+      타일을 생성할 최대 확대/축소 수준을 설정합니다. 기본값은 5입니다. 최대 22까지 설정할 수 있습니다.
+
+   -  **CONF=string**:
+      레이어를 JSON 직렬화(serialized) 문자열로 환경설정합니다.
+
+   -  **SIMPLIFICATION=float**:
+      라인 또는 폴리곤 도형 용 단순화 인자를 설정합니다. 단위는 도형 좌표를 타일 좌표로 수량화(quantification)한 후의 타일의 정수형 단위입니다. SIMPLIFICATION_MAX_ZOOM을 함께 정의하지 않는 한 모든 확대/축소 수준에 적용됩니다.
+
+   -  **SIMPLIFICATION_MAX_ZOOM=float**:
+      라인 또는 폴리곤 도형 용 단순화 인자가 설정한 최대 확대/축소 수준까지만 적용됩니다.
+
+   -  **EXTENT=positive_integer**:
+      타일 하나에 있는 단위 개수를 설정합니다. 큰 값을 설정할수록 (타일의 바이트 용량은 커지지만) 더 정확한 도형 좌표를 작성합니다. 기본값은 4096입니다.
+
+   -  **BUFFER=positive_integer**:
+      도형 버퍼 작업 용 단위 개수를 설정합니다. 이 값은 도형을 가져오고 자르는 기준이 되는 타일 각 변 주위의 버퍼에 대응합니다. 몇몇 렌더링 클라이언트가 타일 경계와 교차하는 도형을 제대로 렌더링하기 위해 사용하는 값입니다. EXTENT를 4096으로 설정한 경우 기본값은 80입니다.
+
+   -  **COMPRESS=YES/NO**:
+      타일을 DEFALTE/gzip 알고리즘으로 압축할지 여부를 선택합니다. 기본값은 YES입니다. FORMAT을 MBTILES로 설정한 경우 YES로 유지해야 합니다.
+
+   -  **TEMPORARY_DB=string**:
+      타일 생성에 쓰이는 임시 데이터베이스를 가리키는 경로+파일명입니다. 이 파일은 기본적으로 산출 파일/디렉터리와 동일한 디렉터리에 있을 것입니다.
+
+   -  **MAX_SIZE=integer**:
+      (압축 후) 최대 타일 용량을 바이트 단위로 설정합니다. 기본값은 500,000입니다. 타일 용량이 이 한계값을 초과하는 경우, 객체를 줄어든 정밀도로 작성하거나 또는 폐기할 것입니다.
+
+   -  **MAX_FEATURES=integer**:
+      타일 당 최대 객체 개수를 설정합니다. 기본값은 200,000입니다.
+
+   -  **BOUNDS=min_long,min_lat,max_long,max_lat**:
+      작성된 객체의 범위로부터 계산한 'bounds' 메타데이터 항목의 기본값을 대체합니다.
+
+   -  **CENTER=long,lat,zoom_level**:
+      최소 확대/축소 수준에서 BOUNDS의 중심인 'center' 메타데이터 항목의 기본값을 대체합니다.
+
+
+레이어 환경설정 (벡터)
 ----------------------------
 
-The above mentioned CONF dataset creation option can be set to a string
-whose value is a JSon serialized document such as the below one:
+앞에서 언급했던 데이터셋 생성 옵션 CONF를 다음과 같이 그 값이 JSON 직렬화 문서인 문자열로 설정할 수 있습니다:
 
 ::
 
@@ -285,64 +229,55 @@ whose value is a JSon serialized document such as the below one:
                }
            }
 
-*boundaries_lod0* and *boundaries_lod1* are the name of the OGR layers
-that are created into the target MVT dataset. They are mapped to the MVT
-target layer *boundaries*.
+*boundaries_lod0* 및 *boundaries_lod1* 은 대상 MVT 데이터셋으로 생성되는 OGR 레이어의 이름입니다. 이들은 MVT 대상 레이어 *boundaries* 로 매핑됩니다.
 
-It is also possible to get the same behavior with the below layer
-creation options, although that is not convenient in the ogr2ogr use
-case.
+ogr2ogr를 사용하는 경우에는 불편하긴 하지만, 다음 레이어 생성 옵션으로도 동일한 결과를 얻을 수 있습니다.
 
-Layer creation options (vector)
+
+레이어 생성 옵션 (벡터)
 -------------------------------
 
--  **MINZOOM**\ =integer: Minimum zoom level at which tiles are
-   generated. Defaults to the dataset creation option MINZOOM value.
--  **MAXZOOM**\ =integer: Minimum zoom level at which tiles are
-   generated. Defaults to the dataset creation option MAXZOOM value.
-   Maximum supported value is 22
--  **NAME**\ =string: Target layer name. Defaults to the layer name, but
-   can be overridden so that several OGR layers map to a single target
-   MVT layer. The typical use case is to have different OGR layers for
-   mutually exclusive zoom level ranges.
--  **DESCRIPTION**\ =string: A description of the layer.
+-  **MINZOOM=integer**:
+   타일을 생성할 최소 확대/축소 수준을 설정합니다. 기본값은 데이터셋 생성 옵션 MINZOOM의 값입니다.
 
-Overviews (raster)
+-  **MAXZOOM=integer**:
+   타일을 생성할 최대 확대/축소 수준을 설정합니다. 기본값은 데이터셋 생성 옵션 MAXZOOM의 값입니다. 최대 22까지 설정할 수 있습니다.
+
+-  **NAME=string**:
+   대상 레이어의 이름을 설정합니다. 기본값은 입력 레이어 이름이지만, OGR 레이어 여러 개를 대상 MVT 레이어 1개로 매핑할 수 있도록 무시할 수 있습니다. 이 옵션은 상호 배타적인 확대/축소 범위에 서로 다른 OGR 레이어를 작성하고자 할 때 주로 쓰입니다.
+
+-  **DESCRIPTION=string**:
+   레이어의 설명입니다.
+
+
+오버뷰 (래스터)
 ------------------
 
-gdaladdo / BuildOverviews() can be used to compute overviews. Only
-power-of-two overview factors (2,4,8,16,...) are supported.
+gdaladdo 또는 BuildOverviews()를 사용해서 오버뷰를 계산할 수 있습니다. 2의 거듭제곱 오버뷰 인자(2, 4, 8, 16, ...)만 지원합니다.
 
-If more overview levels are specified than available, the extra ones are
-silently ignored.
+사용할 수 있는 것보다 더 많은 오버뷰 수준을 지정하는 경우, 초과하는 수준들은 조용히 무시합니다.
 
-Overviews can also be cleared with the -clean option of gdaladdo (or
-BuildOverviews() with nOverviews=0)
+gdaladdo의 -clean 옵션으로 (또는 BuildOverviews()의 nOverviews=0 파라미터로) 오버뷰를 제거할 수도 있습니다.
 
-Vector tiles
+벡터 타일
 ------------
 
-Starting with GDAL 2.3, the MBTiles driver can read MBTiles files
-containing vector tiles conforming to the Mapbox Vector Tile format
-(format=pbf).
+GDAL 2.3버전부터, MBTiles 드라이버는 맵박스 벡터 타일 포맷을 준수하는 벡터 타일을 담고 있는 MBTiles 파일(.pbf)을 읽어올 수 있습니다.
 
-The driver requires the 'metadata' table to contain a name='json' entry,
-that has a 'vector_layers' array describing layers and their schema. See
-:ref:`metadata.json <mvt_metadata_json>`
+이 드라이버는 'json'이라는 항목을 담기 위한 'metadata' 테이블을 필요로 합니다. 'json' 항목은 레이어와 그 스키마를 서술하는 'vector_layers' 배열을 가지고 있습니다. :ref:`metadata.json <mvt_metadata_json>` 을 참조하십시오.
 
-Note: The driver will make no effort of stiching together geometries for
-features that overlap several tiles.
+주의: 이 드라이버는 타일 여러 개에 중첩하는 객체의 도형들을 함께 병합하려는 시도를 하지 않을 것입니다.
 
-Examples:
+예시
 ---------
 
--  Accessing a remote MBTiles raster :
+-  원격 MBTiles 래스터에 접근하기:
 
    ::
 
       $ gdalinfo /vsicurl/http://a.tiles.mapbox.com/v3/kkaefer.iceland.mbtiles
 
-   Output:
+   산출물:
 
    ::
 
@@ -397,14 +332,13 @@ Examples:
       Band 4 Block=256x256 Type=Byte, ColorInterp=Alpha
         Overviews: 8192x8192, 4096x4096, 2048x2048, 1024x1024, 512x512
 
--  Reading pixel attributes encoded according to the UTFGrid
-   specification :
+-  UTFGrid 사양에 따라 인코딩된 픽셀 속성 읽어오기:
 
    ::
 
       $ gdallocationinfo /vsicurl/http://a.tiles.mapbox.com/v3/mapbox.geography-class.mbtiles -wgs84 2 49 -b 1 -xml
 
-   Output:
+   산출물:
 
    ::
 
@@ -418,14 +352,14 @@ Examples:
         </BandReport>
       </Report>
 
--  Converting a dataset to MBTiles and adding overviews :
+-  데이터셋을 MBTiles로 변환하고 오버뷰 추가하기:
 
    ::
 
       $ gdal_translate my_dataset.tif my_dataset.mbtiles -of MBTILES
       $ gdaladdo -r average my_dataset.mbtiles 2 4 8 16
 
--  Opening a vector MBTiles:
+-  벡터 MBTiles 열기:
 
    ::
 
@@ -445,16 +379,18 @@ Examples:
         format=pbf
       1: ne_10m_admin_1_states_provinces_shpgeojson (Multi Polygon)
 
--  Converting a GeoPackage to a Vector tile MBTILES:
+-  지오패키지를 벡터 타일 MBTILES로 변환하기:
 
    ::
 
       $ ogr2ogr -f MBTILES target.mbtiles source.gpkg -dsco MAXZOOM=10
 
-See Also
+참고
 --------
 
--  `MBTiles specification <https://github.com/mapbox/mbtiles-spec>`__
--  `UTFGrid
-   specification <https://github.com/mapbox/utfgrid-spec/blob/master/1.0/utfgrid.md>`__
--  :ref:`Mapbox Vector tiles driver <vector.mvt>`
+-  `MBTiles 사양 <https://github.com/mapbox/mbtiles-spec>`_
+
+-  `UTFGrid 사양 <https://github.com/mapbox/utfgrid-spec/blob/master/1.0/utfgrid.md>`_
+
+-  :ref:`맵박스 벡터 타일 <vector.mvt>` 드라이버
+

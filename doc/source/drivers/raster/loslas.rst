@@ -1,19 +1,18 @@
 .. _raster.loslas:
 
 ================================================================================
-LOSLAS -- NADCON .los/.las Datum Grid Shift
+LOSLAS -- NADCON .los/.las 원점 그리드 이동(Datum Grid Shift)
 ================================================================================
 
 .. shortname:: LOSLAS
 
 .. built_in_by_default::
 
-Starting with GDAL 3.1, can also open geoid models of extension .geo such as
-https://geodesy.noaa.gov/GEOID/MEXICO97/
+GDAL 3.1버전부터, https://geodesy.noaa.gov/GEOID/MEXICO97/ 같은 .geo 확장자를 가진 지오이드 모델도 열 수 있습니다.
 
-NOTE: Implemented as ``gdal/frmts/raw/loaslasdataset.cpp``.
+주의: ``gdal/frmts/raw/loaslasdataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::

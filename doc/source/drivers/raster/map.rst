@@ -8,18 +8,18 @@ MAP -- OziExplorer .MAP
 
 .. built_in_by_default::
 
-OziExplorer MAP files.
+OziExplorer MAP 파일입니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
 .. supports_virtualio::
 
-See Also:
+참고
 ---------
 
--  Implemented as ``gdal/frmts/map/mapdataset.cpp``.
--  `OziExplorer Map File
-   Format <http://www.oziexplorer3.com/eng/help/map_file_format.html>`__
+-  ``gdal/frmts/map/mapdataset.cpp`` 로 구현되었습니다.
+
+-  `OziExplorer MAP 파일 포맷 <http://www.oziexplorer3.com/eng/help/map_file_format.html>`_
