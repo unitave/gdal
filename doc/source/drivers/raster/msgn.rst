@@ -1,30 +1,22 @@
 .. _raster.msgn:
 
 ================================================================================
-MSGN -- Meteosat Second Generation (MSG) Native Archive Format (.nat)
+MSGN -- 2세대 Meteosat(MSG) 네이티브 압축 포맷 (.nat)
 ================================================================================
 
 .. shortname:: MSGN
 
 .. built_in_by_default::
 
-GDAL supports reading only of MSG native files. These files may have
-anything from 1 to 12 bands, all at 10-bit resolution.
+GDAL은 MSG 네이티브 파일만 읽기 지원합니다. 이 파일은 밴드 1개에서 12개 사이에서 몇 개든 가지고 있을 수 있으며, 모든 밴드는 10비트 해상도입니다.
 
-Includes support for the 12th band (HRV - High Resolution Visible). This
-is implemented as a subset, i.e., it is accessed by prefixing the
-filename with the tag "HRV:".
+이 드라이버는 12번 밴드(고해상도 가시광(High Resolution Visible); HRV) 지원을 포함합니다. 12번 밴드 읽기는 하위 데이터셋으로 구현되어 있습니다. 예를 들면 파일명 앞에 "HRV:" 태그를 붙여서 12번 밴드에 접근합니다.
 
-Similarly, it is possible to obtain floating point radiance values in
-stead of the usual 10-bit digital numbers (DNs). This subset is accessed
-by prefixing the filename with the tag "RAD:".
+마찬가지로, 일반적인 10비트 수치값(digital number; DN) 대신 부동소수점형 방사값을 읽어올 수도 있습니다. 파일명 앞에 "RAD:" 태그를 붙여서 이 하위 데이터셋에 접근합니다.
 
-Georeferencing is currently supported, but the results may not be
-acceptable (accurate enough), depending on your requirements. The
-current workaround is to implement the CGMS Geostationary projection
-directly, using the code available from EUMETSAT.
+현재 지리참조를 지원하지만, 요구 사항에 따라 그 결과물이 받아들일 수 없는 (충분히 정확하지 않은) 수준일 수도 있습니다. 현재로서는 EUMETSAT이 공개하고 있는 코드를 사용해서 CGMS 정지위성 투영법을 직접 구현하는 대안뿐입니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::

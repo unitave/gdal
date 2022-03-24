@@ -1,70 +1,50 @@
 .. _raster.mrsid:
 
 ================================================================================
-MrSID -- Multi-resolution Seamless Image Database
+MrSID -- 다중 해상도 심리스 이미지 데이터베이스
 ================================================================================
 
 .. shortname:: MrSID
 
 .. build_dependencies:: MrSID SDK
 
-MrSID is a wavelet-based image compression technology which can utilize
-both lossy and lossless encoding. This technology was acquired in its
-original form from Los Alamos National Laboratories (LANL), where it was
-developed under the aegis of the U.S. government for storing
-fingerprints for the FBI. Now it is developed and distributed by
-Extensis.
+MrSID(Multi-resolution Seamless Image Database)는 손실 및 비손실 인코딩 둘 다 사용할 수 있는 웨이블릿 기반 이미지 압축 기술입니다. 로스 알라모스 국립 연구소(Los Alamos National Laboratories)에서 미국 정부의 후원 아래 FBI를 위한 지문 정보 저장을 위해 이 기술의 원형을 개발했습니다. 현재 익스텐시스(Extensis) 사가 이 기술을 개발 및 배포하고 있습니다.
 
-This driver supports reading of MrSID image files using Extensis'
-decoding software development kit (DSDK). **This DSDK is not free
-software, you should contact Extensis to obtain it (see link at end of
-this page).** If you are using GCC, please, ensure that you have the
-same compiler as was used for DSDK compilation. It is C++ library, so
-you may get incompatibilities in C++ name mangling between different GCC
-versions (2.95.x and 3.x).
+이 드라이버는 익스텐시스의 DSDK(Decoding Software Development Kit)를 이용해서 MrSID 이미지 파일 읽기를 지원합니다. **이 DSDK는 자유 소프트웨어가 아닙니다. DSDK를 사용하려면 익스텐시스 사에 연락해야 합니다. (이 페이지 마지막에 있는 링크를 참조하십시오.)** 사용자가 GCC를 사용한다면, DSDK 컴파일 작업에 사용되는 것과 동일한 컴파일러를 가지고 있는지 확인해주십시오. GCC는 C++ 라이브러리입니다. 즉 서로 다른 GCC 버전(2.95.x 및 3.x) 간에 C++ 용어가 달라졌기 때문에 호환이 되지 않을 수도 있습니다.
 
-Latest versions of the DSDK also support decoding JPEG2000 file format,
-so this driver can be used for JPEG2000 too.
+DSDK 최신 버전이 JPEG2000 파일 포맷 디코딩도 지원하기 때문에, JPEG2000에도 이 드라이버를 사용할 수 있습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
 .. supports_virtualio::
 
-Metadata
---------
-
-MrSID metadata transparently translated into GDAL metadata strings.
-Files in MrSID format contain a set of standard metadata tags such as:
-IMAGE__WIDTH (contains the width of the image), IMAGE__HEIGHT (contains
-the height of the image), IMAGE__XY_ORIGIN (contains the x and y
-coordinates of the origin), IMAGE__INPUT_NAME (contains the name or
-names of the files used to create the MrSID image) etc. GDAL's metadata
-keys cannot contain characters \`:' and \`=', but standard MrSID tags
-always contain double colons in tag names. These characters replaced in
-GDAL with \`_' during translation. So if you are using other software to
-work with MrSID be ready that names of metadata keys will be shown
-differently in GDAL.
-
-XMP metadata can be extracted from JPEG2000
-files, and will be stored as XML raw content in the xml:XMP metadata
-domain.
-
-Georeference
-------------
-
-MrSID images may contain georeference and coordinate system information
-in form of GeoTIFF GeoKeys, translated in metadata records. All those
-GeoKeys properly extracted and used by the driver. Unfortunately, there
-is one caveat: old MrSID encoders has a bug which resulted in wrong
-GeoKeys, stored in MrSID files. This bug was fixed in MrSID software
-version 1.5, but if you have older encoders or files, created with older
-encoders, you cannot use georeference information from them.
-
-See Also:
+메타데이터
 ---------
 
--  Implemented as ``gdal/frmts/mrsid/mrsiddataset.cpp``.
--  `Extensis web site <http://www.extensis.com/support/developers>`__
+MrSID 메타데이터는 투명하게 GDAL 메타데이터 문자열로 변환됩니다. MrSID 포맷 파일은 다음과 같은 표준 메타데이터 태그 집합을 담고 있습니다:
+
+
+   -  IMAGE__WIDTH (이미지의 너비)
+   -  IMAGE__HEIGHT (이미지의 높이)
+   -  IMAGE__XY_ORIGIN (원점의 x 및 y 좌표)
+   -  IMAGE__INPUT_NAME (MrSID 이미지 생성에 사용된 파일(들)의 이름)
+   -  ...
+
+GDAL의 메타데이터 키는 ':' 및 '=' 문자를 담을 수 없지만, 표준 MrSID 태그는 태그 이름에 항상 쌍점 2개를 가지고 있습니다. GDAL의 변환 과정에서 이 쌍점을 '_'로 대체합니다. 따라서 MrSID 파일 작업에 다른 소프트웨어를 사용하는 경우, GDAL에서는 메타데이터 키의 이름이 다르게 출력될 것입니다.
+
+JPEG2000 파일로부터 XMP 메타데이터를 추출할 수 있고, xml:XMP 메타데이터 도메인에 추출한 메타데이터를 XML 원본(raw) 내용으로 저장할 것입니다.
+
+지리참조
+------------
+
+MrSID 이미지가 GeoTIFF 지오키(GeoKey) 형태의 지리참조 및 좌표계 정보를 메타데이터 레코드로 변환해서 담고 있을 수도 있습니다. 이 드라이버는 이런 지오키들을 모두 제대로 추출해서 사용합니다. 그러나 한 가지 조심할 점이 있습니다. 예전 MrSID 인코더에는 MrSID 파일에 지오키를 잘못 저장하는 버그가 있습니다. MrSID 소프트웨어 1.5버전에서 이 버그를 수정했지만, 이보다 예전 인코더 또는 예전 인코더로 생성된 파일인 경우 지리참조 정보를 사용할 수 없습니다.
+
+참고
+---------
+
+-  ``gdal/frmts/mrsid/mrsiddataset.cpp`` 로 구현되었습니다.
+
+-  `익스텐시스 웹사이트 <http://www.extensis.com/support/developers>`_
