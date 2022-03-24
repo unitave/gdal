@@ -132,13 +132,13 @@ GNUMakefile을 이용해서 빌드하는 경우, ``--with-msg`` 옵션으로 MSG
 
    gdal_translate -of GTiff MSG(c:\hrit-data\,200501181200,12,N,N,10,1) d:\output\outfile.tif
 
-10 cycles, but every hour (thus from 1200 to 2100):
+연속 사이클 10회, 그러나 1시간 간격으로 (따라서 1200에서 2100까지):
 
 ::
 
    gdal_translate -of GTiff MSG(c:\hrit-data\,200501181200,12,N,N,10,4) d:\output\outfile.tif
 
-매시간 간격으로 연속 사이클 10회, 3, 2, 1 밴드를 가져오는 예시:
+1시간 간격으로 연속 사이클 10회, 3, 2, 1 밴드를 가져오는 예시:
 
 ::
 
