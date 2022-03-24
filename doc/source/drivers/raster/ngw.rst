@@ -1,6 +1,6 @@
 .. _raster.ngw:
 
-NGW -- NextGIS Web
+NGW -- NextGIS 웹
 ==================
 
 .. versionadded:: 2.4
@@ -9,184 +9,169 @@ NGW -- NextGIS Web
 
 .. build_dependencies:: libcurl
 
-NextGIS Web - is a server GIS, which allows storing and editing geodata
-and to display maps in web browser. Also NextGIS Web can share geodata
-with other NextGIS software.
+NextGIS 웹(Web)은 서버 GIS로, 웹브라우저에서 지리 데이터(geodata)를 저장하고 편집하며 맵을 출력할 수 있습니다.
+또 NextGIS 웹은 다른 NextGIS 소프트웨어와도 지리 데이터를 공유할 수 있습니다.
 
-NextGIS Web has the following features:
+NextGIS 웹의 기능은 다음과 같습니다:
 
--  Display maps in a web browser (different maps with different layers
-   and styles)
--  Flexible permissions management
--  Load geodata from PostGIS or import from GIS formats (ESRI Shape,
-   GeoJSON or GeoTIFF)
--  Load vector geodata in the following formats: GeoJSON, CSV, ESRI
-   Shape, Mapinfo tab
--  Import map styles from QGIS project or set them manually
--  Act as a server for TMS, WMS, MVT, WFS
--  Act as a client for WMS
--  User can add photos to records, change record attributes via web
-   interface or WFS-T protocol
+-  웹브라우저에 맵 출력 (서로 다른 레이어와 스타일을 가지고 있는 서로 다른 맵들)
+-  유연한 권한 관리
+-  PostGIS로부터 지리 데이터를 불러오거나 GIS 포맷(ESRI Shapefile, GeoJSON 또는 GeoTIFF)으로부터 가져오기
+-  GeoJSON, CSV, ESRI Shapefile, Mapinfo TAB 등의 포맷으로부터 벡터 지리 데이터 불러오기
+-  QGIS 프로젝트로부터 맵 스타일 가져오기 또는 직접 설정하기
+-  TMS, WMS, MVT, WFS 서버로 작동
+-  WMS 용 클라이언트로 작동
+-  웹 인터페이스 또는 WFS-T 프로토콜을 통해 사용자가 레코드에 사진을 추가하고 레코드를 변경할 수 있음
 
-NextGIS Web - is an open source software (license GPL v2+, see `GNU
-General Public License, version
-2 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html>`__).
+NextGIS 웹은 오픈소스 소프트웨어입니다. (GPL 버전 2 이상의 사용 허가, `GNU 일반 공중 사용 허가서 버전 2 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html>`_ 참조)
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
-Driver
-------
+드라이버
+-------
 
-NextGIS Web supports several raster types:
+NextGIS 웹은 다음 래스터 유형들을 지원합니다:
 
--  Raster style
--  Vector style
--  WMS layer
--  WMS Service
--  Web map as combination of raster and vector styles
+-  래스터 스타일
+-  벡터 스타일
+-  WMS 레이어
+-  WMS 서비스
+-  래스터와 벡터 스타일을 결합한 웹 맵(Web Map)
 
-Each NextGIS Web raster layer can have one or more raster styles.
-Each NextGIS Web vector or PostGIS layer can have one or more vector
-styles (QGIS qml or MapServer xml).
-WMS layers from external WMS service have no styles.
-WMS Service is usual WMS protocol implementation.
+NextGIS 웹 래스터 레이어는 각각 하나 이상의 래스터 스타일을 가질 수 있습니다.
+NextGIS 웹 벡터 또는 PostGIS 레이어는 각각 하나 이상의 벡터 스타일을 가질 수 있습니다. (QGIS QML 또는 MapServer XML)
+외부 WMS 서비스의 WMS 레이어에는 스타일이 없습니다.
+WMS 서비스는 일반 WMS 프로토콜을 구현한 것입니다.
 
-NGW driver supports only raster and vector styles and WMS layers.
-You can get raster data as tiles or image (only tiles are supported
-now).
+NGW 드라이버는 래스터 및 벡터 스타일과 WMS 레이어만 지원합니다.
+래스터 데이터를 타일 또는 이미지로 가져올 수 있습니다. (현재 타일만 지원합니다.)
 
-The driver supports read and copy from existing source dataset
-operations on rasters.
+이 드라이버는 기존 소스 데이터셋의 래스터 상에서의 작업으로부터 읽기 및 복사를 지원합니다.
 
-Dataset name syntax
+데이터셋 이름 문법
 -------------------
 
-The minimal syntax to open a NGW datasource is: NGW:[NextGIS Web
-URL][/resource/][resource identifier]
+다음은 NGW 데이터소스를 열기 위한 최소한의 문법입니다:
 
--  **NextGIS Web URL** may be an url to nextgis.com cloud service (for
-   example, https://demo.nextgis.com), or some other url including port
-   and additional path (for example, http://192.168.1.1:8000/test).
--  **resource** is mandatory keyword dividing resource identifier from
-   the rest of URL.
--  **resource identifier** this is positive number from 0 and above.
-   This may be a resource group, vector, PostGIS or raster layer, style.
+NGW:[NextGIS 웹 URL][/resource/][resource identifier]
 
-If identifier is resource group, all vector layers, PostGIS, raster
-layers, styles will be listed as child resources. In other case this
-will be a separate raster.
+-  **NextGIS 웹 URL**:
+   NextGIS.com 클라우드 서비스(예: https://demo.nextgis.com)를 가리키는 URL일 수도 있고, 또는 포트와 추가 경로를 포함하는 다른 URL(예: http://192.168.1.1:8000/test)일 수도 있습니다.
+-  **resource**:
+   전체 URL에서 리소스 식별자를 분리하는 필수 키워드입니다.
+-  **resource identifier**:
+   0에서 시작하는 양의 숫자값입니다.
+   리소스 그룹, 벡터, PostGIS 또는 래스터 레이어, 스타일일 수도 있습니다.
 
-Configuration options
+식별자가 리소스 그룹인 경우, 모든 벡터 레이어, PostGIS, 래스터 레이어, 스타일을 하위 리소스로 목록화할 것입니다. 그렇지 않은 경우 식별자가 개별 래스터일 것입니다.
+
+환경설정 옵션
 ---------------------
 
-The following configuration options are available:
+다음과 같은 환경설정 옵션을 사용할 수 있습니다:
 
--  **NGW_USERPWD**: User name and password separated with colon.
-   Optional and can be set using open options.
--  **NGW_CACHE_EXPIRES**: Time in seconds cached files will stay valid.
-   If cached file expires it is deleted when maximum size of cache is
-   reached. Also expired file can be overwritten by the new one from
-   web. Defaults to 604800 (7 days).
--  **NGW_CACHE_MAX_SIZE**: The cache maximum size in bytes. If cache
-   reached maximum size, expired cached files will be deleted. Defaults
-   to 67108864 (64Mb).
--  **NGW_JSON_DEPTH**: The depth of json response that can be parsed. If
-   depth is greater than this value, parse error occurs.
+-  **NGW_USERPWD**:
+   쌍점으로 구분된 사용자명과 비밀번호입니다.
+   선택 옵션이며, 열기 옵션을 이용해서 설정할 수도 있습니다.
 
-Authentication
+-  **NGW_CACHE_EXPIRES**:
+   캐시된 파일을 사용할 수 있는 유효 기간을 초 단위로 설정합니다.
+   유효 기간을 초과했을 때 최대 캐시 용량을 넘어섰다면 캐시된 파일을 삭제합니다. 유효 기간을 초과한 파일을 웹으로부터 받은 새 파일로 덮어쓸 수도 있습니다. 기본값은 604800(7일)입니다.
+
+-  **NGW_CACHE_MAX_SIZE**:
+   바이트 단위 최대 캐시 용량을 설정합니다. 캐시가 최대 용량을 넘어선 경우, 캐시된 파일 가운데 유효 기간을 초과한 파일을 삭제할 것입니다. 기본값은 67108864(64Mb)입니다.
+
+-  **NGW_JSON_DEPTH**:
+   파싱할 수 있는 JSON 응답의 심도를 설정합니다.
+   심도가 이 값을 초과하는 경우 파싱 오류를 발생시킵니다.
+
+인증
 --------------
 
-Any operations (read, write, get metadata, change properties, etc.) may
-require an authenticated access. Authenticated access is obtained by
-specifying user name and password in open, create or configuration
-options.
+모든 작업 (읽기, 쓰기, 메타데이터 가져오기, 속성 변경 등등) 시 인증 접근이 필요할 수도 있습니다. 열기 옵션, 생성 옵션 또는 환경설정 옵션에서 사용자명과 비밀번호를 지정하면 인증된 접근을 할 수 있습니다.
 
-Open options
+열기 옵션
 ------------
 
-The following open options are available:
+다음과 같은 열기 옵션을 사용할 수 있습니다:
 
--  USERPWD - Username and password, separated by colon.
--  CACHE_EXPIRES=604800 - Time in seconds cached files will stay valid.
-   If cached file expires it is deleted when maximum size of cache is
-   reached. Also expired file can be overwritten by the new one from
-   web. Defaults to 604800 (7 days).
--  CACHE_MAX_SIZE=67108864 - The cache maximum size in bytes. If cache
-   reached maximum size, expired cached files will be deleted. Defaults
-   to 67108864 (64Mb).
--  JSON_DEPTH=32 - The depth of json response that can be parsed. If
-   depth is greater than this value, parse error occurs.
+-  **USERPWD**:
+   쌍점으로 구분된 사용자명과 비밀번호입니다.
 
-Create copy options
+-  **CACHE_EXPIRES=604800**:
+   캐시된 파일을 사용할 수 있는 유효 기간을 초 단위로 설정합니다.
+   유효 기간을 초과했을 때 최대 캐시 용량을 넘어섰다면 캐시된 파일을 삭제합니다. 유효 기간을 초과한 파일을 웹으로부터 받은 새 파일로 덮어쓸 수도 있습니다. 기본값은 604800(7일)입니다.
+
+-  **CACHE_MAX_SIZE=67108864**:
+   바이트 단위 최대 캐시 용량을 설정합니다. 캐시가 최대 용량을 넘어선 경우, 캐시된 파일 가운데 유효 기간을 초과한 파일을 삭제할 것입니다. 기본값은 67108864(64Mb)입니다.
+
+-  **JSON_DEPTH=32**:
+   파싱할 수 있는 JSON 응답의 심도를 설정합니다.
+   심도가 이 값을 초과하는 경우 파싱 오류를 발생시킵니다.
+
+생성 복사 옵션
 -------------------
 
-NextGIS Web supports only GeoTIFF file format. Prior version 3.1 supported only
-3 (RGB) or 4 (RGBA) bands rasters with datatype Byte. In CreateCopy function if
-source dataset has GeoTIFF file format it will copy as is. For other formats the
-additional transformation to temporary GeoTIFF file will execute.
+NextGIS 웹은 GeoTIFF 포맷 파일만 지원합니다. 이전 3.1버전은 바이트 데이터 유형의 밴드 3개(RGB) 또는 4개(RGBA)를 가진 래스터만 지원했습니다. CreateCopy() 함수에서 소스 데이터셋이 GeoTIFF 포맷 파일이면 그대로 복사할 것입니다. 다른 포맷이라면 임시 GeoTIFF 파일에 추가적인 변환을 실행할 것입니다.
 
-The following copy options are available:
+다음 복사 옵션들을 사용할 수 있습니다:
 
--  KEY - Key value. Must be unique in whole NextGIS Web instance. Optional.
--  DESCRIPTION - Resource description. Optional.
--  RASTER_STYLE_NAME - Raster style name. Optional. Default is same as raster
-   layer name.
--  RASTER_QML_PATH - Path to QGIS QML raster style file. Optional for RGB/RGBA,
-   for other bands count/pixel types is mandatory.
--  USERPWD - Username and password, separated by colon.
--  CACHE_EXPIRES=604800 - Time in seconds cached files will stay valid.
-   If cached file expires it is deleted when maximum size of cache is
-   reached. Also expired file can be overwritten by the new one from
-   web. Defaults to 604800 (7 days).
--  CACHE_MAX_SIZE=67108864 - The cache maximum size in bytes. If cache
-   reached maximum size, expired cached files will be deleted. Defaults
-   to 67108864 (64Mb).
--  JSON_DEPTH=32 - The depth of json response that can be parsed. If
-   depth is greater than this value, parse error occurs.
+-  KEY:
+   키 값입니다. NextGIS 웹 전체에서 유일한(unique) 값이어야만 합니다. 선택 옵션입니다.
 
-Metadata
+-  DESCRIPTION:
+   리소스 설명입니다. 선택 옵션입니다.
+
+-  RASTER_STYLE_NAME:
+   래스터 스타일의 이름입니다. 선택 옵션입니다. 기본값은 래스터 레이어 이름입니다.
+
+-  RASTER_QML_PATH:
+   QGIS QML 래스터 스타일 파일을 가리키는 경로입니다. RGB/RGBA 이미지의 경우 선택 옵션이고, 다른 밴드 개수/픽셀 유형을 가진 이미지의 경우 필수 옵션입니다.
+
+-  USERPWD:
+   쌍점으로 구분된 사용자명과 비밀번호입니다.
+
+-  CACHE_EXPIRES=604800:
+   캐시된 파일을 사용할 수 있는 유효 기간을 초 단위로 설정합니다.
+   유효 기간을 초과했을 때 최대 캐시 용량을 넘어섰다면 캐시된 파일을 삭제합니다. 유효 기간을 초과한 파일을 웹으로부터 받은 새 파일로 덮어쓸 수도 있습니다. 기본값은 604800(7일)입니다.
+
+-  CACHE_MAX_SIZE=67108864:
+   바이트 단위 최대 캐시 용량을 설정합니다. 캐시가 최대 용량을 넘어선 경우, 캐시된 파일 가운데 유효 기간을 초과한 파일을 삭제할 것입니다. 기본값은 67108864(64Mb)입니다.
+
+-  JSON_DEPTH=32:
+   파싱할 수 있는 JSON 응답의 심도를 설정합니다.
+   심도가 이 값을 초과하는 경우 파싱 오류를 발생시킵니다.
+
+메타데이터
+---------
+
+데이터소스, 벡터, PostGIS, 래스터 레이어 및 스타일에서 NextGIS 웹 메타데이터를 지원합니다. 메타데이터는 특화 도메인 "NGW"에 저장됩니다. NextGIS 웹 메타데이터는 문자열과 숫자값 유형을 지원합니다. 10진수 숫자값을 가진 메타데이터 키는 접미어 **.d** 가 붙고, 실수 숫자값의 경우 접미어 **.f** 가 붙을 것입니다. 새 메타데이터 항목을 생성하려면, SetMetadataItem() 함수와 알맞은 접미어를 사용해서 NGW 도메인에 새 키=값 쌍을 추가하십시오. NextGIS 웹으로 전송하는 과정에서 접미어를 생략시킬 것입니다. 사용자는 숫자가 문자열로부터 숫자값으로 정확하게 변환되었는지 확인해야만 합니다.
+
+NextGIS 웹은 리소스 설명과 키를 기본 도메인에 있는 알맞은 *description* 및 *keyname* 메타데이터 항목으로 매핑시킵니다. 이런 메타데이터 항목들을 변경하면 리소스 속성을 업데이트시킬 것입니다.
+
+NextGIS 웹은 리소스 생성 날짜, 유형 및 상위 식별자를 기본 도메인에 있는 알맞은 *creation_date*, *resource_type* 및 *parent_id* 읽기전용 메타데이터 항목으로 매핑시킵니다.
+
+예시
 --------
 
-NextGIS Web metadata are supported in datasource, vector, PostGIS,
-raster layers and styles. Metadata are stored at specific domain "NGW".
-NextGIS Web supported metadata are strings and numbers. Metadata keys
-with decimal numbers will have suffix **.d** and for real numbers -
-**.f**. To create new metadata item, add new key=value pair in NGW
-domain use the *SetMetadataItem* function and appropriate suffix. During
-transferring to NextGIS Web, suffix will be omitted. You must ensure
-that numbers correctly transform from string to number.
-
-Resource description and key map to appropriate *description* and
-*keyname* metadata items in default domain. Changing those metadata
-items will cause an update of resource properties.
-
-Resource creation date, type and parent identifier map to appropriate
-read-only metadata items *creation_date*, *resource_type* and
-*parent_id* in default domain.
-
-Examples
---------
-
-Read datasource contensts (1730 is resource group identifier):
+데이터소스 내용 읽어오기 (1730은 리소스 그룹 식별자입니다):
 
 ::
 
        gdalinfo NGW:https://demo.nextgis.com/resource/1730
 
-Read raster details (1734 is raster layer identifier):
+래스터 상세 정보 읽어오기 (1734는 래스터 레이어 식별자입니다):
 
 ::
 
        gdalinfo NGW:https://demo.nextgis.com/resource/1734
 
-See also
+참고
 --------
 
--  :ref:`Vector side of the driver <vector.ngw>`
--  `NextGIS Web
-   documentation <http://docs.nextgis.com/docs_ngweb/source/toc.html>`__
--  `NextGIS Web for
-   developers <http://docs.nextgis.com/docs_ngweb_dev/doc/toc.html>`__
+-  :ref:`NextGIS 웹 드라이버의 벡터 지원 <vector.ngw>`
+-  `NextGIS 웹 문서 <http://docs.nextgis.com/docs_ngweb/source/toc.html>`_
+-  `개발자를 위한 NextGIS 웹 <http://docs.nextgis.com/docs_ngweb_dev/doc/toc.html>`_

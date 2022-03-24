@@ -1,27 +1,25 @@
 .. _raster.ngsgeoid:
 
 ================================================================================
-NGSGEOID - NOAA NGS Geoid Height Grids
+NGSGEOID - NOAA NGS 지오이드 표고 그리드
 ================================================================================
 
 .. shortname:: NGSGEOID
 
 .. built_in_by_default::
 
-GDAL supports reading NOAA NGS geoid height grids in binary format (.bin
-files). Those files can be used for vertical datum transformations.
+GDAL은 NOAA NGS 지오이드 표고 그리드(Geoid Height Grids) 바이너리 포맷 (.bin) 읽기를 지원합니다. 이 포맷은 수직 원점(datum) 변환에 쓰일 수 있습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
 .. supports_virtualio::
 
-See also
+참고
 --------
 
--  `Description of NGS Geoid Height Grids
-   format <http://www.ngs.noaa.gov/GEOID/USGG2009/s2009rme.txt>`__
--  `GEOID09 main page <http://www.ngs.noaa.gov/PC_PROD/GEOID09/>`__
--  `USGG2009 main page <http://www.ngs.noaa.gov/PC_PROD/USGG2009/>`__
+-  `NGS 지오이드 표고 그리드 포맷 설명 <http://www.ngs.noaa.gov/GEOID/USGG2009/s2009rme.txt>`_
+-  `GEOID09 메인 페이지 <http://www.ngs.noaa.gov/PC_PROD/GEOID09/>`_
+-  `USGG2009 메인 페이지 <http://www.ngs.noaa.gov/PC_PROD/USGG2009/>`_
