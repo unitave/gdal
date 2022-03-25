@@ -1,7 +1,7 @@
 .. _raster.nwtgrd:
 
 ================================================================================
-NWT_GRD/NWT_GRC -- Northwood/Vertical Mapper File Format
+NWT_GRD/NWT_GRC -- 노스우드/버티컬 매퍼 파일 포맷
 ================================================================================
 
 .. shortname:: NWT_GRD
@@ -10,16 +10,13 @@ NWT_GRD/NWT_GRC -- Northwood/Vertical Mapper File Format
 
 .. built_in_by_default::
 
-Support for reading & writing Northwood GRID raster formats. This format
-is also known as Vertical Mapper Grid or MapInfo Grid and is commonly
-used in MapInfo Pro software
+GDAL은 노스우드 그리드(Northwood GRID) 래스터 포맷 읽기 및 쓰기를 지원합니다. 이 포맷은 버티컬 매퍼 그리드(Vertical Mapper Grid) 또는 MapInfo 그리드로도 알려져 있으며, MapInfo 프로 소프트웨어에서 흔히 쓰입니다.
 
-Full read/write support of \*.grd (grid) files is available, read-only
-support is available for classified grids (\*.grc).
+\*.grd (그리드) 파일의 완전한 읽기 및 쓰기를 지원하며, 범주화 그리드(\*.grc)의 경우 읽기만 지원합니다.
 
-For writing, Float32 is the only supported band type.
+쓰기 작업 시, 밴드 유형은 Float32만 지원합니다.
 
-Driver capabilities (NWT_GRD)
+드라이버 케이퍼빌리티 (NWT_GRD)
 -----------------------------
 
 .. supports_createcopy::
@@ -30,61 +27,47 @@ Driver capabilities (NWT_GRD)
 
 .. supports_virtualio::
 
-Driver capabilities (NWT_GRC)
+드라이버 케이퍼빌리티 (NWT_GRC)
 -----------------------------
 
 .. supports_georeferencing::
 
 .. supports_virtualio::
 
-Color Information
+색상 정보
 -----------------
 
-The grid formats have color information embedded in the grid file
-header. This describes how to scale data values to RGB values. When
-opening in read mode, the driver will report 4 bands - R, G, B and the
-data band. In reality there is 1 band and the RGB bands are 'virtual',
-made from scaling data. For this reason, when opening in write mode only
-1 band is reported and the RGB bands are unavailable.
+그리드 포맷은 그리드 파일 헤더에 색상 정보를 내장하고 있습니다. 색상 정보는 데이터 값을 RGB 값으로 크기 조정하는 방법을 서술합니다. 그리드 파일을 읽기 모드로 열면, 드라이버가 밴드 4개를 -- R, G, B와 데이터 밴드를 -- 리포트할 것입니다. 이때 실제 밴드는 1개이며 RGB 밴드들은 데이터를 크기 조정해서 나온 '가상' 밴드입니다. 이런 이유로 파일을 쓰기 모드로 열면 밴드 1개만 리포트되며 RGB 밴드는 사용할 수 없습니다.
 
-Metadata
---------
+메타데이터
+---------
 
-GDAL Metadata items are stored in the PAM .aux.xml file
+PAM .aux.xml 파일에 GDAL 메타데이터 항목을 저장합니다.
 
-Northwood Grid itself does not natively support arbitrary metadata
+노스우드 그리드 자체는 임의의 메타데이터를 네이티브하게 지원하지 않습니다.
 
-Nodata values
+NODATA 값
 -------------
 
-In write mode, it is possible to designate any value as the nodata
-value. These values are translated to the Vertical Mapper no data value
-when writing. Therefore, in read mode the nodata value is always
-reported as -1e37.
+쓰기 모드에서는, 어떤 값이든 NODATA 값으로 지정할 수 있습니다. 쓰기 작업 시 지정된 값을 버티컬 매퍼 NODATA 값으로 변환합니다. 따라서 읽기 모드에서는 NODATA 값을 항상 -1e37로 리포트합니다.
 
-Creation Options
+생성 옵션
 ~~~~~~~~~~~~~~~~
 
--  **ZMIN=-2e37**: Set the minimum Z value. Data are scaled on disk to a
-   16 bit integer and the Z value range is used to scale data. If not
-   set, it may cause incorrect data to be written when using 'Create()'
-   or a full recalculation of the source dataset statistics when using
-   'CreateCopy'
+-  **ZMIN=-2e37**:
+   최소 Z값을 설정합니다. 디스크 상에서 데이터를 16비트 정수형으로 크기 조정하는데, 데이터를 크기 조정하는 데 Z값 범위를 사용합니다. 지정하지 않는 경우, 'Create()' 사용 시 정확하지 않은 데이터를 작성할 수도 있고 'CreateCopy()' 사용 시 소스 데이터셋의 통계를 처음부터 다시 계산할 수도 있습니다.
 
--  **ZMAX=2e38**: Set the maximum Z value. Data are scaled on disk to a
-   16 bit integer and the Z value range is used to scale data. If not
-   set, it may cause incorrect data to be written when using 'Create()'
-   or a full recalculation of the source dataset statistics when using
-   'CreateCopy'
+-  **ZMAX=2e38**:
+   최대 Z값을 설정합니다. 디스크 상에서 데이터를 16비트 정수형으로 크기 조정하는데, 데이터를 크기 조정하는 데 Z값 범위를 사용합니다. 지정하지 않는 경우, 'Create()' 사용 시 정확하지 않은 데이터를 작성할 수도 있고 'CreateCopy()' 사용 시 소스 데이터셋의 통계를 처음부터 다시 계산할 수도 있습니다.
 
--  **BRIGHTNESS=50**: Set the brightness level. Only affects opening the
-   file in MapInfo/Vertical Mapper
+-  **BRIGHTNESS=50**:
+   명도 수준을 설정합니다. MapInfo 또는 버티컬 매퍼에서 파일을 열 때만 영향을 미칩니다.
 
--  **CONTRAST=50**: Set the contrast level. Only affects opening the
-   file in MapInfo/Vertical Mapper
+-  **CONTRAST=50**:
+   대비 수준을 설정합니다. MapInfo 또는 버티컬 매퍼에서 파일을 열 때만 영향을 미칩니다.
 
--  **TRANSCOLOR=0**: Set a transparent color level. Only affects opening
-   the file in MapInfo/Vertical Mapper
+-  **TRANSCOLOR=0**:
+   투명 색상 수준을 설정합니다. MapInfo 또는 버티컬 매퍼에서 파일을 열 때만 영향을 미칩니다.
 
--  **TRANSLUCENCY=0**: Set the translucency level. Only affects opening
-   the file in MapInfo/Vertical Mapper
+-  **TRANSLUCENCY=0**:
+   투명도 수준을 설정합니다. MapInfo 또는 버티컬 매퍼에서 파일을 열 때만 영향을 미칩니다.
