@@ -1,30 +1,22 @@
 .. _raster.pdf:
 
 ================================================================================
-PDF -- Geospatial PDF
+PDF -- 지리공간 PDF
 ================================================================================
 
 .. shortname:: PDF
 
-.. build_dependencies:: none for write support, Poppler/PoDoFo/PDFium for read support
+.. build_dependencies:: 쓰기 지원 의존성은 없음, 읽기 지원의 경우 Poppler/PoDoFo/PDFium 의존성
 
-GDAL supports reading Geospatial PDF documents, by extracting
-georeferencing information and rasterizing the data. Non-geospatial PDF
-documents will also be recognized by the driver.
+GDAL은 지리공간 PDF(Geospatial PDF) 문서로부터 지리참조 정보를 추출하고 데이터를 래스터화해서 지리공간 PDF 문서 읽어오기를 지원합니다. 이 드라이버는 지리공간 PDF 문서가 아닌 PDF 문서도 인식할 것입니다.
 
-PDF documents can be created from other
-GDAL raster datasets, and OGR datasources can also optionally be drawn
-on top of the raster layer (see OGR\_\* creation options in the below
-section).
+다른 GDAL 래스터 데이터셋으로부터 PDF 문서를 생성할 수 있으며, OGR 데이터소스가 래스터 레이어 위에 렌더링되도록 선택할 수도 있습니다. (아래 생성 옵션 단락에서 OGR\_\* 옵션들을 참조하십시오.)
 
-The driver supports reading georeferencing encoded in either of the 2
-current existing ways : according to the OGC encoding best practice, or
-according to the Adobe Supplement to ISO 32000.
+이 드라이버는 현재 OGC 인코딩 모범 사례(OGC encoding best practice) 또는 ISO 32000에 대한 어도비 부록(Adobe Supplement to ISO 32000) 두 가지 기존 방식 가운데 하나로 인코딩된 지리참조 정보 읽어오기를 지원합니다.
 
-Multipage documents are exposed as subdatasets, one subdataset par page
-of the document.
+다중 페이지 문서는 하위 데이터셋으로 -- 문서 1페이지 당 하위 데이터셋 1개로 노출됩니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -33,96 +25,84 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Vector support
+벡터 지원
 --------------
 
-See the :ref:`PDF vector <vector.pdf>` documentation page
+:ref:`PDF 벡터 <vector.pdf>` 문서 페이지를 참조하십시오.
 
-Metadata
---------
+메타데이터
+---------
 
-The neatline (for OGC best practice) or the bounding box (Adobe style)
-will be reported as a NEATLINE metadata item, so that it can be later
-used as a cutline for the warping algorithm.
+(OGC 모범 사례의 경우) 도곽선(neatline)을 또는 (어도비 스타일의) 경계 상자를 NEATLINE 메타데이터 항목으로 리포트할 것이기 때문에, 나중에 왜곡 작업(warping) 알고리즘 용 절단선(cutline)으로 사용할 수 있습니다.
 
-XMP metadata can be extracted from the file,
-and will be stored as XML raw content in the xml:XMP metadata domain.
+파일로부터 XMP 메타데이터를 추출할 수 있고, xml:XMP 메타데이터 도메인에 추출한 메타데이터를 XML 원본(raw) 내용으로 저장할 것입니다.
 
-Additional metadata, such as found in USGS
-Topo PDF can be extracted from the file, and will be stored as XML raw
-content in the EMBEDDED_METADATA metadata domain.
+예를 들어 USGS Topo PDF 같은 파일로부터 추가 메타데이터를 추출할 수 있고, EMBEDDED_METADATA 메타데이터 도메인에 추출한 메타데이터를 XML 원본(raw) 내용으로 저장할 것입니다.
 
-Configuration options
+환경설정 옵션
 ---------------------
 
--  :decl_configoption:`GDAL_PDF_DPI` : To control the dimensions of the raster by
-   specifying the DPI of the rasterization with the Its default value is
-   150. The driver will make some effort to
-   guess the DPI value either from a specific metadata item contained in
-   some PDF files, or from the raster images inside the PDF (in simple
-   cases).
--  :decl_configoption:`GDAL_PDF_NEATLINE` : The name of the neatline to
-   select (only available for geospatial PDF, encoded according to OGC
-   Best Practice). This defaults to "Map Layers" for USGS Topo PDF. If
-   not found, the neatline that covers the largest area.
--  :decl_configoption:`GDAL_USER_PWD` : User password for protected PDFs.
--  :decl_configoption:`GDAL_PDF_RENDERING_OPTIONS` : a combination of VECTOR, RASTER and
-   TEXT separated by comma, to select whether vector, raster or text
-   features should be rendered. If the option is not specified, all
-   features are rendered (Poppler and PDFium).
--  :decl_configoption:`GDAL_PDF_BANDS` = 3 or 4 : whether the PDF should be rendered as a
-   RGB (3) or RGBA (4) image. The default value will depend on the PDF rendering
-   used (Poppler vs PDFium) and on the content found in the PDF file (if an
-   image with transparency is recognized, then 4 will be used). When 3 bands
-   is selected, a white background is used.
--  :decl_configoption:`GDAL_PDF_LAYERS` = list of layers (comma separated) to turn ON (or
-   "ALL" to turn all layers ON). The layer names can be obtained by
-   querying the LAYERS metadata domain. When this option is specified,
-   layers not explicitly listed will be turned off (Poppler and PDFium).
--  :decl_configoption:`GDAL_PDF_LAYERS_OFF` = list of layers (comma separated) to turn OFF.
-   The layer names can be obtained by querying the LAYERS metadata
-   domain (Poppler and PDFium).
--  :decl_configoption:`GDAL_PDF_LAUNDER_LAYER_NAMES` = YES/NO: (GDAL >= 3.1) Can be set to NO
-   to avoid the layer names reported in the LAYERS metadata domain or as OGR
-   layers for the vector part to be "laundered".
+-  :decl_configoption:`GDAL_PDF_DPI`:
+   래스터화 DPI를 기본값 150으로 지정해서 래스터 크기를 제어합니다. 이 드라이버는 일부 PDF 파일에 담겨 있는 특정 메타데이터 항목으로부터 DPI 값을 추정하거나, 또는 (단순 작성의 경우) PDF 내부 래스터 이미지로부터 DPI 값을 추정하려고 시도할 것입니다.
 
-Open Options
+-  :decl_configoption:`GDAL_PDF_NEATLINE`:
+   선택할 도곽선의 이름입니다. (OGC 인코딩 모범 사례에 따라 인코딩된 지리정보 PDF인 경우에만 사용할 수 있습니다.) USGS Topo PDF의 경우 기본값은 "Map Layers"입니다. 찾을 수 없는 경우 가장 넓은 영역을 커버하는 도곽선을 사용합니다.
+
+-  :decl_configoption:`GDAL_USER_PWD`:
+   보안이 걸린 PDF 용 사용자 비밀번호입니다.
+
+-  :decl_configoption:`GDAL_PDF_RENDERING_OPTIONS`:
+   벡터, 래스터 또는 텍스트 객체를 렌더링해야 할지 여부를 선택하기 위한, 쉼표로 구분된 VECTOR, RASTER 및 TEXT의 조합입니다. 이 옵션을 지정하지 않는 경우, (Poppler 및 PDFium은) 모든 객체를 렌더링합니다.
+
+-  :decl_configoption:`GDAL_PDF_BANDS`=3 또는 4:
+   PDF를 RGB(3) 또는 RGBA(4) 이미지로 렌더링해야 할지를 지정합니다. 기본값은 사용하는 PDF 렌더링과 (Poppler인지 PDFium인지) PDF 파일의 콘텐츠에 따라 달라집니다. (투명도를 가진 이미지를 인식한 경우, 4를 사용할 것입니다.) 3밴드를 선택한 경우, 하얀색을 배경색으로 사용합니다.
+
+-  :decl_configoption:`GDAL_PDF_LAYERS`=레이어 목록 (쉼표 구분):
+   쉼표로 구분된 가시화시킬 레이어들의 목록입니다. (또는 "ALL"로 지정하면 모든 레이어가 가시화됩니다.) LAYERS 메타데이터 도메인을 쿼리하면 레이어 이름을 수집할 수 있습니다. 이 옵션을 지정한 경우, (Poppler 및 PDFium은) 명확하게 목록에 있지 않은 레이어들을 숨길 것입니다.
+
+-  :decl_configoption:`GDAL_PDF_LAYERS_OFF`=레이어 목록 (쉼표 구분):
+   쉼표로 구분된 숨길 레이어들의 목록입니다. (Poppler 및 PDFium의 경우) LAYERS 메타데이터 도메인을 쿼리하면 레이어 이름을 수집할 수 있습니다.
+
+-  :decl_configoption:`GDAL_PDF_LAUNDER_LAYER_NAMES`=YES/NO: (GDAL 3.1 이상 버전)
+   LAYERS 메타데이터 도메인에 리포트된 레이어 이름이 또는 OGR 벡터 레이어 이름이 "세탁"되는 일을 막으려면 NO로 설정하면 됩니다.
+
+열기 옵션
 ~~~~~~~~~~~~
 
-Above configuration options are also available as open options.
+앞의 환경설정 옵션을 열기 옵션으로도 사용할 수 있습니다.
 
--  **RENDERING_OPTIONS**\ =[RASTER,VECTOR,TEXT / RASTER,VECTOR /
-   RASTER,TEXT / RASTER / VECTOR,TEXT / VECTOR / TEXT]: same as
-   GDAL_PDF_RENDERING_OPTIONS configuration option
+-  **RENDERING_OPTIONS=[RASTER,VECTOR,TEXT / RASTER,VECTOR / RASTER,TEXT / RASTER / VECTOR,TEXT / VECTOR / TEXT]**:
+   GDAL_PDF_RENDERING_OPTIONS 환경설정 옵션과 동일합니다.
 
--  **DPI**\ =value: same as GDAL_PDF_DPI configuration option
+-  **DPI=value**:
+   GDAL_PDF_DPI 환경설정 옵션과 동일합니다.
 
--  **USER_PWD**\ =password: same as GDAL_USER_PWD configuration option
+-  **USER_PWD=password**:
+   GDAL_USER_PWD 환경설정 옵션과 동일합니다.
 
--  **PDF_LIB**\ =[POPPLER/PODOFO/PDFIUM]: only available for builds with
-   multiple backends.
+-  **PDF_LIB=[POPPLER/PODOFO/PDFIUM]**:
+   다중 백엔드로 빌드된 경우에만 사용할 수 있습니다.
 
--  **LAYERS**\ =string: list of layers (comma separated) to turn ON.
-   Same as GDAL_PDF_LAYERS configuration option
+-  **LAYERS=string**:
+   쉼표로 구분된 가시화시킬 레이어들의 목록입니다.
+   GDAL_PDF_LAYERS 환경설정 옵션과 동일합니다.
 
--  **GDAL_PDF_LAYERS_OFF**\ =string: list of layers (comma separated) to
-   turn OFF. Same as GDAL_PDF_LAYERS_OFF configuration option
+-  **GDAL_PDF_LAYERS_OFF=string**:
+   쉼표로 구분된 숨길 레이어들의 목록입니다.
+   GDAL_PDF_LAYERS_OFF 환경설정 옵션과 동일합니다.
 
--  **BANDS**\ =3 or 4. Same as GDAL_PDF_BANDS configuration option
+-  **BANDS=3 또는 4**:
+   GDAL_PDF_BANDS 환경설정 옵션과 동일합니다.
 
--  **NEATLINE**\ =name of neatline. Same as GDAL_PDF_NEATLINE
-   configuration option
+-  **NEATLINE=string**:
+   도곽선 이름입니다. GDAL_PDF_NEATLINE 환경설정 옵션과 동일합니다.
 
-LAYERS Metadata domain
+LAYERS 메타데이터 도메인
 ----------------------
 
-When GDAL is compiled against Poppler
-or PDFium, the LAYERS metadata domain can be queried to retrieve layer
-names that can be turned ON or OFF. This is useful to know which values
-to specify for the *GDAL_PDF_LAYERS* or *GDAL_PDF_LAYERS_OFF*
-configuration options.
+GDAL을 Poppler 또는 PDFium을 대상으로 컴파일한 경우, 가시성 상태를 끄거나 켤 수 있는 레이어 이름을 수집하기 위해 LAYERS 메타데이터 도메인을 쿼리할 수 있습니다. *GDAL_PDF_LAYERS* 또는 *GDAL_PDF_LAYERS_OFF* 환경설정 옵션에 지정할 값을 알아내는 데 유용합니다.
 
-For example :
+다음은 그 예시입니다:
 
 ::
 
@@ -141,248 +121,173 @@ For example :
 
    $ gdal_translate ../autotest/gdrivers/data/adobe_style_geospatial.pdf out.tif --config GDAL_PDF_LAYERS_OFF "New_Data_Frame"
 
-Restrictions
+제약 조건
 ------------
 
-The opening of a PDF document (to get the georeferencing) is fast, but
-at the first access to a raster block, the whole page will be rasterized
-(with Poppler), which can be a slow operation.
+(지리참조 정보를 얻기 위해) PDF 문서를 열 때의 속도는 빠르지만, (Poppler의 경우) 래스터 블록에 처음 접근할 때 전체 페이지를 래스터화할 것이기 때문에 속도가 느려질 수 있습니다.
 
-Note: some raster-only PDF files (such as some
-USGS GeoPDF files), that are regularly tiled are exposed as tiled
-dataset by the GDAL PDF driver, and can be rendered with any backends.
+주의: (일부 USGS GeoPDF 파일들처럼) 래스터만 가지고 있는 일부 PDF 파일의 경우, GDAL PDF 드라이버가 정규 타일화된 래스터를 타일화 데이터셋으로 노출시키기 때문에, 어떤 백엔드로도 렌더링할 수 있습니다.
 
-Only a few of the possible Datums available in the OGC best practice
-spec have been currently mapped in the driver. Unrecognized datums will
-be considered as being based on the WGS84 ellipsoid.
+이 드라이버에 현재 매핑된 OGC 모범 사례 사양에서 사용할 수 있는 원점(datum)이 많지 않습니다. 인식할 수 없는 원점은 WGS84 타원제 기반 원점으로 간주할 것입니다.
 
-For documents that contain several neatlines in a page (insets), the
-georeferencing will be extracted from the inset that has the largest
-area (in term of screen points).
+한 페이지에 도곽선을 여러 개 담고 있는 (삽화가 여러 개인) 문서의 경우, (스크린 관점에서) 가장 넓은 영역을 가지고 있는 삽화로부터 지리참조 정보를 추출할 것입니다.
 
-Creation Issues
+생성 문제점
 ---------------
 
-PDF documents can be created from other GDAL raster datasets, that have
-1 band (graylevel or with color table), 3 bands (RGB) or 4 bands (RGBA).
+1밴드(회색조 또는 색상표), 3밴드(RGB) 또는 4밴드(RGBA)를 가지고 있는 GDAL 래스터 데이터셋으로부터 PDF 문서를 생성할 수 있습니다.
 
-Georeferencing information will be written by default according to the
-ISO32000 specification. It is also possible to write it according to the
-OGC Best Practice conventions (but limited to a few datum and projection
-types).
+기본적으로 ISO 32000 사양에 따라 지리참조 정보를 작성할 것입니다. (몇 안 되는 원점과 투영 유형으로 제한되겠지만) OGC 모범 사례 규범에 따라 작성할 수도 있습니다.
 
-Note: PDF write support does not require linking to any backend.
+주의: PDF 쓰기 지원은 어떤 백엔드와의 링크 작업도 요구하지 않습니다.
 
-Creation Options
+생성 옵션
 ~~~~~~~~~~~~~~~~
 
--  **COMPRESS=[NONE/DEFLATE/JPEG/JPEG2000]**: Set the compression to use
-   for raster data. DEFLATE is the default.
+-  **COMPRESS=[NONE/DEFLATE/JPEG/JPEG2000]**:
+   래스터 데이터에 사용할 압축 방식을 설정합니다. 기본값은 DEFLATE입니다.
 
--  **STREAM_COMPRESS=[NONE/DEFLATE]**: Set the compression to use for
-   stream objects (vector geometries, JavaScript content). DEFLATE is
-   the default.
+-  **STREAM_COMPRESS=[NONE/DEFLATE]**:
+   스트림 객체(벡터 도형, 자바스크립트 콘텐츠)에 사용할 압축 방식을 설정합니다. 기본값은 DEFLATE입니다.
 
--  **DPI=value**: Set the DPI to use. Default to 72. May be
-   automatically adjusted to higher value so that page dimension does
-   not exceed the 14400 maximum value (in user units) allowed by
-   Acrobat.
+-  **DPI=value**:
+   사용할 DPI를 설정합니다. 기본값은 72입니다.
+   페이지 크기가 애크러뱃이 허용하는 (사용자 단위) 최대 14400값을 초과하지 않도록 더 높은 해상도값으로 자동 조정될 수도 있습니다.
 
--  **WRITE_USERUNIT=YES/NO**: (GDAL >= 2.2) Whether the UserUnit setting
-   computed from the DPI (UserUnit = DPI / 72.0) should be recorded in
-   the file. When UserUnit is recorded, the raster size in pixels
-   recognized by GDAL on reading remains identical to the source raster.
-   When UserUnit is not recorded, the printed size will depends on the
-   DPI value. If this parameter is not set, but DPI is specified, then
-   it will default to NO (so that the printed size depends on the DPI
-   value). If this parameter is not set and DPI is not specified, then
-   UserUnit will be recorded (so that the raster size in pixels
-   recognized by GDAL on reading remain identical to the source raster).
+-  **WRITE_USERUNIT=YES/NO**: (GDAL 2.2이상 버전)
+   파일에 DPI로부터 계산한 UserUnit 설정을 (UserUnit = DPI / 72.0) 기록해야 할지 여부를 선택합니다.
+   UserUnit을 기록하는 경우, 읽기 작업 시 GDAL이 인식하는 픽셀 단위 래스터 크기가 소스 래스터 크기와 동일할 것입니다. UserUnit을 기록하지 않으면 인쇄되는 크기가 DPI 값에 따라 달라질 것입니다. DPI는 지정했는데 이 파라미터를 설정하지 않는 경우, 기본값 NO를 사용할 것입니다. (즉 인쇄되는 크기가 DPI 값에 따라 달라집니다.) 이 파라미터는 설정했는데 DPI를 지정하지 않으면, UserUnit을 기록할 것입니다. (즉 읽기 작업 시 GDAL이 인식하는 픽셀 단위 래스터 크기가 소스 래스터 크기와 동일합니다.)
 
--  **PREDICTOR=[1/2]**: Only for DEFLATE compression. Might be set to 2
-   to use horizontal predictor that can make files smaller (but not
-   always!). 1 is the default.
+-  **PREDICTOR=[1/2]**:
+   DEFLATE 압축을 사용하는 경우에만 설정할 수 있습니다. 파일 용량을 더 작게 생성할 수 있는 (그러나 항상 그렇지는 않습니다!) 수평 예측 변수를 사용하려면 2로 설정하면 됩니다. 기본값은 1입니다.
 
--  **JPEG_QUALITY=[1-100]**: Set the JPEG quality when using JPEG
-   compression. A value of 100 is best quality (least compression), and
-   1 is worst quality (best compression). The default is 75.
+-  **JPEG_QUALITY=[1-100]**:
+   JPEG 압축을 사용하는 경우 JPEG 품질을 설정합니다.
+   100이 최고 품질(최저 압축), 1이 최저 품질(최고 압축)입니다. 기본값은 75입니다.
 
--  **JPEG2000_DRIVER=[JP2KAK/JP2ECW/JP2OpenJPEG/JPEG2000]**: Set the
-   JPEG2000 driver to use. If not specified, it will be searched in the
-   previous list.
+-  **JPEG2000_DRIVER=[JP2KAK/JP2ECW/JP2OpenJPEG/JPEG2000]**:
+   사용할 JPEG2000 드라이버를 설정합니다. 설정하지 않는 경우 목록에서 검색할 것입니다.
 
--  **TILED=YES**: By default monoblock files are created. This option
-   can be used to force creation of tiled PDF files.
+-  **TILED=YES**:
+   기본적으로 블록 1개로 이루어진 파일을 생성합니다.
+   이 옵션을 설정하면 타일화 PDF 파일을 강제로 생성할 수 있습니다.
 
--  **BLOCKXSIZE=n**: Sets tile width, defaults to 256.
+-  **BLOCKXSIZE=n**:
+   타일 너비를 설정합니다. 기본값은 256입니다.
 
--  **BLOCKYSIZE=n**: Set tile height, defaults to 256.
+-  **BLOCKYSIZE=n**:
+   타일 높이를 설정합니다. 기본값은 256입니다.
 
--  **CLIPPING_EXTENT=xmin,ymin,xmax,ymax**: Set the clipping extent for
-   the main source dataset and for the optional extra rasters. The
-   coordinates are expressed in the units of the SRS of the dataset. If
-   not specified, the clipping extent is set to the extent of the main
-   source dataset.
+-  **CLIPPING_EXTENT=xmin,ymin,xmax,ymax**:
+   주 소스 데이터셋 및 선택적인 추가 래스터에 자르기 범위를 설정합니다. 좌표 단위는 데이터셋의 공간 좌표계 단위입니다. 지정하지 않는 경우, 주 소스 데이터셋의 범위를 자르기 범위로 설정합니다.
 
--  **LAYER_NAME=name**: Name for layer where the raster is placed. If
-   specified, the raster will be be placed into a layer that can be
-   toggled/un-toggled in the "Layer tree" of the PDF reader.
+-  **LAYER_NAME=name**:
+   래스터가 배치되는 레이어의 이름입니다. 이 옵션을 지정하는 경우, PDF 판독기의 "레이어 트리"에서 가시성을 켜고 끌 수 있는 레이어에 래스터를 배치할 것입니다.
 
--  **EXTRA_RASTERS=dataset_ids**: Comma separated list of georeferenced
-   rasters to insert into the page. Those rasters are displayed on top
-   of the main source raster. They must be georeferenced in the same
-   projection, and they will be clipped to CLIPPING_EXTENT if it is
-   specified (otherwise to the extent of the main source raster).
+-  **EXTRA_RASTERS=dataset_ids**:
+   페이지에 삽일할, 쉼표로 구분된 지리참조 래스터 목록입니다. 이 래스터들을 주 소스 래스터 위에 출력합니다. 동일한 투영법으로 지리참조되어 있어야만 하며, CLIPPING_EXTENT 옵션을 설정한 경우 자르기 범위에 맞춰 잘려질 것입니다. (CLIPPING_EXTENT 옵션을 설정하지 않았다면 주 소스 래스터의 범위에 맞춰 잘려질 것입니다.)
 
--  **EXTRA_RASTERS_LAYER_NAME=dataset_names**: Comma separated list of
-   name for each raster specified in EXTRA_RASTERS. If specified, each
-   extra raster will be be placed into a layer, named with the specified
-   value, that can be toggled/un-toggled in the "Layer tree" of the PDF
-   reader. If not specified, all the extra rasters will be placed in the
-   default layer.
+-  **EXTRA_RASTERS_LAYER_NAME=dataset_names**:
+   EXTRA_RASTERS에 지정한 각 래스터의 이름을 쉼표로 구분한 목록입니다. 이 옵션을 지정하는 경우, 지정한 이름으로 명명된 레이어 하나에 해당 이름을 가진 래스터 하나를 각각 배치할 것입니다. 이 레이어들은 PDF 판독기의 "레이어 트리"에서 가시성을 켜고 끌 수 있습니다. 지정하지 않는다면, 기본 레이어에 모든 추가 래스터를 배치할 것입니다.
 
--  **EXTRA_STREAM=content**: A PDF content stream to draw after the
-   imagery, typically to add some text. It may refer to any of the 14
-   standard PDF Type 1 fonts (omitting hyphens), as /FTimesRoman,
-   /FTimesBold, /FHelvetica, /FCourierOblique, ... , in which case the
-   required resource dictionary will be inserted.
+-  **EXTRA_STREAM=content**:
+   영상을 렌더링한 다음 -- 보통 텍스트를 추가하기 위해 -- 렌더링할 PDF 콘텐츠 스트림입니다.
+   표준 PDF 1번 유형 글꼴 14개 가운데 어떤 글꼴이든 (하이픈을 생략하고) /FTimesRoman, /FTimesBold, /FHelvetica, /FCourierOblique, ... 형태로 참조할 수도 있습니다. 이때 요청된 리소스 디렉터리를 삽입할 것입니다.
 
--  **EXTRA_IMAGES=image_file_name,x,y,scale[,link=some_url] (possibly
-   repeated)**: A list of (ungeoreferenced) images to insert into the
-   page as extra content. This is useful to insert logos, legends,
-   etc... x and y are in user units from the lower left corner of the
-   page, and the anchor point is the lower left pixel of the image.
-   scale is a magnifying ratio (use 1 if unsure). If link=some_url is
-   specified, the image will be selectable and its selection will cause
-   a web browser to be opened on the specified URL.
+-  **EXTRA_IMAGES=image_file_name,x,y,scale[,link=some_url] (반복 가능)**:
+   페이지에 추가 콘텐츠로 삽입할 (지리참조 되지 않은) 이미지 목록입니다. 로고, 범례 등등을 삽입하는 데 유용한 옵션입니다. x 및 y는 페이지의 좌하단 모서리에서 시작하는 사용자 단위 좌표로, 기준점(anchor point)이 이미지의 좌하단 픽셀입니다. 척도(scale)는 확대 비율입니다. (확실하지 않은 경우 1로 설정하십시오.) link=some_url을 지정하는 경우, 이미지를 클릭할 수 있게 됩니다. 이런 이미지를 클릭하면 웹브라우저가 지정한 URL로 열릴 것입니다.
 
--  **EXTRA_LAYER_NAME=name**: Name for layer where the extra content
-   specified with EXTRA_STREAM or EXTRA_IMAGES is placed. If specified,
-   the extra content will be be placed into a layer that can be
-   toggled/un-toggled in the "Layer tree" of the PDF reader.
+-  **EXTRA_LAYER_NAME=name**:
+   EXTRA_STREAM 또는 EXTRA_IMAGES 옵션으로 지정한 추가 콘텐츠를 배치할 레이어의 이름입니다.
+   이 옵션을 지정한 경우, PDF 판독기의 "레이어 트리"에서 가시성을 켜고 끌 수 있는 레이어에 추가 콘텐츠를 배치할 것입니다.
 
 -  **MARGIN/LEFT_MARGIN/RIGHT_MARGIN/TOP_MARGIN/BOTTOM_MARGIN=value**:
-   Margin around image in user units.
+   이미지 주위에 사용자 단위 여백을 설정합니다.
 
--  **GEO_ENCODING=[NONE/ISO32000/OGC_BP/BOTH]**: Set the Geo encoding
-   method to use. ISO32000 is the default.
+-  **GEO_ENCODING=[NONE/ISO32000/OGC_BP/BOTH]**:
+   사용할 지리 인코딩 메소드를 설정합니다. 기본값은 ISO 32000입니다.
 
--  **NEATLINE=polygon_definition_in_wkt**: Set the NEATLINE to use.
+-  **NEATLINE=polygon_definition_in_wkt**:
+   사용할 NEATLINE을 설정합니다.
 
--  **XMP=[NONE/xml_xmp_content]**: By default, if the source dataset has
-   data in the 'xml:XMP' metadata domain, this data will be copied to
-   the output PDF, unless this option is set to NONE. The XMP xml string
-   can also be directly set to this option.
+-  **XMP=[NONE/xml_xmp_content]**:
+   소스 데이터셋이 'xml:XMP' 메타데이터 도메인에 데이터를 가지고 있는 경우, 이 옵션을 NONE으로 설정하지 않는 이상 기본적으로 산출 PDF에 이 데이터를 복사할 것입니다. 이 옵션에 XMP XML 문자열을 직접 설정할 수도 있습니다.
 
--  **WRITE_INFO=[YES/NO]**: By default, the AUTHOR, CREATOR,
-   CREATION_DATE, KEYWORDS, PRODUCER, SUBJECT and TITLE information will
-   be written into the PDF Info block from the corresponding metadata
-   item from the source dataset, or if not set, from the corresponding
-   creation option. If this option is set to NO, no information will be
-   written.
+-  **WRITE_INFO=[YES/NO]**:
+   기본적으로, PDF Info 블록에 소스 데이터셋의 해당 메타데이터 항목으로부터 나온 AUTHOR, CREATOR, CREATION_DATE, KEYWORDS, PRODUCER, SUBJECT 및 TITLE 정보를 작성할 것입니다.
+   이 옵션을 설정하지 않은 경우 대응하는 생성 옵션으로부터 PDF Info 블록에 앞의 정보를 작성할 것입니다.
+   이 옵션을 NO로 설정하면, 어떤 정보도 작성하지 않을 것입니다.
 
--  **AUTHOR**, **CREATOR**, **CREATION_DATE**, **KEYWORDS**,
-   **PRODUCER**, **SUBJECT**, **TITLE** : metadata that can be written
-   into the PDF Info block. Note: the format of the value for
-   CREATION_DATE must be D:YYYYMMDDHHmmSSOHH'mm' (e.g.
-   D:20121122132447+02'00' for 22 nov 2012 13:24:47 GMT+02) (see `PDF
-   Reference, version
-   1.7 <http://www.adobe.com/devnet/acrobat/pdfs/pdf_reference_1-7.pdf>`__,
-   page 160)
+-  **AUTHOR**, **CREATOR**, **CREATION_DATE**, **KEYWORDS**, **PRODUCER**, **SUBJECT**, **TITLE**:
+   PDF Info 블록에 작성할 수 있는 메타데이터입니다.
+   주의: CREATION_DATE에 설정할 값의 서식이 반드시 D:YYYYMMDDHHmmSSOHH'mm'이어야만 합니다. (예: 2012년 11월 22일 13:24:47 GMT+02는 D:20121122132447+02'00'으로 표현됩니다.)
+   (`PDF 참조 문서 1.7버전 <http://www.adobe.com/devnet/acrobat/pdfs/pdf_reference_1-7.pdf>`_ 의 160페이지를 참조하십시오.)
 
--  **OGR_DATASOURCE=name** : Name of the OGR datasource to display on
-   top of the raster layer.
+-  **OGR_DATASOURCE=name**:
+   래스터 레이어 위에 출력할 OGR 데이터소스의 이름입니다.
 
--  **OGR_DISPLAY_FIELD=name** : Name of the field (matching the name of
-   a field from the OGR layer definition) to use to build the label of
-   features that appear in the "Model Tree" UI component of a well-known
-   PDF viewer. For example, if the OGR layer has a field called "ID",
-   this can be used as the value for that option : features in the
-   "Model Tree" will be labelled from their value for the "ID" field. If
-   not specified, sequential generic labels will be used ("feature1",
-   "feature2", etc... ).
+-  **OGR_DISPLAY_FIELD=name**:
+   잘 알려진 PDF 뷰어의 "모델 트리" UI 구성요소에 노출될 객체의 라벨을 작성하기 위해 사용할 (OGR 레이어 정의의 필드명과 일치하는) 필드명입니다. 예를 들어, OGR 레이어가 "ID"라는 필드를 가지고 있다면 이 필드를 이 옵션의 값으로 사용할 수 있습니다. "모델 트리"에 있는 객체의 라벨을 "ID" 필드의 값으로 작성할 것입니다.
+   이 옵션을 지정하지 않는 경우, 순차적인 일반 라벨을 ("feature1", "feature2", ...) 사용할 것입니다.
 
--  **OGR_DISPLAY_LAYER_NAMES=names** : Comma separated list of names to
-   display for the OGR layers in the "Model Tree". This option is useful
-   to provide custom names, instead of OGR layer name that are used when
-   this option is not specified. When specified, the number of names
-   should be the same as the number of OGR layers in the datasource (and
-   in the order they appear when listed by ogrinfo for example).
+-  **OGR_DISPLAY_LAYER_NAMES=names**:
+   "모델 트리"에 OGR 레이어를 출력하기 위한, 쉼표로 구분된 레이어 이름 목록입니다. 이 옵션을 지정하지 않는 경우 쓰이는 OGR 레이어 이름 대신 사용자 지정 이름을 지정하는 데 유용한 옵션입니다. 이 옵션을 지정하면, 이름의 개수와 데이터소스에 있는 OGR 레이어들의 개수가 (또한 예를 들어 ogrinfo로 OGR 레이어 목록이 리포트될 때의 순서도) 일치해야 합니다.
 
--  **OGR_WRITE_ATTRIBUTES=YES/NO** : Whether to write attributes of OGR
-   features. Defaults to YES
+-  **OGR_WRITE_ATTRIBUTES=YES/NO**:
+   OGR 객체의 속성을 작성할지 여부를 선택합니다. 기본값은 YES입니다.
 
--  **OGR_LINK_FIELD=name** : Name of the field (matching the name of a
-   field from the OGR layer definition) to use to cause clicks on OGR
-   features to open a web browser on the URL specified by the field
-   value.
+-  **OGR_LINK_FIELD=name**:
+   OGR 객체를 클릭하면 해당 필드값이 지정하는 URL로 웹브라우저를 열기 위해 사용할 (OGR 레이어 정의의 필드명과 일치하는) 필드명을 설정합니다.
 
--  **OFF_LAYERS=names**: Comma separated list of layer names that should
-   be initially hidden. By default, all layers are visible. The layer
-   names can come from LAYER_NAME (main raster layer name),
-   EXTRA_RASTERS_LAYER_NAME, EXTRA_LAYER_NAME and
-   OGR_DISPLAY_LAYER_NAMES.
+-  **OFF_LAYERS=names**:
+   처음에는 숨겨야 할, 쉼표로 구분된 레이어 이름 목록입니다. 기본적으로 모든 레이어의 가시성이 켜져 있습니다.
+   LAYER_NAME(주 래스터 레이어 이름), EXTRA_RASTERS_LAYER_NAME, EXTRA_LAYER_NAME 및 OGR_DISPLAY_LAYER_NAMES 옵션에 지정한 이름을 설정할 수 있습니다.
 
--  **EXCLUSIVE_LAYERS=names**: Comma separated list of layer names, such
-   that only one of those layers can be visible at a time. This is the
-   behavior of radio-buttons in a graphical user interface. The layer
-   names can come from LAYER_NAME (main raster layer name),
-   EXTRA_RASTERS_LAYER_NAME, EXTRA_LAYER_NAME and
-   OGR_DISPLAY_LAYER_NAMES.
+-  **EXCLUSIVE_LAYERS=names**:
+   한번에 하나만 가시화될 수 있는, 쉼표로 구분된 레이어 이름 목록입니다.
+   GUI에서 라디오 버튼의 습성과 동일합니다. LAYER_NAME(주 래스터 레이어 이름), EXTRA_RASTERS_LAYER_NAME, EXTRA_LAYER_NAME 및 OGR_DISPLAY_LAYER_NAMES 옵션에 지정한 이름을 설정할 수 있습니다.
 
--  **JAVASCRIPT=script**: Javascript content to run at document opening.
-   See `Acrobat(R) JavaScript Scripting
-   Reference <http://partners.adobe.com/public/developer/en/acrobat/sdk/AcroJS.pdf>`__.
+-  **JAVASCRIPT=script**:
+   문서를 열 때 실행될 자바스크립트의 내용입니다.
+   `애크러뱃(R) 자바스크립트 스크립트 작업 참조 문서 <http://partners.adobe.com/public/developer/en/acrobat/sdk/AcroJS.pdf>`_ 를 참조하십시오.
 
--  **JAVASCRIPT_FILE=script_filename**: Name of Javascript file to embed
-   and run at document opening. See `Acrobat(R) JavaScript Scripting
-   Reference <http://partners.adobe.com/public/developer/en/acrobat/sdk/AcroJS.pdf>`__.
+-  **JAVASCRIPT_FILE=script_filename**:
+   문서에 내장되어 문서를 열 때 실행될 자바스크립트 파일의 이름입니다.
+   `애크러뱃(R) 자바스크립트 스크립트 작업 참조 문서 <http://partners.adobe.com/public/developer/en/acrobat/sdk/AcroJS.pdf>`_ 를 참조하십시오.
 
--  **COMPOSITION_FILE=xml_filename**: (GDAL >= 3.0) See below
-   paragraph "Creation of PDF file from a XML composition file"
+-  **COMPOSITION_FILE=xml_filename**: (GDAL 3.0 이상 버전)
+   아래에 있는 "XML 구성 파일로부터 PDF 파일 생성" 단락을 참조하십시오.
 
-Update of existing files
+기존 파일 업데이트
 ------------------------
 
-Existing PDF files (created or not with GDAL) can be opened in update
-mode in order to set or update the following elements :
+다음 요소들을 설정하거나 업데이트하기 위해 (GDAL이 생성했거나 또는 생성하지 않은) 기존 PDF 파일을 업데이트 모드로 열 수 있습니다:
 
--  Geotransform and associated projection (with SetGeoTransform() and
-   SetProjection())
--  GCPs (with SetGCPs())
--  Neatline (with SetMetadataItem("NEATLINE",
-   polygon_definition_in_wkt))
--  Content of Info object (with SetMetadataItem(key, value) where key is
-   one of AUTHOR, CREATOR, CREATION_DATE, KEYWORDS, PRODUCER, SUBJECT
-   and TITLE)
--  xml:XMP metadata (with SetMetadata(md, "xml:XMP"))
+-  지리변형 및 관련 투영법 (SetGeoTransform() 및 SetProjection() 이용)
+-  GCP (SetGCPs() 이용)
+-  도곽선 (SetMetadataItem("NEATLINE",polygon_definition_in_wkt) 이용)
+-  Info 객체의 내용 (SetMetadataItem(key, value) 이용, 이때 키는 AUTHOR, CREATOR, CREATION_DATE, KEYWORDS, PRODUCER, SUBJECT 및 TITLE 가운데 하나)
+-  xml:XMP 메타데이터 (SetMetadata(md, "xml:XMP") 이용)
 
-For geotransform or GCPs, the Geo encoding method used by default is
-ISO32000. OGC_BP can be selected by setting the GDAL_PDF_GEO_ENCODING
-configuration option to OGC_BP.
+지리변형 또는 GCP의 경우, 기본적으로 사용하는 지리 인코딩은 ISO 32000입니다. GDAL_PDF_GEO_ENCODING 환경설정 옵션을 OGC_BP로 설정하면 OGC_BP를 선택할 수 있습니다.
 
-Updated elements are written at the end of the file, following the
-incremental update method described in the PDF specification.
+업데이트된 요소들은 PDF 사양에서 서술하는 증분 업데이트 메소드에 따라 파일 마지막에 작성됩니다.
 
-Creation of PDF file from a XML composition file (GDAL >= 3.0)
+XML 구성 파일로부터 PDF 파일 생성 (GDAL 3.0 이상 버전)
 --------------------------------------------------------------
 
-A PDF file can be generate from a XML file that describes the
-composition of the PDF:
+다음과 같은 PDF의 구성(composition)을 서술하는 XML 파일로부터 PDF 파일을 생성할 수 있습니다:
 
--  number of pages
--  layer tree, with visibility state, exclusion groups
--  definition or 0, 1 or several georeferenced areas per page
--  page content made of rasters, vectors or labels
+-  페이지 수
+-  가시성 상태 및 제외 그룹을 가진 레이어 트리
+-  페이지 당 0개, 1개 또는 여러 개인 지리참조 영역의 정의
+-  래스터, 벡터 또는 라벨로 이루어진 페이지 내용
 
-The GDALCreate() API must be used with width = height = bands = 0 and
-datatype = GDT_Unknown and COMPOSITION_FILE must be the single creation
-option.
+GDALCreate() API를 width = height = bands = 0 및 datatype = GDT_Unknown으로 사용해야만 하며, 반드시 COMPOSITION_FILE만 단일 생성 옵션으로 사용해야 합니다.
 
-The XML schema against which the composition file must validate is
-`pdfcomposition.xsd <https://raw.githubusercontent.com/OSGeo/gdal/master/data/pdfcomposition.xsd>`__
+`pdfcomposition.xsd <https://raw.githubusercontent.com/OSGeo/gdal/master/data/pdfcomposition.xsd>`_ XML 스키마를 기준으로 구성 파일을 무결성 검증해야만 합니다.
 
-Example on how to use the API:
+다음은 API 사용법에 대한 예시입니다:
 
 .. code-block:: c++
 
@@ -392,12 +297,9 @@ Example on how to use the API:
    GDALClose(ds);
    CSLDestroy(papszOptions);
 
-A sample Python script
-`gdal_create_pdf.py <https://raw.githubusercontent.com/OSGeo/gdal/master/swig/python/gdal-utils/osgeo_utils/samples/gdal_create_pdf.py>`__
-is also available. Starting with GDAL 3.2, the :ref:`gdal_create` utility can
-also be used.
+파이썬 스크립트 샘플 `gdal_create_pdf.py <https://raw.githubusercontent.com/OSGeo/gdal/master/swig/python/gdal-utils/osgeo_utils/samples/gdal_create_pdf.py>`_ 도 이용할 수 있습니다. GDAL 3.2버전부터, :ref:`gdal_create` 유틸리티도 사용할 수 있습니다.
 
-Example of a composition XML file:
+다음은 XML 구성 파일의 예시입니다:
 
 .. code-block:: xml
 
@@ -490,109 +392,102 @@ Example of a composition XML file:
 
    </PDFComposition>
 
-Build dependencies
+빌드 의존성
 ------------------
 
-For read support, GDAL must be built against one of the following
-libraries :
+GDAL이 읽기 지원을 하려면 GDAL을 다음 라이브러리들 가운데 하나를 대상으로 빌드해야하만 합니다:
 
--  `Poppler <http://poppler.freedesktop.org/>`__ (GPL-licensed)
--  `PoDoFo <http://podofo.sourceforge.net/>`__ (LGPL-licensed)
--  `PDFium <https://code.google.com/p/pdfium/>`__ (New BSD-licensed,
-   supported since GDAL 2.1.0)
+-  `Poppler <http://poppler.freedesktop.org/>`_ (GPL 사용 허가)
+-  `PoDoFo <http://podofo.sourceforge.net/>`_ (LGPL 사용 허가)
+-  `PDFium <https://code.google.com/p/pdfium/>`_ (새로운 BSD 사용 허가, GDAL 2.1.0버전부터 지원)
 
-Note: it is also possible to build against a combination of several of
-the above libraries. PDFium will be used in priority over Poppler,
-itself used in priority over PoDoFo.
+주의: 이 라이브러리들 가운데 몇 개의 조합을 대상으로 빌드할 수도 있습니다. PDFium을 Poppler보다 우선 사용하고, Poppler를 PoDoFo보다 우선 사용할 것입니다.
 
-Unix build
+유닉스 빌드
 ~~~~~~~~~~
 
-The relevant configure options are --with-poppler, --with-podofo,
---with-podofo-lib and --with-podofo-extra-lib-for-test.
+관련 환경설정 옵션은 다음과 같습니다:
 
-Starting with GDAL 2.1.0, --with-pdfium, --with-pdfium-lib,
---with-pdfium-extra-lib-for-test and --enable-pdf-plugin are also
-available.
+   -  \--with-poppler
+   -  \--with-podofo
+   -  \--with-podofo-lib
+   -  \--with-podofo-extra-lib-for-test
+
+GDAL 2.1.0버전부터 다음 옵션도 사용할 수 있습니다:
+
+   -  \--with-pdfium
+   -  \--with-pdfium-lib
+   -  \--with-pdfium-extra-lib-for-test
+   -  \--enable-pdf-plugin
 
 Poppler
 ~~~~~~~
 
-libpoppler itself must have been configured with
--DENABLE_UNSTABLE_API_ABI_HEADERS=ON
-so that the xpdf C++ headers are available. Note: the poppler C++ API
-isn't stable, so the driver compilation may fail with too old or too
-recent poppler versions.
+libpoppler 자체를 -DENABLE_UNSTABLE_API_ABI_HEADERS=ON 옵션으로 환경설정 해야만 xpdf C++ 헤더를 사용할 수 있습니다.
+주의: Poppler C++ API가 불안정하기 때문에, 드라이버를 너무 예전이거나 너무 최신인 Poppler 버전으로 컴파일하는 경우 실패할 수도 있습니다.
 
 PoDoFo
 ~~~~~~
 
-As a partial alternative, the PDF driver can be compiled against
-libpodofo to avoid the libpoppler dependency. This is sufficient to get
-the georeferencing and vector information. However, for getting the
-imagery, the pdftoppm utility that comes with the poppler distribution
-must be available in the system PATH. A temporary file will be generated
-in a directory determined by the following configuration options :
-CPL_TMPDIR, TMPDIR or TEMP (in that order). If none are defined, the
-current directory will be used. Successfully tested versions are
-libpodofo 0.8.4, 0.9.1 and 0.9.3. Important note: using PoDoFo 0.9.0 is
-strongly discouraged, as it could cause crashes in GDAL due to a bug in
-PoDoFo.
+libpoppler 의존성을 피하려면, PDF 드라이버를 불완전한 대체제인 libpodofo를 대상으로 컴파일할 수 있습니다. PoDoFo 라이브러리는 지리참조 정보 및 벡터 정보를 읽어오기에 충분합니다. 하지만 영상을 읽어오려면 시스템 PATH 환경 변수에 Poppler 배포판에 포함된 pdftoppm 유틸리티를 반드시 지정해야만 합니다.
+다음 환경설정 옵션에 따라 결정되는 디렉터리에 임시 파일을 생성할 것입니다(우선 순위 순서입니다):
+
+   -  CPL_TMPDIR
+   -  TMPDIR
+   -  TEMP
+
+어떤 디렉터리도 정의하지 않는 경우, 현재 디렉터리를 사용할 것입니다.
+
+libpodofo 0.8.4, 0.9.1 및 0.9.3버전이 성공적으로 테스트되었습니다.
+
+중요: PoDoFo 0.9.0버전을 사용하지 말 것을 강력히 권장합니다. 해당 버전의 버그로 인해 GDAL이 멈출 수 있기 때문입니다.
 
 PDFium
 ~~~~~~
 
-Using PDFium as a backend allows access to raster, vector,
-georeferencing and other metadata. The PDFium backend has also support
-for arbitrary overviews, for fast zoom-out.
+PDFium을 백엔드로 사용하면 래스터, 벡터, 지리참조 정보 및 기타 메타데이터에 접근할 수 있습니다. PDFium 백엔드는 빠른 속도의 축소(zoom out)를 위한 임의의 오버뷰도 지원합니다.
 
-Only GDAL builds against static builds of PDFium have been tested.
-Building PDFium can be challenging, and particular builds must be used to
-work properly with GDAL.
+PDFium 안정 빌드를 대상으로 빌드된 GDAL만 테스트되었습니다. PDFium을 빌드하는 작업은 어렵기도 하고, GDAL과 제대로 작동하려면 특정 빌드를 사용해야만 합니다.
 
-With GDAL >= 3.4.0
+GDAL 3.5 이상 버전
++++++++++++++++++
+
+PDFium 패치 버전을 빌드하려면 반드시 `<https://github.com/rouault/pdfium_build_gdal_3_5>`_ 저장소에 있는 스크립트를 이용해야만 합니다.
+
+GDAL 3.4버전
 +++++++++++++++++++
 
-The scripts in the `<https://github.com/rouault/pdfium_build_gdal_3_4>`__
-repository must be used to build a patched version of PDFium.
+PDFium 패치 버전을 빌드하려면 반드시 `<https://github.com/rouault/pdfium_build_gdal_3_4>`_ 저장소에 있는 스크립트를 이용해야만 합니다.
 
-With GDAL >= 3.2.0
-+++++++++++++++++++
+GDAL 3.2 및 3.3버전
++++++++++++++++++++++
 
-The scripts in the `<https://github.com/rouault/pdfium_build_gdal_3_2>`__
-repository must be used to build a patched version of PDFium.
+PDFium 패치 버전을 빌드하려면 반드시 `<https://github.com/rouault/pdfium_build_gdal_3_2>`_ 저장소에 있는 스크립트를 이용해야만 합니다.
 
-With GDAL 3.1.x
+GDAL 3.1.x
 +++++++++++++++
 
-The scripts in the `<https://github.com/rouault/pdfium_build_gdal_3_1>`__
-repository must be used to build a patched version of PDFium.
+PDFium 패치 버전을 빌드하려면 반드시 `<https://github.com/rouault/pdfium_build_gdal_3_1>`_ 저장소에 있는 스크립트를 이용해야만 합니다.
 
-With GDAL >= 2.2.0 and < 3.1
+GDAL 2.2.0 이상 3.1 미만 버전
 ++++++++++++++++++++++++++++
 
-A `PDFium forked version for simpler
-builds <https://github.com/rouault/pdfium>`__ is available (for Windows,
-a dedicated
-`win_gdal_build <https://github.com/rouault/pdfium/tree/win_gdal_build>`__
-branch is recommended). A `build
-repository <https://github.com/rouault/pdfium/tree/build>`__ is
-available with a few scripts that can be used as a template to build
-PDFium for Linux/MacOSX/Windows. Those forked versions remove the
-dependency to the V8 JavaScript engine, and have also a few changes to
-avoid symbol clashes, on Linux, with libjpeg and libopenjpeg. Building
-the PDF driver as a GDAL plugin is also a way of avoiding such issues.
-PDFium build requires a C++11 compatible compiler, as well as for
-building GDAL itself against PDFium. Successfully tested versions are
-GCC 4.7.0 (previous versions aren't compatible) and Visual Studio 12 /
-VS2013.
+`단순 빌드를 위한 PDFium 포크 버전 <https://github.com/rouault/pdfium>`_ 을 사용할 수 있습니다. (윈도우의 경우, 전용 `win_gdal_build <https://github.com/rouault/pdfium/tree/win_gdal_build>`_ 브랜치를 권장합니다.)
 
-Examples
+`빌드 저장소 <https://github.com/rouault/pdfium/tree/build>`_ 에서 리눅스/macOS/윈도우 용 PDFium을 빌드하기 위한 템플릿으로 사용할 수 있는 스크립트 몇 개를 사용할 수 있습니다.
+
+이 포크 버전들은 V8 자바스크립트 엔진 의존성을 제거하고, 리눅스 상에서 libjpeg 및 libopenjpeg과의 심볼 충돌을 막기 위해 몇 가지 변경 사항을 적용한 버전입니다.
+
+PDF 드라이버를 GDAL 플러그인으로 빌드하는 것도 이런 문제점들을 피하기 위한 방법 가운데 하나입니다.
+
+PDFium을 빌드하는 것은 물론 GDAL 자체를 PDFium 대상으로 빌드하기 위해서도 C++11 호환 컴파일러가 필요합니다.
+
+성공적으로 테스트된 컴파일러의 버전은 GCC 4.7.0 (이전 버전들은 호환되지 않습니다) 그리고 비주얼 스튜디오 12 및 2013입니다.
+
+예시
 --------
 
--  Create a PDF from 2 rasters (main_raster and another_raster), such
-   that main_raster is initially displayed, and they are exclusively
-   displayed :
+-  래스터 2개(main_raster 및 another_raster)로부터 처음에는 main_raster를 출력하고, 한번에 하나만 가시화할 수 있는 PDF를 생성합니다:
 
    ::
 
@@ -600,46 +495,39 @@ Examples
                      -co EXTRA_RASTERS=another_raster.tif -co EXTRA_RASTERS_LAYER_NAME=another_raster
                      -co OFF_LAYERS=another_raster -co EXCLUSIVE_LAYERS=main_raster,another_raster
 
--  Create of PDF with some JavaScript :
+-  자바스크립트로 PDF를 생성합니다:
 
    ::
 
       gdal_translate -of PDF my.tif my.pdf -co JAVASCRIPT_FILE=script.js
 
-   where script.js is :
+   이때 script.js의 내용은 다음과 같습니다:
 
    ::
 
       button = app.alert({cMsg: 'This file was generated by GDAL. Do you want to visit its website ?', cTitle: 'Question', nIcon:2, nType:2});
       if (button == 4) app.launchURL('http://gdal.org/');
 
-See also
+참고
 --------
 
-:ref:`PDF vector <vector.pdf>` documentation page
+-  :ref:`PDF 벡터 <vector.pdf>` 문서 페이지
 
-Specifications :
+-  사양:
 
--  `OGC GeoPDF Encoding Best Practice Version 2.2
-   (08-139r3) <http://portal.opengeospatial.org/files/?artifact_id=40537>`__
--  `Adobe Supplement to ISO
-   32000 <http://www.adobe.com/devnet/acrobat/pdfs/adobe_supplement_iso32000.pdf>`__
--  `PDF Reference, version
-   1.7 <http://www.adobe.com/devnet/acrobat/pdfs/pdf_reference_1-7.pdf>`__
--  `Acrobat(R) JavaScript Scripting
-   Reference <http://partners.adobe.com/public/developer/en/acrobat/sdk/AcroJS.pdf>`__
+   -  `OGC GeoPDF 인코딩 모범 사례 2.2버전 (08-139r3) <http://portal.opengeospatial.org/files/?artifact_id=40537>`_
+   -  `ISO 32000에 대한 어도비 부록 <http://www.adobe.com/devnet/acrobat/pdfs/adobe_supplement_iso32000.pdf>`_
+   -  `PDF 참조 문서 1.7버전 <http://www.adobe.com/devnet/acrobat/pdfs/pdf_reference_1-7.pdf>`_
+   -  `애크러뱃(R) 자바스크립트 스크립트 작업 참조 문서 <http://partners.adobe.com/public/developer/en/acrobat/sdk/AcroJS.pdf>`_
 
-Libraries :
+-  라이브러리:
 
--  `Poppler homepage <http://poppler.freedesktop.org/>`__
--  `PoDoFo homepage <http://podofo.sourceforge.net/>`__
--  `PDFium homepage <https://code.google.com/p/pdfium/>`__
--  `PDFium forked version for simpler
-   builds <https://github.com/rouault/pdfium>`__
+   -  `Poppler 홈페이지 <http://poppler.freedesktop.org/>`_
+   -  `PoDoFo 홈페이지 <http://podofo.sourceforge.net/>`_
+   -  `PDFium 홈페이지 <https://code.google.com/p/pdfium/>`_
+   -  `단순 빌드를 위한 PDFium 포크 버전 <https://github.com/rouault/pdfium>`_
 
-Samples :
+-  샘플:
 
--  `A few Geospatial PDF
-   samples <https://www.terragotech.com/learn-more/sample-geopdfs>`__
--  `Tutorial to generate Geospatial PDF maps from OSM
-   data <http://latuviitta.org/documents/Geospatial_PDF_maps_from_OSM_with_GDAL.pdf>`__
+   -  `몇몇 지리공간 PDF 샘플들 <https://www.terragotech.com/learn-more/sample-geopdfs>`_
+   -  `OSM 데이터로부터 지리공간 PDF 맵을 생성하는 예제 <http://latuviitta.org/documents/Geospatial_PDF_maps_from_OSM_with_GDAL.pdf>`_
