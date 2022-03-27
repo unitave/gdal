@@ -17,6 +17,7 @@ GDAL 3.1버전부터 이 포맷의 읽기를 지원합니다. 이전 버전까�
 이 드라이버는 SUPERFAST, FAST, NORMAL(기본값), BETTER 및 UBER 압축 품질을 지원합니다. QUALITY 생성 옵션을 사용해서 압축 품질을 설정할 수 있습니다.
 
 더 자세한 정보는 `Crunch Lib <https://github.com/BinomialLLC/crunch>`_ 을 읽어보십시오.
+(이 저장소에서 작동하는 포크의 빌드 지침은 아래 내용을 참조하십시오.)
 
 주의: ``gdal/frmts/dds/ddsdataset.cpp`` 로 구현되었습니다.
 
