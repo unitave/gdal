@@ -220,7 +220,7 @@ TIFF 포맷은 색상표(palette 또는 color table)에 R, G, B 구성요소만 
 
 -  **NUM_THREADS=number_of_threads/ALL_CPUS**: (GDAL 2.1버전부터) 작업자 스레드의 개수를 지정해서 멀티스레딩 압축을 활성화합니다. DEFLATE 또는 LZMA 같은 느린 압축 알고리즘에 사용해볼 만합니다. 기본값은 주 스레드에서 압축하는 것입니다.
 
--  **PREDICTOR=[1/2/3]**: LZW, DEFLATE 및 ZSTD를 위한 예측 변수(predictor)를 설정합니다.
+-  **PREDICTOR=[1/2/3]**: LZW, DEFLATE 및 ZSTD 압축을 위한 예측 변수(predictor)를 설정합니다.
    기본값은 1(예측 변수 없음), 2는 수평 차별화(horizontal differencing)이고 3은 부동소수점형 예측 변수입니다.
    PREDICTOR=2는 8, 16, 32 및 64비트 샘플에서만 지원됩니다(libtiff 4.3.0 다음 버전부터 64비트 지원이 추가되었습니다.)
    PREDICTOR=3은 16, 32 및 64비트 부동소수점형 데이터에서만 지원됩니다.
