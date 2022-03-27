@@ -32,14 +32,14 @@ JPEG2000 파일로부터 XMP 메타데이터를 추출할 수 있고, xml:XMP �
 
 내부(GeoJP2 또는 GMLJP2 경계 상자), 월드 파일 .j2w/.wld 사이드카 파일, 또는 PAM(Persistent Auxiliary metadata) .aux.xml 사이드카 파일 등 서로 다른 소스들로부터 지리참조 정보를 얻을 수 있습니다. 기본적으로 PAM, GeoJP2, GMLJP2, WORLDFILE 순서대로 정보를 수집합니다. (첫 항목을 가장 우선합니다.)
 
-GDAL 2.2버전부터, GDAL_GEOREF_SOURCES 환경설정 옵션으로 (또는 GEOREF_SOURCES 열기 옵션으로) 사용할 수 있는 소스와 그 우선 순위를 변경할 수 있습니다. 이 옵션의 값은 PAM, GEOJP2, GMLJP2, (GEOJP2, GMLJP2로 가는 단축 키인) INTERNAL, WORLDFILE, NONE이라는 키워드를 쉼표로 구분한 목록입니다. 목록의 첫 항목이 가장 우선되는 소스입니다. 목록에 없는 소스는 무시할 것입니다.
+GDAL 2.2버전부터, :decl_configoption:`GDAL_GEOREF_SOURCES` 환경설정 옵션으로 (또는 GEOREF_SOURCES 열기 옵션으로) 사용할 수 있는 소스와 그 우선 순위를 변경할 수 있습니다. 이 옵션의 값은 PAM, GEOJP2, GMLJP2, (GEOJP2, GMLJP2로 가는 단축 키인) INTERNAL, WORLDFILE, NONE이라는 키워드를 쉼표로 구분한 목록입니다. 목록의 첫 항목이 가장 우선되는 소스입니다. 목록에 없는 소스는 무시할 것입니다.
 
 예를 들어 이 옵션을 "WORLDFILE,PAM,INTERNAL"로 설정하면 PAM이나 내부 JP2 경계 상자보다 잠재적인 월드 파일의 지리변형 행렬을 우선할 것입니다. "PAM,WORLDFILE,GEOJP2"로 설정하면 설정된 소스를 이용하고 GMLJP2 경계 상자는 무시할 것입니다.
 
 스레드 지원
 --------------
 
-JPEG2000 파일이 내부 타일을 가지고 있다면, GDAL은 기본적으로 RasterIO()가 교차하는 타일 여러 개를 요청해서 받는 경우 타일 여러 개를 멀티스레드로 디코딩하려 시도할 것입니다. 이 맥락에서 기본값이 ALL_CPUS인 ``GDAL_NUM_THREADS`` 환경설정 옵션을 이용하면 이런 습성을 제어할 수 있습니다. RAM 옵션으로 메모리 용량이 제한된 경우, 멀티스레딩을 비활성화시키기 위해 GDAL_NUM_THREADS 환경설정 옵션을 1로 설정해야 할 수도 있습니다.
+JPEG2000 파일이 내부 타일을 가지고 있다면, GDAL은 기본적으로 RasterIO()가 교차하는 타일 여러 개를 요청해서 받는 경우 타일 여러 개를 멀티스레드로 디코딩하려 시도할 것입니다. 이 맥락에서 기본값이 ALL_CPUS인 :decl_configoption:`GDAL_NUM_THREADS` 환경설정 옵션을 이용하면 이런 습성을 제어할 수 있습니다. RAM 옵션으로 메모리 용량이 제한된 경우, 멀티스레딩을 비활성화시키기 위해 GDAL_NUM_THREADS 환경설정 옵션을 1로 설정해야 할 수도 있습니다.
 
 OpenJPEG 2.2.0버전부터, 코드 블록 수준에서 멀티스레드 디코딩을 활성화할 수도 있습니다. 반드시 ``OPJ_NUM_THREADS`` 환경설정 변수로 활성화시켜야만 합니다. (주의: 이 변수는 GDAL 환경설정 변수가 아니라 시스템 환경설정 변수입니다.) 숫자값 또는 NUM_CPUS를 이 변수의 값으로 설정할 수 있습니다. 기본값은 1입니다. GDAL 2.3버전부터, GDAL은 코드 블록 수준에서 이 멀티스레드 디코딩을 자동으로 활성화합니다.
 GDAL 3.0.1 및 OpenJPEG 2.3.2버전부터 멀티스레드 디코딩을 자동으로 활성화하고, 이를 ``OPJ_NUM_THREADS`` 환경설정 변수 또는 ``GDAL_NUM_THREADS`` 환경설정 옵션으로 제어할 수 있습니다.
