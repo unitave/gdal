@@ -1,38 +1,28 @@
 .. _raster.pds4:
 
 ================================================================================
-PDS4 -- NASA Planetary Data System (Version 4)
+PDS4 -- NASA 행성 데이터 시스템 v4
 ================================================================================
 
 .. shortname:: PDS4
 
 .. built_in_by_default::
 
-PDS4 is a format used primarily by NASA to store and distribute solar,
-lunar and planetary imagery data. GDAL provides read-write access to
-PDS4 formatted imagery data.
+PDS4(Planetary Data System v4)는 NASA가 태양, 달 및 행성 영상 데이터를 저장하고 배포하기 위해 주로 사용하는 포맷입니다. GDAL은 PDS4 포맷 영상 데이터에 읽기전용 접근을 지원합니다.
 
-PDS4 files are compose of a .xml (label) file which references a raw
-imagery file. The driver also supports imagery stored in a separate
-uncompressed GeoTIFF file with a strip organization compatible of a raw
-imagery file.
+PDS4 파일은 RAW 영상 파일을 참조하는 .xml 라벨 파일로 이루어져 있습니다. 이 드라이버는 RAW 영상 파일과 호환되는 스트립(strip) 구조를 가진 개별 비압축 GeoTIFF 파일에 저장된 영상도 지원합니다.
 
-The driver also reads and write georeferencing and coordinate system
-information as well as selected other header metadata.
+이 드라이버는 지리참조와 좌표계 정보는 물론 선택한 다른 헤더 메타데이터도 읽고 씁니다.
 
-A mask band is attached to each source band. The value of this mask band
-is 0 when the pixel value is one of the missing constants.
+마스크 밴드가 각 소스 밴드에 첨부되어 있습니다. 픽셀값이 누락된 상수 가운데 하나인 경우 이 마스크 밴드의 값은 0입니다.
 
-Implementation of this driver was supported by the United States
-Geological Survey.
+이 드라이버는 미국 지질조사국(United States Geological Survey)의 지원으로 구현되었습니다.
 
-PDS4 is part of a family of related formats including PDS and ISIS3.
+PDS4는 PDS와 ISIS3를 포함하는 관련 포맷 패밀리의 일원입니다.
 
-Starting with GDAL 2.5, the PDS4 driver supports reading and writing
-ASCII fixed-with, binary fixed-with and delimited(CSV) tables as OGR
-vector layers.
+GDAL 2.5버전부터, PDS4 드라이버는 고정 너비 아스키(ASCII fixed-width), 고정 너비 바이너리(binary fixed-width) 및 구분된(CSV) 테이블을 OGR 벡터 레이어로 읽고 쓰기를 지원합니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -43,183 +33,144 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Metadata
---------
+메타데이터
+---------
 
-The PDS4 label can be retrieved as XML-serialized content in the
-xml:PDS4 metadata domain.
+PDS4 라벨을 xml:PDS4 메타데이터 도메인의 XML 직렬화(XML-serialized) 콘텐츠로 가져올 수 있습니다.
 
-On creation, a source template label can be passed to the SetMetadata()
-interface in the "xml:PDS4" metadata domain.
+생성 작업 시, "xml:PDS4" 메타데이터 도메인에 소스 템플릿 라벨을 SetMetadata() 인터페이스를 통해 전송할 수 있습니다.
 
-Open options (vector only)
+열기 옵션 (벡터 전용)
 --------------------------
 
 .. versionadded:: 3.0
 
-When opening a PDS4 vector dataset, the following open options are
-available:
+PDS4 벡터 데이터셋을 열 때, 다음 열기 옵션들을 사용할 수 있습니다:
 
--  **LAT**\ =string. Name of a field containing a Latitude value.
-   Defaults to Latitude.
--  **LONG**\ =string. Name of a field containing a Longitude value.
-   Defaults to Longitude.
--  **ALT**\ =string. Name of a field containing a Altitude value.
-   Defaults to Altitude.
--  **WKT**\ =string. Name of a field containing a WKT value.
--  **KEEP_GEOM_COLUMNS**\ =YES/NO. Whether to expose original
-   x/y/geometry columns as regular fields. Defaults to NO.
+-  **LAT=string**:
+   위도값을 담고 있는 필드명입니다. 기본값은 'Latitude'입니다.
 
-Creation support
+-  **LONG=string**:
+   경도값을 담고 있는 필드명입니다. 기본값은 'Longitude'입니다.
+
+-  **ALT=string**:
+   고도값을 담고 있는 필드명입니다. 기본값은 'Altitude'입니다.
+
+-  **WKT=string**:
+   WKT 값을 담고 있는 필드명입니다.
+
+-  **KEEP_GEOM_COLUMNS=YES/NO**:
+   원본 x, y, geometry 열들을 정규 필드로 노출시킬지 여부를 선택합니다. 기본값은 NO입니다.
+
+생성 지원
 ----------------
 
-The PDS4 driver supports updating imagery of existing datasets, creating
-new datasets through the CreateCopy() and Create() interfaces.
+PDS4 드라이버는 CreateCopy() 및 Create() 인터페이스를 통해 기존 데이터셋의 영상 업데이트 및 새 데이터셋 생성을 지원합니다.
 
-When using CreateCopy(), gdal_translate or gdalwarp, an effort is made
-to preserve as much as possible of the original label when doing PDS4 to
-PDS4 conversions. This can be disabled with the USE_SRC_LABEL=NO
-creation option.
+gdal_translate 또는 gdalwarp로 CreateCopy() 사용 시, PDS4를 PDS4로 변환하는 경우 원본 라벨을 가능한 한 보전하려고 노력할 것입니다. USE_SRC_LABEL 생성 옵션을 NO로 설정하면 이 습성을 비활성화시킬 수 있습니다.
 
-The following dataset creation options are available:
+다음 데이터셋 생성 옵션들을 사용할 수 있습니다:
 
--  Raster only:
+-  래스터 전용:
 
-   -  **IMAGE_FILENAME**\ =filename. Override default external image
-      filename.
-   -  **IMAGE_EXTENSION**\ =ext. Override default extension of the
-      external image filename. The default is 'img' for IMAGE_FORMAT=RAW
-      or 'tif' for IMAGE_FORMAT=GEOTIFF
-   -  **IMAGE_FORMAT**\ =RAW/GEOTIFF. Format of the image file. If using
-      RAW, the imagery is put in a raw file whose filename is the main
-      filename with a .img extension. If using GEOTIFF, the imagery is
-      put in a separate GeoTIFF file, whose filename is the main
-      filename with a .tif extension. Defaults to RAW
-   -  **INTERLEAVE**\ =BSQ/BIP/BIL. Pixel organization in the image
-      file. BSQ is Band SeQuential, BIP is Band Interleaved per Pixel
-      and BIL is Band Interleave Per Line. The default is BSQ. BIL is
-      not valid for IMAGE_FORMAT=GEOTIFF.
-      Starting with GDAL 3.5, when copying from a source dataset with multiple bands
-      which advertises a INTERLEAVE metadata item, if the INTERLEAVE creation option
-      is not specified, the source dataset INTERLEAVE will be automatically taken
-      into account.
-   -  **USE_SRC_LABEL**\ =YES/NO. Whether to use the source label in
-      PDS4 to PDS4 conversions. Defaults to YES.
-   -  **ARRAY_TYPE**\ =Array/Array_2D/Array_2D_Image/Array_2D_Map/
-      Array_2D_Spectrum/Array_3D/Array_3D_Image/Array_3D_Movie/Array_3D_Spectrum.
-      To set the XML element that defines the type of array. Defaults to
-      Array_3D_Image. Using a Array_2D\* for a multiband image is not
-      supported. When using a Array_2D\* value, INTERLEAVE will be
-      ignored.
-   -  **ARRAY_IDENTIFIER**\ =string. (GDAL >= 3.0) Identifier to put in
-      the Array element.
-   -  **UNIT**\ =string. (GDAL >= 3.0) Content of the
-      Element_Array.unit. If not provided, the unit of the source band
-      in case of copying from another raster will be used (if present on
-      the source band).
-   -  **CREATE_LABEL_ONLY**\ =YES/NO. (GDAL >= 3.1) If set to YES, and used
-      in a gdal_translate / CreateCopy() context where the source dataset is
-      a ENVI, GeoTIFF, ISIS3, VICAR, FITS or PDS3 dataset, whose layout is
-      compatible of a raw binary format, as supported by PDS4, then only the
-      label XML file will be generated, and it will reference the raw binary
-      file of the source dataset. The IMAGE_FILENAME, IMAGE_FORMAT and
-      INTERLEAVE creation options are ignored in that situation.
+   -  **IMAGE_FILENAME=filename**:
+      기본 외부 이미지 파일명을 대체합니다.
 
--  Raster and vector:
+   -  **IMAGE_EXTENSION=ext**:
+      외부 이미지 파일명의 기본 확장자를 대체합니다.
+      IMAGE_FORMAT을 RAW로 설정한 경우 기본값은 'img', GEOTIFF로 설정한 경우 기본값은 'tif'입니다.
 
-   -  **VAR_\***\ =string. If options like VAR_XXXX=yyyy are specified,
-      any {XXXX} string in the template label will be replaced by the
-      yyyy value.
-   -  **TEMPLATE**\ =filename. Template label to use. If not specified
-      and not creating from an existing PDS4 file, the
-      data/pds4_template.xml file will be used. For GDAL utilities to
-      find this default PDS4 template, GDAL's data directory should be
-      defined in your environment (typically on Windows builds). Consult
-      the
-      `wiki <https://trac.osgeo.org/gdal/wiki/FAQInstallationAndBuilding#HowtosetGDAL_DATAvariable>`__
-      for more information.
-   -  **LATITUDE_TYPE**\ =Planetocentric/Planetographic. Value of
-      latitude_type. Defaults to Planetocentric.
-   -  **LONGITUDE_DIRECTION**\ =Positive East/Positive West. Value of
-      longitude_direction. Defaults to Positive East.
-   -  **RADII**\ =semi_major_radius,semi_minor_radius. To override the
-      ones of the SRS. Note that the first value (semi_major_radius)
-      will be used to set the <pds:semi_major_radius> and
-      <pds:semi_minor_radius> XML elements, and that second value
-      (semi_minor_radius) will be used to set the <pds:polar_radius> XML
-      element.
-   -  **BOUNDING_DEGREES**\ =west_lon,south_lat,east_lon,north_lat.
-      Manually set bounding box
+   -  **IMAGE_FORMAT=RAW/GEOTIFF**:
+      이미지 파일 포맷을 설정합니다. RAW로 설정하는 경우, 파일명이 주 파일명에 확장자 .img인 RAW 파일에 영상을 넣습니다. GEOTIFF로 설정하면, 파일명이 주 파일명에 확장자 .tif인 개별 GeoTIFF 파일에 영상을 넣습니다. 기본값은 RAW입니다.
 
-Layer creation options (vector/table datasets)
+   -  **INTERLEAVE=BSQ/BIP/BIL**:
+      이미지 파일의 픽셀 구조를 설정합니다. BSQ는 밴드 순차(Band SeQuential), BIP는 픽셀 별 밴드 교차삽입(Band Interleaved per Pixel) 그리고 BIL은 라인 별 밴드 교차삽입(Band Interleave Per Line)입니다. 기본값은 BSQ입니다. IMAGE_FORMAT을 GEOTIFF로 설정했다면 BIL을 사용해서는 안 됩니다.
+      GDAL 3.5버전부터, INTERLEAVE 메타데이터 항목을 가진 다중 밴드 소스 데이터셋으로부터 복사할 때 INTERLEAVE 생성 옵션을 지정하지 않으면, 소스 데이터셋의 INTERLEAVE를 자동으로 연산에 넣을 것입니다.
+
+   -  **USE_SRC_LABEL=YES/NO**:
+      PDS4를 PDS4로 변환할 때 소스 라벨을 사용할지 여부를 선택합니다. 기본값은 YES입니다.
+
+   -  **ARRAY_TYPE=Array/Array_2D/Array_2D_Image/Array_2D_Map/Array_2D_Spectrum/Array_3D/Array_3D_Image/Array_3D_Movie/Array_3D_Spectrum**:
+      배열의 유형을 정의하는 XML 요소를 설정합니다. 기본값은 Array_3D_Image입니다.
+      다중 밴드 이미지에 Array_2D\* 사용은 지원하지 않습니다.
+      Array_2D\* 값을 설정하는 경우, INTERLEAVE 옵션을 무시할 것입니다.
+
+   -  **ARRAY_IDENTIFIER=string**: (GDAL 3.0 이상 버전)
+      배열 요소에 넣을 식별자를 설정합니다.
+
+   -  **UNIT=string**: (GDAL 3.0 이상 버전)
+      Element_Array.unit의 내용입니다. 이 옵션을 지정하지 않으면, 다른 래스터로부터 복사해오는 경우의 소스 밴드 단위를 (소스 밴드에 단위가 존재하는 경우) 사용할 것입니다.
+
+   -  **CREATE_LABEL_ONLY=YES/NO**: (GDAL 3.1 이상 버전)
+      YES로 설정하고 소스 데이터셋이 PDS4가 지원하는 RAW 바이너리 포맷과 호환되는 레이아웃을 가진 ENVI, GeoTIFF, ISIS3, VICAR, FITS 또는 PDS3 데이터셋인 gdal_translate / CreateCopy() 맥락에서 사용하는 경우, 소스 데이터셋의 RAW 바이너리 파일을 참조하는 XML 라벨 파일만 생성할 것입니다. 이런 경우에는 IMAGE_FILENAME, IMAGE_FORMAT 및 INTERLEAVE 생성 옵션들을 무시합니다.
+
+-  래스터 및 벡터:
+
+   -  **VAR_\*=string**:
+      VAR_XXXX=yyyy 같은 옵션을 지정하면, 템플릿 라벨에 있는 모든 {XXXX} 문자열을 yyyy 값으로 대체할 것입니다.
+
+   -  **TEMPLATE=filename**:
+      사용할 템플릿 라벨 파일을 설정합니다. 이 옵션을 지정하지 않고 기존 PDS4 파일로부터도 생성하지 않는 경우, data/pds4_template.xml 파일을 사용할 것입니다. GDAL 유틸리티가 이 기본 PDS4 템플릿을 찾을 수 있도록 (특히 윈도우 빌드에서) 사용자 환경 변수에 GDAL data 디렉터리를 정의해야 합니다. 더 자세한 정보는 `위키 <https://trac.osgeo.org/gdal/wiki/FAQInstallationAndBuilding#HowtosetGDAL_DATAvariable>`_ 를 찾아보십시오.
+
+   -  **LATITUDE_TYPE=Planetocentric/Planetographic**:
+      latitude_type의 값을 설정합니다. 기본값은 Planetocentric입니다.
+
+   -  **LONGITUDE_DIRECTION=Positive East/Positive West**:
+      longitude_direction의 값을 설정합니다. 기본값은 Positive East입니다.
+
+   -  **RADII=semi_major_radius,semi_minor_radius**:
+      공간 좌표계의 반경을 대체합니다.
+      첫 번째 값(semi_major_radius)을 사용해서 <pds:semi_major_radius> 및 <pds:semi_minor_radius> XML 요소를 설정하고, 두 번째 값(semi_minor_radius)을 사용해서 <pds:polar_radius> XML 요소를 설정할 것이라는 사실을 기억하십시오.
+
+   -  **BOUNDING_DEGREES=west_lon,south_lat,east_lon,north_lat**:
+      경계 상자를 직접 설정합니다.
+
+레이어 생성 옵션 (벡터/테이블 데이터셋)
 ----------------------------------------------
 
-(Starting with GDAL 3.0) When creating a PDS4 vector dataset, or
-appending a new table to an existing table, the following layer creation
-options are available:
+(GDAL 3.0버전부터) PDS4 벡터 데이터셋 생성 또는 기존 테이블에 새 테이블 추가 작업 시 다음과 같은 레이어 생성 옵션들을 사용할 수 있습니다:
 
--  **TABLE_TYPE**\ =DELIMITED/CHARACTER/BINARY. Determines the type of
-   the PDS4 table to create. DELIMITED is the default and corresponds to
-   a CSV table file (with comma field separator). CHARACTER corresponds
-   to a fixed-width ASCII table. BINARY corresponds to a fixed-width
-   table. For fixed-width table, for String fields, an arbitrary width
-   of 64 bytes is used if there is no explicit field set in the OGR
-   field definition. Only DELIMITED supports arbitrary encoding of
-   geometry as a WKT string. The two other table types only support
-   points for geographic coordinates (LAT, LONG).
--  **LINE_ENDING**\ = CRLF/LF. Determines the line-ending character sequence.
-   Only applies to TABLE_TYPE=DELIMITED or CHARACTER. The default is CRLF
-   (Carriage Return and Line Feed). It can be set to LF for just Line Feed
-   character. (GDAL >= 3.4)
--  **GEOM_COLUMNS**\ =AUTO/WKT/LONG_LAT. Specify how the geometry is
-   encoded. In AUTO mode, for DELIMITED tables, if the input geometry is
-   Point with a geographic CRS attached to the laye, then a LONG and LAT
-   columns will be created to store the point coordinates. For other
-   geometry types, a WKT column is used. The WKT value of this option
-   can also be used to force a WKT column to be created when a LONG and
-   LAT columns would have been possible. For fixed-width table types,
-   only AUTO and LONG_LAT are possible.
--  **CREATE_VRT**\ =YES/NO. Defaults to YES for a DELIMITED table. In
-   that case, a OGR VRT (XML file) will be created along-side the .csv
-   file.
--  **LAT**\ =string. Name of a field containing a Latitude value.
-   Defaults to Latitude. Only used when the geometry comes from a Point
-   layer with geographic CRS
--  **LONG**\ =string. Name of a field containing a Longitude value.
-   Defaults to Longitude. Only used when the geometry comes from a Point
-   layer with geographic CRS
--  **ALT**\ =string. Name of a field containing a Altitude value.
-   Defaults to Altitude. Only used when the geometry comes from a Point
-   layer with geographic CRS
--  **WKT**\ =string. Name of a field containing a WKT value.
--  **SAME_DIRECTORY**\ =YES/NO. Whether table files should be created in
-   the same directory, or in a subdirectory. Defaults to NO, that is
-   that table files will be created in a subdiretory whose name is the
-   basename of the XML file. For example if creating a "foo.xml" PDS4
-   dataset, table files will be created in the "foo" subdirectory by
-   default. If this option is set to YES, they will be created in the
-   same directory as "foo.xml".
+-  **TABLE_TYPE=DELIMITED/CHARACTER/BINARY**:
+   생성할 PDS4 테이블의 유형을 설정합니다. 기본값은 DELIMITED로 (쉼표 필드 구분자를 가진)CSV 테이블 파일을 생성합니다. CHARACTER는 고정 너비 아스키 테이블을 생성합니다. BINARY는 고정 너비 테이블을 생성합니다. 고정 너비 테이블의 경우, OGR 필드 정의에 명확하게 설정된 필드가 없다면 문자열 필드에 임의의 64바이트 너비를 사용합니다. DELIMITED로 설정한 경우에만 도형을 WKT 문자열로 임의 인코딩할 수 있습니다. 다른 테이블 유형 2개는 지리 좌표 포인트(위도, 경도)만 지원합니다.
 
-Subdataset / multiple image support
+-  **LINE_ENDING= CRLF/LF**: (GDAL 3.4 이상 버전)
+   새줄 문자 시퀀스를 설정합니다. TABLE_TYPE 옵션을 DELIMITED 또는 CHARACTER로 설정한 경우에만 적용됩니다. 기본값은 CRLF(Carriage Return and Line Feed)입니다. 줄바꿈(Line Feed) 문자만 사용하려면 LF로 설정하면 됩니다.
+
+-  **GEOM_COLUMNS=AUTO/WKT/LONG_LAT**:
+   도형 인코딩 방식을 설정합니다. DELIMITED 테이블 유형에서 AUTO로 설정하면, 입력 도형이 레이어의 지리 좌표계를 가진 포인트인 경우 포인트 좌표를 저장하기 위해 LONG과 LAT 열들을 생성할 것입니다. 입력 도형이 다른 유형이라면 WKT 열을 사용합니다. LONG과 LAT 열들을 사용할 수 있는 경우에도 이 옵션을 WKT 값으로 설정해서 강제로 WKT 열을 생성시킬 수도 있습니다. 고정 너비 테이블 유형의 경우, AUTO 및 LONG_LAT만 설정할 수 있습니다.
+
+-  **CREATE_VRT=YES/NO**:
+   DELIMITED 테이블 유형의 경우 기본값은 YES입니다. 이런 경우 .csv 파일과 함께 OGR VRT(XML 파일)을 생성할 것입니다.
+
+-  **LAT=string**:
+   위도값을 담고 있는 필드명입니다. 기본값은 'Latitude'입니다.
+   도형이 지리 좌표계를 가진 포인트 레이어의 도형인 경우에만 사용합니다.
+
+-  **LONG=string**:
+   경도값을 담고 있는 필드명입니다. 기본값은 'Longitude'입니다.
+   도형이 지리 좌표계를 가진 포인트 레이어의 도형인 경우에만 사용합니다.
+
+-  **ALT=string**:
+   고도값을 담고 있는 필드명입니다. 기본값은 'Altitude'입니다.
+   도형이 지리 좌표계를 가진 포인트 레이어의 도형인 경우에만 사용합니다.
+
+-  **WKT=string**:
+   WKT 값을 담고 있는 필드명입니다.
+
+-  **SAME_DIRECTORY=YES/NO**:
+   테이블 파일을 동일한 디렉터리에 생성해야 할지 아니면 하위 디렉터리에 생성해야 할지 여부를 선택합니다. 기본값은 NO로, XML 파일의 기본명으로 명명된 하위 디렉터리에 테이블 파일을 생성할 것이라는 뜻입니다. 예를 들어 "foo.xml" PDS4 데이터셋을 생성한다고 할 때, 기본적으로 "foo" 하위 디렉터리에 테이블 파일을 생성할 것입니다. 이 옵션을 YES로 설정하는 경우, "foo.xml" 파일과 동일한 디렉터리에 테이블 파일을 생성할 것입니다.
+
+하위 데이터셋 / 다중 이미지 지원
 -----------------------------------
 
-If several Array objects are present in the label, they will be reported
-as separate subdatasets (typically the main subdataset is an Array3D,
-and backplanes are represented as Array2D).
+라벨에 배열 객체 여러 개가 존재하는 경우, 개별 하위 데이터셋들로 리포트될 것입니다. (일반적으로 주 데이터셋이 Array3D, 백플레인(backplane)들이 Array2D인 것으로 표현합니다.)
 
-Since GDAL 3.0, creation of new datasets with subdatasets is supported
-(through the APPEND_SUBDATASET=YES creation option). One important
-restriction is that, given that the georeferencing information in the
-PDS4 XML label is global for the whole dataset, all subdatasets must
-share the same georeferencing information: coordinate reference system,
-georegistration and resolution. Appending to both RAW and GEOTIFF raster
-is supported. In append mode, most creation options are ignored, except
-INTERLEAVE (if GeoTIFF output image), ARRAY_TYPE and ARRAY_IDENTIFIER.
+GDAL 3.0버전부터, (APPEND_SUBDATASET=YES 생성 옵션을 통해) 하위 데이터셋을 가진 새 데이터셋 생성을 지원합니다. 중요한 제약 조건이 하나 있는데, PDS4 XML 라벨 파일에 있는 지리참조 정보가 데이터셋 전체에 적용되는 전체 수준인 경우 모든 하위 데이터셋들도 반드시 동일한 지리참조 정보를 -- 좌표계, 지리 등록(georegistration), 해상도 정보를 -- 공유해야만 한다는 것입니다. RAW 및 GEOTIFF 래스터 둘 다에 이 정보를 추가할 수 있습니다. 추가(append) 모드에서는 ARRAY_TYPE 및 ARRAY_IDENTIFIER, 그리고 (산출 이미지가 GeoTIFF 포맷인 경우) INTERLEAVE를 제외한 생성 옵션 대부분을 무시합니다.
 
-PDS4 raster examples
+PDS4 래스터 예시
 --------------------
 
-Listing bands and subdatasets:
+밴드와 하위 데이터셋 목록:
 
 ::
 
@@ -267,10 +218,9 @@ Listing bands and subdatasets:
    Band 5 Block=512x1 Type=Int16, ColorInterp=Undefined
      Offset: 0.146998785514825,   Scale:4.48823844390647e-06
 
-The information displayed by default is the one of the first subdataset
-(SUBDATASET_1_NAME)
+기본적으로 출력되는 정보는 첫 번째 하위 데이터셋(SUBDATASET_1_NAME)의 정보입니다.
 
-Getting information on a subdataset:
+하위 데이터셋에 관한 정보 수집:
 
 ::
 
@@ -290,22 +240,21 @@ Getting information on a subdataset:
    Band 1 Block=512x1 Type=Int16, ColorInterp=Undefined
      Offset: 0.04984971,   Scale:7.454028e-06
 
-Conversion to GeoTIFF of a given subdatasets:
+지정 하위 데이터셋을 GeoTIFF로 변환:
 
 ::
 
    $ gdal_translate PDS4:b0011_p237201_01_01v02.xml:1:2 iof_r2.tif
 
-Conversion to GeoTIFF of a all subdatasets:
+모든 하위 데이터셋을 GeoTIFF로 변환:
 
 ::
 
    $ gdal_translate -sds b0011_p237201_01_01v02.xml b0011_p237201_01_01v02.tif
 
-This will create b0011_p237201_01_01v02_X.tif files where X=1,....,N
+이 명령어는 X=1,....,N인 b0011_p237201_01_01v02_X.tif 파일들을 생성할 것입니다.
 
-Creation of a new PDS4 dataset, using the default template and setting
-its parameterized variables:
+기본 템플릿을 사용하고 기본 템플릿에 파라미터화된 변수들을 설정해서 새 PDS4 데이터셋을 생성:
 
 ::
 
@@ -318,11 +267,9 @@ its parameterized variables:
                -co VAR_INVESTIGATION_AREA_NAME="Lunar Reconnaissance Orbiter" \
                -co VAR_INVESTIGATION_AREA_LID_REFERENCE="urn:nasa:pds:context:instrument_host:spacecraft.lro"
 
-Creation of the same PDS4 dataset as above, using the default template
-but setting its parameterized variables from a text file. Helps with
-long command lines:
+기본 템플릿을 사용하지만 기본 템플릿에 텍스트 파일로부터 나온 파라미터화된 변수들을 설정해서 위와 동일한 PDS4 데이터셋을 생성합니다. 긴 명령어를 단순화할 수 있습니다:
 
-Create a text file "myOptions.txt" with the below content
+다음 내용을 가진 "myOptions.txt" 텍스트 파일을 생성한 다음
 
 ::
 
@@ -341,29 +288,24 @@ Create a text file "myOptions.txt" with the below content
 
    gdal_translate input.tif output.xml -of PDS4 --optfile myOptions.txt
 
-For more on --optfile, consult `the general documentation on GDAL
-utilities <gdal_utilities.html>`__.
+--optfile 옵션에 관해 더 알고 싶다면, `GDAL 유틸리티 일반 문서 <gdal_utilities.html>`_ 를 읽어보십시오.
 
-Creation of a PDS4 dataset, using a non default template (here on a HTTP
-server, but local filename also possible):
+기본 템플릿이 아닌 템플릿을 사용해서 PDS4 데이터셋을 생성 (이 예시에서는 HTTP 서버에 있는 템플릿을 사용하지만, 로컬 파일명으로도 설정할 수 있습니다):
 
 ::
 
    $ gdal_translate input.tif output.xml -of PDS4 \
                -co TEMPLATE=http://example.com/mytemplate.xml
 
-Creation of a PDS4 dataset from a source PDS4 dataset (using the XML
-file of this source PDS4 dataset as an implicit template), with
-subsetting:
+소스 PDS4 데이터셋의 (이 소스 PDS4 데이터셋의 XML 파일을 암묵적인 템플릿으로 사용해서) 부분 집합인 PDS4 데이터셋을 생성:
 
 ::
 
    $ gdal_translate input.xml output.xml -of PDS4 -projwin ullx ully lrx lry
 
-In Python, creation of a PDS4 dataset from a GeoTIFF, using a base
-template into which one substitute one element with a new value:
+파이썬 코드로 GeoTIFF의 요소 1개를 새 값으로 대체한 기본 템플릿을 사용해서 PDS4 데이터셋으로 생성:
 
-::
+.. code-block:: python
 
    from osgeo import gdal
    from lxml import etree
@@ -386,7 +328,7 @@ template into which one substitute one element with a new value:
    # Cleanup
    gdal.Unlink(in_memory_template)
 
-Appending a new image (subdataset) to an existing PDS4 dataset.
+기존 PDS4 데이터셋에 새 이미지(하위 데이터셋)를 추가:
 
 ::
 
@@ -394,49 +336,48 @@ Appending a new image (subdataset) to an existing PDS4 dataset.
                          -co APPEND_SUBDATASET=YES \
                          -co ARRAY_IDENTIFIER=my_new_image
 
-
-Adding a PDS4 label to an existing ISIS3 dataset. (GDAL >= 3.1)
+기존 ISIS3 데이터셋에 PDS4 라벨을 추가 (GDAL 3.1 이상 버전):
 
 ::
 
    $ gdal_translate dataset.cub dataset.xml -of PDS4 -co CREATE_LABEL_ONLY=YES
 
-PDS4 vector examples
+PDS4 벡터 예시
 --------------------
 
-Displaying the content of a PDS4 dataset with a table:
+테이블을 가진 PDS4 데이터셋의 콘텐츠를 출력:
 
 ::
 
    $ ogrinfo -al my_pds4.xml
 
-Converting a PDS4 dataset with a table to shapefile, by specifying
-columns that contain longitude and latitude:
+경도와 위도를 담고 있는 열을 지정해서 테이블을 가진 PDS4 데이터셋을 shapefile로 변환:
 
 ::
 
    $ ogr2ogr out.shp my_pds4.xml -oo LAT=my_lat_column -oo LONG=my_long_column
 
-Converting a shapefile to a PDS4 dataset with a CSV-delimited table
-(with an implicit WKT column to store the geometry):
+shapefile을 (도형을 저장하기 위한 WKT 열을 내포한) 쉼표로 구분된 CSV 테이블을 가진 PDS4 데이터셋으로 변환:
 
 ::
 
    $ ogr2ogr my_out_pds4.xml in.shp
 
-Limitations
+제약
 -----------
 
-As a new driver and new format, please report any issues to the bug
-tracker, as explained on the `wiki <https://trac.osgeo.org/gdal/wiki>`__
+새로 도입된 드라이버와 포맷이기 때문에, 문제점을 발견했다면 `위키 <https://trac.osgeo.org/gdal/wiki>`_ 에 설명된 대로 버그 트래커에 리포트해주십시오.
 
-See Also:
+참고
 ---------
 
--  Implemented as ``gdal/frmts/pds/pds4dataset.cpp``.
--  `Official
-   documentation <https://pds.nasa.gov/pds4/doc/index.shtml>`__
--  `Schemas, including the cartography
-   extension <https://pds.nasa.gov/pds4/schema/released/>`__
--  :ref:`raster.pds` driver.
--  :ref:`raster.isis3` driver.
+-  ``gdal/frmts/pds/pds4dataset.cpp`` 로 구현되었습니다.
+
+-  `공식 문서 <https://pds.nasa.gov/pds4/doc/index.shtml>`_
+
+-  `지도 제작 확장 사양을 포함하는 스키마 <https://pds.nasa.gov/pds4/schema/released/>`_
+
+-  :ref:`raster.pds` 드라이버
+
+-  :ref:`raster.isis3` 드라이버
+

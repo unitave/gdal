@@ -8,7 +8,7 @@ PDS -- 행성 데이터 시스템 v3
 
 .. built_in_by_default::
 
-PDS(Planetary Data System)는 NASA가 태양, 달 및 행성 영상 데이터를 저장하고 배포하기 위해 주로 사용하는 포맷입니다. GDAL은 PDS 형식 영상 데이터에 읽기전용 접근을 지원합니다.
+PDS(Planetary Data System)는 NASA가 태양, 달 및 행성 영상 데이터를 저장하고 배포하기 위해 주로 사용하는 포맷입니다. GDAL은 PDS 포맷 영상 데이터에 읽기전용 접근을 지원합니다.
 
 PDS 파일의 확장자는 거의 .img이며, 관련 .lbl 라벨 파일을 가지고 있는 경우도 있습니다. .lbl 파일이 존재하는 경우 .img 파일보다는 .lbl 파일을 데이터셋 이름으로 사용해야 합니다.
 
