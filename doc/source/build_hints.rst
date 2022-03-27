@@ -1318,7 +1318,7 @@ PCRE2
 PDFium
 ******
 
-`PDFium <https://github.com/rouault/pdfium_build_gdal_3_4>`_ 라이브러리는
+`PDFium <https://github.com/rouault/pdfium_build_gdal_3_5>`_ 라이브러리는
 :ref:`raster.pdf` 드라이버 용 백엔드 후보 가운데 하나입니다.
 
 .. option:: PDFium_INCLUDE_DIR
