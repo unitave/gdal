@@ -187,7 +187,7 @@ TIFF 포맷은 색상표(palette 또는 color table)에 R, G, B 구성요소만 
 -  **RPCTXT=YES**: RPC(Rational Polynomial Coefficients) 정보를 사용할 수 있는 경우 RPC를 설명하는 관련 \_RPC.TXT 파일을 강제로 생성합니다.
 
 -  **INTERLEAVE=[BAND,PIXEL]**: 기본적으로 픽셀이 교차삽입되는 (TIFF 용어로는 PLANARCONFIG_CONTIG) TIFF 파일을 생성합니다. PIXEL 교차삽입은 몇몇 목적을 위해 BAND 교차삽입보다 약간 덜 효율적이지만, 픽셀이 교차삽입된 TIFF 파일만 지원하는 응용 프로그램도 일부 존재합니다.
-   GDAL 3.5버전부터, INTERLEAVE 메타데이터 항목을 가진 다중 밴드 소스 데이터셋으로부터 복사할 때 INTERLEAVE 생성 옵션을 지정하지 않으면, COMPRESS 생성 옵션을 지정하지 않는 이상 소스 데이터셋의 INTERLEAVE를 자동으로 연산에 넣을 것입니다.
+   GDAL 3.5버전부터, INTERLEAVE 메타데이터 항목을 노출하는 다중 밴드 소스 데이터셋으로부터 복사할 때 INTERLEAVE 생성 옵션을 지정하지 않으면, COMPRESS 생성 옵션을 지정하지 않는 이상 소스 데이터셋의 INTERLEAVE를 자동으로 연산에 넣을 것입니다.
 
 -  **TILED=YES**: 기본적으로 스트립화 TIFF 파일을 생성합니다. 타일화 TIFF 파일을 강제로 생성하기 위해 이 옵션을 사용할 수 있습니다.
 

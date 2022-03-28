@@ -22,7 +22,7 @@ GDAL은 BIL, BIP 및 BSQ 교차삽입(interleaving) 포맷 읽기를 지원할 �
    - **BIP** --- 픽셀 단위 영상(data interleaved by pixel)
    - **BIL** -- 라인 단위 영상(data interleaved by line)
    
-   GDAL 3.5버전부터, INTERLEAVE 메타데이터 항목을 가진 다중 밴드를 가진 소스 데이터셋으로부터 복사할 때 INTERLEAVE 생성 옵션을 지정하지 않는다면 소스 데이터셋의 INTERLEAVE를 자동적으로 연산에 넣을 것입니다.
+   GDAL 3.5버전부터, INTERLEAVE 메타데이터 항목을 노출하는 다중 밴드를 가진 소스 데이터셋으로부터 복사할 때 INTERLEAVE 생성 옵션을 지정하지 않는다면 소스 데이터셋의 INTERLEAVE를 자동적으로 연산에 넣을 것입니다.
 
 -  **SUFFIX=REPLACE/ADD**: 지정한 파일명에 ".hdr" 접미어를 강제로 추가합니다. 예를 들어 사용자가 산출 데이터셋에 "file.bin"이라는 이름을 선택했다면 "file.bin.hdr" 헤더 파일을 생성할 것입니다. 기본적으로 헤더 파일 접미어가 바이너리 파일의 접미어를 대체합니다. 예를 들어 "file.bin"이라는 이름을 선택했다면 "file.hdr" 헤더 파일을 생성할 것입니다.
 

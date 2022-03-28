@@ -8,21 +8,15 @@ SDTS -- USGS SDTS DEM
 
 .. built_in_by_default::
 
-GDAL includes support for reading USGS SDTS formatted DEMs. USGS DEMs
-are always returned with a data type of signed sixteen bit integer, or
-32bit float. Projection and georeferencing information is also returned.
+GDAL은 USGS SDTS 포맷 DEM 읽기를 지원합니다. USGS DEM은 언제나 부호 있는 16비트 정수형 또는 32비트 부동소수점형 데이터 유형으로 반환됩니다. 투영법과 지리참조 정보도 반환됩니다.
 
-SDTS datasets consist of a number of files. Each DEM should have one
-file with a name like XXXCATD.DDF. This should be selected to open the
-dataset.
+SDTS 데이터셋은 파일 여러 개로 이루어져 있습니다. 각 DEM은 XXXCATD.DDF 같은 이름의 파일 하나를 가지고 있어야 합니다. 데이터셋을 열려면 이런 파일을 선택해야 합니다.
 
-The elevation units of DEMs may be feet or meters. The GetType() method
-on a band will attempt to return if the units are Feet ("ft") or Meters
-("m").
+DEM의 표고 단위는 피트 또는 미터가 될 수 있습니다. 밴드에 GetType() 메소드를 호출하면 단위가 피트인지 ("ft") 또는 미터인지 ("m") 반환하려 할 것입니다.
 
-NOTE: Implemented as ``gdal/frmts/sdts/sdtsdataset.cpp``.
+주의: ``gdal/frmts/sdts/sdtsdataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::

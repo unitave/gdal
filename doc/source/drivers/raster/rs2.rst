@@ -1,70 +1,48 @@
 .. _raster.rs2:
 
 ================================================================================
-RS2 -- RadarSat 2 XML Product
+RS2 -- 레이더샛 2 XML 상품
 ================================================================================
 
 .. shortname:: RS2
 
 .. built_in_by_default::
 
-This driver will read some RadarSat 2 XML polarimetric products. In
-particular complex products, and 16bit magnitude detected products.
+이 드라이버는 몇몇 레이더샛(RadarSat) 2 XML 편광(polarimetric) 상품을, 특히 복소수형 상품 및 16비트 광도(magnitude) 탐지 상품을 읽어올 것입니다.
 
-The RadarSat 2 XML products are distributed with a primary XML file
-called product.xml, and a set of supporting XML data files with the
-actual imagery stored in TIFF files. The RS2 driver will be used if the
-product.xml or the containing directory is selected, and it can treat
-all the imagery as one consistent dataset.
+레이더샛 2 XML 상품은 product.xml이라는 주 XML 파일과 TIFF 파일에 저장된 실제 영상을 가진 부 XML 데이터 파일들로 배포됩니다. product.xml 파일 또는 이 파일을 담고 있는 디렉터리를 선택하면 RS2 드라이버를 사용할 것입니다. 이 드라이버는 모든 영상을 하나의 일관된 데이터셋으로 처리할 수 있습니다.
 
-The complex products use "32bit void typed" TIFF files which are not
-meaningfully readable normally. The RS2 driver takes care of converting
-this into useful CInt16 format internally.
+복소수형 상품은 "32비트 보이드 유형" TIFF 파일을 사용합니다. 일반적으로는 이런 파일을 유의미하게 읽을 수 없습니다. RS2 드라이버는 내부적으로 이런 파일을 유용한 CInt16 포맷으로 변환시킵니다.
 
-The RS2 driver also reads geolocation tiepoints from the product.xml
-file and represents them as GCPs on the dataset.
+RS2 드라이버는 product.xml 파일로부터 지리 위치 원격 측량 지점(geolocation tiepoint)도 읽어와서 데이터셋 상의 GCP로 표현합니다.
 
-It is very likely that RadarSat International will be distributing other
-sorts of datasets in this format; however, at this time this driver only
-supports specific RadarSat 2 polarimetric products. All other will be
-ignored, or result in various runtime errors. It is hoped that this
-driver can be generalized when other product samples become available.
+레이더샛 인터내셔널(RadarSat International)이 이 포맷으로 된 다른 종류의 데이터셋들을 배포할 가능성은 매우 큽니다. 하지만 현재, 이 드라이버는 특정 레이더샛 2 편광 상품만 지원합니다. 다른 종류의 모든 상품은 무시하거나 여러 가지 런타임 오류를 발생시킬 것입니다. 다른 상품 샘플을 사용할 수 있을 경우 이 드라이버를 일반화시킬 수 있으리라 예측해봅니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
 .. supports_virtualio::
 
-Data Calibration
+데이터 보정
 ----------------
 
-If you wish to have GDAL apply a particular calibration LUT to the data
-when you open it, you have to open the appropriate subdatasets. The
-following subdatasets exist within the SUBDATASET domain for RS2
-products:
+데이터셋을 열었을 때 GDAL이 데이터에 특정 보정(calibration) LUT를 적용하기를 바란다면, 그에 맞는 하위 데이터셋을 열어야 합니다. RS2 상품의 SUBDATASET 도메인 안에 다음 하위 데이터셋들이 존재합니다:
 
--  uncalibrated - open with RADARSAT_2_CALIB:UNCALIB: prepended to
-   filename
--  beta\ :sub:`0` - open with RADARSAT_2_CALIB:BETA0: prepended to
-   filename
--  sigma\ :sub:`0` - open with RADARSAT_2_CALIB:SIGMA0: prepended to
-   filename
--  gamma - open with RADARSAT_2_CALIB:GAMMA: prepended to filename
+-  uncalibrated - ``RADARSAT_2_CALIB:UNCALIB:`` 를 파일명인 척해서 열기
 
-Note that geocoded (SPG/SSG) products do not have this functionality
-available. Also be aware that the LUTs must be in the product directory
-where specified in the product.xml, otherwise loading the product with
-the calibration LUT applied will fail.
+-  beta\ :sub:`0` - ``RADARSAT_2_CALIB:BETA0:`` 을 파일명인 척해서 열기
 
-One caveat worth noting is that the RADARSAT-2 driver will supply the
-calibrated data as GDT_Float32 or GDT_CFloat32 depending on the type of
-calibration selected. The uncalibrated data is provided as
-GDT_Int16/GDT_Byte/GDT_CInt16, also depending on the type of product
-selected.
+-  sigma\ :sub:`0` - ``RADARSAT_2_CALIB:SIGMA0:`` 을 파일명인 척해서 열기
 
-See Also
+-  gamma - ``RADARSAT_2_CALIB:GAMMA:`` 를 파일명인 척해서 열기
+
+지오코드 (SPG/SSG) 상품은 이 기능을 사용할 수 없다는 사실을 기억하십시오. 또한 LUT가 product.xml 파일에 지정된 상품 디렉터리 안에 있어야만 하며, 그렇지 않은 경우 적용된 보정 LUT로 상품을 불러오는 과정에서 오류가 발생할 것입니다.
+
+선택한 보정 유형에 따라 RS2 드라이버가 보정된 데이터를 GDT_Float32 또는 GDT_CFloat32 유형으로 제공할 것이라는 사실을 기억해두는 편이 좋습니다. 또한 선택한 상품 유형에 따라, 비보정 데이터를 GDT_Int16 또는 GDT_Byte 또는 GDT_CInt16 유형으로 제공합니다.
+
+참고
 --------
 
--  RadarSat document RN-RP-51-27.
+-  RadarSat 문서 RN-RP-51-27.
