@@ -1,43 +1,36 @@
 .. _raster.prf:
 
 ================================================================================
-PHOTOMOD Raster File
+PHOTOMOD 래스터 파일
 ================================================================================
 
 .. shortname:: PRF
 
 .. built_in_by_default::
 
-PRF or MegaTIFF is an internal format of PHOTOMOD software for storing
-large images.
+PRF 또는 MegaTIFF는 PHOTOMOD 소프트웨어가 대용량 이미지를 저장하기 위해 사용하는 내부 포맷입니다.
 
-This format was developed to store images larger than 4 GB. As a basis
-for storing data used TIFF or JPEG2000 format. Raster is split into
-fragments (tiles) such that each fragment does not exceeded a predefined
-size (e.g., less than 1 GB). An overview file also added to process
-raster data on a small scales.
+이 포맷은 4GB를 초과하는 이미지를 저장하기 위해 개발되었습니다. 데이터를 저장하기 위한 기반은 TIFF 또는 JPEG2000 포맷입니다. 래스터는 각 조각(타일)이 사전 정의된 용량을 (예: 1GB를) 초과하지 않는 개수의 조각들로 분할됩니다. 소축척에서 래스터 데이터를 처리하기 위한 오버뷰 파일도 추가됩니다.
 
-PRF files has two variations: 'prf' for imagery data and 'x-dem' for
-elevation data. Files can be georeferenced, but projection information
-can be stored only in external files (\*.prj).
+PRF 파일에는 변이형이 2개 존재합니다: 영상 데이터 용 'prf'와 표고 데이터 용 'x-dem'입니다. 파일을 지리참조시킬 수 있지만, 투영법 정보는 외부 파일(\*.prj)에만 저장할 수 있습니다.
 
-Image format has the following structure:
+이 이미지 포맷은 다음과 같은 구조입니다:
 
--  the header XML file 'image_name.prf'/'image_name.x-dem'
--  folder 'image_name' with raster subtiles
--  files \*.tif/*.jp2/*.demtif inside folder 'image_name', containing
-   raster fragments and the overview image
+-  'image_name.prf'/'image_name.x-dem' 헤더 XML 파일
+-  래스터 하위 타일들을 담고 있는 'image_name' 폴더
+-  'image_name' 폴더 안의, 래스터 조각들과 오버뷰 이미지를 담고 있는 \*.tif/*.jp2/*.demtif 파일들
 
-The driver support the data type among Byte, UInt16, UInt32, Float32 or
-Float64.
+이 드라이버는 바이트, UInt16, UInt32, Float32 또는 Float64 데이터 유형을 지원합니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_virtualio::
 
-See Also
+참고
 --------
 
--  `Racurs company home page <http://www.racurs.ru>`__
--  `PHOTOMOD Lite home page <http://www.racurs.ru/index.php?page=453>`__
+-  `Racurs 사 홈페이지 <http://www.racurs.ru>`_
+
+-  `PHOTOMOD Lite 홈페이지 <http://www.racurs.ru/index.php?page=453>`_
+

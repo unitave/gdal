@@ -1,135 +1,115 @@
 .. _raster.postgisraster:
 
 ================================================================================
-PostGISRaster -- PostGIS Raster driver
+PostGISRaster -- PostGIS 래스터 드라이버
 ================================================================================
 
 .. shortname:: PostGISRaster
 
-.. build_dependencies:: PostgreSQL library
+.. build_dependencies:: PostgreSQL 라이브러리
 
-PostGIS Raster (previously known as WKT Raster) is the project that
-provides raster support on PostGIS. Since September 26st, 2010, is an
-official part of PostGIS 2.0+.
+(WKT 래스터로 알려졌던) PostGIS 래스터는 PostGIS에서 래스터를 지원하기 위한 프로젝트입니다. 2010년 9월 26일부터 PostGIS 2.0 이상 버전에 공식적으로 도입되었습니다.
 
-This driver was started during the Google Summer of Code 2009, and
-significantly improved since then.
+이 드라이버의 개발은 2009년 GSoC(Google Summer of Code) 도중 시작되었으며, 이후로 크게 개선되었습니다.
 
-Currently, the driver provides read-only support to PostGIS Raster data
-sources.
+현재, 이 드라이버는 PostGIS 래스터 데이터소스의 읽기만 지원하고 있습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
 
 .. supports_georeferencing::
 
-Connecting to a database
+데이터베이스 연결하기
 ------------------------
 
-To connect to a PostGIS Raster datasource, use a connection string
-specifying the database name, with additional parameters as necessary
+PostGIS 래스터 데이터소스에 연결하려면, 데이터베이스 이름을 지정하는 연결 문자열을 필요한 추가 파라미터와 함께 사용하십시오.
 
 ::
 
    PG:"[host=''] [port:''] dbname='' [user=''] [password=''] [schema=''] [table=''] [column=''] [where=''] [mode=''] [outdb_resolution='']"
 
-Note that the string, up to the part starting with "table='" is a
-libpq-style connection string. That means that you can leave out
-unnecessary fields (like password, in some cases).
+"table='"로 시작하는 부분까지의 문자열이 libpq 스타일 연결 문자열이라는 사실을 기억하십시오. 즉 (몇몇 경우 비밀번호 같은) 필요없는 필드를 생략해도 된다는 뜻입니다.
 
--  **schema** - name of PostgreSQL schema where requested raster table
-   is stored.
--  **table** - name of PostGIS Raster table. The table was created by
-   the raster loader (eg. raster2pgsql utility).
--  **column** - name of raster column in raster table
--  **where** - option is used to filter the results of the raster table.
-   Any SQL-WHERE expression is valid.
--  **mode** - option is used to know the expected arrangement of the
-   raster table. There are 2 possible values
+-  **schema**:
+   요청한 래스터 테이블을 저장하고 있는 PostgreSQL 스키마의 이름입니다.
 
-   -  **mode=1** - ONE_RASTER_PER_ROW mode. In this case, a raster table
-      is considered as a bunch of different raster files. This mode is
-      intended for raster tables storing different raster files. It's
-      the default mode if you don't provide this field in connection
-      string.
-   -  **mode=2** - ONE_RASTER_PER_TABLE mode. In this case, a raster
-      table is considered as a unique raster file, even if the table has
-      more than one row. This mode is intended for reading tiled rasters
-      from database.
+-  **table**:
+   PostGIS 래스터 테이블의 이름입니다.
+   (예를 들어 raster2pgsql 유틸리티 같은) 래스터 로더(loader)가 생성한 테이블입니다.
 
--  **outdb_resolution** - (GDAL >= 2.3.1) option to specify how
-   out-database rasters should be resolved. Default is server_side.
+-  **column**:
+   래스터 테이블에 있는 래스터 열의 이름입니다.
 
-   -  **server_side**: The outDB raster will be fetched by the
-      PostgreSQL server. This implies that outdb rasters are enabled on
-      the server.
-   -  **client_side**: The outDB raster filenames will be returned to
-      the GDAL PostGISRaster client, which will open it on the client
-      side. This implies that the filename stored on te server can be
-      accessed by the client.
-   -  **client_side_if_possible**: The outDB raster filenames will be
-      returned to the GDAL PostGISRaster client, which will check if it
-      can access them. If it can, that's equivalent to client_side.
-      Otherwise that's equivalent to server_side. Note that this mode
-      involves extra queries to the server.
+-  **where**:
+   래스터 테이블의 요청 결과물을 필터링하기 위해 쓰이는 옵션입니다.
+   모든 유형의 SQL-WHERE 표현식을 사용할 수 있습니다.
 
-Additional notes
+-  **mode**:
+   래스터 테이블의 예상 구조 상태를 알기 위해 쓰이는 옵션입니다.
+   두 가지 값 가운데 하나로 설정할 수 있습니다.
+
+   -  **mode=1** - ONE_RASTER_PER_ROW 모드입니다.
+      이 경우, 래스터 테이블을 한 무리의 서로 다른 래스터 파일들로 간주합니다. 이 모드는 서로 다른 래스터 파일들을 저장하고 있는 래스터 테이블 용입니다. 연결 문자열에 이 필드를 지정하지 않는 경우, 이 모드를 기본값으로 사용합니다.
+
+   -  **mode=2** - ONE_RASTER_PER_TABLE 모드입니다.
+      이 경우, 테이블이 행을 하나 이상 가지고 있더라도 래스터 테이블을 유일(unique) 래스터 타일로 간주합니다. 이 모드는 데이터베이스로부터 타일화 래스터를 읽어오기 위한 것입니다.
+
+-  **outdb_resolution**: (GDAL 2.3.1 이상 버전)
+   이 파라미터는 데이터베이스 외부에 있는 래스터를 처리할 방법을 지정합니다. 기본값은 server_side입니다.
+
+   -  **server_side** - PostgreSQL 서버가 데이터베이스 외부에 있는 래스터를 가져올 것입니다. 데이터베이스 외부에 있는 래스터가 서버 상에서 활성화된 상태라는 뜻입니다.
+
+   -  **client_side** - GDAL PostGISRaster 클라이언트에 데이터베이스 외부에 있는 래스터의 파일명을 반환할 것입니다. 그러면 클라이언트 향에서 해당 래스터를 열 것입니다. 클라이언트가 서버 상에 저장된 파일명에 접근할 수 있다는 뜻입니다.
+
+   -  **client_side_if_possible** - GDAL PostGISRaster 클라이언트에 데이터베이스 외부에 있는 래스터의 파일명을 반환할 것입니다. 그러면 크라이언트가 해당 파일명에 접근할 수 있는지 확인할 것입니다. 접근할 수 있다면 client_side와 동일합니다. 접근할 수 없다면 server_side와 동일합니다. 이 모드로 설정하면 서버에 추가적인 쿼리를 발생시킨다는 사실을 기억하십시오.
+
+추가 메모
 ~~~~~~~~~~~~~~~~
 
-If a table stores a tiled raster and you execute the driver with mode=1,
-each image tile will be considered as a different image, and will be
-reported as a subdataset. There are use cases the driver can't still
-work with. For example: non-regular blocked rasters. That cases are
-detected and an error is raised. Anyway, as I've said, the driver is
-under development, and will work with more raster arrangements ASAP.
+테이블이 타일화 래스터를 저장하고 있는데 드라이버를 mode=1 파라미터로 실행한 경우, 각 이미지 타일을 서로 다른 이미지로 간주하고 하위 데이터셋으로 리포트할 것입니다. 이 드라이버가 아직도 처리하지 못 하는 사용 사례들이 있습니다. 예를 들어 비정규 블록화 래스터를 탐지하면 오류를 발생시킵니다. 어쨌든 앞에서 언급했듯이 이 드라이버는 계속 개발 중이고, 앞으로 더 많은 래스터 구조를 처리할 수 있게 될 것입니다.
 
-There's an additional working mode. If you don't provide a table name,
-the driver will look for existing raster tables in all allowed database'
-schemas, and will report each table as a subdataset.
+추가적인 작업 모드가 존재합니다. 테이블 이름을 설정하지 않는 경우, 드라이버가 사용 권한이 있는 모든 데이터베이스 스키마에 있는 기존 래스터 테이블을 검색해서 각 테이블을 하위 데이터셋으로 리포트할 것입니다.
 
-You must use this connection string's format in all the gdal tools, like
-gdalinfo, gdal_translate, gdalwarp, etc.
+gdalinfo, gdal_translate, gdalwarp 등등 모든 GDAL 도구에서 이 연결 문자열 서식을 사용해야만 합니다.
 
-Performance hints
+성능 힌트
 ~~~~~~~~~~~~~~~~~
 
-To get the maximum performance from the driver, it is best to load the
-raster in PostGIS raster with the following characteristics:
+이 드라이버의 최대 성능을 끌어내려면, PostGIS 래스터에 래스터를 다음과 같은 옵션들로 불러오는 것이 최선입니다:
 
--  tiled: -t switch of raster2pgsql
--  with overview: -l 2,4,8,... switch of raster2pgsql
--  with a GIST spatial index on the raster column: -I switch of
-   raster2pgsql
--  with constraints registered: -C switch of raster2pgsql
+-  타일화: raster2pgsql의 -t 스위치
 
-Examples
+-  오버뷰: raster2pgsql의 -l 2,4,8,... 스위치
+
+-  래스터 열에 GIST 공간 색인 생성: raster2pgsql의 -I 스위치
+
+-  제약 조건 등록: raster2pgsql의 -C 스위치
+
+예시
 --------
 
-To get a summary about your raster via GDAL use gdalinfo:
+gdalinfo를 이용해서 GDAL을 통해 래스터에 관한 요약을 보려면:
 
 ::
 
    gdalinfo  "PG:host=localhost port=5432 dbname='mydb' user='postgres' password='secret' schema='public' table=mytable"
 
-For more examples, check the PostGIS Raster FAQ section: `Can I export
-my PostGIS Raster data to other raster
-formats? <https://postgis.net/docs/RT_FAQ.html#idm28288>`__
+더 많은 예시를 원한다면 PostGIS 래스터 FAQ 단락을 살펴보십시오: `내 PostGIS 래스터 데이터를 다른 래스터 포맷으로 내보낼 수 있나요? <https://postgis.net/docs/RT_FAQ.html#idm28288>`_
 
-Credits
--------
-
-The driver developers
-
--  Jorge Arévalo (jorgearevalo at libregis.org)
--  David Zwarg (dzwarg at azavea.com)
--  Even Rouault (even.rouault at spatialys.com)
-
-See Also
+감사의 말
 --------
 
--  `GDAL PostGISRaster driver
-   Wiki <https://trac.osgeo.org/gdal/wiki/frmts_wtkraster.html>`__
--  `PostGIS Raster
-   documentation <https://postgis.net/docs/RT_reference.html>`__
+드라이버 개발자들
+
+-  호르헤 아레발로(Jorge Arévalo, jorgearevalo@libregis.org)
+-  데이빗 즈와그(David Zwarg, dzwarg@azavea.com)
+-  이벤 루올(Even Rouault, even.rouault@spatialys.com)
+
+참고
+--------
+
+-  `GDAL PostGISRaster 드라이버 위키 <https://trac.osgeo.org/gdal/wiki/frmts_wtkraster.html>`_
+
+-  `PostGIS 래스터 문서 <https://postgis.net/docs/RT_reference.html>`_

@@ -119,10 +119,10 @@ GDALGeoTIFF 또는 GeoTIFF 프로파일을 사용하는 경우, GDALMD_AREA_OR_P
 GDAL은 COLOR_PROFILE 도메인에 있는 다음 색상 프로파일 메타데이터를 처리할 수 있습니다:
 
 -  SOURCE_ICC_PROFILE (파일에 내장된 Base64 인코딩 ICC 프로파일. 이 태그가 존재하는 경우 다른 태그들을 무시합니다.)
--  SOURCE_PRIMARIES_RED (적색 우선인 경우 "x,y,1" 서식의 xyY)
--  SOURCE_PRIMARIES_GREEN (녹색 우선인 경우 "x,y,1" 서식의 xyY)
--  SOURCE_PRIMARIES_BLUE (청색 우선인 경우 "x,y,1" 서식의 xyY)
--  SOURCE_WHITEPOINT (화이트 포인트의 경우 "x,y,1" 서식의 xyY)
+-  SOURCE_PRIMARIES_RED ("x,y,1" 서식의 적색을 우선하는 xyY)
+-  SOURCE_PRIMARIES_GREEN ("x,y,1" 서식의 녹색을 우선하는 xyY)
+-  SOURCE_PRIMARIES_BLUE ("x,y,1" 서식의 청색을 우선하는 xyY)
+-  SOURCE_WHITEPOINT ("x,y,1" 서식의 화이트 포인트 용 xyY)
 -  TIFFTAG_TRANSFERFUNCTION_RED (TIFFTAG_TRANSFERFUNCTION의 적색 테이블)
 -  TIFFTAG_TRANSFERFUNCTION_GREEN (TIFFTAG_TRANSFERFUNCTION의 녹색 테이블)
 -  TIFFTAG_TRANSFERFUNCTION_BLUE (TIFFTAG_TRANSFERFUNCTION의 청색 테이블)

@@ -1,38 +1,34 @@
 .. _raster.r:
 
 ================================================================================
-R -- R Object Data Store
+R -- R 객체 데이터 저장소(R Object Data Store)
 ================================================================================
 
 .. shortname:: R
 
 .. built_in_by_default::
 
-The R Object File Format is supported for write access, and limited read
-access by GDAL. This format is the native format R uses for objects
-saved with the *save* command and loaded with the *load* command. GDAL
-supports writing a dataset as an array object in this format, and
-supports reading files with simple rasters in essentially the same
-organization. It will not read most R object files.
+GDAL은 R 객체 파일 포맷의 쓰기 접근 및 제한된 읽기 접근을 지원합니다. 이 포맷은 R가 *save* 명령어로 저장하고 *load* 명령어로 불러오는 객체 용으로 사용하는 네이티브 포맷입니다. GDAL은 데이터셋을 이 포맷으로 된 배열 객체로 작성할 수 있고, 본질적으로 동일한 구조로 된 단순 래스터를 가진 파일을 읽어올 수 있습니다. 대부분의 R 객체 파일은 읽을 수 없을 것입니다.
 
-Currently there is no support for reading or writing georeferencing
-information.
+현재 지리참조 정보 읽기 또는 쓰기는 지원하지 않습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
 
 .. supports_virtualio::
 
-Creation Options
+생성 옵션
 ----------------
 
--  **ASCII=YES/NO**: Produce an ASCII formatted file, instead of binary,
-   if set to YES. Default is NO.
--  **COMPRESS=YES/NO**: Produces a compressed file if YES, otherwise an
-   uncompressed file. Default is YES.
+-  **ASCII=YES/NO**:
+   이 옵션을 YES로 설정하면 바이너리 대신 아스키 서식 파일을 생성합니다. 기본값은 NO입니다.
 
-See Also:
+-  **COMPRESS=YES/NO**:
+   이 옵션을 YES로 설정하면 압축 파일을, NO로 설정하면 비압축 파일을 생성합니다. 기본값은 YES입니다.
 
--  `R Project <http://www.r-project.org/>`__
+참고
+----
+
+-  `R 프로젝트 <http://www.r-project.org/>`_

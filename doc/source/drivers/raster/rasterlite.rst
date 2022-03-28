@@ -1,39 +1,26 @@
 .. _raster.rasterlite:
 
 ================================================================================
-Rasterlite - Rasters in SQLite DB
+Rasterlite - SQLite 데이터베이스 래스터
 ================================================================================
 
 .. shortname:: Rasterlite
 
 .. build_dependencies:: libsqlite3
 
-The Rasterlite driver allows reading and
-creating Rasterlite databases.
+Rasterlite 드라이버는 Rasterlite 데이터베이스 읽기 및 생성을 지원합니다.
 
-| Those databases can be produced by the utilities of the
-  `rasterlite <http://www.gaia-gis.it/spatialite>`__ distribution, such
-  as rasterlite_load, rasterlite_pyramids, ....
-| The driver supports reading grayscale, paletted and RGB images stored
-  as GIF, PNG, TIFF or JPEG tiles. The driver also supports reading
-  overviews/pyramids, spatial reference system and spatial extent.
+-  rasterlite_load, rasterlite_pyramids 등과 같은 `Rasterlite <http://www.gaia-gis.it/spatialite>`_ 유틸리티를 사용하면 이런 데이터베이스를 생성할 수 있습니다.
 
-GDAL/OGR must be compiled with OGR SQLite driver support. For read
-support, linking against spatialite library is not required, but recent
-enough sqlite3 library is needed to read rasterlite databases.
-rasterlite library is not required either.
+-  이 드라이버는 GIF, PNG, TIFF 또는 JPEG 타일로 저장된 회색조, 색상표 및 RGB 이미지의 읽기를 지원합니다. 오버뷰/피라미드, 공간 좌표계 및 공간 범위도 읽어올 수 있습니다.
 
-For write support a new table, linking against spatialite library \*is\*
-required.
+GDAL/OGR를 OGR SQLite 드라이버 지원과 함께 컴파일해야만 합니다. 읽기 지원의 경우 SpatiaLite 라이브러리에 대한 링크 작업은 필요없지만, Rasterlite 데이터베이스를 읽기 위해서는 충분히 최신인 SQLite3 라이브러리가 필요합니다. Rasterlite 라이브러리에 대한 링크 작업도 필요없습니다.
 
-Although the Rasterlite documentation only mentions GIF, PNG, TIFF, JPEG
-as compression formats for tiles, the
-driver supports reading and writing internal tiles in any format handled
-by GDAL. Furthermore, the Rasterlite driver also allow reading and
-writing as many bands and as many band types as supported by the driver
-for the internal tiles.
+새 테이블 작성 지원의 경우, SpatiaLite 라이브러리에 대한 링크 작업이 **필요합니다**.
 
-Driver capabilities
+Rasterlite 문서가 타일 용 압축 포맷으로 GIF, PNG, TIFF, JPEG만 언급하고 있기는 하지만, 이 드라이버는 GDAL이 처리할 수 있는 모든 포맷으로 된 내부 타일을 읽고 쓸 수 있습니다. 거기에 더해, Rasterlite 드라이버는 내부 타일에 드라이버가 지원하는 만큼 많은 밴드와 밴드 유형도 읽고 쓸 수 있습니다.
+
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -42,7 +29,7 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Connection string syntax in read mode
+읽기 모드에서의 연결 문자열 문법
 -------------------------------------
 
 문법:
@@ -57,108 +44,100 @@ Connection string syntax in read mode
 
 이때:
 
--  *rasterlitedb_name* is the filename of the RasterLite DB.
--  *raster_table_prefix* is the prefix of the raster table to open. For
-   each raster, there are 2 corresponding SQLite tables, suffixed with
-   \_rasters and \_metadata
--  *minx_val,miny_val,maxx_val,maxy_val* set a user-defined extent
-   (expressed in coordinate system units) for the raster that can be
-   different from the default extent.
--  *level_number* is the level of the pyramid/overview to open, 0 being
-   the base pyramid.
+-  *rasterlitedb_name*:
+   RasterLite DB의 파일명입니다.
 
-Creation issues
+-  *raster_table_prefix*:
+   열어야 할 래스터 테이블의 접두어입니다. 각 래스터에는 해당 래스터에 대응하는, \_rasters 및 \_metadata 접미어가 붙은 SQLite 테이블 2개가 존재합니다.
+
+-  *minx_val,miny_val,maxx_val,maxy_val*:
+   기본 범위와 다를 수도 있는 래스터의 사용자 정의 범위를 (좌표계 단위로) 설정합니다.
+
+-  *level_number*:
+   열어야 할 오버뷰/피라미드의 수준입니다. 0이 기반 피라미드입니다.
+
+생성 문제점
 ---------------
 
-The driver can create a new database if necessary, create a new raster
-table if necessary and copy a source dataset into the specified raster
-table.
+이 드라이버는 필요한 경우 새 데이터베이스와 새 래스터 테이블을 생성하고, 지정한 래스터 테이블에 소스 데이터셋을 복사할 수 있습니다.
 
-If data already exists in the raster table, the new data will be added.
-You can use the WIPE=YES creation options to erase existing data.
+래스터 테이블에 기존 데이터가 존재하는 경우, 새 데이터를 추가할 것입니다. WIPE 생성 옵션을 YES로 설정하면 기존 데이터를 삭제할 수 있습니다.
 
-The driver does not support updating a block in an existing raster
-table. It can only append new data.
+이 드라이버는 기존 래스터 테이블에 있는 블록의 업데이트를 지원하지 않습니다. 새 데이터를 추가할 수 있을 뿐입니다.
 
-Syntax for the name of the output dataset:
-'RASTERLITE:rasterlitedb_name,table=raster_table_prefix' or
-'rasterlitedb_name'
+산출 데이터셋의 명명 문법은 다음과 같습니다:
 
-It is possible to specify only the DB name as in the later form, but
-only if the database does not already exists. In that case, the raster
-table name will be base on the DB name itself.
+::
 
-Creation options
+   'RASTERLITE:rasterlitedb_name,table=raster_table_prefix'
+
+   또는
+
+   'rasterlitedb_name'
+
+그 이름을 가진 기존 데이터베이스가 존재하지 않는 경우에만 데이터베이스 이름만 후자 형태로 지정할 수 있습니다. 해당 이름을 가진 기존 데이터베이스가 존재한다면, 데이터베이스 이름 자체를 기반으로 래스터 테이블 이름을 결정할 것입니다.
+
+생성 옵션
 ~~~~~~~~~~~~~~~~
 
--  **WIPE** (=NO by default): Set to YES to erase all preexisting data
-   in the specified table
+-  **WIPE=YES/NO**:
+   이 옵션을 YES로 설정하면 지정한 테이블에 있는 기존 데이터를 모두 삭제합니다. 기본값은 NO입니다.
 
--  **TILED** (=YES by default) : Set to NO if the source dataset must be
-   written as a single tile in the raster table
+-  **TILED=YES/NO**:
+   래스터 테이블에 소스 데이터셋을 단일 타일로 작성해야만 하는 경우 이 옵션을 NO로 설정하십시오. 기본값은 YES입니다.
 
--  **BLOCKXSIZE**\ =n: Sets tile width, defaults to 256.
+-  **BLOCKXSIZE=n**:
+   타일 너비를 설정합니다. 기본값은 256입니다.
 
--  **BLOCKYSIZE**\ =n: Sets tile height, defaults to 256.
+-  **BLOCKYSIZE=n**:
+   타일 높이를 설정합니다. 기본값은 256입니다.
 
--  **DRIVER**\ =[GTiff/GIF/PNG/JPEG/...] : name of the GDAL
-   driver to use for storing tiles. Defaults to GTiff
+-  **DRIVER=[GTiff/GIF/PNG/JPEG/...]**:
+   타일을 저장하기 위해 사용할 GDAL 드라이버의 이름입니다. 기본값은 GTiff입니다.
 
--  **COMPRESS**\ =[LZW/JPEG/DEFLATE/...] : (GTiff driver) name of the
-   compression method
+-  **COMPRESS=[LZW/JPEG/DEFLATE/...]**:
+   (GTiff 드라이버를 설정한 경우) 압축 방식의 이름입니다.
 
--  **PHOTOMETRIC**\ =[RGB/YCbCr/...] : (GTiff driver) photometric
-   interpretation
+-  **PHOTOMETRIC=[RGB/YCbCr/...]**:
+   (GTiff 드라이버를 설정한 경우) 측광 해석 형식을 설정합니다.
 
--  **QUALITY** : (JPEG-compressed GTiff, JPEG and WEBP drivers)
-   JPEG/WEBP quality 1-100. Defaults to 75
+-  **QUALITY**:
+   (JPEG 압축 GTiff, JPEG 및 WEBP 드라이버를 설정한 경우) JPEG/WEBP 압축 품질을 1에서 100 사이의 값으로 설정합니다. 기본값은 75입니다.
 
-Overviews
+오버뷰
 ---------
 
-The driver supports building (if the dataset is opened in update mode)
-and reading internal overviews.
+(데이터셋을 업데이트 모드로 연 경우) 이 드라이버는 내부 오버뷰 작성 및 읽기를 지원합니다.
 
-If no internal overview is detected, the driver will try using external
-overviews (.ovr files).
+내부 오버뷰를 하나도 탐지하지 못 했다면, 이 드라이버는 외부 오버뷰(.ovr 파일)을 사용하려 시도할 것입니다.
 
-Options can be used for internal overviews
-building. They can be specified with the RASTERLITE_OVR_OPTIONS
-configuration option, as a comma separated list of the above creation
-options. See below examples.
+내부 오버뷰 작성을 위해 옵션을 사용할 수 있습니다. RASTERLITE_OVR_OPTIONS 환경설정 옵션을 앞에서 설명한 생성 옵션들을 쉼표로 구분한 목록으로 지정하면 됩니다. 아래 예시를 참조하십시오.
 
-All resampling methods supported by GDAL
-overviews are available.
+GDAL 오버뷰가 지원하는 모든 리샘플링 메소드를 사용할 수 있습니다.
 
-Performance hints
+성능 힌트
 -----------------
 
-Some of the performance hints of the OGR SQLite driver apply. In
-particular setting the OGR_SQLITE_SYNCHRONOUS configuration option to
-OFF when creating a dataset or adding overviews might increase
-performance on some filesystems.
+OGR SQLite 드라이버를 활용하기 위한 몇몇 성능 힌트를 서술합니다. 특히 데이터셋 생성 또는 오버뷰 추가 시 OGR_SQLITE_SYNCHRONOUS 환경설정 옵션을 OFF로 설정하면 일부 파일 시스템 상에서 성능을 향상시킬 수도 있습니다.
 
-After having added all the raster tables and building all the needed
-overview levels, it is advised to run :
+래스터 테이블을 모두 추가하고 필요한 오버뷰 수준들을 모두 작성한 다음, 다음 명령어를 실행할 것을 권장합니다:
 
 ::
 
    ogrinfo rasterlitedb.sqlite -sql "VACUUM"
 
-in order to optimize the database, and increase read performances
-afterwards. This is particularly true with big rasterlite datasets. Note
-that the operation might take a long time.
+이 명령어는 데이터베이스를 최적화하고 읽기 성능을 향상시킵니다. 특히 대용량 RasterLite 데이터셋의 경우 상당한 성능 향상을 보입니다. 이 명령어를 실행하면 시간이 꽤 걸릴 수도 있다는 사실을 기억하십시오.
 
-Examples
+예시
 --------
 
--  Accessing a rasterlite DB with a single raster table :
+-  단일 래스터 테이블을 가지고 있는 RasterLite 데이터베이스에 접근하기:
 
    ::
 
       $ gdalinfo rasterlitedb.sqlite -noct
 
-   Output:
+   산출물:
 
    ::
 
@@ -191,13 +170,13 @@ Examples
       Band 1 Block=480x480 Type=Byte, ColorInterp=Palette
         Color Table (RGB with 256 entries)
 
--  Listing a multi-raster table DB :
+-  다중 래스터 테이블을 가지고 있는 RasterLite 데이터베이스에 접근하기:
 
    ::
 
       $ gdalinfo multirasterdb.sqlite
 
-   Output:
+   산출물:
 
    ::
 
@@ -217,53 +196,53 @@ Examples
       Lower Right (  512.0,  512.0)
       Center      (  256.0,  256.0)
 
--  Accessing a raster table within a multi-raster table DB:
+-  다중 래스터 테이블을 가지고 있는 데이터베이스 안에 있는 래스터 테이블 하나에 접근하기:
 
    ::
 
       $ gdalinfo RASTERLITE:multirasterdb.sqlite,table=raster1
 
--  Creating a new rasterlite DB with data encoded in JPEG tiles :
+-  JPEG 타일로 인코딩된 데이터로 새 RasterLite 데이터베이스를 생성하기:
 
    ::
 
       $ gdal_translate -of Rasterlite source.tif RASTERLITE:my_db.sqlite,table=source -co DRIVER=JPEG
 
--  Creating internal overviews :
+-  내부 오버뷰 생성하기:
 
    ::
 
       $ gdaladdo RASTERLITE:my_db.sqlite,table=source 2 4 8 16
 
--  Cleaning internal overviews :
+-  내부 오버뷰 제거하기:
 
    ::
 
       $ gdaladdo -clean RASTERLITE:my_db.sqlite,table=source
 
--  Creating external overviews in a .ovr file:
+-  외부 오버뷰를 .ovr 파일로 생성하기:
 
    ::
 
       $ gdaladdo -ro RASTERLITE:my_db.sqlite,table=source 2 4 8 16
 
--  Creating internal overviews with options (GDAL 1.10 or later):
+-  내부 오버뷰를 옵션을 사용해서 생성하기(GDAL 1.10 이상 버전):
 
    ::
 
       $ gdaladdo RASTERLITE:my_db.sqlite,table=source 2 4 8 16 --config RASTERLITE_OVR_OPTIONS DRIVER=GTiff,COMPRESS=JPEG,PHOTOMETRIC=YCbCr
 
-:
 
-See Also
+참고
 --------
 
--  `Spatialite and Rasterlite home
-   page <https://www.gaia-gis.it/fossil/libspatialite/index>`__
--  `Rasterlite
-   manual <http://www.gaia-gis.it/gaia-sins/rasterlite-docs/rasterlite-man.pdf>`__
--  `Rasterlite
-   howto <http://www.gaia-gis.it/gaia-sins/rasterlite-docs/rasterlite-how-to.pdf>`__
--  `Sample
-   databases <http://www.gaia-gis.it/spatialite-2.3.1/resources.html>`__
--  :ref:`OGR SQLite driver <vector.sqlite>`
+-  `Spatialite 및 Rasterlite 홈페이지 <https://www.gaia-gis.it/fossil/libspatialite/index>`_
+
+-  `Rasterlite 지침서 <http://www.gaia-gis.it/gaia-sins/rasterlite-docs/rasterlite-man.pdf>`_
+
+-  `Rasterlite 입문서 <http://www.gaia-gis.it/gaia-sins/rasterlite-docs/rasterlite-how-to.pdf>`_
+
+-  `샘플 데이터베이스 <http://www.gaia-gis.it/spatialite-2.3.1/resources.html>`_
+
+-  :ref:`OGR SQLite <vector.sqlite>` 드라이버
+
