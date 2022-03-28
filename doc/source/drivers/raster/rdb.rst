@@ -1,32 +1,32 @@
 .. _raster.rdb:
 
 ================================================================================
-RDB - *RIEGL* Database
+RDB - *RIEGL* 데이터베이스
 ================================================================================
 
 .. shortname:: RDB
 
 .. versionadded:: 3.1
 
-.. build_dependencies:: rdblib >= 2.2.0.
+.. build_dependencies:: rdblib 2.2.0 이상 버전
 
-GDAL can read \*.mpx files in the RDB format, the in-house format used by `RIEGL Laser Measurement Systems GmbH <http://www.riegl.com>`__ through the RDB library.
+GDAL은 `RIEGL 레이저 측정 시스템 GmbH <http://www.riegl.com>`_ 사가 RDB 라이브러리를 통해 사용하는 내부(in-house) 포맷인 RDB 포맷 \*.mpx 파일을 읽을 수 있습니다.
 
-The driver relies on the RDB library, which can be downloaded `here <https://repository.riegl.com/software/libraries/rdblib>`__ . The minimum version required of the rdblib is 2.2.0.
+이 드라이버는 `여기 <https://repository.riegl.com/software/libraries/rdblib>`_ 에서 다운로드할 수 있는 RDB 라이브러리에 의존합니다. rdblib의 최저 요구 버전은 2.2.0입니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
-Provided Bands
+제공 밴드
 -------------------
 
-All attributes stored in the RDB, but the coordinates, are provided in bands. Vector attributes are split up into multiple bands.
-The attributes are currently mapped as follows:
+좌표를 제외한, RDB에 저장되는 모든 속성은 밴드에 저장됩니다. 벡터 속성은 다중 밴드에 분할 저장됩니다.
+현재 매핑된 속성들은 다음과 같습니다:
 
 +----------------------------+-------------------------+
-| RDB attribute              | GDAL Band               |
+| RDB 속성                   | GDAL 밴드               |
 +============================+=========================+
 | riegl.surface_normal[0],   | Band 1                  |
 |                            |                         |
