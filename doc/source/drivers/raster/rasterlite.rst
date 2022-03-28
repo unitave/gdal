@@ -45,10 +45,17 @@ Driver capabilities
 Connection string syntax in read mode
 -------------------------------------
 
-Syntax: 'rasterlitedb_name' or
-'RASTERLITE:rasterlitedb_name[,table=raster_table_prefix][,minx=minx_val,miny=miny_val,maxx=maxx_val,maxy=maxy_val][,level=level_number]
+문법:
 
-where :
+::
+
+   'rasterlitedb_name'
+   
+   또는
+   
+   'RASTERLITE:rasterlitedb_name[,table=raster_table_prefix][,minx=minx_val,miny=miny_val,maxx=maxx_val,maxy=maxy_val][,level=level_number]'
+
+이때:
 
 -  *rasterlitedb_name* is the filename of the RasterLite DB.
 -  *raster_table_prefix* is the prefix of the raster table to open. For
