@@ -10,7 +10,7 @@ JP2ECW -- ERDAS JPEG2000 (.jp2)
 
 GDAL은 헥사곤 지오스페이셜(Hexagon Geospatial; 예전의 Intergraph, ERDAS, ERMapper) 사가 개발한 ERDAS ECW/JP2 SDK를 이용해서 JPEG2000 파일 읽기와 쓰기를 지원합니다. 이 지원은 선택 옵션으로 ECW/JP2 SDK 다운로드 페이지에서 사용할 수 있는 라이브러리들과 링크해야 합니다.
 
-좌표계 및 지리참조 변환을 읽어오고, GeoJP2 (tm) (GeoTIFF-in-JPEG2000), ERDAS GML-in-JPEG2000, 그리고 OGC가 개발한 새 GML-in-JPEG2000 사양을 어느 정도 지원합니다.
+좌표계 및 지리참조 변환을 읽어오고, GeoJP2™ (GeoTIFF-in-JPEG2000), ERDAS GML-in-JPEG2000, 그리고 OGC가 개발한 새 GML-in-JPEG2000 사양을 어느 정도 지원합니다.
 
 드라이버 케이퍼빌리티
 -------------------

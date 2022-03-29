@@ -8,9 +8,9 @@ TIL -- EarthWatch/DigitalGlobe .TIL
 
 .. built_in_by_default::
 
-NOTE: Implemented as ``gdal/frmts/til/tildataset.cpp``.
+주의: ``gdal/frmts/til/tildataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::

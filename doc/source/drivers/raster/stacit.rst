@@ -1,7 +1,7 @@
 .. _raster.stacit:
 
 ================================================================================
-STACIT - Spatio-Temporal Asset Catalog Items
+STACIT - 시공간 자산 카탈로그 항목(Spatio-Temporal Asset Catalog Items)
 ================================================================================
 
 .. versionadded:: 3.4
@@ -10,77 +10,75 @@ STACIT - Spatio-Temporal Asset Catalog Items
 
 .. built_in_by_default::
 
-This driver supports opening JSON files, or usually the result of a remote query,
-that are the ``items`` link of a
-`STAC Collection <https://github.com/radiantearth/stac-api-spec/blob/master/stac-spec/collection-spec/collection-spec.md>`_,
-and whose items also implement the
-`Projection Extension Specification <https://github.com/stac-extensions/projection/>`_.
-It builds a virtual mosaic from the items.
+이 드라이버는 JSON 파일 또는 또는 일반적으로 원격 쿼리의 결과물의 읽기를 지원합니다.
+이들은 `STAC 컬렉션 <https://github.com/radiantearth/stac-api-spec/blob/master/stac-spec/collection-spec/collection-spec.md>`_ 의 ``items`` 링크로, 이 항목들은 `투영법 확장 사양 <https://github.com/stac-extensions/projection/>`_ 도 구현합니다. 이 드라이버는 항목들로부터 가상 모자이크를 작성합니다.
 
-A STACIT dataset which has no subdatasets is actually a :ref:`raster.vrt` dataset.
-Thus, translating it into VRT will result in a VRT file that directly references the items.
+하위 데이터셋을 하나도 가지고 있지 않은 STACIT 데이터셋은 사실 :ref:`raster.vrt` 데이터셋입니다. 따라서 이런 STACIT 데이터셋을 VRT로 변환하면 항목들을 직접 참조하는 VRT 파일을 생성할 것입니다.
 
-Open syntax
+열기 문법
 -----------
 
-STACIT datasets/subdatasets can be accessed with one of the following syntaxes:
+다음 문법 가운데 하나로 STACIT 데이터셋/하위 데이터셋에 접근할 수 있습니다:
 
-* ``filename.json``: local file
+* ``filename.json``: 로컬 파일
 
-* ``STACIT:"https://example.com/filename.json"``: remote file
+* ``STACIT:"https://example.com/filename.json"``: 원격 파일
 
-* ``STACIT:"filename.json":asset=my_asset``: specify an asset of a local/remote file
+* ``STACIT:"filename.json":asset=my_asset``: 로컬/원격 파일의 자산을 지정합니다.
 
-* ``STACIT:"filename.json":collection=my_collect,asset=my_asset``: specify a collection + asset of a local/remote file
+* ``STACIT:"filename.json":collection=my_collect,asset=my_asset``: 로컬/원격 파일의 자산 및 컬렉션을 지정합니다.
 
-* ``STACIT:"filename.json":collection=my_collect,asset=my_asset,crs=my_crs``: specify a collection + asset + CRS of a local/remote file
+* ``STACIT:"filename.json":collection=my_collect,asset=my_asset,crs=my_crs``: 컬렉션, 자산, 그리고 로컬/원격 파일의 좌표계를 지정합니다.
 
-Open options
+열기 옵션
 ------------
 
-The following open options are supported:
+다음 열기 옵션들을 지원합니다:
 
-* ``MAX_ITEMS`` = number. Maximum number of items fetched. 0=unlimited. Default is 1000.
+-  **MAX_ITEMS= number**:
+   가져올 항목들의 최대 개수를 설정합니다. 0은 무제한이라는 뜻입니다. 기본값은 1000입니다.
 
-* ``COLLECTION`` = string. Name of collection to filter items.
+-  **COLLECTION=string**:
+   항목을 필터링할 컬렉션의 이름을 설정합니다.
 
-* ``ASSET`` = string. Name of asset to filter items.
+-  **ASSET=string**:
+   항목을 필터링할 자산의 이름을 설정합니다.
 
-* ``CRS`` = string. Name of CRS to filter items.
+-  **CRS=string**:
+   항목을 필터링할 좌표계의 이름을 설정합니다.
 
-* ``RESOLUTION`` = AVERAGE/HIGHEST/LOWEST. Strategy to use to determine dataset resolution. Default is AVERAGE.
+-  **RESOLUTION=AVERAGE/HIGHEST/LOWEST**:
+   데이터셋 해상도를 결정하기 위해 사용할 전략을 설정합니다. 기본값은 AVERAGE입니다.
 
-Subdatasets
------------
+하위 데이터셋
+------------
 
-If a STACIT JSON file contains several collections, assets or CRS,
-the driver will return a list of subdataset names to open each of the possible
-subdatasets.
+STACIT JSON 파일이 컬렉션, 자산 또는 좌표계 여러 개를 담고 있는 경우, 이 드라이버는 사용 가능한 하위 데이터셋 각각을 열 수 있는 하위 데이터셋 이름 목록을 반환할 것입니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_virtualio::
 
-Examples
+예시
 --------
 
-List the subdatasets associated to a `STAC search <https://github.com/radiantearth/stac-api-spec/tree/master/item-search>`_
-on a given collection, bbox and starting from a datetime:
+지정한 컬렉션, 경계 상자에 대한 `STAC 검색 <https://github.com/radiantearth/stac-api-spec/tree/master/item-search>`_ 과 관련된 하위 데이터셋을 날짜/시간(datetime)으로부터 시작하도록 목록화합니다:
 
 ::
 
     gdalinfo "STACIT:\"https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=naip&bbox=-100,40,-99,41&datetime=2019-01-01T00:00:00Z%2F..\""
 
 
-Open a subdataset returned by the above request:
+앞의 요청으로 반환되는 하위 데이터셋을 엽니다:
 
 ::
 
     gdalinfo "STACIT:\"https://planetarycomputer.microsoft.com/api/stac/v1/search?collections=naip&bbox=-100,40,-99,41&datetime=2019-01-01T00:00:00Z%2F..\":asset=image"
 
 
-See Also
+참고
 --------
 
--  :ref:`raster.stacta` documentation page.
+-  :ref:`raster.stacta` 드라이버
+

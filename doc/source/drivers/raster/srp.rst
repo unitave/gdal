@@ -1,31 +1,22 @@
 .. _raster.srp:
 
 ================================================================================
-SRP -- Standard Product Format (ASRP/USRP) (.gen)
+SRP -- 표준 상품 포맷 (ASRP/USRP) (.gen)
 ================================================================================
 
 .. shortname:: SRP
 
 .. built_in_by_default::
 
-The ASRP and USRP raster products (as defined by DGIWG) are variations
-on a common standard product format and are supported for reading by
-GDAL. ASRP and USRP datasets are made of several files - typically a
-.GEN, .IMG, .SOU and .QAL file with a common basename. The .IMG file
-should be selected to access the dataset.
+(DGIWG가 정의하는) ASRP와 USRP 래스터 상품은 공통 표준 상품 포맷(Common Standard Product Format)의 변이형으로, GDAL이 읽기를 지원합니다. ASRP와 USRP 데이터셋은 일반적으로 공통 기본명을 가진 .GEN, .IMG, .SOU 및 .QAL 파일들로 이루어져 있습니다. 데이터셋에 접근하려면 .IMG 파일을 선택해야 합니다.
 
-ASRP (in a geographic coordinate system) and USRP (in a UTM/UPS
-coordinate system) products are single band images with a palette and
-georeferencing.
+(지리 좌표계를 사용하는) ASRP와 (UTM/UPS 좌표계를 사용하는) USRP 상품은 색상표와 지리참조 정보를 가진 단일 밴드 이미지입니다.
 
-the Transmission Header File (.THF) can also be
-used as an input to GDAL. If the THF references more than one image,
-GDAL will report the images it is composed of as subdatasets. If the THF
-references just one image, GDAL will open it directly.
+.THF 전송 헤더 파일(Transmission Header File)도 GDAL에 입력할 수 있습니다. .THF 파일이 하나 이상의 이미지를 참조하는 경우, GDAL은 이미지가 하위 데이터셋으로 구성돼 있다고 리포트할 것입니다. .THF 파일이 이미지 하나만 참조한다면, GDAL은 이미지를 직접 열 것입니다.
 
-NOTE: Implemented as ``gdal/frmts/adrg/srpdataset.cpp``.
+주의: ``gdal/frmts/adrg/srpdataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::

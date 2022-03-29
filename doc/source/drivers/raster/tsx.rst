@@ -1,17 +1,17 @@
 .. _raster.tsx:
 
 ================================================================================
-TSX --  TerraSAR-X Product
+TSX --  TerraSAR-X 상품
 ================================================================================
 
 .. shortname:: TSX
 
 .. built_in_by_default::
 
-NOTE: Implemented as ``gdal/frmts/tsx/tsxdataset.cpp``.
+주의: ``gdal/frmts/tsx/tsxdataset.cpp`` 로 구현되었습니다.
 
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::

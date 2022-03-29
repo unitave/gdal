@@ -1,7 +1,7 @@
 .. _raster.tga:
 
 ================================================================================
-TGA -- TARGA Image File Format
+TGA -- TARGA 이미지 파일 포맷
 ================================================================================
 
 .. versionadded:: 3.2
@@ -10,24 +10,24 @@ TGA -- TARGA Image File Format
 
 .. built_in_by_default::
 
-The TGA driver currently supports reading TGA 2.0 files.
+TGA 드라이버는 현재 TGA 2.0 파일 읽기를 지원합니다.
 
-The driver supports reading 1 (grey-level or paletted), 3 (RGB), and 4
-(RGBA, or RGB-undefined) band images. The driver supports both uncompressed or
-RLE-compressed images. Top-left or bottom-left origins are supported (if the
-later, the lines are re-order to expose a top-left order). 16-bit RGB encoded
-images are also supported.
+이 드라이버는 1밴드(회색조 또는 색상표), 3밴드(RGB), 그리고 4밴드(RGBA 또는 정의되지 않은 RGB) 이미지 읽기를 지원합니다. 비압축 이미지 또는 RLE 압축 이미지 둘 다 지원합니다. 좌상단 또는 좌하단 원점을 지원합니다. (좌하단 원점의 경우, 상단-좌측 순서를 노출시키기 위해 라인들을 재배열합니다.) 16비트 인코딩 RGB 이미지도 지원합니다.
 
-The following metadata items may be reported: IMAGE_ID, AUTHOR_NAME and
-COMMENTS. The extended area is used to determine if the fourth band is an alpha
-channel or not.
+다음 메타데이터 항목을 리포트할 수도 있습니다:
 
-Driver capabilities
+   -   IMAGE_ID
+   -   AUTHOR_NAME
+   -   COMMENTS
+   
+네 번째 밴드가 알파 채널인지 아닌지를 판단하기 위해 확장 영역을 사용합니다.
+
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_virtualio::
 
-Links
+링크
 -----
 
-- `Format specification <http://www.dca.fee.unicamp.br/~martino/disciplinas/ea978/tgaffs.pdf>`_
+- `포맷 사양 <http://www.dca.fee.unicamp.br/~martino/disciplinas/ea978/tgaffs.pdf>`_
