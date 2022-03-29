@@ -1,36 +1,22 @@
 .. _raster.usgsdem:
 
 ================================================================================
-USGSDEM -- USGS ASCII DEM (and CDED)
+USGSDEM -- USGS 아스키 DEM (및 CDED)
 ================================================================================
 
 .. shortname:: USGSDEM
 
 .. built_in_by_default::
 
-GDAL includes support for reading USGS ASCII DEM files. This is the
-traditional format used by USGS before being replaced by SDTS, and is
-the format used for CDED DEM data products from the Canada. Most popular
-variations on USGS DEM files should be supported, including correct
-recognition of coordinate system, and georeferenced positioning.
+GDAL은 USGS 아스키 DEM 파일 읽기를 지원합니다. 이 포맷은 USGS가 SDTS로 갈아타기 전에 사용했던 전통적인 포맷으로, CDED(Canada Digital Elevation Data) DEM 데이터에 사용되는 포맷입니다. USGS DEM 파일의 가장 유명한 변이형들을 좌표계 및 지리참조 배치 정보를 정확하게 인식해서 지원할 것입니다.
 
-The 7.5 minute (UTM grid) USGS DEM files will generally have regions of
-missing data around the edges, and these are properly marked with a
-nodata value. Elevation values in USGS DEM files may be in meters or
-feet, and this will be indicated by the return value of
-GDALRasterBand::GetUnitType() (either "m" or "ft").
+`7.5분 (UTM 그리드) USGS DEM <https://pubs.usgs.gov/of/2003/of03-150/arcview/metadata/dem/dem.htm>`_ 파일은 일반적으로 경계 주변에 NODATA 값으로 제대로 표시된 누락된 데이터 영역을 가지고 있을 것입니다. USGS DEM 파일의 표고값 단위는 미터 또는 피트이며, GDALRasterBand::GetUnitType()의 반환값이 이 단위를 ("m" 또는 "ft"로) 알려줄 것입니다.
 
-Note that USGS DEM files are represented as one big tile. This may cause
-cache thrashing problems if the GDAL tile cache size is small. It will
-also result in a substantial delay when the first pixel is read as the
-whole file will be ingested.
+USGS DEM 파일은 하나의 큰 타일로 표현된다는 사실을 기억하십시오. 이 때문에 GDAL 타일 캐시 용량이 작을 경우 캐시 충돌(cache thrashing) 문제가 발생할 수도 있습니다. 또한 첫 번째 픽셀을 읽어올 때 파일 전체를 가져올 것이기 때문에 상당한 지연 현상이 발생할 수도 있습니다.
 
-Some of the code for implementing usgsdemdataset.cpp was derived from
-VTP code by Ben Discoe. See the `Virtual
-Terrain <http://www.vterrain.org/>`__ project for more information on
-VTP.
+``usgsdemdataset.cpp`` 를 구현하기 위한 코드 가운데 일부는 벤 디스코(Ben Discoe)가 개발한 VTP 코드로부터 파생되었습니다. VTP에 대해 더 알고 싶다면 `가상 지형 프로젝트(Virtual Terrain Project) <http://www.vterrain.org/>`_ 를 참조하십시오.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
@@ -39,77 +25,67 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Creation Issues
+생성 문제점
 ---------------
 
-GDAL supports export of geographic (and UTM) USGS DEM and CDED data
-files, including the ability to generate CDED 2.0 50K products to
-Canadian federal government specifications.
+GDAL은 캐나다 연방 정부 사양을 준수하는 CDED 2.0 50K 상품 생성을 포함, 지리 (및 UTM) 좌표계를 사용하는 USGS DEM과 CDED 데이터 파일 내보내기를 지원합니다.
 
-Input data must already be sampled in a geographic or UTM coordinate
-system. By default the entire area of the input file will be output, but
-for CDED50K products the output file will be sampled at the production
-specified resolution and on product tile boundaries.
+먼저 입력 데이터를 지리 또는 UTM 좌표계로 샘플링해야만 합니다. 기본적으로 입력 파일의 전체 영역을 산출할 것이지만, CDED 50K 상품의 경우 생성 작업 시 산출 파일을 지정한 해상도 및 상품의 타일 경계에서 샘플링할 것입니다.
 
-If the input file has appropriate coordinate system information set,
-export to specific product formats can take input in different
-coordinate systems (i.e. from Albers projection to NAD83 geographic for
-CDED50K production).
+입력 파일이 적절한 좌표계 정보 설정을 가지고 있다면, 특정 상품 포맷으로 내보내는 경우 서로 다른 좌표계를 입력받을 수 있습니다. (예를 들어 CDED 50K 상품의 경우 알베르스 정적원추 투영법을 NAD83 지리 좌표계로 변환할 수 있습니다.)
 
-Creation Options:
+생성 옵션
+---------
 
--  **PRODUCT=DEFAULT/CDED50K**: When CDED50K is specified, the output
-   file will be forced to adhere to CDED 50K product specifications. The
-   output will always be 1201x1201 and generally a 15 minute by 15
-   minute tile (though wider in longitude in far north areas).
--  **TOPLEFT=long,lat**: For CDED50K products, this is used to specify
-   the top left corner of the tile to be generated. It should be on a 15
-   minute boundary and can be given in decimal degrees or degrees and
-   minutes (eg. TOPLEFT=117d15w,52d30n).
--  **RESAMPLE=Nearest/Bilinear/Cubic/CubicSpline**: Set the resampling
-   kernel used for resampling the data to the target grid. Only has an
-   effect when particular products like CDED50K are being produced.
-   Defaults to Bilinear.
--  **DEMLevelCode=integer** DEM Level (1, 2 or 3 if set). Defaults to 1.
--  **DataSpecVersion=integer** :Data and Specification version/revision
-   (eg. 1020)
--  **PRODUCER=text**: Up to 60 characters to be put into the producer
-   field of the generated file .
--  **OriginCode=text**: Up to 4 characters to be put into the origin
-   code field of the generated file (YT for Yukon).
--  **ProcessCode=code**: One character to be put into the process code
-   field of the generated file (8=ANUDEM, 9=FME, A=TopoGrid).
--  **TEMPLATE=filename**: For any output file, a template file can be
-   specified. A number of fields (including the Data Producer) will be
-   copied from the template file if provided, and are otherwise left
-   blank.
--  **ZRESOLUTION=float**: DEM's store elevation information as positive
-   integers, and these integers are scaled using the "z resolution." By
-   default, this resolution is written as 1.0. However, you may specify
-   a different resolution here, if you would like your integers to be
-   scaled into floating point numbers.
--  **NTS=name**: NTS Mapsheet name, used to derive TOPLEFT. Only has an
-   effect when particular products like CDED50K are being produced.
--  **INTERNALNAME=name**: Dataset name written into file header. Only
-   has an effect when particular products like CDED50K are being
-   produced.
+-  **PRODUCT=DEFAULT/CDED50K**:
+   이 옵션을 CDED50K로 설정하는 경우, 산출 파일이 CDED 50K 상품 사양을 준수하도록 강제할 것입니다. 산출물 크기는 항상 1201x1201 크기로, (최북단 영역에서는 경도 간격이 더 넓어지겠지만) 일반적으로는 15분 x 15분 크기의 타일이 될 것입니다.
 
-Example: The following would generate a single CDED50K tile, extracting
-from the larger DEM coverage yk_3arcsec for a tile with the top left
-corner -117w,60n. The file yk_template.dem is used to set some product
-fields including the Producer of Data, Process Code and Origin Code
-fields.
+-  **TOPLEFT=long,lat**:
+   CDED 50K 상품의 경우, 이 옵션을 사용해서 생성할 타일의 좌상단 모서리를 지정합니다. 이 모서리는 15분 경계 상에 있어야 하며, 십진수도 또는 도분 단위로 설정할 수 있습니다. (예: TOPLEFT=117d15w,52d30n)
+
+-  **RESAMPLE=Nearest/Bilinear/Cubic/CubicSpline**:
+   데이터를 대상 그리드로 리샘플링하기 위해 사용되는 리샘플링 커널을 설정합니다. CDED 50K 같은 특정 상품을 생성하는 경우에만 효과를 미칩니다. 기본값은 Bilinear입니다.
+
+-  **DEMLevelCode=integer**:
+   DEM 수준을 설정합니다. (1, 2, 3 가운데 하나로 설정할 수 있습니다.) 기본값은 1입니다.
+
+-  **DataSpecVersion=integer**:
+   데이터와 사양의 버전/리비전을 설정합니다. (예: 1020)
+
+-  **PRODUCER=text**:
+   생성된 파일의 생산자 필드에 저장할 60개까지의 문자입니다.
+
+-  **OriginCode=text**:
+   생성된 파일의 원점 코드 필드에 저장할 4개까지의 문자입니다. (예: 유콘(Yukon)의 경우 YT)
+
+-  **ProcessCode=code**:
+   생성된 파일의 처리 코드 필드에 저장할 문자 1개입니다. (예: 8=ANUDEM, 9=FME, A=TopoGrid)
+
+-  **TEMPLATE=filename**:
+   모든 산출 파일에 템플릿 파일을 지정할 수 있습니다. 템플릿 파일을 지정하는 경우 템플릿 파일로부터 데이터 생산자(Data Producer)를 포함하는 수많은 필드를 복사할 것입니다. 지정하지 않는다면 산출 파일의 필드들을 비워둘 것입니다.
+
+-  **ZRESOLUTION=float**:
+   DEM은 표고 정보를 양의 정수값으로 저장하고, "z 해상도"를 이용해서 이 정수값들을 크기 조정합니다. 기본적으로 이 해상도는 1.0으로 작성됩니다. 하지만 정수값을 부동소수점형 숫자로 크기 조정하고 싶다면 이 옵션에 다른 해상도를 지정할 수도 있습니다.
+
+-  **NTS=name**:
+   TOPLEFT를 파생시키기 위해 사용되는 NTS 맵시트(Mapsheet) 이름입니다. CDED 50K 같은 특정 상품을 생성하는 경우에만 효과를 미칩니다.
+
+-  **INTERNALNAME=name**:
+   파일 헤더에 작성할 데이터셋 이름입니다. CDED 50K 같은 특정 상품을 생성하는 경우에만 효과를 미칩니다.
+
+예시
+----
+
+다음 명령어는 더 큰 DEM 커버리지 yk_3arcsec으로부터 좌상단 모서리가 -117w,60n인 타일을 하나 추출해서 단일 CDED 50K 타일을 생성할 것입니다. yk_template.dem 파일은 데이터 생산자, 처리 코드 및 원점 코드 필드를 포함하는 몇몇 상품 필드를 설정하기 위해 쓰입니다.
 
 ::
 
    gdal_translate -of USGSDEM -co PRODUCT=CDED50K -co TEMPLATE=yk_template.dem \
                   -co TOPLEFT=-117w,60n yk_3arcsec 031a01_e.dem
 
---------------
+참고
+----
 
-NOTE: Implemented as ``gdal/frmts/usgsdem/usgsdemdataset.cpp``.
+-  ``gdal/frmts/usgsdem/usgsdemdataset.cpp`` 로 구현되었습니다.
 
-The USGS DEM reading code in GDAL was derived from the importer in the
-`VTP <http://www.vterrain.org/>`__ software. The export capability was
-developed with the financial support of the Yukon Department of
-Environment.
+-  GDAL의 USGS DEM 판독 코드는 `VTP <http://www.vterrain.org/>`_ 소프트웨어의 가져오기 기능으로부터 파생되었습니다. 내보내기 기능은 캐나다 유콘 준주 환경부의 재정 지원으로 개발되었습니다.
