@@ -332,41 +332,25 @@ OpenOptions 하위 요소를 추가해서 소스 데이터셋을 열 때 적용�
 ComplexSource
 ~~~~~~~~~~~~~
 
-Alternatively to linear scaling, non-linear
-scaling using a power function can be used by specifying the Exponent,
-SrcMin, SrcMax, DstMin and DstMax elements. If SrcMin and SrcMax are
-not specified, they are computed from the source minimum and maximum
-value (which might require analyzing the whole source dataset). Exponent
-must be positive. (Those 5 values can be set with the -exponent and -scale
-options of gdal_translate.)
+선형 크기 조정의 대체제로서, 거듭제곱 함수를 사용하는 비선형 크기 조정을 사용해서 Exponent, SrcMin, SrcMax, DstMin 및 DstMax 요소들을 지정할 수 있습니다. SrcMin과 SrcMax를 지정하지 않는 경우, (소스 데이터셋 전체를 분석해야 할 수도 있는) 소스의 최소값과 최대값으로부터 계산합니다. Exponent는 양의 값이어야만 합니다. (gdal_translate의 -exponent 및 -scale 옵션을 이용하면 이 5개의 값을 설정할 수 있습니다.)
 
-The ComplexSource supports adding a custom lookup table to transform
-the source values to the destination. The LUT can be specified using
-the following form:
+ComplexSource는 소스 값을 대상 값으로 변환하기 위한 사용자 지정 검색 테이블을 추가할 수 있습니다. 다음 형식을 이용하면 LUT를 지정할 수 있습니다:
 
 .. code-block:: xml
 
     <LUT>[src value 1]:[dest value 1],[src value 2]:[dest value 2],...</LUT>
 
-The intermediary values are calculated using a linear interpolation
-between the bounding destination values of the corresponding range.
+선형 보간을 이용해서 해당 범위의 양 끝 대상 값 사이의 중간(intermediary) 값을 계산합니다.
 
-The ComplexSource supports fetching a color component from a source raster
-band that has a color table. The ColorTableComponent value is the index of the
-color component to extract : 1 for the red band, 2 for the green band, 3 for
-the blue band or 4 for the alpha band.
+ComplexSource는 색상표를 가진 소스 래스터 밴드로부터 색상 구성요소를 가져올 수 있습니다. ColorTableComponent 값은 추출할 색상 구성요소의 색인입니다: 1은 적색 밴드, 2는 녹색 밴드, 3은 청색 밴드, 4는 알파 밴드입니다.
 
-When transforming the source values the operations are executed
-in the following order:
+소스 값을 변환하는 경우 다음과 같은 순서로 작업을 수행합니다:
 
-- Masking, if the NODATA element is set or, starting with GDAL 3.3,
-  if the UseMaskBand is set to true and the source band has a mask band.
-  Note that this is binary masking only, so no alpha blending is done if the
-  mask band is actually an alpha band with non-0 or non-255 values.
-- Color table expansion
-- For linear scaling, applying the scale ratio, then scale offset
-- For non-linear scaling, apply (DstMax-DstMin) * pow( (SrcValue-SrcMin) / (SrcMax-SrcMin), Exponent) + DstMin
-- Table lookup
+- NODATA 요소가 설정되어 있지 않거나, 또는 GDAL 3.3버전부터 UseMaskBand가 참으로 설정되어 있고 소스 밴드가 마스크 밴드를 가지고 있는 경우 마스크 작업을 수행합니다. 이 작업은 바이너리 전용이기 때문에 마스크 밴드가 실제로 0이 아닌 또는 255가 아닌 값을 가진 알파 밴드인 경우 알파 혼합 작업(blending)을 하지 않습니다.
+- 색상표를 확장합니다.
+- 선형 크기 조정 작업의 경우, 척도 비율을 적용한 다음 척도 오프셋을 적용합니다.
+- 비선형 크기 조정 작업의 경우, (DstMax-DstMin) * pow( (SrcValue-SrcMin) / (SrcMax-SrcMin), Exponent) + DstMin을 적용합니다.
+- 검색 테이블을 추가합니다.
 
 .. code-block:: xml
 
@@ -382,7 +366,7 @@ in the following order:
       <DstRect xOff="0" yOff="0" xSize="512" ySize="512"/>
     </ComplexSource>
 
-Non-linear scaling:
+비선형 크기 조정:
 
 .. code-block:: xml
 
@@ -402,11 +386,7 @@ Non-linear scaling:
 KernelFilteredSource
 ~~~~~~~~~~~~~~~~~~~~
 
-The Kernel element should have
-two child elements, Size and Coefs and optionally the boolean attribute
-normalized (defaults to false=0).  The size must always be an odd number,
-and the Coefs must have Size * Size entries separated by spaces.  For now
-kernel is not applied to sub-sampled or over-sampled data.
+Kernel 요소는 Size 및 Coefs 하위 요소 2개를 가지고 있어야 하고, 기본값이 0(거짓)인 정규화된 불 속성을 가질 수도 있습니다. Size 요소는 항상 홀수여야만 하고, Coefs 요소는 공백으로 구분된 Size * Size 항목들을 가지고 있어야만 합니다. 현재 서브샘플링 또는 오버샘플링된 데이터에 Kernel을 적용하지 않습니다.
 
 .. code-block:: xml
 
@@ -419,11 +399,7 @@ kernel is not applied to sub-sampled or over-sampled data.
       </Kernel>
     </KernelFilteredSource>
 
-Starting with GDAL 2.3, a separable kernel may also be used.  In this case the
-number of Coefs entries should correspond to the Size.  The Coefs specify a
-one-dimensional kernel which is applied along each axis in succession, resulting
-in far quicker execution. Many common image-processing filters are separable.
-For example, a Gaussian blur:
+GDAL 2.3버전부터, 개별 Kernel을 사용할 수도 있습니다. 이런 경우 Coefs의 항목 개수는 Size 값과 일치해야 합니다. Coefs는 각 축을 따라 연속으로 적용되는 1차원 Kernel을 지정하기 때문에 실행 속도가 훨씬 빨라집니다. 흔히 쓰이는 많은 이미지 처리 필터들을 분리할 수 있습니다. 예를 들어 가우스 흐리기(Gaussian blur)의 경우는 다음과 같습니다:
 
 .. code-block:: xml
 
@@ -439,36 +415,23 @@ For example, a Gaussian blur:
 오버뷰
 ---------
 
-GDAL can make efficient use of overviews available in the sources that compose
-the bands when dealing with RasterIO() requests that involve downsampling.
-But in the general case, the VRT bands themselves will not expose overviews.
+GDAL은 다운샘플링을 수반하는 RasterIO() 요청을 처리할 때 밴드를 구성하는 소스에서 사용할 수 있는 오버뷰를 효율적으로 사용할 수 있습니다. 하지만 일반적인 경우, VRT 밴드 자체는 오버뷰를 노출시키지 않을 것입니다.
 
-Except if (from top priority to lesser priority) :
+다음 경우를 제외하면 말입니다. (우선 순위가 높은 것으로부터 낮은 것 순서입니다.):
 
-- The **Overview** element is present in the VRTRasterBand element. See above.
-- or external .vrt.ovr overviews are built
-- (starting with GDAL 3.2) explicit virtual overviews, if a **OverviewList** element
-  is declared in the VRTDataset element (see above).
-  Those virtual overviews will be hidden by external .vrt.ovr overviews that might be built later.
-- (starting with GDAL 2.1) implicit virtual overviews, if the VRTRasterBand are made of
-  a single SimpleSource or ComplexSource that has overviews.
-  Those virtual overviews will be hidden by external .vrt.ovr overviews that might be built later.
+- VRTRasterBand 요소에 **Overview** 요소가 존재하는 경우. 앞의 내용을 참조하십시오.
+- 또는 외부 .vrt.ovr 오버뷰를 작성한 경우.
+- (GDAL 3.2버전부터) VRTDataset 요소에서 **OverviewList** 요소를 선언하는 경우 명확한 가상 오버뷰를 사용합니다. 앞의 내용을 참조하십시오.
+  나중에 작성될 수도 있는 외부 .vrt.ovr 오버뷰는 이런 가상 오버뷰를 숨길 것입니다.
+- (GDAL 2.1 버전부터) VRTRasterBand가 오버뷰를 가진 단일 SimpleSource 또는 ComplexSource로 이루어진 경우 명확한 가상 오버뷰를 사용합니다.
+  나중에 작성될 수도 있는 외부 .vrt.ovr 오버뷰는 이런 가상 오버뷰를 숨길 것입니다.
 
 RAW 파일을 위한 .vrt 설명
 -------------------------------
 
-So far we have described how to derive new virtual datasets from existing
-files supports by GDAL.  However, it is also common to need to utilize
-raw binary raster files for which the regular layout of the data is known
-but for which no format specific driver exists.  This can be accomplished
-by writing a .vrt file describing the raw file.
+이제까지 GDAL이 지원하는 기존 파일로부터 새 가상 데이터셋을 파생시키는 방법을 설명했습니다. 하지만, 데이터의 정규 레이아웃은 알려져 있지만 포맷 특화 드라이버는 존재하지 않는 RAW 바이너리 래스터 파일을 활용해야 하는 경우도 많습니다. RAW 파일을 서술하는 .vrt 파일을 작성하면 이런 RAW 파일을 사용할 수 있습니다.
 
-For example, the following .vrt describes a raw raster file containing
-floating point complex pixels in a file called <i>l2p3hhsso.img</i>.  The
-image data starts from the first byte (ImageOffset=0).  The byte offset
-between pixels is 8 (PixelOffset=8), the size of a CFloat32.  The byte offset
-from the start of one line to the start of the next is 9376 bytes
-(LineOffset=9376) which is the width (1172) times the size of a pixel (8).
+예를 들어, 다음 .vrt 파일은 *l2p3hhsso.img* 라는 파일에 부동소수점형 복소수 픽셀을 담고 있는 RAW 래스터 파일을 서술합니다. 이미지 데이터는 첫 번째 바이트부터 (ImageOffset=0) 시작합니다. 픽셀 간의 바이트 오프셋은 CFloat32의 크기인 8(PixelOffset=8)입니다. 어떤 라인의 시작으로부터 다음 라인의 시작까지의 바이트 오프셋은 너비(1,172)와 픽셀 크기(8)를 곱한 9,376바이트(LineOffset=9376)입니다.
 
 .. code-block:: xml
 
@@ -482,12 +445,7 @@ from the start of one line to the start of the next is 9376 bytes
         </VRTRasterBand>
     </VRTDataset>
 
-Some things to note are that the VRTRasterBand has a subClass specifier
-of "VRTRawRasterBand".  Also, the VRTRawRasterBand contains a number of
-previously unseen elements but no "source" information.  VRTRawRasterBands
-may never have sources (i.e. SimpleSource), but should contain the following
-elements in addition to all the normal "metadata" elements previously
-described which are still supported.
+기억해둘 점이 있는데, VRTRasterBand가 "VRTRawRasterBand" 라는 subClass 지정자(specifier)를 가지고 있다는 사실입니다. 또한 VRTRawRasterBand는 이전에 볼 수 없었던 요소들을 여러 개 담고 있지만 "소스" 정보는 담고 있지 않습니다. VRTRawRasterBand는 아마도 (SimpleSource 같은) 소스를 절대 가지지 못 할 테지만, 앞에서 언급했던 모든 정규 "메타데이터" 요소들은 물론 지금도 지원하고 있는 다음과 같은 요소들도 담을 수 있을 것입니다.
 
 - **SourceFilename**: The name of the raw file containing the data for this band.  The relativeToVRT attribute can be used to indicate if the SourceFilename is relative to the .vrt file (1) or not (0).
 
