@@ -1,27 +1,21 @@
 .. _raster.vrt:
 
 ================================================================================
-VRT -- GDAL Virtual Format
+VRT -- GDAL 가상 포맷
 ================================================================================
 
 .. shortname:: VRT
 
 .. built_in_by_default::
 
-Introduction
+소개
 ------------
 
-The VRT driver is a format driver for GDAL that allows a virtual GDAL dataset
-to be composed from other GDAL datasets with repositioning, and algorithms
-potentially applied as well as various kinds of metadata altered or added.
-VRT descriptions of datasets can be saved in an XML format normally given the
-extension .vrt.
+VRT 드라이버는 GDAL 용 포맷 드라이버로, 다른 GDAL 데이터셋으로부터 재배치 작업, 적용될 가능성이 있는 알고리즘은 물론 다양한 종류의 메타데이터를 수정 또는 추가해서 가상 GDAL 데이터셋을 구성할 수 있습니다. 일반적으로 .vrt 확장자를 가진 XML 포맷에 이 가상 데이터셋의 VRT 설명을 저장할 수 있습니다.
 
-The VRT format can also describe :ref:`gdal_vrttut_warped`
-and :ref:`gdal_vrttut_pansharpen`
+이 VRT 포맷은 :ref:`gdal_vrttut_warped` 및 :ref:`gdal_vrttut_pansharpen` 도 서술할 수 있습니다.
 
-An example of a simple .vrt file referring to a 512x512 dataset with one band
-loaded from :file:`utm.tif` might look like this:
+예를 들어 :file:`utm.tif` 로부터 불러온 1밴드 512x512 데이터셋을 참조하는 단순한 .vrt 파일은 다음과 같이 보일 수도 있습니다:
 
 .. code-block:: xml
 
@@ -38,28 +32,21 @@ loaded from :file:`utm.tif` might look like this:
         </VRTRasterBand>
     </VRTDataset>
 
-Many aspects of the VRT file are a direct XML encoding of the
-:ref:`raster_data_model` which should be reviewed
-for understanding of the semantics of various elements.
+VRT 파일의 많은 면면들은 여러 요소들의 의미를 이해하기 위해 자세히 읽어봐야 할 :ref:`raster_data_model` 을 직접 XML 인코딩한 것입니다.
 
-VRT files can be produced by translating to VRT format.  The resulting file can
-then be edited to modify mappings, add metadata or other purposes.  VRT files
-can also be produced programmatically by various means.
+VRT 포맷으로 변환하면 VRT 파일을 생성할 수 있습니다. 이렇게 산출된 파일을 편집해서 매핑을 수정하고, 메타데이터 또는 다른 용도들을 추가할 수 있습니다. 여러 가지 수단을 통해 VRT 파일을 프로그램적으로 생성할 수도 있습니다.
 
-This tutorial will cover the .vrt file format (suitable for users editing
-.vrt files), and how .vrt files may be created and manipulated programmatically
-for developers.
+이 교육 교재는 .vrt 파일 포맷을 (사용자가 .vrt 파일을 편집할 수 있을 정도로) 설명하고, 개발자가 프로그램을 짜서 .vrt 파일을 생성하고 조작할 수 있는 방법을 설명할 것입니다.
 
-.vrt Format
+.vrt 포맷
 -----------
 
-A `XML schema of the GDAL VRT format <https://raw.githubusercontent.com/OSGeo/gdal/master/data/gdalvrt.xsd>`_
-is available.
+`GDAL VRT 포맷의 XML 스키마 <https://raw.githubusercontent.com/OSGeo/gdal/master/data/gdalvrt.xsd>`_ 를 읽어보십시오.
 
-Virtual files stored on disk are kept in an XML format with the following
-elements.
+가상 파일은 하드디스크에 다음 요소들을 가지고 있는 XML 포맷으로 저장됩니다.
 
-**VRTDataset**: This is the root element for the whole GDAL dataset. It must have the attributes rasterXSize and rasterYSize describing the width and height of the dataset in pixels. It may have a subClass attributes with values VRTWarpedDataset (:ref:`gdal_vrttut_warped`) or VRTPansharpenedDataset (:ref:`gdal_vrttut_pansharpen`). It may have SRS, GeoTransform, GCPList, Metadata, MaskBand and VRTRasterBand subelements.
+**VRTDataset**:
+전체 GDAL 데이터셋의 루트 요소입니다. VRTDataset 루트 요소는 데이터셋의 너비와 높이를 픽셀 단위로 서술하는 rasterXSize 및 rasterYSize 속성을 가지고 있어야만 합니다. VRTWarpedDataset (:ref:`gdal_vrttut_warped`) 또는 VRTPansharpenedDataset (:ref:`gdal_vrttut_pansharpen`) 값을 가진 subClass 속성을 가지고 있을 수도 있습니다. SRS, GeoTransform, GCPList, Metadata, MaskBand 및 VRTRasterBand 하위 요소들을 가지고 있을 수도 있습니다.
 
 .. code-block:: xml
 
@@ -68,23 +55,26 @@ elements.
 VRTDataset
 ++++++++++
 
-The allowed subelements for VRTDataset are :
+VRTDataset이 가지고 있을 수 있는 하위 요소들은 다음과 같습니다:
 
-- **SRS**: This element contains the spatial reference system (coordinate system) in OGC WKT format.  Note that this must be appropriately escaped for XML, so items like quotes will have the ampersand escape sequences substituted. As well as WKT, valid input to the :cpp:func:`OGRSpatialReference::SetFromUserInput` method (such as well known GEOGCS names, and PROJ.4 format) is also allowed in the SRS element.
+- **SRS**:
+  이 요소는 OGC WKT 서식으로 된 공간 좌표계를 담고 있습니다. OGC WKT 서식을 XML 용으로 제대로 이스케이프시켜야만 한다는 사실을 기억하십시오. 즉 따옴표 같은 항목들을 앤드 기호('&') 이스케이프 시퀀스로 대체할 것입니다. SRS 요소에서 :cpp:func:`OGRSpatialReference::SetFromUserInput` 메소드에 WKT는 물론, (잘 알려진 GEOGCS 이름들과 PROJ.4 서식 같은) 무결한 문자열을 입력할 수도 있습니다.
 
 .. code-block:: xml
 
   <SRS dataAxisToSRSAxisMapping="1,2">PROJCS[&quot;NAD27 / UTM zone 11N&quot;,GEOGCS[&quot;NAD27&quot;,DATUM[&quot;North_American_Datum_1927&quot;,SPHEROID[&quot;Clarke 1866&quot;,6378206.4,294.9786982139006,AUTHORITY[&quot;EPSG&quot;,&quot;7008&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;6267&quot;]],PRIMEM[&quot;Greenwich&quot;,0],UNIT[&quot;degree&quot;,0.0174532925199433],AUTHORITY[&quot;EPSG&quot;,&quot;4267&quot;]],PROJECTION[&quot;Transverse_Mercator&quot;],PARAMETER[&quot;latitude_of_origin&quot;,0],PARAMETER[&quot;central_meridian&quot;,-117],PARAMETER[&quot;scale_factor&quot;,0.9996],PARAMETER[&quot;false_easting&quot;,500000],PARAMETER[&quot;false_northing&quot;,0],UNIT[&quot;metre&quot;,1,AUTHORITY[&quot;EPSG&quot;,&quot;9001&quot;]],AUTHORITY[&quot;EPSG&quot;,&quot;26711&quot;]]</SRS>
 
-The **dataAxisToSRSAxisMapping** attribute is allowed since GDAL 3.0 to describe the relationship between the axis indicated in the CRS definition and the axis of the GeoTransform or GCP metadata. The value of the attribute is a comma separated list of integers. The number of elements of this list must be the number of axis of the CRS. Values start at 1. If m denotes the array values of this attribute, then m[0] is the data axis number for the first axis of the CRS. If the attribute is missing, then the OAMS_TRADITIONAL_GIS_ORDER data axis to CRS axis mapping strategy is implied.
+  GDAL 3.0버전부터 좌표계 정의에 나타난 축과 지리변형 또는 GCP 메타데이터의 축 간의 관계를 설명하기 위해 **dataAxisToSRSAxisMapping** 속성을 사용할 수 있습니다. 이 속성의 값은 쉼표로 구분된 정수 목록입니다. 이 목록의 요소 개수는 좌표계의 축 개수여야만 합니다. 정수값은 1부터 시작합니다. 이 속성의 배열 값들을 m으로 나타내는 경우, 좌표계의 첫 번째 축을 뜻하는 데이터 축 번호는 m[0]이 됩니다. 이 속성이 누락된 경우 좌표계 축에 OAMS_TRADITIONAL_GIS_ORDER 데이터 축을 매핑하는 전략을 취합니다.
 
-- **GeoTransform**: This element contains a six value affine geotransformation for the dataset, mapping between pixel/line coordinates and georeferenced coordinates.
+- **GeoTransform**:
+  이 요소는 데이터셋의 픽셀/라인 좌표와 지리참조 좌표를 매핑하는 아핀 지리변형 값 6개를 담고 있습니다.
 
 .. code-block:: xml
 
   <GeoTransform>440720.0,  60,  0.0,  3751320.0,  0.0, -60.0</GeoTransform>
 
-- **GCPList**: This element contains a list of Ground Control Points for the dataset, mapping between pixel/line coordinates and georeferenced coordinates. The Projection attribute should contain the SRS of the georeferenced coordinates in the same format as the SRS element. The dataAxisToSRSAxisMapping attribute is the same as in the SRS element.
+- **GCPList**:
+  이 요소는 데이터셋의 픽셀/라인 좌표와 지리참조 좌표를 매핑하는 지상기준점(Ground Control Point) 목록을 담고 있습니다. 투영법 속성이 SRS 요소와 동일한 서식으로 된 지리참조 좌표를 사용하는 공간 좌표계를 담고 있어야 합니다. dataAxisToSRSAxisMapping 속성은 SRS 요소에서와 동일합니다.
 
 .. code-block:: xml
 
@@ -93,7 +83,8 @@ The **dataAxisToSRSAxisMapping** attribute is allowed since GDAL 3.0 to describe
         <GCP Id="2" Info="b" Pixel="13.5" Line="23.5" X="1.0" Y="2.0" Z="0.0" />
     </GCPList>
 
-- **Metadata**: This element contains a list of metadata name/value pairs associated with the VRTDataset as a whole, or a VRTRasterBand. It has <MDI> (metadata item) subelements which have a "key" attribute and the value as the data of the element. The Metadata element can be repeated multiple times, in which case it must be accompanied with a "domain" attribute to indicate the name of the metadata domain.
+- **Metadata**:
+  이 요소는 VRTDataset 전체, 또는 VRTRasterBand와 관련된 메타데이터 이름/값 쌍들의 목록을 담고 있습니다. 이 요소는 <MDI>(metadata item) 하위 요소를 가지고 있는데, 이 하위 요소는 "key" 속성과 값을 데이터로 가지고 있습니다. Metadata 요소는 여러 번 반복될 수 있는데 이 경우 반드시 메타데이터 도메인의 이름을 나타내는 "domain" 속성과 함께 쓰여야만 합니다.
 
 .. code-block:: xml
 
@@ -101,8 +92,8 @@ The **dataAxisToSRSAxisMapping** attribute is allowed since GDAL 3.0 to describe
     <MDI key="md_key">Metadata value</MDI>
   </Metadata>
 
-- **MaskBand**: This element represents a mask band that is shared between all bands on the dataset (see GMF_PER_DATASET in RFC 15). It must contain a single VRTRasterBand child element, that is the description of the mask band itself.
-
+- **MaskBand**:
+  이 요소는 데이터셋의 모든 밴드가 공유하는 마스크 밴드를 표현합니다. (RFC 15의 GMF_PER_DATASET을 참조하십시오.) 마스크 밴드 자체를 서술하는 단일 VRTRasterBand 하위 요소를 담고 있어야만 합니다.
 .. code-block:: xml
 
   <MaskBand>
@@ -116,65 +107,59 @@ The **dataAxisToSRSAxisMapping** attribute is allowed since GDAL 3.0 to describe
     </VRTRasterBand>
   </MaskBand>
 
-- **OverviewList**: (GDAL >= 3.2.0, not valid for VRTPansharpenedDataset)
-  This elements contains a list of overview factors, separated by space, to
-  create "virtual overviews". For example ``2 4``. It can be used so that bands
-  of the VRT datasets declare overviews. This only makes sense to use if the
-  sources added in those bands have themselves overviews compatible with the
-  declared factor. It is generally not necessary to use this mechanism, since
-  downsampling pixel requests on a VRT dataset/band are able to use overviews of the
-  sources, even when the VRT bands do not declare them. One situation where
-  explicit overviews are needed at the VRT level is the warping of a VRT
-  to a lower resolution.
-  This element can also be used with an existing VRT dataset by running
-  :cpp:func:`GDALDataset::BuildOverviews` or :program:`gdaladdo` with the
-  :decl_configoption:`VRT_VIRTUAL_OVERVIEWS` configuration option set to ``YES``.
-  Virtual overviews have the least priority compared to the **Overview** element
-  at the **VRTRasterBand** level, or to materialized .vrt.ovr files.
+- **OverviewList**: (GDAL 3.2.0 이상 버전, VRTPansharpenedDataset의 경우 사용할 수 없음)
+  이 요소는 "가상 오버뷰"를 생성하기 위한 오버뷰 인자들을 공백으로 구분해서 담고 있습니다. 예를 들면 ``2 4`` 처럼 말입니다. VRT 데이터셋의 밴드들이 오버뷰를 선언하도록 하기 위해 사용할 수 있습니다. 이 밴드들에 추가된 소스 자체가, 선언된 인자와 호환되는 오버뷰를 가지고 있을 경우에만 이 요소를 사용하는 의미가 있습니다. 일반적으로는 이 메커니즘을 사용할 필요가 없습니다. VRT 데이터셋/밴드에 픽셀 다운샘플링을 요청하면 VRT 밴드가 오버뷰를 선언하지 않았더라도 소스의 오버뷰를 사용할 수 있기 때문입니다. 오버뷰가 VRT 수준에서 명확하게 필요한 한 가지 상황은 VRT를 더 낮은 해상도로 왜곡하는 경우입니다.
+  :decl_configoption:`VRT_VIRTUAL_OVERVIEWS` 환경설정 옵션을 ``YES`` 로 설정해서 :cpp:func:`GDALDataset::BuildOverviews` 또는 :program:`gdaladdo` 를 실행하면 이 요소를 기존 VRT 데이터셋과 함께 사용할 수도 있습니다. 가상 오버뷰는 **VRTRasterBand** 수준의 **Overview** 요소 또는 생성된 .vrt.ovr 파일과 비교할 때 가장 낮은 우선 순위를 가집니다.
 
-
-- **VRTRasterBand**: This represents one band of a dataset.
+- **VRTRasterBand**:
+  이 요소는 데이터셋의 밴드 1개를 표현합니다.
 
 VRTRasterBand
 +++++++++++++
 
-The attributes for VRTRasterBand are:
+VRTRasterBand의 속성들은 다음과 같습니다:
 
-- **dataType** (optional): type of the pixel data associated with this band (use
-  names Byte, UInt16, Int16, UInt32, Int32, Float32, Float64, CInt16, CInt32, CFloat32 or CFloat64).
-  If not specified, defaults to 1
+- **dataType**: (선택적)
+  이 밴드와 관련된 픽셀 데이터의 유형입니다. (Byte, UInt16, Int16, UInt32, Int32, Float32, Float64, CInt16, CInt32, CFloat32 또는 CFloat64 가운데 하나의 이름입니다.) 지정하지 않는 경우 기본값은 1입니다.
 
-- **band** (optional): band number this element represents (1 based).
+- **band**: (선택적)
+  이 요소가 표현하는 밴드의 번호입니다. (1에서 시작하는 숫자값입니다.)
 
-- **blockXSize** (optional, GDAL >= 3.3): block width.
-  If not specified, defaults to the minimum of the raster width and 128.
+- **blockXSize**: (선택적, GDAL 3.3 이상 버전)
+  블록 너비입니다.
+  지정하지 않는 경우, 기본값은 최소 래스터 너비 및 128입니다.
 
-- **blockYSize** (optional, GDAL >= 3.3): block height.
-  If not specified, defaults to the minimum of the raster height and 128.
+- **blockYSize**: (선택적, GDAL 3.3 이상 버전)
+  블록 높이입니다.
+  지정하지 않는 경우, 기본값은 최소 래스터 높이 및 128입니다.
 
-This element may have Metadata, ColorInterp, NoDataValue, HideNoDataValue, ColorTable, GDALRasterAttributeTable, Description and MaskBand subelements as well as the various kinds of source elements such as SimpleSource, ComplexSource, etc.  A raster band may have many "sources" indicating where the actual raster data should be fetched from, and how it should be mapped into the raster bands pixel space.
+이 요소는 SimpleSource, ComplexSource 등과 같은 여러 종류의 소스 요소들은 물론 Metadata, ColorInterp, NoDataValue, HideNoDataValue, ColorTable, GDALRasterAttributeTable, Description 및 MaskBand 하위 요소들도 가질 수 있습니다. 래스터 밴드는 어디에서 실제 래스터 데이터를 가져와야 할지, 그리고 래스터 밴드 픽셀 공간에 그 데이터를 어떻게 매핑해야 할지를 나타내는 많은 "소스"들을 가지고 있을 수도 있습니다.
 
-The allowed subelements for VRTRasterBand are :
+VRTRasterBand가 가지고 있을 수 있는 하위 요소들은 다음과 같습니다:
 
-- **ColorInterp**: The data of this element should be the name of a color interpretation type.  One of Gray, Palette, Red, Green, Blue, Alpha, Hue, Saturation, Lightness, Cyan, Magenta, Yellow, Black, or Unknown.
+- **ColorInterp**:
+  이 요소의 데이터는 색상 해석 유형의 이름이어야 합니다. Gray, Palette, Red, Green, Blue, Alpha, Hue, Saturation, Lightness, Cyan, Magenta, Yellow, Black, 또는 Unknown 가운데 하나입니다.
 
 .. code-block:: xml
 
   <ColorInterp>Gray</ColorInterp>:
 
-- **NoDataValue**: If this element exists a raster band has a nodata value associated with, of the value given as data in the element. This must not be confused with the NODATA element of a VRTComplexSource element.
+- **NoDataValue**:
+  구성할 입력 데이터셋이 이 래스터 밴드에 NODATA 값을 가지고 있는 경우, VRT에 반영될 수 있도록 이 요소의 값을 해당 NODATA 값으로 설정하십시오. VRTComplexSource 요소의 NODATA 요소와 이 요소를 절대로 혼동해서는 안 됩니다.
 
 .. code-block:: xml
 
   <NoDataValue>-100.0</NoDataValue>
 
-- **HideNoDataValue**: If this value is 1, the nodata value will not be reported.  Essentially, the caller will not be aware of a nodata pixel when it reads one.  Any datasets copied/translated from this will not have a nodata value.  This is useful when you want to specify a fixed background value for the dataset.  The background will be the value specified by the NoDataValue element. Default value is 0 when this element is absent.
+- **HideNoDataValue**:
+  이 요소의 값이 1인 경우, NODATA 값을 리포트하지 않을 것입니다. 본질적으로, 호출자가 NODATA 픽셀을 읽더라도 NODATA 픽셀인지 모를 것입니다. 이 요소를 가진 데이터셋으로부터 복사 또는 변환된 어떤 데이터셋도 NODATA 값을 가지지 않을 것입니다. 사용자가 데이터셋에 고정 배경값을 지정하고자 할 때 유용합니다. NoDataValue 요소가 지정한 값이 배경값이 될 것입니다. 이 요소가 생략된 경우 기본값은 0입니다.
 
 .. code-block:: xml
 
   <HideNoDataValue>1</HideNoDataValue>
 
-- **ColorTable**: This element is parent to a set of Entry elements defining the entries in a color table.  Currently only RGBA color tables are supported with c1 being red, c2 being green, c3 being blue and c4 being alpha.  The entries are ordered and will be assumed to start from color table entry 0.
+- **ColorTable**:
+  이 요소는 색상표 항목들을 정의하는 Entry 요소 집합의 상위 요소입니다. 현재 c1이 적색, c2가 녹색, c3가 청색 그리고 c4가 알파인 RGBA 색상표만 지원합니다. 이 항목들은 번호가 매겨져 있으며, 색상표 항목 0번에서 시작한다고 가정할 것입니다.
 
 .. code-block:: xml
 
@@ -183,7 +168,8 @@ The allowed subelements for VRTRasterBand are :
       <Entry c1="145" c2="78" c3="224" c4="255"/>
     </ColorTable>
 
-- **GDALRasterAttributeTable**: (GDAL >=2.3) This element is parent to a set of FieldDefn elements defining the columns of a raster attribute table, followed by a set of Row elements defining the values of the columns of each row.
+- **GDALRasterAttributeTable**: (GDAL 2.3 이상 버전)
+  이 요소는 래스터 속성 테이블의 열들을 정의하는 FieldDefn 요소 집합의 상위 요소입니다. 이 요소 뒤에 각 행의 열의 값을 정의하는 Row 요소 집합이 옵니다.
 
 .. code-block:: xml
 
@@ -222,31 +208,36 @@ The allowed subelements for VRTRasterBand are :
       </Row>
     </GDALRasterAttributeTable>
 
-- **Description**: This element contains the optional description of a raster band as its text value.
+- **Description**:
+  이 요소는 선택적인 래스터 밴드 설명을 래스터 밴드의 텍스트 값으로 담고 있습니다.
 
 .. code-block:: xml
 
   <Description>Crop Classification Layer</Description>
 
-- **UnitType**: This optional element contains the vertical units for elevation band data.  One of "m" for meters or "ft" for feet. Default assumption is meters.
+- **UnitType**:
+  이 선택적인 요소는 표고 밴드 데이터 용 수직 단위를 담고 있습니다. 미터를 뜻하는 "m"과 피트를 뜻하는 "ft" 가운데 하나입니다. 기본적으로 미터 단위를 가정합니다.
 
 .. code-block:: xml
 
   <UnitType>ft</UnitType>
 
-- **Offset**: This optional element contains the offset that should be applied when computing "real" pixel values from scaled pixel values on a raster band.   The default is 0.0.
+- **Offset**:
+  이 선택적인 요소는 래스터 밴드 상에서 크기 조정된 픽셀값으로부터 "실제/실수" 픽셀 값을 계산하는 경우 적용해야 할 오프셋을 담고 있습니다. 기본값은 0.0입니다.
 
 .. code-block:: xml
 
   <Offset>0.0</Offset>
 
-- **Scale**: This optional element contains the scale that should be applied when computing "real" pixel values from scaled pixel values on a raster band.   The default is 1.0.
+- **Scale**:
+  이 선택적인 요소는 래스터 밴드 상에서 크기 조정된 픽셀값으로부터 "실제/실수" 픽셀 값을 계산하는 경우 적용해야 할 척도를 담고 있습니다. 기본값은 1.0입니다.
 
 .. code-block:: xml
 
   <Scale>0.0</Scale>
 
-- **Overview**: This optional element describes one overview level for the band.  It should have a child SourceFilename and SourceBand element.  The SourceFilename may have a relativeToVRT boolean attribute.  Multiple elements may be used to describe multiple overviews.
+- **Overview**:
+  이 선택적인 요소는 밴드의 오버뷰 수준 하나를 서술합니다. SourceFilename 및 SourceBand 하위 요소들을 가지고 있어야 합니다. SourceFilename은 relativeToVRT 불(boolean) 속성을 가질 수도 있습니다. 오버뷰 여러 개를 서술하기 위해 이 요소를 여러 번 사용할 수도 있습니다.
 
 .. code-block:: xml
 
@@ -255,7 +246,8 @@ The allowed subelements for VRTRasterBand are :
       <SourceBand>1</SourceBand>
     </Overview>
 
-- **CategoryNames**: This optional element contains a list of Category subelements with the names of the categories for classified raster band.
+- **CategoryNames**:
+  이 선택적인 요소는 범주화된 래스터 밴드의 카테고리 이름들을 가지고 있는 Category 하위 요소 목록을 담고 있습니다.
 
 .. code-block:: xml
 
@@ -267,45 +259,38 @@ The allowed subelements for VRTRasterBand are :
     <Category>Soybeans</Category>
   </CategoryNames>
 
-- **SimpleSource**: The SimpleSource_ indicates that raster data should be read from a separate dataset, indicating the dataset, and band to be read from, and how the data should map into this band's raster space.
+- **SimpleSource**:
+  SimpleSource_ 란 개별 데이터셋으로부터 각각 래스터 데이터와 밴드를 읽어오고 해당 밴드의 래스터 공간에 데이터를 매핑해야 할 방법을 나타내는 데이터셋을 의미합니다.
 
-- **AveragedSource**: The AveragedSource is derived from the SimpleSource and shares the same properties except that it uses an averaging resampling instead of a nearest neighbour algorithm as in SimpleSource, when the size of the destination rectangle is not the same as the size of the source rectangle. Note: a more general mechanism to specify resampling algorithms can be used. See above paragraph about the 'resampling' attribute.
+- **AveragedSource**:
+  AveragedSource는 SimpleSource로부터 파생되었으며, 대상 직사각형의 크기가 소스 직사각형의 크기와 다를 경우 SimpleSource처럼 최근접 이웃 알고리즘 대신 평균 리샘플링 알고리즘을 사용하는 점을 제외하면 동일한 속성을 공유합니다. 주의: 리샘플링 알고리즘을 지정하려면 더 일반적인 메커니즘을 쓸 수 있습니다. 다음 단락에서 'resampling' 속성에 관한 정보를 참조하십시오.
 
-- **ComplexSource**: The ComplexSource_ is derived from the SimpleSource (so it shares the SourceFilename, SourceBand, SrcRect and DstRect elements), but it provides support to rescale and offset the range of the source values. Certain regions of the source can be masked by specifying the NODATA value, or starting with GDAL 3.3, with the <UseMaskBand>true</UseMaskBand> element.
+- **ComplexSource**:
+  ComplexSource_ 는 SimpleSource로부터 파생되었지만 (따라서 SourceFilename, SourceBand, SrcRect 및 DstRect 요소를 공유합니다) 소스 값들의 범위를 다시 크기 조정하고 오프셋시킬 수 있는 기능을 지원합니다. NODATA 값을 지정해서 또는 GDAL 3.3버전부터 <UseMaskBand>true</UseMaskBand> 요소를 사용해서 소스의 특정 영역을 마스크할 수 있습니다.
 
-- **KernelFilteredSource**: The KernelFilteredSource_ is a pixel source derived from the Simple Source (so it shares the SourceFilename, SourceBand, SrcRect and DstRect elements, but it also passes the data through a simple filtering kernel specified with the Kernel element.
+- **KernelFilteredSource**:
+  KernelFilteredSource_ 는 SimpleSource로부터 파생된 픽셀 소스지만 (따라서 SourceFilename, SourceBand, SrcRect 및 DstRect 요소를 공유합니다) Kernel 요소가 지정한 단순 필터링 커널을 통해 데이터를 전송합니다.
 
-- **MaskBand**: This element represents a mask band that is specific to the VRTRasterBand it contains. It must contain a single VRTRasterBand child element, that is the description of the mask band itself.
+- **MaskBand**:
+  이 요소는 상위 요소인 VRTRasterBand에 특화된 마스크 밴드를 표현합니다. 마스크 밴드 자체를 서술하는 단일 VRTRasterBand 하위 요소를 담고 있어야만 합니다.
 
-Sources
+소스
 *******
 
 SimpleSource
 ~~~~~~~~~~~~
 
-The SimpleSource may have the SourceFilename, SourceBand, SrcRect, and DstRect
-subelements.  The SrcRect element will indicate what rectangle on the indicated
-source file should be read, and the DstRect element indicates how that
-rectangle of source data should be mapped into the VRTRasterBands space.
+SimpleSource는 SourceFilename, SourceBand, SrcRect, 및 DstRect 하위 요소들을 가질 수도 있습니다. SrcRect 요소는 지정한 소스 파일 상에서 어떤 직사각형을 읽어와야 할지를 나타내고, DstRect 요소는 소스 데이터의 해당 직사각형을 어떻게 VRTRasterBands 공간으로 매핑시켜야 할지를 나타냅니다.
 
-The relativeToVRT attribute on the SourceFilename indicates whether the
-filename should be interpreted as relative to the .vrt file (value is 1)
-or not relative to the .vrt file (value is 0).  The default is 0.
+SourceFilename 요소의 relativeToVRT 속성은 (속성값이 1) 파일명을 .vrt 파일과 관련된 것으로 해석해야 할지 (속성값이 0) .vrt 파일과 관련되지 않은 것으로 해석해야 할지를 나타냅니다. 기본값은 0입니다.
 
-Some characteristics of the source band can be specified in the optional
-``SourceProperties`` element to enable the VRT driver to defer the opening of the source
-dataset until it really needs to read data from it. This is particularly useful
-when building VRTs with a big number of source datasets. The needed parameters are the
-raster dimensions, the size of the blocks and the data type. If the SourceProperties
-tag is not present, the source dataset will be opened at the same time as the VRT itself.
+VRT 드라이버가 데이터셋으로부터 데이터를 정말로 읽어와야 할 때까지 소스 데이터셋을 여는 것을 연기하도록 하려면 선택적인 ``SourceProperties`` 요소에 소스 밴드의 몇몇 특성들을 지정해주면 됩니다. 소스 데이터셋 개수가 엄청나게 많은 VRT들을 작성하는 경우 특히 유용합니다. 래스터 차원, 블록 크기 및 데이터 유형 파라미터가 필요합니다. SourceProperties 태그가 생략된 경우, VRT 자체를 여는 것과 동시에 소스 데이터셋도 열 것입니다.
 
 .. note::
 
-    Starting with GDAL 3.4, the ``SourceProperties`` element is no longer necessary
-    for deferred opening of the source datasets.
+    GDAL 3.4버전부터, 더 이상 소스 데이터셋 열기를 연기하기 위해 ``SourceProperties`` 요소를 사용할 필요가 없습니다.
 
-The content of the SourceBand subelement can refer to
-a mask band. For example mask,1 means the mask band of the first band of the source.
+SourceBand 하위 요소의 내용은 마스크 밴드를 참조할 수 있습니다. 예를 들어 "mask,1"은 첫 번째 소스 밴드의 마스크밴드를 의미합니다.
 
 .. code-block:: xml
 
@@ -317,9 +302,7 @@ a mask band. For example mask,1 means the mask band of the first band of the sou
       <DstRect xOff="0" yOff="0" xSize="512" ySize="512"/>
     </SimpleSource>
 
-A OpenOptions subelement can be added to specify
-the open options to apply when opening the source dataset. It has <OOI> (open option item)
-subelements which have a "key" attribute and the value as the data of the element.
+OpenOptions 하위 요소를 추가해서 소스 데이터셋을 열 때 적용할 열기 옵션을 지정할 수 있습니다. 이 요소는 "key" 속성과 값을 요소 데이터로 가지는 <OOI>(open option item) 하위 요소를 가지고 있습니다.
 
 .. code-block:: xml
 
@@ -334,11 +317,7 @@ subelements which have a "key" attribute and the value as the data of the elemen
       <DstRect xOff="0" yOff="0" xSize="256" ySize="256"/>
     </SimpleSource>
 
-A resampling attribute can be specified on a SimpleSource
-or ComplexSource element to specified the resampling algorithm used when the
-size of the destination rectangle is not the same as the size of the source
-rectangle. The values allowed for that attribute are : nearest,bilinear,cubic,
-cubicspline,lanczos,average,mode.
+대상 직사각형의 크기가 소스 직사각형의 크기와 다를 경우 사용하는 리샘플링 알고리즘을 지정하려면 SimpleSource 또는 ComplexSource 요소에 resampling 속성을 지정하면 됩니다. nearest, bilinear, cubic, cubicspline, lanczos, average, mode 가운데 하나를 지정할 수 있습니다.
 
 .. code-block:: xml
 
@@ -457,7 +436,7 @@ For example, a Gaussian blur:
       </Kernel>
     </KernelFilteredSource>
 
-Overviews
+오버뷰
 ---------
 
 GDAL can make efficient use of overviews available in the sources that compose
@@ -475,7 +454,7 @@ Except if (from top priority to lesser priority) :
   a single SimpleSource or ComplexSource that has overviews.
   Those virtual overviews will be hidden by external .vrt.ovr overviews that might be built later.
 
-.vrt Descriptions for Raw Files
+RAW 파일을 위한 .vrt 설명
 -------------------------------
 
 So far we have described how to derive new virtual datasets from existing
@@ -560,7 +539,7 @@ Another example, in this case a 400x300 RGB pixel interleaved image.
     </VRTRasterBand>
     </VRTDataset>
 
-Creation of VRT Datasets
+VRT 데이터셋 생성
 ------------------------
 
 The VRT driver supports several methods of creating VRT datasets.
@@ -713,7 +692,7 @@ should be specified with the above :cpp:func:`GDALRasterBand::SetMetadataItem` e
 
 .. _vrt_derived_bands:
 
-Using Derived Bands (with pixel functions in C/C++)
+파생 밴드 사용하기 (C/C++ 픽셀 함수 이용)
 ---------------------------------------------------
 
 A specialized type of band is a 'derived' band which derives its pixel
@@ -796,7 +775,7 @@ calling the pixel function, and the imaginary portion would be lost.
             <SourceTransferType>CFloat64</SourceTransferType>
             ...
 
-Default Pixel Functions
+기본 픽셀 함수
 +++++++++++++++++++++++
 
 GDAL provides a set of default pixel functions that can be used without writing new code:
@@ -824,7 +803,7 @@ GDAL provides a set of default pixel functions that can be used without writing 
      - computes the complex conjugate of a single raster band (just a copy if the input is non-complex)
    * - **dB**
      - 1
-     - ``fact`` (optional)
+     - ``fact`` (선택적)
      - perform conversion to dB of the abs of a single raster band (real or complex): ``20. * log10( abs( x ) )``. The optional ``fact`` parameter can be set to ``10`` to get the alternative formula: ``10. * log10( abs( x ) )``
    * - **dB2amp**
      - 1
@@ -844,7 +823,7 @@ GDAL provides a set of default pixel functions that can be used without writing 
      - divide one rasted band by another (``b1 / b2``)
    * - **exp**
      - 1
-     - ``base`` (optional), ``fact`` (optional)
+     - ``base`` (선택적), ``fact`` (선택적)
      - computes the exponential of each element in the input band ``x`` (of real values): ``e ^ x``. The function also accepts two optional parameters: ``base`` and ``fact`` that allow to compute the generalized formula: ``base ^ ( fact * x )``. Note: this function is the recommended one to perform conversion form logarithmic scale (dB): `` 10. ^ (x / 20.)``, in this case ``base = 10.`` and ``fact = 0.05`` i.e. ``1. / 20``
    * - **imag**
      - 1
@@ -864,7 +843,7 @@ GDAL provides a set of default pixel functions that can be used without writing 
      - interpolate a value at time (or position) ``t`` given input sources beginning at ``t0`` with spacing ``dt`` using linear interpolation
    * - **inv**
      - 1
-     - ``k`` (optional)
+     - ``k`` (선택적)
      - inverse (``1./x``). If the optional ``k`` parameter is set then the result is multiplied by ``k`` (``k / x``)
    * - **log10**
      - 1
@@ -876,7 +855,7 @@ GDAL provides a set of default pixel functions that can be used without writing 
      - extract module from a single raster band (real or complex)
    * - **mul**
      - >= 2
-     - ``k`` (optional)
+     - ``k`` (선택적)
      - multiply 2 or more raster bands. If the optional ``k`` parameter is provided then the result is multiplied by the scalar ``k``.
    * - **phase**
      - 1
@@ -884,7 +863,7 @@ GDAL provides a set of default pixel functions that can be used without writing 
      - extract phase from a single raster band [-PI,PI] (0 or PI for non-complex)
    * - **polar**
      - 2
-     - ``amplitude_type`` (optional)
+     - ``amplitude_type`` (선택적)
      - make a complex band using input bands for amplitude and phase values ``b1 * exp( j * b2 )``. The optional (string) parameter ``amplitude_type`` can be ``AMPLITUDE`` (default) ``INTENSITY`` or ``dB``. Note: if ``amplitude_type`` is set to ``INTENSITY`` then negative values are clipped to zero.
    * - **pow**
      - 1
@@ -900,18 +879,18 @@ GDAL provides a set of default pixel functions that can be used without writing 
      - perform the square root of a single raster band (real only)
    * - **sum**
      - >= 2
-     - ``k`` (optional)
+     - ``k`` (선택적)
      - sum 2 or more raster bands. If the optional ``k`` parameter is provided then it is added to each element of the result
    * - **replace_nodata**
      - = 1
-     - ``to`` (optional)
+     - ``to`` (선택적)
      - convert incoming ``NoData`` values to a new value, IEEE 754 `nan` by default
    * - **scale**
      - = 1
      - -
      - perform scaling according to the ``offset`` and ``scale`` values of the raster band
 
-Writing Pixel Functions
+픽셀 함수 작성하기
 +++++++++++++++++++++++
 
 To register this function with GDAL (prior to accessing any VRT datasets
@@ -1036,7 +1015,7 @@ The following is an implementation of the pixel function:
         return CE_None;
     }
 
-Using Derived Bands (with pixel functions in Python)
+파생 밴드 사용하기 (파이썬 픽셀 함수 이용)
 ----------------------------------------------------
 
 Starting with GDAL 2.2, in addition to pixel functions written in C/C++ as
@@ -1077,7 +1056,7 @@ returned by the pixel function is ignored.
     If wanting to fill ``out_ar`` from another array, use the ``out_ar[:] = ...``
     syntax.
 
-Examples
+예시
 ++++++++
 
 VRT that multiplies the values of the source file by a factor of 1.5
@@ -1214,7 +1193,7 @@ with hillshading.py:
         hillshade_int(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
                     raster_ysize, radius, gt, z, scale)
 
-Python module path
+파이썬 모듈 경로
 ++++++++++++++++++
 
 When importing modules from inline Python code or when relying on out-of-line
@@ -1224,7 +1203,7 @@ contrary to the Python interactive interpreter, the current path is not
 automatically added when used from GDAL. So you may need to define the
 **PYTHONPATH** environment variable if you get ModuleNotFoundError exceptions.
 
-Security implications
+보안 영향
 *********************
 
 The ability to run Python code potentially opens the door to many potential
@@ -1239,7 +1218,7 @@ configuration option, which can accept 3 values:
 
 .. _linking_mechanism_to_python_interpreter:
 
-Linking mechanism to a Python interpreter
+파이썬 해석기에 메커니즘 링크하기
 *****************************************
 
 Currently only CPython 2 and 3 is supported. The GDAL shared object
@@ -1262,8 +1241,8 @@ will be tried. At the time of writing, the order of versions searched is 2.7,
 3.5, 3.6, 3.7, 3.8, 3.9, 3.4, 3.3, 3.2. Enabling debug information (CPL_DEBUG=ON) will
 show which Python version is used.
 
-Just-in-time compilation
-++++++++++++++++++++++++
+JIT(Just-in-time) 컴파일 작업
+++++++++++++++++++++++++++++
 
 The use of a just-in-time compiler may significantly speed up execution times.
 `Numba <http://numba.pydata.org/>`_ has been successfully tested. For
@@ -1358,7 +1337,7 @@ The following VRT file can be used (to be opened with QGIS for example)
 
 .. _gdal_vrttut_warped:
 
-Warped VRT
+왜곡 VRT
 ----------
 
 A warped VRT is a VRTDataset with subClass="VRTWarpedDataset". It has a
@@ -1404,7 +1383,7 @@ GDALWarpOptions element which describe the warping options.
 
 .. _gdal_vrttut_pansharpen:
 
-Pansharpened VRT
+영상융합 VRT
 ----------------
 
 .. versionadded:: 2.1
@@ -1568,7 +1547,7 @@ pseudo panchromatic intensity, but not bound to an output band.
         </PansharpeningOptions>
     </VRTDataset>
 
-Multidimensional VRT
+다중 차원 VRT
 ---------------------
 
 .. versionadded:: 3.1
@@ -1581,7 +1560,7 @@ See the dedicated :ref:`vrt_multidimensional` page.
 
    vrt_multidimensional
 
-vrt:// connection string
+vrt:// 연결 문자열
 ------------------------
 
 .. versionadded:: 3.1
@@ -1608,7 +1587,7 @@ are the source band numbers (between 1 and N), possibly out-of-order or with rep
 The ``mask`` value can be used to specify the global mask band. This can also
 be seen as an equivalent of running `gdal_translate -of VRT -b num1 ... -b numN`.
 
-Multi-threading issues
+멀티스레딩 문제점
 ----------------------
 
 .. warning::
@@ -1632,7 +1611,7 @@ If several VRT datasets referring to the same underlying sources are used in a m
 shared should be set to 0. Alternatively, the VRT_SHARED_SOURCE configuration
 option can be set to 0 to force non-shared mode.
 
-Performance considerations
+성능 고려 사항
 --------------------------
 
 A VRT can reference many (hundreds, thousands, or more) datasets. Due to
@@ -1648,7 +1627,7 @@ Linux is limited to 1024 simultaneously opened files, and you should let some
 margin for shared libraries, etc...
 gdal_translate and gdalwarp, by default, increase the pool size to 450.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -1658,3 +1637,4 @@ Driver capabilities
 .. supports_georeferencing::
 
 .. supports_virtualio::
+
