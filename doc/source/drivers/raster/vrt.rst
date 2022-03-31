@@ -447,29 +447,34 @@ RAW 파일을 위한 .vrt 설명
 
 기억해둘 점이 있는데, VRTRasterBand가 "VRTRawRasterBand" 라는 subClass 지정자(specifier)를 가지고 있다는 사실입니다. 또한 VRTRawRasterBand는 이전에 볼 수 없었던 요소들을 여러 개 담고 있지만 "소스" 정보는 담고 있지 않습니다. VRTRawRasterBand는 아마도 (SimpleSource 같은) 소스를 절대 가지지 못 할 테지만, 앞에서 언급했던 모든 정규 "메타데이터" 요소들은 물론 지금도 지원하고 있는 다음과 같은 요소들도 담을 수 있을 것입니다.
 
-- **SourceFilename**: The name of the raw file containing the data for this band.  The relativeToVRT attribute can be used to indicate if the SourceFilename is relative to the .vrt file (1) or not (0).
+- **SourceFilename**:
+  이 밴드의 데이터를 담고 있는 RAW 파일의 이름입니다. relativeToVRT 속성을 사용해서 SourceFilename이 .vrt 파일과 관련되어 있는지 (속성값이 1) 아닌지 (속성값이 0) 나타낼 수 있습니다.
 
-- **ImageOffset**: The offset in bytes to the beginning of the first pixel of data of this image band.   Defaults to zero.
+- **ImageOffset**:
+  이 이미지 밴드의 데이터의 첫 번째 픽셀의 시작점에 적용할 바이트 단위 오프셋입니다. 기본값은 0입니다.
 
-- **PixelOffset**: The offset in bytes from the beginning of one pixel and the next on the same line.  In packed single band data this will be the size of the **dataType** in bytes.
+- **PixelOffset**:
+  어떤 픽셀의 시작점과 같은 라인에 있는 다음 픽셀의 시작점에 적용할 바이트 단위 오프셋입니다. 패킹된 단일 밴드 데이터에서는 이 값이 **dataType** 의 바이트 단위 크기가 될 것입니다.
 
-- **LineOffset**: The offset in bytes from the beginning of one scanline of data and the next scanline of data.  In packed single band data this will be PixelOffset * rasterXSize.
+- **LineOffset**:
+  어떤 데이터의 스캔 라인 시작점과 다음 데이터 스캔 라인 시작점에 적용할 바이트 단위 오프셋입니다. 패킹된 단일 밴드 데이터에서는 이 값이 PixelOffset * rasterXSize가 될 것입니다.
 
-- **ByteOrder**: Defines the byte order of the data on disk. Either LSB (Least Significant Byte first) such as the natural byte order on Intel x86 systems or MSB (Most Significant Byte first) such as the natural byte order on Motorola or Sparc systems.  Defaults to being the local machine order.
+- **ByteOrder**:
+  디스크 상에 있는 데이터의 바이트 순서를 정의합니다. 인텔 x86 시스템의 네이티브 바이트 순서인 LSB(최하위 바이트 우선) 또는 모토로라나 SPARC 시스템의 네이티브 바이트 순서인 MBS(최상위 바이트 우선) 가운데 하나입니다. 기본값은 로컬 머신이 사용하는 바이트 순서입니다.
 
-A few other notes:
+기타 메모:
 
-- The image data on disk is assumed to be of the same data type as the band **dataType** of the VRTRawRasterBand.
+- 디스크 상에 있는 이미지 데이터는 VRTRawRasterBand의 밴드 **dataType** 과 동일한 데이터 유형이라고 가정합니다.
 
-- All the non-source attributes of the VRTRasterBand are supported, including color tables, metadata, nodata values, and color interpretation.
+- 색상표, 메타데이터, NODATA 값, 색상 해석을 포함, VRTRasterBand의 소스 속성이 아닌 모든 속성들을 지원합니다.
 
-- The VRTRawRasterBand supports in place update of the raster, whereas the source based VRTRasterBand is always read-only.
+- VRTRawRasterBand는 래스터의 제자리(in-place) 업데이트를 지원하지만, 소스 기반 VRTRasterBand는 항상 읽기 전용입니다.
 
-- The OpenEV tool includes a File menu option to input parameters describing a raw raster file in a GUI and create the corresponding .vrt file.
+- OpenEV 도구는 GUI에 RAW 래스터 파일을 살명하는 파라미터를 입력해서 그에 대응하는 .vrt 파일을 생성할 수 있는 파일 메뉴 옵션을 가지고 있습니다.
 
-- Multiple bands in the one .vrt file can come from the same raw file. Just ensure that the ImageOffset, PixelOffset, and LineOffset definition for each band is appropriate for the pixels of that particular band.
+- .vrt 파일 하나에 있는 다중 밴드가 동일한 RAW 파일로부터 가져온 것일 수도 있습니다. 각 밴드의 ImageOffset, PixelOffset 및 LineOffset이 해당 특정 밴드의 픽셀에 어울리는지만 확인하십시오.
 
-Another example, in this case a 400x300 RGB pixel interleaved image.
+다음은 400x300 RGB 픽셀 교차삽입 이미지의 예시입니다.
 
 .. code-block:: xml
 
@@ -500,15 +505,9 @@ Another example, in this case a 400x300 RGB pixel interleaved image.
 VRT 데이터셋 생성
 ------------------------
 
-The VRT driver supports several methods of creating VRT datasets.
-The :file:`vrtdataset.h` include file should be installed with the core
-GDAL include files, allowing direct access to the VRT classes.  However,
-even without that most capabilities remain available through standard GDAL
-interfaces.
+VRT 드라이버는 몇 가지 방법으로 VRT 데이터셋을 생성할 수 있습니다. VRT 클래스에 직접 접근하려면 :file:`vrtdataset.h` 헤더 파일을 GDAL 핵심 헤더 파일과 함께 설치해야 합니다. 하지만 그러지 않더라도 표준 GDAL 인터페이스를 통해 대부분의 케이퍼빌리티를 계속 사용할 수 있습니다.
 
-To create a VRT dataset that is a clone of an existing dataset use the
-:cpp:func:`GDALDriver::CreateCopy` method.  For example to clone
-:file:`utm.tif` into a :file:`wrk.vrt` file in C++ the following could be used:
+기존 데이터셋의 복사본인 VRT 데이터셋을 생성하려면 :cpp:func:`GDALDriver::CreateCopy` 메소드를 사용하십시오. 예를 들어 C++로 :file:`utm.tif` 를 :file:`wrk.vrt` 파일로 복사하려면 다음 명령어를 사용하면 됩니다:
 
 .. code-block:: cpp
 
@@ -522,19 +521,19 @@ To create a VRT dataset that is a clone of an existing dataset use the
   GDALClose((GDALDatasetH) poVRTDS);
   GDALClose((GDALDatasetH) poSrcDS);
 
-Note the use of :cpp:func:`GDALOpenShared` when opening the source dataset. It is advised
-to use :cpp:func:`GDALOpenShared` in this situation so that you are able to release
-the explicit reference to it before closing the VRT dataset itself. In other
-words, in the previous example, you could also invert the 2 last lines, whereas
-if you open the source dataset with :cpp:func:`GDALOpen`, you'd need to close the VRT dataset
-before closing the source dataset.
+소스 데이터셋을 열 때 :cpp:func:`GDALOpenShared` 함수를 이용한다는 사실을 기억하십시오. 이 상황에서 :cpp:func:`GDALOpenShared` 사용을 권장하는 이유는 VRT 데이터셋 자체를 닫기 전에 VRT 데이터셋을 명확하게 가리키는 참조를 배포할 수 있기 때문입니다. 다시 말하자면 이 예시에서는 마지막 두 줄을 서로 바꿀 수 있지만, :cpp:func:`GDALOpen` 함수로 소스 데이터셋을 여는 경우 소스 데이터셋을 닫기 전에 VRT 데이터셋을 닫아야 합니다.
 
-To create a virtual copy of a dataset with some attributes added or changed
-such as metadata or coordinate system that are often hard to change on other
-formats, you might do the following.  In this case, the virtual dataset is
-created "in memory" only by virtual of creating it with an empty filename, and
-then used as a modified source to pass to a :cpp:func:`GDALDriver::CreateCopy` written out in TIFF
-format.
+실제 파일로부터 텍스트를 읽어올 필요 없이 산출되는 :file:`wrk.vrt` 의 VRT XML을 가져오려면, 비어 있는 파일명을 가진 새 데이터셋을 열어서 "xml:VRT" 메타데이터 도메인을 사용하도록 앞의 코드를 수정하면 됩니다.
+
+.. code-block:: cpp
+
+  // 빈 파일명
+  poVRTDS = poDriver->CreateCopy( "", poSrcDS, FALSE, NULL, NULL, NULL );
+
+  // VRT 파일에 담길 실제 XML 텍스트를 가져오기
+  const char *xmlvrt = poVRTDS->GetMetadata("xml:VRT")[0];
+
+다른 포맷에서는 변경하기 어려운 경우가 많은 메타데이터 또는 좌표계 같은 몇몇 속성을 추가 또는 변경해서 데이터셋의 가상 복사본을 생성하려면 다음 명령어 예시를 따라해도 됩니다. 이 경우, "메모리에" 비어 있는 파일명을 가진 가상 데이터셋을 가상으로 생성한 다음, :cpp:func:`GDALDriver::CreateCopy` 함수에 수정된 소스로 전송해서 TIFF 포맷으로 작성하게 합니다.
 
 .. code-block:: cpp
 
@@ -552,26 +551,17 @@ format.
 
   GDALClose((GDALDatasetH) poTiffDS);
 
-In the above example the nodata value is set as -999. You can set the
-HideNoDataValue element in the VRT dataset's band using :cpp:func:`GDALRasterBand::SetMetadataItem` on
-that band.
+이 예시에서는 NODATA 값을 -999로 설정했습니다. 어떤 밴드에 :cpp:func:`GDALRasterBand::SetMetadataItem` 함수를 사용하면 VRT 데이터셋의 해당 밴드에 있는 HideNoDataValue 요소를 설정할 수 있습니다.
 
 .. code-block:: cpp
 
   poVRTDS->GetRasterBand( 1 )->SetMetadataItem( "HideNoDataValue" , "1" );
 
-In this example a virtual dataset is created with the :cpp:func:`GDALDriver::Create` method, and
-adding bands and sources programmatically, but still via the "generic" API.
-A special attribute of VRT datasets is that sources can be added to the VRTRasterBand
-(but not to VRTRawRasterBand) by passing the XML describing the source into :cpp:func:`GDALRasterBand::SetMetadataItem` on the special
-domain target "new_vrt_sources".  The domain target "vrt_sources" may also be
-used, in which case any existing sources will be discarded before adding the
-new ones.  In this example we construct a simple averaging filter source
-instead of using the simple source.
+다음 예시에서는 :cpp:func:`GDALDriver::Create` 메소드로 가상 데이터셋을 생성하고 프로그램을 짜서 밴드와 소스를 추가하지만, 여전히 "일반" API를 통해 작업합니다. VRT 데이터셋의 특별한 속성은 특별 대상 도메인 "new_vrt_sources"를 대상으로 :cpp:func:`GDALRasterBand::SetMetadataItem` 함수에 소스를 서술하는 XML을 전송하면 VRTRasterBand에 (그러나 VRTRawRasterBand에는 불가능합니다) 소스를 추가할 수 있다는 점입니다. "vrt_sources" 대상 도메인도 사용할 수 있겠지만, 이 경우 새 소스를 추가하기 전에 모든 기존 소스를 폐기할 것입니다. 다음은 SimpleSource를 사용하는 대신 단순 평균 필터 소스를 구성하는 예시입니다.
 
 .. code-block:: cpp
 
-    // construct XML for simple 3x3 average filter kernel source.
+    // 단순 3x3 평균 필터 커널 소스 용 XML 구성.
     const char *pszFilterSourceXML  =
     "<KernelFilteredSource>"
     "  <SourceFilename>utm.tif</SourceFilename><SourceBand>1</SourceBand>"
@@ -581,18 +571,12 @@ instead of using the simple source.
     "  </Kernel>"
     "</KernelFilteredSource>";
 
-    // Create the virtual dataset.
+    // 가상 데이터셋 생성.
     poVRTDS = poDriver->Create( "", 512, 512, 1, GDT_Byte, NULL );
     poVRTDS->GetRasterBand(1)->SetMetadataItem("source_0",pszFilterSourceXML,
                                                 "new_vrt_sources");
 
-A more general form of this that will produce a 3x3 average filtered clone
-of any input datasource might look like the following.  In this case we
-deliberately set the filtered datasource as in the "vrt_sources" domain
-to override the SimpleSource created by the `cpp:func:`GDALDriver::CreateCopy` method.  The fact
-that we used `cpp:func:GDALDriver::CreateCopy` ensures that all the other metadata, georeferencing
-and so forth is preserved from the source dataset ... the only thing we are
-changing is the data source for each band.
+어떤 데이터소스를 입력하더라도 3x3 평균 필터로 필터링된 복사본을 생산할, 좀 더 일반적인 예시는 다음과 같이 보일 겁니다. 이 경우 `cpp:func:`GDALDriver::CreateCopy` 메소드가 생성한 SimpleSource를 대체하기 위해 일부러 "vrt_sources" 도메인에 필터링된 데이터소스를 설정했습니다. `cpp:func:GDALDriver::CreateCopy` 를 사용한 이유는 소스 데이터셋으로부터 나온 다른 메타데이터, 지리참조 정보 등등을 보전하기 위해서입니다. 이 예시에서 변경하는 정보는 각 밴드의 데이터소스뿐입니다.
 
 .. code-block:: cpp
 
@@ -623,11 +607,7 @@ changing is the data source for each band.
         poBand->SetMetadataItem( "source_0", szFilterSourceXML, "vrt_sources" );
     }
 
-The :cpp:class:`VRTDataset` class is one of the few dataset implementations that supports the :cpp:func:`GDALDataset::AddBand`
-method. The options passed to the :cpp:func:`GDALDataset::AddBand` method can be used to control the type of the
-band created (VRTRasterBand, VRTRawRasterBand, VRTDerivedRasterBand), and in the case of
-the VRTRawRasterBand to set its various parameters. For standard VRTRasterBand, sources
-should be specified with the above :cpp:func:`GDALRasterBand::SetMetadataItem` examples.
+:cpp:class:`VRTDataset` 클래스는 :cpp:func:`GDALDataset::AddBand` 메소드를 지원하도록 구현된 몇 안 되는 데이터셋 가운데 하나입니다. :cpp:func:`GDALDataset::AddBand` 메소드에 전송되는 옵션들을 사용해서 생성되는 밴드의 유형을 (VRTRasterBand, VRTRawRasterBand, VRTDerivedRasterBand) 제어하고, VRTRawRasterBand로 설정한 경우 다양한 파라미터를 설정할 수 있습니다. 표준 VRTRasterBand로 설정한다면 앞의 :cpp:func:`GDALRasterBand::SetMetadataItem` 예시를 이용해서 소스를 지정해야 할 것입니다.
 
 .. code-block:: cpp
 
@@ -653,25 +633,15 @@ should be specified with the above :cpp:func:`GDALRasterBand::SetMetadataItem` e
 파생 밴드 사용하기 (C/C++ 픽셀 함수 이용)
 ---------------------------------------------------
 
-A specialized type of band is a 'derived' band which derives its pixel
-information from its source bands.  With this type of band you must also
-specify a pixel function, which has the responsibility of generating the
-output raster.  Pixel functions are created by an application and then
-registered with GDAL using a unique key.
+소스 밴드로부터 픽셀 정보를 파생시킨 '파생' 밴드라는 특화된 밴드 유형이 있습니다. 이 밴드 유형을 사용한다면 산출 래스터를 생성할 책임을 지는 픽셀 함수도 지정해야만 합니다. 응용 프로그램으로 이 픽셀 함수를 작성한 다음, 유일(unique) 키를 이용해서 GDAL에 등록합니다.
 
-Using derived bands you can create VRT datasets that manipulate bands on
-the fly without having to create new band files on disk.  For example, you
-might want to generate a band using four source bands from a nine band input
-dataset (x0, x3, x4, and x8) and some constant y:
+파생 밴드를 이용하면 디스크 상에 새 밴드 파일을 생성할 필요없이 밴드를 실시간으로(on-the-fly) 조작하는 VRT 데이터셋을 생성할 수 있습니다. 예를 들면, 어떤 상수 y와 밴드 9개를 가진 입력 데이터셋으로부터 나온 밴드 4개를 (x0, x3, x4, 및 x8) 이용해서 밴드 1개를 생성하고 싶은 경우:
 
 .. code-block:: c
 
   band_value = sqrt((x3*x3+x4*x4)/(x0*x8)) + y;
 
-You could write the pixel function to compute this value and then register
-it with GDAL with the name "MyFirstFunction".  Then, the following VRT XML
-could be used to display this derived band:
-
+이 값을 계산할 픽셀 함수를 작성한 다음 "MyFirstFunction"이라는 이름으로 GDAL에 등록할 수 있습니다. 그러면 다음 VRT XML을 사용해서 이 파생 밴드를 출력할 수 있습니다:
 
 .. code-block:: xml
 
@@ -709,20 +679,9 @@ could be used to display this derived band:
 
 .. note::
 
-    PixelFunctionArguments can only be used with C++ pixel functions in GDAL versions 3.4 and greater.
+    PixelFunctionArguments는 GDAL 3.4 이상 버전에서만 C++ 픽셀 함수와 함께 사용할 수 있습니다.
 
-
-In addition to the subclass specification (VRTDerivedRasterBand) and
-the PixelFunctionType value, there is another new parameter that can come
-in handy: SourceTransferType.  Typically the source rasters are obtained
-using the data type of the derived band.  There might be times,
-however, when you want the pixel function to have access to
-higher resolution source data than the data type being generated.
-For example, you might have a derived band of type "Float", which takes
-a single source of type "CFloat32" or "CFloat64", and returns the imaginary
-portion.  To accomplish this, set the SourceTransferType to "CFloat64".
-Otherwise the source would be converted to "Float" prior to
-calling the pixel function, and the imaginary portion would be lost.
+subClass(VRTDerivedRasterBand) 지정 및 PixelFunctionType 값뿐만 아니라, 편리하게 사용할 수 있는 SourceTransferType이라는 또다른 새 파라미터도 있습니다. 일반적으로 파생 밴드의 데이터 유형을 이용해서 소스 래스터를 가져옵니다. 하지만 생성되는 데이터 유형보다 더 높은 해상도를 가진 소스 데이터에 접근할 수 있는 픽셀 함수가 필요한 경우가 있을 수도 있습니다. 예를 들면 "CFloat32" 또는 "CFloat64" 유형의 단일 소스를 취해서 허수(imaginary) 부분만 반환하는 "Float" 유형의 파생 밴드가 있을 수도 있습니다. 이런 파생 밴드를 생성하려면, SourceTransferType을 "CFloat64"로 설정하십시오. 그렇지 않으면 픽셀 함수를 호출하기 전에 소스를 "Float" 유형으로 변환할 것이고, 그러면 허수 부분이 사라질 것입니다.
 
 .. code-block:: xml
 
@@ -736,7 +695,7 @@ calling the pixel function, and the imaginary portion would be lost.
 기본 픽셀 함수
 +++++++++++++++++++++++
 
-GDAL provides a set of default pixel functions that can be used without writing new code:
+GDAL은 새로운 코드를 짤 필요없이 사용할 수 있는 기본 픽셀 함수들의 집합을 제공합니다:
 
 
 .. list-table::
@@ -744,116 +703,121 @@ GDAL provides a set of default pixel functions that can be used without writing 
    :header-rows: 1
 
    * - PixelFunctionType
-     - Number of input sources
+     - 입력 소스 개수
      - PixelFunctionArguments
-     - Description
+     - 설명
    * - **cmul**
      - 2
      - -
-     - multiply the first band for the complex conjugate of the second
+     - 첫 번째 밴드에 두 번째 밴드의 복소 켤레(complex conjugate)를 곱합니다.
    * - **complex**
      - 2
      - -
-     - make a complex band merging two bands used as real and imag values
+     - 실수 및 허수 값으로 쓰이는 밴드 2개를 병합시켜 복소수형 밴드를 생성합니다.
    * - **conj**
      - 1
      - -
-     - computes the complex conjugate of a single raster band (just a copy if the input is non-complex)
+     - 단일 래스터 밴드의 복소 켤레를 계산합니다. (입력물이 복소수형이 아닌 경우 그냥 복사합니다.)
    * - **dB**
      - 1
      - ``fact`` (선택적)
-     - perform conversion to dB of the abs of a single raster band (real or complex): ``20. * log10( abs( x ) )``. The optional ``fact`` parameter can be set to ``10`` to get the alternative formula: ``10. * log10( abs( x ) )``
+     - (실수형 또는 복소수형) 단일 래스터 밴드의 절대값을 dB로 변환합니다:
+       ``20. * log10( abs( x ) )``. 선택적인 ``fact`` 파라미터를 ``10`` 으로 설정하면 대체 공식 ``10. * log10( abs( x ) )`` 를 사용합니다.
    * - **dB2amp**
      - 1
      - -
-     - perform scale conversion from logarithmic to linear (amplitude) (i.e. ``10 ^ ( x / 20 )`` ) of a single raster band (real only). Deprecated in GDAL v3.5. Please use the ``exp`` pixel function with ``base = 10.`` and ``fact = 0.05`` i.e. ``1./20``
+     - 로그 값으로부터 선형 값으로 (진폭amplitude) 척도 변환합니다. (예: (실수형인 경우에만) 단일 래스터 밴드의 ``10 ^ ( x / 20 )`` ) 이 함수는 GDAL 3.5버전부터 중요도가 떨어져 더 이상 사용되지 않고 앞으로는 사라지게 될 것입니다. 예를 들면 ``base = 10.`` 과 ``fact = 0.05`` 를 사용해서 ``exp`` 픽셀 함수를 ``1./20`` 로 사용하십시오.
    * - **dB2pow**
      - 1
      - -
-     - perform scale conversion from logarithmic to linear (power) (i.e. ``10 ^ ( x / 10 )`` ) of a single raster band (real only). Deprecated in GDAL v3.5. Please use the ``exp`` pixel function with ``base = 10.`` and ``fact = 0.1`` i.e. ``1./10``
+     - 로그 값으로부터 선형 값으로 (거듭제곱) 척도 변환합니다. perform scale conversion from logarithmic to linear (power) (예: (실수형인 경우에만) 단일 래스터 밴드의 ``10 ^ ( x / 10 )`` ) 이 함수는 GDAL 3.5버전부터 중요도가 떨어져 더 이상 사용되지 않고 앞으로는 사라지게 될 것입니다. 예를 들면 ``base = 10.`` 과 ``fact = 0.1`` 을 사용해서 ``exp`` 픽셀 함수를 ``1./10`` 로 사용하십시오.
    * - **diff**
      - 2
      - -
-     - computes the difference between 2 raster bands (``b1 - b2``)
+     - 래스터 밴드 2개의 차를 계산합니다. (``b1 - b2``)
    * - **div**
      - 2
      - -
-     - divide one rasted band by another (``b1 / b2``)
+     - 래스터 밴드를 다른 래스터 밴드로 나눕니다. (``b1 / b2``)
    * - **exp**
      - 1
      - ``base`` (선택적), ``fact`` (선택적)
-     - computes the exponential of each element in the input band ``x`` (of real values): ``e ^ x``. The function also accepts two optional parameters: ``base`` and ``fact`` that allow to compute the generalized formula: ``base ^ ( fact * x )``. Note: this function is the recommended one to perform conversion form logarithmic scale (dB): `` 10. ^ (x / 20.)``, in this case ``base = 10.`` and ``fact = 0.05`` i.e. ``1. / 20``
+     - (실수값을 가진) 입력 밴드 ``x`` 에 있는 각 요소의 지수(exponential)를 계산합니다:
+       ``e ^ x``.
+       이 함수는 다음 2개의 선택적인 파라미터도 입력받습니다:
+       일반화된 공식 ``base ^ ( fact * x )`` 를 계산할 수 있게 해주는 ``base`` 및 ``fact`` 입니다.
+       주의: 로그 척도(dB)를 변환할 때 이 함수를 사용할 것을 권장합니다. 이 경우 예를 들면 ``base = 10.`` 과 ``fact = 0.05`` 를 사용해서 ``1./20`` 로 사용하십시오.
    * - **imag**
      - 1
      - -
-     - extract imaginary part from a single raster band (0 for non-complex)
+     - 단일 래스터 밴드로부터 허수 부분을 추출합니다. (복소수형이 아닌 경우 0을 반환합니다.)
    * - **intensity**
      - 1
      - -
-     - computes the intensity ``Re( x * conj(x) )`` of a single raster band (real or complex)
+     - (실수형 또는 복소수형) 단일 래스터 밴드의 강도(intensity) ``Re( x * conj(x) )`` 를 계산합니다.
    * - **interpolate_exp**
      - >= 2
      - ``t0``, ``dt``, ``t``
-     - interpolate a value at time (or position) ``t`` given input sources beginning at position ``t0`` with spacing ``dt`` using exponential interpolation
+     - 입력 소스가 ``t0`` 위치에서 ``dt`` 간격으로 시작하는 경우 지수 보간법을 이용해서 ``t`` 시간(또는 위치)의 값을 보간합니다.
    * - **interpolate_linear**
      - >= 2
      - ``t0``, ``dt``, ``t``
-     - interpolate a value at time (or position) ``t`` given input sources beginning at ``t0`` with spacing ``dt`` using linear interpolation
+     - 입력 소스가 ``t0`` 위치에서 ``dt`` 간격으로 시작하는 경우 선형 보간법을 이용해서 ``t`` 시간(또는 위치)의 값을 보간합니다.
    * - **inv**
      - 1
      - ``k`` (선택적)
-     - inverse (``1./x``). If the optional ``k`` parameter is set then the result is multiplied by ``k`` (``k / x``)
+     - 역함수 ``1./x`` 입니다. 선택적인 ``k`` 파라미터를 설정한 경우 결과값에 ``k`` 를 곱합니다(``k / x``).
    * - **log10**
      - 1
      - -
-     - compute the logarithm (base 10) of the abs of a single raster band (real or complex): ``log10( abs( x ) )``
+     - (실수형 또는 복소수형) 단일 래스터 밴드의 절대값의 상용로그(십진로그)를 계산합니다: ``log10( abs( x ) )``
    * - **mod**
      - 1
      - -
-     - extract module from a single raster band (real or complex)
+     - (실수형 또는 복소수형) 단일 래스터 밴드로부터 모듈을 추출합니다.
    * - **mul**
      - >= 2
      - ``k`` (선택적)
-     - multiply 2 or more raster bands. If the optional ``k`` parameter is provided then the result is multiplied by the scalar ``k``.
+     - 2개 이상의 래스터 밴드들을 곱합니다. 선택적인 ``k`` 파라미터를 설정한 경우 결과값에 스칼라(scalar) ``k`` 를 곱합니다.
    * - **phase**
      - 1
      - -
-     - extract phase from a single raster band [-PI,PI] (0 or PI for non-complex)
+     - [-PI,PI] 범위의 단일 래스터 밴드로부터 위상(phase)을 추출합니다. (복소수형이 아닌 경우 0 또는 PI를 반환합니다.)
    * - **polar**
      - 2
      - ``amplitude_type`` (선택적)
-     - make a complex band using input bands for amplitude and phase values ``b1 * exp( j * b2 )``. The optional (string) parameter ``amplitude_type`` can be ``AMPLITUDE`` (default) ``INTENSITY`` or ``dB``. Note: if ``amplitude_type`` is set to ``INTENSITY`` then negative values are clipped to zero.
+     - 입력 밴드를 이용해서 진폭 및 위상 값 ``b1 * exp( j * b2 )`` 를 위한 복소수형 밴드를 생성합니다.
+       선택적인 (문자열) 파라미터 ``amplitude_type`` 은 ``AMPLITUDE`` (기본값), ``INTENSITY`` 또는 ``dB`` 가운데 하나로 설정할 수 있습니다.
+       주의: ``amplitude_type`` 을 ``INTENSITY`` 로 설정한 경우 음의 값을 0에서 자릅니다.
    * - **pow**
      - 1
      - ``power``
-     - raise a single raster band to a constant power, specified with argument ``power`` (real only)
+     - 단일 래스터 밴드를 ``power`` 인자가 지정하는 거듭제곱 상수로 승격시킵니다. (실수형 전용)
    * - **real**
      - 1
      - -
-     - extract real part from a single raster band (just a copy if the input is non-complex)
+     - 단일 래스터 밴드로부터 실수 부분을 추출합니다. (입력물이 복소수형이 아닌 경우 그냥 복사합니다.)
    * - **sqrt**
      - 1
      - -
-     - perform the square root of a single raster band (real only)
+     - 단일 래스터 밴드의 제곱근을 계산합니다. (실수형 전용)
    * - **sum**
      - >= 2
      - ``k`` (선택적)
-     - sum 2 or more raster bands. If the optional ``k`` parameter is provided then it is added to each element of the result
+     - 2개 이상의 래스터 밴드들을 더합니다. 선택적인 ``k`` 파라미터를 설정한 경우 결과값의 각 요소에 ``k`` 를 더합니다.
    * - **replace_nodata**
      - = 1
      - ``to`` (선택적)
-     - convert incoming ``NoData`` values to a new value, IEEE 754 `nan` by default
+     - 입력되는 ``NODATA`` 값을 새 값 -- 기본값은 IEEE 754 `nan` -- 으로 변환합니다.
    * - **scale**
      - = 1
      - -
-     - perform scaling according to the ``offset`` and ``scale`` values of the raster band
+     - 래스터 밴드의 ``offset`` 및 ``scale`` 값에 따라 크기 조정 작업을 수행합니다.
 
 픽셀 함수 작성하기
 +++++++++++++++++++++++
 
-To register this function with GDAL (prior to accessing any VRT datasets
-with derived bands that use this function), an application calls
-:cpp:func:`GDALAddDerivedBandPixelFuncWithArgs` with a key and a :cpp:type:`GDALDerivedPixelFuncWithArgs`:
+응용 프로그램은 (픽셀 함수를 이용하는 파생 밴드를 가진 VRT 데이터셋에 접근하기 전에) GDAL에 이 함수를 등록하기 위해 키와 :cpp:type:`GDALDerivedPixelFuncWithArgs` 로 :cpp:func:`GDALAddDerivedBandPixelFuncWithArgs` 를 호출합니다:
 
 .. code-block:: cpp
 
@@ -867,52 +831,37 @@ with derived bands that use this function), an application calls
     "</PixelFunctionArgumentsList>";
     GDALAddDerivedBandPixelFuncWithArgs("MyFirstFunction", TestFunction, pszMetadata);
 
-A good time to do this is at the beginning of an application when the
-GDAL drivers are registered. ``pszMetadata`` is optional and can be ``nullptr``.
-It can be used to declare the function signature to the user and to request additional
-parameters aside from the ones from the Dataset.
+GDAL 드라이버를 등록한 경우 응용 프로그램이 시작할 때 호출하는 것이 좋습니다. ``pszMetadata`` 파라미터는 선택적이며 ``nullptr`` 일 수 있습니다. 이 파라미터를 사용하면 사용자에게 함수 서명(function signature)을 선언할 수 있고 데이터셋의 파라미터들 외에 추가적인 파라미터를 요청할 수 있습니다.
 
-A :cpp:type:`GDALDerivedPixelFuncWithArgs` is defined with a signature similar to :cpp:func:`GDALRasterBand::IRasterIO`:
+:cpp:type:`GDALDerivedPixelFuncWithArgs` 는 :cpp:func:`GDALRasterBand::IRasterIO` 와 비슷한 서명으로 정의됩니다:
 
 
 .. cpp:function:: CPLErr TestFunction(void** papoSources, int nSources, void* pData, int nBufXSize, int nBufYSize, GDALDataType eSrcType, GDALDataType eBufType, int nPixelSpace, int nLineSpace, CSLConstList papszArgs)
 
-   :param papoSources: A pointer to packed rasters; one per source.  The
-    datatype of all will be the same, specified in the ``eSrcType`` parameter.
+   :param papoSources: 패킹된 래스터를 가리키는 포인트입니다. 소스 당 1개를 사용할 수 있습니다. 모든 데이터 유형은 ``eSrcType`` 파라미터에 지정된 유형과 동일할 것입니다.
 
-   :param nSources: The number of source rasters.
+   :param nSources: 소스 래스터의 개수입니다.
 
-   :param pData: The buffer into which the data should be read, or from which
-    it should be written.  This buffer must contain at least ``nBufXSize *
-    nBufYSize`` words of type eBufType.  It is organized in left to right, top
-    to bottom pixel order.  Spacing is controlled by the ``nPixelSpace`` and
-    ``nLineSpace`` parameters.
+   :param pData: 해당 버퍼로 데이터를 읽어와야 할 버퍼, 또는 해당 버퍼로부터 데이터를 작성해야 할 버퍼입니다. 이 버퍼는 eBufType 유형의 워드(word)를 최소한 ``nBufXSize * nBufYSize`` 개 담고 있어야만 합니다. 이 버퍼는 좌측에서 우측, 상단에서 하단 픽셀 순서 구조입니다. ``nPixelSpace`` 및 ``nLineSpace`` 파라미터로 간격을 제어합니다.
 
-   :param nBufXSize: The width of the buffer image into which the desired
-    region is to be read, or from which it is to be written.
+   :param nBufXSize: 해당 버퍼로 원하는 영역을 읽어올 버퍼 이미지의 너비, 또는 해당 버퍼로부터 원하는 영역을 작성할 버퍼 이미지의 너비입니다.
 
-   :param nBufYSize: The height of the buffer image into which the desired
-    region is to be read, or from which it is to be written.
+   :param nBufYSize: 해당 버퍼로 원하는 영역을 읽어올 버퍼 이미지의 높이, 또는 해당 버퍼로부터 원하는 영역을 작성할 버퍼 이미지의 높이입니다.
 
-   :param eSrcType: The type of the pixel values in the ``papoSources`` raster
-    array.
+   :param eSrcType: ``papoSources`` 래스터 배열에 있는 픽셀값들의 유형입니다.
 
-   :param eBufType: The type of the pixel values that the pixel function must
-    generate in the ``pData`` data buffer.
+   :param eBufType: 픽셀 함수가 ``pData`` 데이터 버퍼에 생성해야만 하는 픽셀값들의 유형입니다.
 
-   :param nPixelSpace: The byte offset from the start of one pixel value in
-    ``pData`` to the start of the next pixel value within a scanline.  If
-    defaulted (0) the size of the datatype eBufType is used.
+   :param nPixelSpace: ``pData`` 에 있는 어떤 픽셀값의 시작에서 같은 스캔 라인의 다음 픽셀값의 시작까지 적용할 바이트 단위 오프셋입니다. 기본값 0으로 설정하면 eBufType 데이터 유형의 크기를 사용합니다.
 
-   :param nLineSpace: The byte offset from the start of one scanline in
-    pData to the start of the next.
+   :param nLineSpace: ``pData`` 에 있는 어떤 스캔 라인의 시작에서 다음 스캔 라인의 시작까지 적용할 바이트 단위 오프셋입니다.
 
-   :param papszArgs: An optional string list of named function arguments (e.g. ``y=4``)
+   :param papszArgs: 지정한 함수 인자의 선택적인 문자열 목록입니다. (예: ``y=4``)
 
 
-It is also possible to register a :cpp:type:`GDALDerivedPixelFunc` (which omits the final :cpp:type:`CSLConstList` argument) using :cpp:func:`GDALAddDerivedBandPixelFunc`.
+:cpp:func:`GDALAddDerivedBandPixelFunc` 를 사용해서 (최종 :cpp:type:`CSLConstList` 인자를 생략하는) :cpp:type:`GDALDerivedPixelFunc` 를 등록할 수도 있습니다.
 
-The following is an implementation of the pixel function:
+다음은 픽셀 함수를 구현하는 예시입니다:
 
 .. code-block:: cpp
 
@@ -928,7 +877,7 @@ The following is an implementation of the pixel function:
         double pix_val;
         double x0, x3, x4, x8;
 
-        // ---- Init ----
+        // ---- 초기화 ----
         if (nSources != 4) return CE_Failure;
 
         const char *pszY = CSLFetchNameValue(papszArgs, "y");
@@ -939,20 +888,20 @@ The following is an implementation of the pixel function:
         if (pszNoData != nullptr)
         {
             NoData = std::strtod(pszNoData, &end);
-            if (end == pszNoData) return CE_Failure; // Could not parse
+            if (end == pszNoData) return CE_Failure; // 파싱할 수 없음
         }
 
         char *end = nullptr;
         double y = std::strtod(pszY, &end);
-        if (end == pszY) return CE_Failure; // Could not parse
+        if (end == pszY) return CE_Failure; // 파싱할 수 없음
 
-        // ---- Set pixels ----
+        // ---- 픽셀 설정 ----
         for( iLine = 0; iLine < nYSize; iLine++ )
         {
             for( iCol = 0; iCol < nXSize; iCol++ )
             {
                 ii = iLine * nXSize + iCol;
-                /* Source raster pixels may be obtained with SRCVAL macro */
+                /* SRCVAL 매크로로 소스 래스터 픽셀을 가져올 수도 있음 */
                 x0 = SRCVAL(papoSources[0], eSrcType, ii);
                 x3 = SRCVAL(papoSources[1], eSrcType, ii);
                 x4 = SRCVAL(papoSources[2], eSrcType, ii);
@@ -969,56 +918,74 @@ The following is an implementation of the pixel function:
             }
         }
 
-        // ---- Return success ----
+        // ---- 성공 반환 ----
         return CE_None;
     }
 
 파생 밴드 사용하기 (파이썬 픽셀 함수 이용)
 ----------------------------------------------------
 
-Starting with GDAL 2.2, in addition to pixel functions written in C/C++ as
-documented in the :ref:`vrt_derived_bands` section, it is possible to use
-pixel functions written in Python. Both `CPython <https://www.python.org/>`_
-and `NumPy <http://www.numpy.org/>`_ are requirements at run-time.
+GDAL 2.2버전부터, :ref:`vrt_derived_bands` 단락에서 설명하는 C/C++로 작성된 픽셀 함수뿐만 아니라 파이썬으로 작성된 픽셀 함수도 사용할 수 있습니다. 런타임에 `CPython <https://www.python.org/>`_ 과 `NumPy <http://www.numpy.org/>`_  둘 다 필요합니다.
 
-The subelements for VRTRasterBand (whose subclass specification must be
-set to VRTDerivedRasterBand) are :
+VRTRasterBand의 하위 요소들은 다음과 같습니다(VRTRasterBand의 subClass가 반드시 VRTDerivedRasterBand로 설정돼 있어야만 합니다):
 
-- **PixelFunctionType** (required): Must be set to a function name that will be defined as a inline Python module in PixelFunctionCode element or as the form "module_name.function_name" to refer to a function in an external Python module
+- **PixelFunctionType**: (필수)
+  PixelFunctionCode 요소에 그때 그때 즉시 처리되는(in-line) 파이썬 모듈로 정의될 함수 이름으로, 또는 외부 파이썬 모듈에 있는 함수를 참조하는 "module_name.function_name" 형식의 함수 이름으로 설정해야만 합니다.
 
-- **PixelFunctionLanguage** (required): Must be set to Python.
+- **PixelFunctionLanguage**: (필수)
+  Python으로 설정해야만 합니다.
 
-- **PixelFunctionCode** (required if PixelFunctionType is of the form "function_name", ignored otherwise). The in-lined code of a Python module, that must be at least have a function whose name is given by PixelFunctionType.
+- **PixelFunctionCode**: (PixelFunctionType이 "function_name" 형식인 경우 필수, 아니라면 무시)
+  파이썬 모듈의 그때 그때 즉시 처리되는(in-line) 코드입니다. 적어도 PixelFunctionType이 지정한 이름의 함수를 가지고 있어야만 합니다.
 
-- **BufferRadius** (optional, defaults to 0): Amount of extra pixels, with respect to the original RasterIO() request to satisfy, that are fetched at the left, right, bottom and top of the input and output buffers passed to the pixel function. Note that the values of the output buffer in this buffer zone willbe ignored.
+- **BufferRadius**: (선택적, 기본값은 0)
+  원본 RasterIO() 요청을 만족시키기 위해 픽셀 함수에 전송되는 입력 및 산출 버퍼의 좌측, 우측, 하단 및 상단에서 가져올 추가 픽셀들의 양입니다. 이 버퍼 구역의 산출 버퍼의 값들을 무시할 것이라는 사실을 기억하십시오.
 
-The signature of the Python pixel function must have the following arguments:
+파이썬 픽셀 함수의 서명은 다음 인자들을 가지고 있어야만 합니다:
 
-- **in_ar**: list of input NumPy arrays (one NumPy array for each source)
-- **out_ar**: output NumPy array to fill. The array is initialized at the right dimensions and with the VRTRasterBand.dataType.
-- **xoff**: pixel offset to the top left corner of the accessed region of the band. Generally not needed except if the processing depends on the pixel position in the raster.
-- **yoff** line offset to the top left corner of the accessed region of the band. Generally not needed.
-- **xsize**: width of the region of the accessed region of the band. Can be used together with out_ar.shape[1] to determine the horizontal resampling ratio of the request.
-- **ysize**: height of the region of the accessed region of the band. Can be used together with out_ar.shape[0] to determine the vertical resampling ratio of the request.
-- **raster_xsize**: total with of the raster band. Generally not needed.
-- **raster_ysize**: total with of the raster band. Generally not needed.
-- **buf_radius**: radius of the buffer (in pixels) added to the left, right, top and bottom of in_ar / out_ar. This is the value of the optional BufferRadius element that can be set so that the original pixel request is extended by a given amount of pixels.
-- **gt**: geotransform. Array of 6 double values.
-- **kwargs**: dictionary with user arguments defined in PixelFunctionArguments
+- **in_ar**:
+  입력 NumPy 배열의 목록입니다. (각 소스 당 NumPy 배열 1개입니다.)
 
-The provided ``out_ar`` array must be modified in-place. Any value currently
-returned by the pixel function is ignored.
+- **out_ar**:
+  채워야 할 산출 NumPy 배열입니다. 올바른 차원 개수(직교 차원?)에서 VRTRasterBand.dataType으로 배열을 초기화합니다.
+
+- **xoff**:
+  밴드에서 접근한 영역의 좌상단 모서리에 적용할 픽셀 단위 오프셋입니다. 처리 과정이 래스터의 픽셀 위치에 따라 달라지는 경우가 아니라면 일반적으로는 필요하지 않습니다.
+
+- **yoff**:
+  밴드에서 접근한 영역의 좌상단 모서리에 적용할 라인 단위 오프셋입니다. 일반적으로는 필요하지 않습니다.
+
+- **xsize**:
+  밴드에서 접근한 영역의 영역 너비입니다. out_ar.shape[1]과 함께 사용하면 요청의 수평 리샘플링 비율을 판단할 수 있습니다.
+
+- **ysize**:
+  밴드에서 접근한 영역의 영역 높이입니다. out_ar.shape[0]과 함께 사용하면 요청의 수직 리샘플링 비율을 판단할 수 있습니다.
+
+- **raster_xsize**:
+  래스터 밴드의 총 너비입니다. 일반적으로는 필요하지 않습니다.
+
+- **raster_ysize**:
+  래스터 밴드의 총 높이입니다. 일반적으로는 필요하지 않습니다.
+
+- **buf_radius**:
+  in_ar 및 out_ar의 좌측, 우측, 상단 및 하단에 추가되는 버퍼의 (픽셀 단위) 반경입니다. 이 값은 원본 픽셀 요청을 지정하는 픽셀의 양으로 확장하기 위해 설정할 수 있는 선택적 BufferRadius 요소의 값입니다.
+
+- **gt**:
+  지리변형입니다. 더블(double)형 값 6개로 이루어진 배열입니다.
+
+- **kwargs**:
+  PixelFunctionArguments에 정의된 사용자 인자들의 딕셔너리(dictionary)입니다.
+
+지정한 ``out_ar`` 배열은 반드시 제자리(in-place) 수정되어야만 합니다. 현재 픽셀 함수가 반환하는 어떤 값도 무시합니다.
 
 .. note::
 
-    If wanting to fill ``out_ar`` from another array, use the ``out_ar[:] = ...``
-    syntax.
+    다른 배열로부터 ``out_ar`` 를 채우고 싶다면, ``out_ar[:] = ...`` 문법을 사용하십시오.
 
 예시
 ++++++++
 
-VRT that multiplies the values of the source file by a factor of 1.5
-********************************************************************
+- 소스 파일의 값에 1.5라는 인수를 곱하는 VRT
 
 .. code-block:: xml
 
@@ -1043,8 +1010,7 @@ VRT that multiplies the values of the source file by a factor of 1.5
         </VRTRasterBand>
     </VRTDataset>
 
-VRT that adds 2 (or more) rasters
-*********************************
+- 2개 (이상의) 래스터를 더하는 VRT
 
 .. code-block:: xml
 
@@ -1071,8 +1037,7 @@ VRT that adds 2 (or more) rasters
         </VRTRasterBand>
     </VRTDataset>
 
-VRT that computes hillshading using an external library
-*******************************************************
+- 외부 라이브러리를 이용해서 음영기복을 계산하는 VRT
 
 .. code-block:: xml
 
@@ -1093,7 +1058,7 @@ VRT that computes hillshading using an external library
         </VRTRasterBand>
     </VRTDataset>
 
-with hillshading.py:
+hillshading.py의 내용:
 
 .. code-block:: python
 
@@ -1154,25 +1119,21 @@ with hillshading.py:
 파이썬 모듈 경로
 ++++++++++++++++++
 
-When importing modules from inline Python code or when relying on out-of-line
-code (PixelFunctionType of the form "module_name.function_name"), you need
-to make sure the modules are accessible through the python path. Note that
-contrary to the Python interactive interpreter, the current path is not
-automatically added when used from GDAL. So you may need to define the
-**PYTHONPATH** environment variable if you get ModuleNotFoundError exceptions.
+그때 그때 즉시 처리되는 파이썬 코드로부터 모듈을 가져오는 경우 또는 ("module_name.function_name" 형식의 PixelFunctionType 같은) OOL(out-of-line) 코드에 의존하는 경우, 파이썬 경로를 통해 모듈에 접근할 수 있는지 확인해야 합니다. 파이썬 대화형 해석기와는 반대로, GDAL에서 사용하는 경우 현재 경로를 자동으로 추가하지 않습니다. 따라서 ModuleNotFoundError 예외가 발생하면 사용자가 **PYTHONPATH** 환경설정 변수를 정의해야 할 수도 있습니다.
 
 보안 영향
 *********************
 
-The ability to run Python code potentially opens the door to many potential
-vulnerabilities if the user of GDAL may process untrusted datasets. To avoid
-such issues, by default, execution of Python pixel function will be disabled.
-The execution policy can be controlled with the :decl_configoption:`GDAL_VRT_ENABLE_PYTHON`
-configuration option, which can accept 3 values:
+GDAL 사용자가 신뢰할 수 없을 수도 있는 데이터셋을 처리하는 경우, 파이썬 코드를 실행할 수 있는 환경은 수많은 잠재적인 취약성으로 향하는 문을 열어주는 것일 수도 있습니다. 이런 문제점을 피하려면, 기본적으로 파이썬 픽셀 함수를 실행할 수 없게 해야 합니다. :decl_configoption:`GDAL_VRT_ENABLE_PYTHON` 환경설정 옵션으로 이런 실행 정책을 제어할 수 있는데, 다음 세 가지 가운데 하나로 설정할 수 있습니다:
 
-- YES: all VRT scripts are considered as trusted and their Python pixel functions will be run when pixel operations are involved.
-- NO: all VRT scripts are considered untrusted, and none Python pixelfunction will be run.
-- TRUSTED_MODULES (default setting): all VRT scripts with inline Python code in their PixelFunctionCode elements will be considered untrusted and will not be run. VRT scripts that use a PixelFunctionType of the form "module_name.function_name" will be considered as trusted, only if "module_name" is allowed in the :decl_configoption:`GDAL_VRT_TRUSTED_MODULES` configuration option. The value of this configuration option is a comma separated listed of trusted module names. The '*' wildcard can be used at the name of a string to match all strings beginning with the substring before the '*' character. For example 'every*' will make 'every.thing' or 'everything' module trusted. '*' can also be used to make all modules to be trusted. The ".*" wildcard can also be used to match exact modules or submodules names. For example 'every.*' will make 'every' and 'every.thing' modules trusted, but not 'everything'.
+- YES:
+  모든 VRT 스크립트를 신뢰할 수 있는 것으로 간주하고 픽셀 연산을 수반하는 경우 파이썬 픽셀 함수를 실행할 것입니다.
+
+- NO:
+  모든 VRT 스크립트를 신뢰할 수 없는 것으로 간주하고 어떤 파이썬 픽셀 함수도 실행하지 않을 것입니다.
+
+- TRUSTED_MODULES: (기본 설정값)
+  PixelFunctionCode 요소에 그때 그때 즉시 처리되는 파이썬 코드를 가지고 있는 모든 VRT 스크립트를 신뢰할 수 없는 것으로 간주하고 실행하지 않을 것입니다. VRT 스크립트가 "module_name.function_name" 형식의 PixelFunctionType을 사용한다면, :decl_configoption:`GDAL_VRT_TRUSTED_MODULES` 환경설정 옵션에 "module_name"을 사용할 수 있는 경우에만 신뢰할 수 있는 것으로 간주합니다. 이 환경설정 옵션의 값은 쉼표로 구분된 신뢰할 수 있는 모듈 이름 목록입니다. '*' 와일드카드를 문자열의 이름에 사용해서 '*' 문자 앞의 하위 문자열로 시작하는 모든 문자열 이름을 사용할 수 있습니다. 예를 들어 'every*'는 'every.thing' 또는 'everything' 모듈을 신뢰할 수 있는 모듈로 만들 것입니다. '*' 와일드카드를 모듈 또는 하위 모듈 이름과 정확하게 일치하도록 사용할 수도 있습니다. 예를 들면 'every.*'는 'every'와 'every.thing' 모듈을 신뢰할 수 있는 모듈로 만들지만, 'everything'은 신뢰할 수 없는 모듈로 만들 것입니다.
 
 .. _linking_mechanism_to_python_interpreter:
 
