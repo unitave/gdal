@@ -699,7 +699,7 @@ GDAL은 새로운 코드를 짤 필요없이 사용할 수 있는 기본 픽셀 
 
 
 .. list-table::
-   :widths: 15 10 20 55
+   :widths: 15 15 20 50
    :header-rows: 1
 
    * - PixelFunctionType
