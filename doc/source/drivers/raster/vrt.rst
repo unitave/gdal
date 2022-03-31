@@ -947,7 +947,7 @@ VRTRasterBand의 하위 요소들은 다음과 같습니다(VRTRasterBand의 sub
   입력 NumPy 배열의 목록입니다. (각 소스 당 NumPy 배열 1개입니다.)
 
 - **out_ar**:
-  채워야 할 산출 NumPy 배열입니다. 올바른 차원 개수(직교 차원?)에서 VRTRasterBand.dataType으로 배열을 초기화합니다.
+  채워야 할 산출 NumPy 배열입니다. VRTRasterBand.dataType을 통해 입력 배열 차원과 동일한 차원으로 배열을 초기화합니다.
 
 - **xoff**:
   밴드에서 접근한 영역의 좌상단 모서리에 적용할 픽셀 단위 오프셋입니다. 처리 과정이 래스터의 픽셀 위치에 따라 달라지는 경우가 아니라면 일반적으로는 필요하지 않습니다.
@@ -1140,35 +1140,17 @@ GDAL 사용자가 신뢰할 수 없을 수도 있는 데이터셋을 처리하�
 파이썬 해석기에 메커니즘 링크하기
 *****************************************
 
-Currently only CPython 2 and 3 is supported. The GDAL shared object
-is not explicitly linked at build time to any of the CPython library. When GDAL
-will need to run Python code, it will first determine if the Python interpreter
-is loaded in the current process (which is the case if the program is a Python
-interpreter itself, or if another program, e.g. QGIS, has already loaded the
-CPython library). Otherwise it will look if the :decl_configoption:`PYTHONSO` configuration option is
-defined. This option can be set to point to the name of the Python library to
-use, either as a shortname like "libpython2.7.so" if it is accessible through
-the Linux dynamic loader (so typically in one of the paths in /etc/ld.so.conf or
-LD_LIBRARY_PATH) or as a full path name like "/usr/lib/x86_64-linux-gnu/libpython2.7.so".
-The same holds on Windows will shortnames like "python27.dll" if accessible through
-the PATH or full path names like "c:\\python27\\python27.dll". If the :decl_configoption:`PYTHONSO`
-configuration option is not defined, it will look for a "python" binary in the
-directories of the PATH and will try to determine the related shared object
-(it will retry with "python3" if no "python" has been found). If the above
-was not successful, then a predefined list of shared objects names
-will be tried. At the time of writing, the order of versions searched is 2.7,
-3.5, 3.6, 3.7, 3.8, 3.9, 3.4, 3.3, 3.2. Enabling debug information (CPL_DEBUG=ON) will
-show which Python version is used.
+현재 CPython 2 및 3버전만 지원합니다. 빌드 시 어떤 CPython 라이브러리에도 GDAL 공유 객체를 명확하게 링크시키지 않습니다. GDAL이 파이썬 코드를 실행해야 할 경우, (프로그램 자체가 파이썬 해석기이거나, 또는 예를 들어 QGIS 같은 다른 프로그램이 이미 CPython 라이브러리를 불러온 경우처럼) 현재 프로세스에 파이썬 해석기를 불러왔는지부터 판단할 것입니다. 
+그렇지 않았다면 :decl_configoption:`PYTHONSO` 환경설정 옵션이 정의되었는지 살펴볼 것입니다. 사용할 파이썬 라이브러리의 이름을 -- (일반적으로 /etc/ld.so.conf 또는 LD_LIBRARY_PATH 두 경로 가운데 하나에서) 리눅스 다이내믹 로더(dynamic loader)를 통해 접근할 수 있는 경우 "libpython2.7.so" 같은 단축명을, 아니면 "/usr/lib/x86_64-linux-gnu/libpython2.7.so" 같은 전체 경로를 -- 가리키도록 이 옵션을 설정할 수 있습니다.
+윈도우 상에서도 동일합니다: PATH를 통해 접근할 수 있는 경우 "python27.dll" 같은 단축명을, 아니면 "c:\\python27\\python27.dll" 같은 전체 경로명을 설정할 수 있습니다. :decl_configoption:`PYTHONSO` 환경설정 옵션이 정의되지 않은 경우, PATH의 디렉터리들에서 "python" 바이너리를 찾아서 관련 공유 객체를 판단하려 시도할 것입니다. ("python"을 찾지 못 하는 경우 "python3"로 다시 시도할 것입니다.) 이런 방법들이 성공하지 못 했다면, 사전 정의된 공유 객체 이름 목록으로 시도할 것입니다. 이 단락 작성 당시, 2.7, 3.5, 3.6, 3.7, 3.8, 3.9, 3.4, 3.3, 3.2 순서로 버전을 검색합니다. 디버그 정보를 활성화하면 (CPL_DEBUG=ON) 어떤 버전의 파이썬을 사용했는지를 출력할 것입니다.
 
 JIT(Just-in-time) 컴파일 작업
 ++++++++++++++++++++++++++++
 
-The use of a just-in-time compiler may significantly speed up execution times.
-`Numba <http://numba.pydata.org/>`_ has been successfully tested. For
-better performance, it is recommended to use a offline pixel function so that
-the just-in-time compiler may cache its compilation.
+JIT(Just-in-time) 컴파일러를 사용하면 실행 시간을 상당히 단축시킬 수도 있습니다. `Numba <http://numba.pydata.org/>`_ 컴파일러가 성공적으로 테스트되었습니다. 더 나은 성능을 위해, JIT 컴파일러가 자신의 컴파일 작업을 캐시할 수도 있도록 오프라인 픽셀 함수를 사용할 것을 권장합니다.
 
-Given the following :file:`mandelbrot.py` file :
+
+다음 :file:`mandelbrot.py` 파일을 사용한다면:
 
 .. code-block:: python
 
@@ -1220,7 +1202,7 @@ Given the following :file:`mandelbrot.py` file :
 
                 out_ar[j][i] = iteration * 255 / max_iterations
 
-The following VRT file can be used (to be opened with QGIS for example)
+(예를 들어 QGIS로 여는 데) 다음 VRT 파일을 사용할 수 있습니다:
 
 .. code-block:: xml
 
@@ -1259,8 +1241,7 @@ The following VRT file can be used (to be opened with QGIS for example)
 왜곡 VRT
 ----------
 
-A warped VRT is a VRTDataset with subClass="VRTWarpedDataset". It has a
-GDALWarpOptions element which describe the warping options.
+왜곡(warped) VRT는 subClass="VRTWarpedDataset"인 VRTDataset입니다. 왜곡 작업 옵션을 설명하는 GDALWarpOptions 요소를 가지고 있습니다.
 
 .. code-block:: xml
 
@@ -1307,25 +1288,13 @@ GDALWarpOptions element which describe the warping options.
 
 .. versionadded:: 2.1
 
-A VRT can describe a dataset resulting from a
-`pansharpening operation <https://en.wikipedia.org/wiki/Pansharpened_image>`_
-The pansharpening VRT combines a panchromatic band with several spectral bands
-of lower resolution to generate output spectral bands of the same resolution as
-the panchromatic band.
+VRT는 `영상융합(pan-sharpen) 작업 <https://en.wikipedia.org/wiki/Pansharpened_image>`_ 으로부터 산출된 데이터셋을 서술할 수 있습니다. 영상융합 VRT는 입력 전정색(panchromatic) 밴드와 동일한 해상도의 산출 스펙트럼 밴드를 생성하기 위해 전정색 밴드와 더 낮은 해상도의 스펙트럼 밴드 여러 개를 융합합니다.
 
-VRT pansharpening assumes that the panchromatic and spectral bands have the same
-projection (or no projection). If that is not the case, reprojection must be done in a prior step.
-Bands might have different geotransform matrices, in which case, by default, the
-resulting dataset will have as extent the union of all extents.
+VRT 영상융합 작업은 전정색 밴드와 스펙트럼 밴드가 동일한 투영법을 사용한다고 (또는 투영법을 사용하지 않는다고) 가정합니다. 그렇지 않은 경우, 사전 단계에서 재투영해야만 합니다. 밴드들이 서로 다른 지리변형 행렬을 가지고 있을 수도 있는데 이 경우 기본적으로 산출되는 데이터셋이 모든 범위들을 융합한 범위를 가지게 될 것입니다.
 
-Currently the only supported pansharpening algorithm is a "weighted" Brovey algorithm.
-The general principle of this algorithm is that, after resampling the spectral bands
-to the resolution of the panchromatic band, a pseudo panchromatic intensity is computed
-from a weighted average of the spectral bands. Then the output value of the spectral
-band is its input value multiplied by the ratio of the real panchromatic intensity
-over the pseudo panchromatic intensity.
+현재 "가중치 적용(weighted)" 브로비(Brovey) 영상융합 알고리즘만 지원합니다. 이 알고리즘의 일반 원칙은 스펙트럼 밴드들을 전정색 밴드의 해상도로 리샘플링한 다음, 스펙트럼 밴드들의 가중치 적용 평균으로부터 의사 전정색의 강도(intensity)를 계산한다는 것입니다. 그러면 스펙트럼 밴드의 입력값에 실제 전정색 강도를 의사 전정색 강도로 나눈 값을 곱한 값이 해당 밴드의 산출값이 됩니다.
 
-Corresponding pseudo code:
+해당 의사(pseudo) 코드:
 
 ::
 
@@ -1334,28 +1303,13 @@ Corresponding pseudo code:
     for i=0 to nb_spectral_bands-1:
         output_value[pixel][i] = input_value[pixel][i] * ratio
 
-A valid pansharpened VRT must declare subClass="VRTPansharpenedDataset" as an
-attribute of the VRTDataset top element. The VRTDataset element must have a
-child **PansharpeningOptions** element. This PansharpeningOptions element must have
-a **PanchroBand** child element and one of several **SpectralBand** elements.
-PanchroBand and SpectralBand elements must have at least a **SourceFilename** child
-element to specify the name of the dataset. They may also have a **SourceBand** child
-element to specify the number of the band in the dataset (starting with 1). If not
-specify, the first band will be assumed.
+무결한 영상융합 VRT는 subClass="VRTPansharpenedDataset"을 VRTDataset의 최상위 요소의 속성으로 선언해야만 합니다. VRTDataset 요소는 **PansharpeningOptions** 하위 요소를 가지고 있어야만 합니다. 이 PansharpeningOptions 요소는 **PanchroBand** 하위 요소 하나와 **SpectralBand** 하위 요소 여러 개를 가지고 있어야만 합니다. PanchroBand 및 SpectralBand 요소는 데이터셋의 이름을 지정하는 **SourceFilename** 하위 요소를 적어도 하나 가지고 있어야만 합니다. 또한 데이터셋에 있는 밴드의 (1에서 시작하는) 번호를 지정하는 **SourceBand** 하위 요소도 가질 수 있습니다. 지정하지 않는 경우, 첫 번째 밴드라고 가정할 것입니다.
 
-The SpectralBand element must generally have a **dstBand** attribute to specify the
-number of the output band (starting with 1) to which the input spectral band must be mapped.
-If the attribute is not specified, the spectral band will be taken into account
-in the computation of the pansharpening, but not exposed as an output band.
+SpectralBand 요소는 일반적으로 입력 스펙트럼 밴드를 매핑시켜야만 하는 산출 밴드의 (1에서 시작하는) 번호를 지정하는 **dstBand** 속성을 반드시 가지고 있어야만 합니다. 이 속성을 지정하지 않는 경우, 영상융합 연산에 스펙트럼 밴드를 넣지만 산출 밴드로 노출시키지 않을 것입니다.
 
-Panchromatic and spectral bands should generally come from different datasets,
-since bands of a GDAL dataset are assumed to have all the same dimensions.
-Spectral bands themselves can come from one or several datasets. The only
-constraint is that they have all the same dimensions.
+전정색 및 스펙트럼 밴드는 일반적으로 서로 다른 데이터셋으로부터 가져와야 합니다. GDAL 데이터셋의 밴드들은 모두 동일한 차원을 가진다고 가정하기 때문입니다. 스펙트럼 밴드들 자체도 데이터셋 하나 또는 여러 개로부터 가져온 것일 수 있습니다. 유일한 제약은 스펙트럼 밴드들이 모두 동일한 차원을 가져야 한다는 것입니다.
 
-An example of a minimalist working VRT is the following. It will generates a dataset with 3 output
-bands corresponding to the 3 input spectral bands of multispectral.tif, pansharpened
-with panchromatic.tif.
+다음은 최소한으로 작동하는 VRT의 예시입니다. 이 VRT 스크립트는 multispectral.tif의 입력 스펙트럼 밴드 3개에 대응하는 산출 밴드 3개와 영상융합된 panchromatic.tif를 가진 데이터셋을 생성할 것입니다:
 
 .. code-block:: xml
 
@@ -1380,32 +1334,34 @@ with panchromatic.tif.
         </PansharpeningOptions>
     </VRTDataset>
 
-In the above example, 3 output pansharpend bands will be created from the 3 declared
-input spectral bands. The weights will be 1/3. Cubic resampling will be used. The
-projection and geotransform from the panchromatic band will be reused for the VRT
-dataset.
+이 예시에서, 선언된 입력 스펙트럼 밴드 3개로부터 산출 영상융합 밴드 3개를 생성할 것입니다. 가중치는 1/3일 것입니다. 3차(cubic) 리샘플링 메소드를 사용할 것입니다. VRT 데이터셋에 전정색 밴드로부터 나온 투영법 및 지리변형을 재사용할 것입니다.
 
-It is possible to create more explicit and declarative pansharpened VRT, allowing
-for example to only output part of the input spectral bands (e.g. only RGB when
-the input multispectral dataset is RGBNir). It is also possible to add "classic"
-VRTRasterBands, in addition to the pansharpened bands.
+더 명확하고 선언적인 영상융합 VRT를 생성해서, 예를 들어 입력 스펙트럼 밴드의 일부만 산출하도록 할 수도 있습니다. (예를 들어 입력 다중 스펙트럼 데이터셋이 RGBNir 유형인 경우 RGB만 산출하도록 할 수 있습니다.) 영상융합 밴드에 "전형적인" VRTRasterBands를 추가할 수도 있습니다.
 
-In addition to the above mentioned required PanchroBand and SpectralBand elements,
-the PansharpeningOptions element may have the following children elements :
+PansharpeningOptions 요소는 앞에서 언급했던 필수적인 PanchroBand와 SpectralBand 요소들만이 아니라, 다음과 같은 하위 요소들을 가질 수도 있습니다:
 
-- **Algorithm**: to specify the pansharpening algorithm. Currently, only WeightedBrovey is supported.
-- **AlgorithmOptions**: to specify the options of the pansharpening algorithm. With WeightedBrovey algorithm, the only supported option is a **Weights** child element whose content must be a comma separated list of real values assigning the weight of each of the declared input spectral bands. There must be as many values as declared input spectral bands.
-- **Resampling**: the resampling kernel used to resample the spectral bands to the resolution of the panchromatic band. Can be one of Cubic (default), Average, Near, CubicSpline, Bilinear, Lanczos.
-- **NumThreads**: Number of worker threads. Integer number or ALL_CPUS. If this option is not set, the :decl_configoption:`GDAL_NUM_THREADS` configuration option will be queried (its value can also be set to an integer or ALL_CPUS)
-- **BitDepth**: Can be used to specify the bit depth of the panchromatic and spectral bands (e.g. 12). If not specified, the NBITS metadata item from the panchromatic band will be used if it exists.
-- **NoData**: Nodata value to take into account for panchromatic and spectral bands. It will be also used as the output nodata value. If not specified and all input bands have the same nodata value, it will be implicitly used (unless the special None value is put in NoData to prevent that).
-- **SpatialExtentAdjustment**: Can be one of **Union** (default), **Intersection**, **None** or **NoneWithoutWarning**. Controls the behavior when panchromatic and spectral bands have not the same geospatial extent. By default, Union will take the union of all spatial extents. Intersection the intersection of all spatial extents. None will not proceed to any adjustment at all (might be useful if the geotransform are somehow dummy, and the top-left and bottom-right corners of all bands match), but will emit a warning. NoneWithoutWarning is the same as None, but in a silent way.
+- **Algorithm**:
+  영상융합 알고리즘을 지정합니다. 현재 WeightedBrovey만 지원합니다.
 
-The below examples creates a VRT dataset with 4 bands. The first band is the
-panchromatic band. The 3 following bands are than red, green, blue pansharpened
-bands computed from a multispectral raster with red, green, blue and near-infrared
-bands. The near-infrared bands is taken into account for the computation of the
-pseudo panchromatic intensity, but not bound to an output band.
+- **AlgorithmOptions**:
+  영상융합 알고리즘의 옵션들을 지정합니다. WeightedBrovey 알고리즘이 지원하는 옵션은 **Weights** 하위 요소 하나뿐입니다. 이 하위 요소의 내용은 선언된 입력 스펙트럼 밴드 각각에 가중치를 할당하는 실수값들을 쉼표로 구분한 목록이어야만 합니다. 이 실수값들의 개수와 선언된 입력 스펙트럼 밴드들의 개수가 일치해야만 합니다.
+
+- **Resampling**:
+  스펙트럼 밴드들을 전정색 밴드의 해상도로 리샘플링하기 위해 쓰이는 리샘플링 커널을 지정합니다. Cubic(기본값), Average, Near, CubicSpline, Bilinear, Lanczos 가운데 하나로 지정할 수 있습니다.
+
+- **NumThreads**:
+  작업자 스레드의 개수를 지정합니다. 정수값 또는 ALL_CPUS로 지정할 수 있습니다. 이 옵션을 설정하지 않는 경우, :decl_configoption:`GDAL_NUM_THREADS` 환경설정 옵션을 쿼리할 것입니다. (이 환경설정 옵션의 값도 정수값 또는 ALL_CPUS로 설정할 수 있습니다.)
+
+- **BitDepth**:
+  전정색 및 스펙트럼 밴드의 비트 심도를 (예: 12로) 지정할 수 있습니다. 이 요소를 지정하지 않는 경우, 전정색 밴드의 NBITS 메타데이터 항목이 존재한다면 그 값을 사용할 것입니다.
+
+- **NoData**:
+  전정색 및 스펙트럼 밴드 연산에 넣을 NODATA 값을 지정합니다. 산출물 NODATA 값으로도 사용될 것입니다. (다음과 같은 상황을 막기 위해 NoData 요소에 특별한 None 값을 넣지 않는 한) 이 요소를 지정하지 않았는데 모든 입력 밴드의 NODATA 값이 동일한 경우, 암묵적으로 그 값을 사용할 것입니다.
+
+- **SpatialExtentAdjustment**:
+  **Union** (기본값), **Intersection**, **None** 또는 **NoneWithoutWarning** 가운데 하나를 지정할 수 있습니다. 전정색 및 스펙트럼 밴드가 동일한 지리공간 범위를 가지고 있지 않은 경우의 습성을 제어합니다. 기본적으로, Union은 모든 공간 범위를 통합합니다. Intersection은 모든 공간 범위가 중첩하는 범위입니다. None은 어떤 조정도 진행하지 않지만 (어째서인지 지리변형이 더미(dummy)이고 모든 밴드의 좌상단과 우하단 모서리가 일치하는 경우 유용할 수도 있습니다) 경고를 발할 것입니다. NoneWithoutWarning 은 None과 동일하지만 경고를 발하지 않습니다.
+
+다음 예시는 밴드 4개를 가진 VRT 데이터셋을 생성합니다. 첫 번째 밴드가 전정색 밴드입니다. 그 뒤의 밴드 3개는 적색, 녹색, 청색 및 근적외선 밴드를 가진 다중 스펙트럼 래스터로부터 계산된 적색, 녹색, 청색 영상융합 밴드들입니다. 의사 전정색 강도 계산에 근적외선 밴드도 들어가지만, 산출 밴드로 생성되지는 않습니다.
 
 .. code-block:: xml
 
@@ -1471,7 +1427,7 @@ pseudo panchromatic intensity, but not bound to an output band.
 
 .. versionadded:: 3.1
 
-See the dedicated :ref:`vrt_multidimensional` page.
+전용 :ref:`vrt_multidimensional` 페이지를 참조하십시오.
 
 .. toctree::
    :maxdepth: 1
@@ -1484,67 +1440,40 @@ vrt:// 연결 문자열
 
 .. versionadded:: 3.1
 
-In some contexts, it might be useful to benefit from features of VRT without
-having to create a file or to provide the rather verbose VRT XML content as
-the connection string. For that purpose, the following URI syntax is supported for
-the dataset name since GDAL 3.1
+어떤 맥락에서는, 파일을 생성할 필요없이 VRT의 기능을 사용하거나 또는 조금 장황한 VRT XML 내용을 연결 문자열로 제공하는 편이 유용할 수도 있습니다. 이런 목적으로, GDAL 3.1버전부터 데이터셋 이름을 지정하는 다음과 같은 URI 문법을 지원합니다.
 
 ::
 
     vrt://{path_to_gdal_dataset}?[bands=num1,...,numN]
 
-For example:
+다음은 그 예시입니다:
 
 ::
 
     vrt://my.tif?bands=3,2,1
 
-The only supported option currently is bands. Other may be added in the future.
+현재 지원하는 옵션은 bands뿐입니다. 향후 다른 옵션들이 추가될 수도 있습니다.
 
-The effect of this option is to change the band composition. The values specified
-are the source band numbers (between 1 and N), possibly out-of-order or with repetitions.
-The ``mask`` value can be used to specify the global mask band. This can also
-be seen as an equivalent of running `gdal_translate -of VRT -b num1 ... -b numN`.
+이 옵션은 밴드 구성을 변경하는 효과를 냅니다. 지정한 값들은 소스 밴드의 (1에서 N 사이의) 번호로, 순서를 그대로 따라갈 수도 있고 뒤섞을 수도 있습니다. 전체 수준 마스크 밴드를 지정하려면 ``mask`` 값을 쓰면 됩니다. *gdal_translate -of VRT -b num1 ... -b numN* 명령어를 실행하는 것과 동일하다고 볼 수도 있습니다.
 
 멀티스레딩 문제점
 ----------------------
 
 .. warning::
 
-    The below section applies to GDAL <= 2.2. Starting with GDAL 2.3, the use
-    of VRT datasets is subject to the standard GDAL dataset multi-threaded rules
-    (that is a VRT dataset handle may only be used by a same thread at a time,
-    but you may open several dataset handles on the same VRT file and use them
-    in different threads)
+    다음 단락은 GDAL 2.2 이하 버전에 적용됩니다. GDAL 2.3버전부터, VRT 데이터셋 사용 시 표준 GDAL 데이터셋 멀티스레드 작업 규칙을 따릅니다. (즉 동일한 스레드에서는 한번에 VRT 데이터셋 하나씩 처리할 수 있다는 뜻이지만, 동일한 VRT 파일에 데이터셋 핸들 여러 개를 열어서 서로 다른 스레드에서 사용할 수도 있습니다.)
 
-When using VRT datasets in a multi-threading environment, you should be
-careful to open the VRT dataset by the thread that will use it afterwards. The
-reason for that is that the VRT dataset uses :cpp:func:`GDALOpenShared` when opening the
-underlying datasets. So, if you open twice the same VRT dataset by the same
-thread, both VRT datasets will share the same handles to the underlying
-datasets.
+멀티스레딩 환경에서 VRT 데이터셋을 사용하는 경우, 나중에 해당 VRT 데이터셋을 사용할 스레드에서 VRT 데이터셋을 여는 것을 조심해야 합니다. 그 이유는 VRT 데이터셋이 기저 데이터셋을 열 때 :cpp:func:`GDALOpenShared` 함수를 이용하기 때문입니다. 즉, 동일한 스레드에서 동일한 VRT 데이터셋을 두 번 열 경우, 두 VRT 데이터셋 모두 기저 데이터셋에 동일한 핸들을 공유하게 되기 때문입니다.
 
-The shared attribute, on the SourceFilename indicates whether the
-dataset should be shared (value is 1) or not (value is 0). The default is 1.
-If several VRT datasets referring to the same underlying sources are used in a multithreaded context,
-shared should be set to 0. Alternatively, the VRT_SHARED_SOURCE configuration
-option can be set to 0 to force non-shared mode.
+SourceFilename에서 shared 속성이 데이터셋을 공유해야 할지 (속성값은 1) 또는 공유하지 말아야 할지를 (속성값은 0) 나타냅니다. 기본값은 1입니다.
+멀티스레드 맥락에서 동일한 기저 소스를 참조하는 VRT 데이터셋 여러 개를 사용하는 경우, shared 속성을 0으로 설정해야 합니다. 아니면 비공유 모드를 강제하기 위해 VRT_SHARED_SOURCE 환경설정 옵션을 0으로 설정할 수도 있습니다.
 
 성능 고려 사항
 --------------------------
 
-A VRT can reference many (hundreds, thousands, or more) datasets. Due to
-operating system limitations, and for performance at opening time, it is
-not reasonable/possible to open them all at the same time. GDAL has a "pool"
-of datasets opened by VRT files whose maximum limit is 100 by default. When it
-needs to access a dataset referenced by a VRT, it checks if it is already in
-the pool of open datasets. If not, when the pool has reached its limit, it closes
-the least recently used dataset to be able to open the new one. This maximum
-limit of the pool can be increased by setting the :decl_configoption:`GDAL_MAX_DATASET_POOL_SIZE`
-configuration option to a bigger value. Note that a typical user process on
-Linux is limited to 1024 simultaneously opened files, and you should let some
-margin for shared libraries, etc...
-gdal_translate and gdalwarp, by default, increase the pool size to 450.
+VRT는 수많은 (수백, 수천, 또는 그 이상의) 데이터셋을 참조할 수 있습니다. 운영 체제의 제한에 의해, 그리고 VRT 파일을 열 때의 성능을 위해, 동시에 참조 데이터셋 전부를 여는 것은 타당하지도 가능하지도 않습니다. GDAL은 기본적으로 VRT 파일이 열 수 있는 데이터셋 "풀(pool)"의 최대 한계값을 100개로 제한합니다. GDAL이 VRT가 참조하는 데이터셋에 접근해야 하는 경우, GDAL은 해당 데이터셋이 이미 열려 있는 데이터셋 풀에 있는지 확인합니다. 없다면, 풀이 한계값에 도달한 경우, 새 데이터셋을 열기 위해 최저 사용 빈도를 가진 데이터셋을 닫습니다.
+:decl_configoption:`GDAL_MAX_DATASET_POOL_SIZE` 환경설정 옵션을 더 큰 값으로 설정하면 풀의 최대 한계값을 늘릴 수 있습니다. 리눅스 상에서 전형적인 사용자 프로세스는 동시에 열 수 있는 파일 개수를 1,024개로 제한하기 때문에 공유 라이브러리 등등을 위한 예비 공간을 준비해야 한다는 사실을 기억하십시오.
+gdal_translate 및 gdalwarp 유틸리티는 기본적으로 풀 크기를 450개로 늘립니다.
 
 드라이버 케이퍼빌리티
 -------------------
