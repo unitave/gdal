@@ -8,48 +8,37 @@ WEBP - WEBP
 
 .. build_dependencies:: libwebp
 
-GDAL can read and write WebP images through
-the WebP library.
+GDAL은 WebP 라이브러리를 통해 WebP 이미지를 읽고 쓸 수 있습니다.
 
-WebP is a new image format that provides lossy compression for
-photographic images. A WebP file consists of VP8 image data, and a
-container based on RIFF.
+WebP는 사진 이미지 용 손실 압축을 제공하는 새로운 이미지 포맷입니다. WebP 파일은 VP8 이미지 데이터 및 RIFF 기반 컨테이너로 이루어져 있습니다.
 
-The driver rely on the Open Source WebP library (BSD licensed). The WebP
-library (at least in its version 0.1) only offers compression and
-decompression of whole images, so RAM might be a limitation when dealing
-with big images (which are limited to 16383x16383 pixels).
+이 드라이버는 (BSD 사용 허가) 오픈소스 WebP 라이브러리에 의존합니다. WebP 라이브러리는 (적어도 0.1버전에서는) 전체 이미지 압축 및 압축 해제만 제공하기 때문에, 큰 이미지를 처리하는 경우 램에 제약이 있을 수도 있습니다. (이미지 자체도 16,383x16,383 픽셀 크기로 제한되어 있습니다.)
 
-The WEBP driver supports 3 bands (RGB) images. It also supports 4 bands (RGBA)
+WEBP 드라이버는 3밴드(RGB) 이미지와 4밴드(RGBA) 이미지를 지원합니다.
 
-The WEBP driver can be used as the internal format used by the
-:ref:`raster.rasterlite` driver.
+WEBP 드라이버를 :ref:`raster.rasterlite` 드라이버가 사용하는 내부 포맷으로 사용할 수 있습니다.
 
-XMP metadata can be extracted from the file,
-and will be stored as XML raw content in the xml:XMP metadata domain.
+파일로부터 XMP 메타데이터를 추출할 수 있는데, 추출한 메타데이터를 xml:XMP 메타데이터 도메인의 XML RAW 콘텐츠로 저장할 것입니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
 
 .. supports_virtualio::
 
-Creation options
+열기 옵션
 ----------------
 
-Various creation options exists, among them :
+여러 생성 옵션들이 존재하는데, 그 중에서도:
 
--  **QUALITY=n**: By default the quality flag is set to 75, but this
-   option can be used to select other values. Values must be in the
-   range 1-100. Low values result in higher compression ratios, but
-   poorer image quality.
+-  **QUALITY=n**:
+   기본적으로 품질 플래그는 75로 설정되어 있지만, 이 옵션을 사용하면 다른 값을 선택할 수 있습니다. 1에서 100 사이의 값이어야만 합니다. 낮은 값으로 설정하면 높은 압축률을 보이지만 이미지 품질은 떨어집니다.
 
--  **LOSSLESS=True/False** By
-   default, lossy compression is used. If set to True, lossless
-   compression will be used.
+-  **LOSSLESS=True/False**:
+   기본적으로 손실 압축 방식을 사용합니다. True로 설정하면 비손실 압축 방식을 사용할 것입니다.
 
-See Also
+참고
 --------
 
--  `WebP home page <https://developers.google.com/speed/webp/>`__
+-  `WebP 홈페이지 <https://developers.google.com/speed/webp/>`_

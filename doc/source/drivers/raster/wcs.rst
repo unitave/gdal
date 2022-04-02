@@ -1,198 +1,169 @@
 .. _raster.wcs:
 
 ================================================================================
-WCS -- OGC Web Coverage Service
+WCS -- OGC 웹 커버리지 서비스
 ================================================================================
 
 .. shortname:: WCS
 
 .. build_dependencies:: libcurl
 
-The optional GDAL WCS driver allows use of a coverage in a WCS server as
-a raster dataset. GDAL acts as a client to the WCS server.
+선택적인 GDAL WCS(Web Coverage Service) 드라이버는 WCS 서버에 있는 커버리지를 래스터 데이터셋으로 사용할 수 있게 해줍니다. GDAL은 WCS 서버의 클라이언트로서 동작합니다.
 
-Accessing a WCS server is accomplished by creating a local service
-description file that contains one `<WCS_GDAL>` XML element. It is
-important that there is no spaces or other content outside that element.
-Starting at version 2.3 the service description file is meant to be
-managed by the driver in a cache directory. User should control the
-contents of the service file using options. The dataset name is
-:samp:`WCS:<URL>`, where the <URL> is the URL of the server appended
-potentially appended with WCS version, coverage, and possibly other
-parameters. If the WCS version is 2.0.1 further parameters can be given
-to control how the data model of the coverage is mapped to the GDAL data
-model.
+`<WCS_GDAL>` XML 요소 하나를 담고 있는 로컬 서비스 설명 파일을 생성해서 WCS 서버에 접근할 수 있습니다. 이 요소 외에 어떤 공백이나 다른 내용도 없다는 사실이 중요합니다. GDAL 2.3버전부터 드라이버가 캐시 디렉터리에서 서비스 설명 파일을 관리한다고 간주합니다. 사용자는 옵션을 이용해서 서비스 파일의 내용을 제어해야 합니다.
+데이터셋 이름은 :samp:`WCS:<URL>` 이며, 이때 <URL>은 추가할 서버의 URL입니다. 이 서버는 WCS 버전, 커버리지, 그리고 기타 파라미터들을 가지고 있을 수도 있습니다. WCS 버전이 2.0.1인 경우 GDAL 데이터 모델에 커버리지 데이터 모델을 매핑하는 방법을 제어하기 위한 심화 파라미터들을 지정할 수 있습니다.
 
-If the URL does not contain a coverage name, the driver attempts to
-fetch the capabilities document from the server, parse it, and show the
-resulting metadata to the user. Coverages are shown as subdatasets. If
-the URL contains a coverage name as parameter (the key 'coverage' can be
-used irrespective of the WCS version), the driver attempts to fetch the
-coverage description document from the server, parse it, and create
-service description file. A small test GetCoverage request may be done
-to obtain details of the served data. If the respective server
-capabilities file is not cached, it will also be fetched.
+URL이 커버리지 이름을 담고 있지 않은 경우, 드라이버가 서버로부터 케이퍼빌리티 문서를 가져와서 파싱한 다음 사용자에게 산출된 메타데이터를 출력하려 시도합니다. 커버리지는 하위 데이터셋으로 표현됩니다. URL이 커버리지 이름을 파라미터로 담고 있다면 ('coverage' 키는 WCS 버전에 상관없이 사용할 수 있습니다) 드라이버가 서버로부터 커버리지 설명 문서를 가져와서 파싱한 다음 서비스 설명 파일을 생성하려 시도합니다. 서비스 데이터의 상세 정보를 수집하기 위해 간단한 GetCoverage 요청을 전송할 수도 있습니다. 해당 서버의 케이퍼빌리티 파일이 캐시되지 않았다면, 그 파일도 가져올 것입니다.
 
-With service version 2.0.1 (for which support is available starting at
-GDAL version 2.3), it may be that the coverage has more than two
-dimensions. In that case, the driver will append the coverage metadata
-and show zero bands. At that point, the user must use options to further
-instruct the driver how to deal with extra dimensions and data fields.
+(GDAL 2.3버전부터 지원하는) WCS 2.0.1버전부터, 커버리지가 2차원 이상일 수도 있습니다. 이런 경우, 드라이버가 커버리지 메타데이터를 추가해서 0으로만 구성된 밴드(zero band)를 출력할 것입니다. 이때 사용자는 옵션을 이용해서 드라이버에 추가 차원 및 데이터 필드 처리 방법을 지시해야만 합니다.
 
-The WCS driver supports WCS versions 1.0.0, 1.1.0, 1.1.1, 1.1.2, and
-2.0.1 at basic level (version 0.7 is not supported and support for
-version 2.0.1 is available starting at GDAL 2.3). Any return format that
-is a single file, and is in a format supported by GDAL should work. The
-driver will prefer a format with "tiff" in the name, otherwise it will
-fallback to the first offered format. However, the user may set the
-preferred format. Coordinate systems are read from the DescribeCoverage
-result.
+WCS 드라이버는 기본 수준에서 WCS 1.0.0, 1.1.0, 1.1.1, 1.1.2 및 2.0.1버전을 지원합니다. (0.7버전은 지원하지 않으며, 2.0.1버전은 GDAL 2.3버전부터 지원합니다.) GDAL이 지원하는 포맷의 단일 파일로 반환되는 모든 포맷이 작동할 것입니다. 이 드라이버는 이름에 "tiff"가 포함된 포맷을 선호할 것입니다. 그렇지 않은 경우, 처음 제공된 포맷으로 돌아갈 것입니다. 하지만 사용자가 선호 포맷을 설정할 수도 있습니다. DescribeCoverage 결과물로부터 좌표계를 읽어옵니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
 .. supports_virtualio::
 
-Service description file
+서비스 설명 파일
 ------------------------
 
-The service description file has the following elements as immediate
-children of the document element. Note that when the "WCS:<URL>" syntax
-for dataset name is used, the contents of the service description file
-is meant to be modified by using options.
+서비스 설명 파일은 다음 요소들을 Document 요소의 직계 하위 요소로 가지고 있습니다. 데이터셋 이름에 "WCS:<URL>" 문법을 사용하는 경우, 옵션을 이용해서 서비스 설명 파일의 내용을 수정할 수 있다는 사실을 기억하십시오.
 
--  **ServiceURL**: URL of the service without parameters
--  **Version**: The WCS version that is used in the communication. If
-   the dataset name syntax WCS:URL is used the default is 2.0.1 and the
-   server's response may change the user request, otherwise defaults to
-   1.0.0. Versions 1.0.0, 1.1.0, 1.1.1, 1.1.2, and 2.0.1 are supported.
--  **CoverageName**: The coverage that is used for the dataset.
--  **Format**: The format to use for GetCoverage calls. If not set,
-   selected by the driver. (WCS version 2.0)
--  **PreferredFormat**: The format to use for GetCoverage calls. If not
-   set, selected by the driver. (WCS versions 1.0 and 1.1)
--  **Interpolation**: The interpolation method used when scaling. Should
-   be one of the server supported values. (GDAL 2.3)
--  **BlockXSize**: The block width to use for block cached remote
-   access.
--  **BlockYSize**: The block height to use for block cached remote
-   access.
--  **OverviewCount**: The number of overviews to represent bands as
-   having. Defaults to a number such that the top overview is fairly
-   smaller (less than 1K x 1K or so).
--  **NoDataValue**: The nodata value to use for all the bands (blank for
-   none). Normally determined by the driver. With version 2.0.1 this may
-   be a comma separated list of values, one for each band.
--  **Elements for controlling the range and domain:**
--  **Domain**: The axes that are used for the spatial dimensions. The
-   default is to use the first two axes given by the server. The axis
-   order swap may apply. Syntax: *axis_name,axis_name* A
-   *field_name:field_name* in the list denotes a range of fields. (Used
-   only with version 2.0.1)
--  **DefaultTime**: A timePosition to use by default when accessing
-   coverages with a time dimension. Populated with the last offered time
-   position by default. (Used only with version 1.0.0)
--  **FieldName**: Name of the field being accessed. Used only with
-   version 1.1. Defaults to the first field in the DescribeCoverage. In
-   version 1.1 the range consists of one or more fields, which may be
-   scalar or vector. A vector field contains one or more bands.
--  **BandCount**: Number of bands in the dataset, normally determined by
-   the driver.
--  **BandType**: The pixel data type to use. Normally determined by the
-   driver.
--  **Elements for controlling the communication:**
--  **Timeout**: The timeout to use for remote service requests. If not
-   provided, the libcurl default is used.
--  **UserPwd**: May be supplied with *userid:password* to pass a userid
-   and password to the remote server.
--  **HttpAuth**: May be BASIC, NTLM or ANY to control the authentication
-   scheme to be used.
--  **GetCoverageExtra**: An additional set of keywords to add to
-   GetCoverage requests in URL encoded form. eg.
-   "&RESAMPLE=BILINEAR&Band=1". Note that the extra parameters should
-   not be known parameters (see below).
--  **DescribeCoverageExtra**: An additional set of keywords to add to
-   DescribeCoverage requests in URL encoded form. eg. "&CustNo=775"
--  **Elements that may be needed to deal with server quirks (GDAL
-   2.3):**
-   **Note:** The options are not propagated to the subdataset with the
-   switch -sd.
--  **OriginAtBoundary**: Set this flag if the server reports grid origin
-   to be at the pixel boundary instead of the pixel center. (Use for
-   MapServer versions <= 7.0.7 with WCS versions 1.0.0 and 2.0.1)
--  **OuterExtents**: Set to consider WCS 1.1 extents as boundaries of
-   outer pixels instead of centers of outer pixels. (Use for GeoServer).
--  **BufSizeAdjust**: Set to 0.5 in WCS 1.1 if data access fails due to
-   the response not having expected size. (Use for GeoServer).
--  **OffsetsPositive**: Use with MapServer in WCS version 2.0.1 together
-   wwith NrOffsets.
--  **NrOffsets**: Set to 2 if the server requires that there are only
-   two values in the GridOffsets. Use when the server is MapServer or
-   ArcGIS. With MapServer use also OffsetsPositive.
--  **GridCRSOptional**: Let the driver skip Grid\* parameters from a WCS
-   1.1 GetCoverage request if the request is not scaled. Do not use for
-   GeoServer.
--  **NoGridAxisSwap**: Set to tell the driver not to swap axis order.
-   When reading the grid geometry (in WCS 1.1 the origin and offsets, in
-   WCS 2.0.1 the grid envelope, axis labels, and offsets) no axis order
-   swap is done although it would otherwise be done if this flag is set.
-   In 1.1 it would be done if the CRS has inverted axes. In 2.0.1 it
-   would be done if the axisOrder of the sequenceRule in GridFunction
-   defines so. This is needed usually both in 1.1 and 2.0.1 when parsing
-   coverage descriptions from MapServer and GeoServer.
--  **SubsetAxisSwap** Set to tell the driver to swap the axis names in
-   boundedBy.Envelope.axisLabels when making WCS 2.0.1 GetCoverage
-   request. Needed for GeoServer when EPSG dictates axis order swap.
--  **UseScaleFactor**: Set to tell the driver to use scale by factor
-   approach instead of scale to size when making a WCS 2.0.1 GetCoverage
-   request. Required when the server is ArcGIS.
+-  **ServiceURL**:
+   파라미터가 없는 서비스 URL입니다.
 
-Range and dimension subsetting
+-  **Version**:
+   통신에 사용되는 WCS 버전입니다. 데이터셋 이름에 "WCS:<URL>" 문법을 사용하는 경우 기본값은 2.0.1이며 서버의 응답이 사용자 요청을 변경할 수도 있습니다. 그렇지 않은 경우 기본값은 1.0.0입니다. 1.0.0, 1.1.0, 1.1.1, 1.1.2 및 2.0.1버전을 지원합니다.
+
+-  **CoverageName**:
+   데이터셋으로 사용되는 커버리지입니다.
+
+-  **Format**:
+   GetCoverage 호출에 사용되는 포맷입니다. 이 요소를 설정하지 않는 경우 드라이버가 포맷을 선택합니다. (WCS 2.0버전)
+
+-  **PreferredFormat**:
+   GetCoverage 호출에 사용되는 포맷입니다. 이 요소를 설정하지 않는 경우 드라이버가 포맷을 선택합니다. (WCS 1.0 및 1.1버전)
+
+-  **Interpolation**:
+   크기 조정 작업 시 사용되는 보간법입니다. 서버가 지원하는 값들 가운데 하나여야 합니다. (GDAL 2.3버전)
+
+-  **BlockXSize**:
+   캐시된 블록 원격 접근에 사용되는 블록 너비입니다.
+
+-  **BlockYSize**:
+   캐시된 블록 원격 접근에 사용되는 블록 높이입니다.
+
+-  **OverviewCount**:
+   밴드가 가지고 있는 것으로 표현할 오버뷰의 개수입니다. 기본값은 최상위 오버뷰의 크기가 상당히 작을 정도의 (약 1,000 x 1,000 미만이 될 정도의) 개수입니다.
+
+-  **NoDataValue**:
+   모든 밴드에 사용할 NODATA 값입니다. (NODATA가 없는 경우 설정하지 않습니다.) 일반적으로 드라이버가 이 값을 결정합니다. WCS 2.0.1버전부터 각 밴드에 값 하나를 설정하는, 쉼표로 구분된 목록을 설정할 수도 있습니다.
+
+-  **범위 및 도메인을 제어하기 위한 요소들:**
+
+   -  **Domain**:
+      공간 차원에 사용되는 축들입니다. 기본값은 서버가 지정한 처음 두 개의 축을 사용하는 것입니다. 축 순서 바꾸기를 적용할 수도 있습니다.
+      문법: *axis_name,axis_name*
+      목록에 *field_name:field_name* 이 있는 경우 필드의 범위를 나타냅니다. (WCS 2.0.1버전 전용)
+
+   -  **DefaultTime**:
+      시간 차원을 가진 커버리지에 접근할 때 사용할 timePosition입니다. 기본적으로 값을 가장 최근에 제공한 시점으로 채웁니다. (WCS 1.0.0버전 전용)
+
+   -  **FieldName**:
+      접근할 필드명입니다. WCS 1.1버전 전용입니다. 기본값은 DescribeCoverage에 있는 첫 번째 필드입니다. WCS 1.1버전에서는 범위가 스칼라(scalar) 또는 벡터일 수도 있는 하나 이상의 필드로 이루어져 있습니다. 벡터 필드는 하나 이상의 밴드를 담고 있습니다.
+
+   -  **BandCount**:
+      데이터셋의 밴드 개수입니다. 일반적으로 드라이버가 결정합니다.
+
+   -  **BandType**:
+      사용할 픽셀 데이터 유형입니다. 일반적으로 드라이버가 결정합니다.
+
+-  **통신을 제어하기 위한 요소들:**
+
+   -  **Timeout**:
+      원격 서비스 요청에 사용할 제한 시간입니다. 이 요소를 설정하지 않는 경우 libcurl 기본값을 사용합니다.
+
+   -  **UserPwd**:
+      원격 서버에 사용자 ID와 비밀번호를 전송합니다. *userid:password* 로 설정할 수도 있습니다.
+
+   -  **HttpAuth**:
+      사용할 인증 스키마를 제어합니다. BASIC, NTLM 또는 ANY 가운데 하나로 설정할 수도 있습니다.
+
+   -  **GetCoverageExtra**:
+      GetCoverage 요청에 URL 인코딩 형식으로 추가할 키워드 집합입니다.
+      예: "&RESAMPLE=BILINEAR&Band=1"
+      추가 파라미터는 알려진 파라미터가 아니어야 한다는 사실을 기억하십시오. (아래 참조)
+
+   -  **DescribeCoverageExtra**:
+      DescribeCoverage 요청에 URL 인코딩 형식으로 추가할 키워드 집합입니다.
+      예: "&CustNo=775"
+
+-  **서버의 문제점을 처리하기 위해 필요할 수도 있는 요소들(GDAL 2.3버전):**
+
+.. note::
+   이 옵션들은 -sd 스위치로 하위 데이터셋으로 전파되지 않습니다.
+
+   -  **OriginAtBoundary**:
+      서버가 그리드 원점이 픽셀 중심이 아니라 픽셀 경계에 있다고 리포트하는 경우 이 플래그를 설정하십시오.
+      (WCS 버전이 1.0.0 및 2.0.1인 MapServer 7.0.7 이하 버전의 경우 사용하십시오.)
+
+   -  **OuterExtents**:
+      WCS 1.1 범위를 외부 픽셀의 중심이 아니라 외부 픽셀의 경계로 간주하도록 하려면 이 플래그를 설정하십시오.
+      (GeoServer의 경우 사용하십시오.)
+
+   -  **BufSizeAdjust**:
+      WCS 1.1버전에서 응답이 예상 크기가 아니기 때문에 데이터 접근이 실패하는 경우 0.5로 설정하십시오.
+      (GeoServer의 경우 사용하십시오.)
+
+   -  **OffsetsPositive**:
+      WCS 버전이 2.0.1인 MapServer의 경우 NrOffsets와 함께 사용하십시오.
+
+   -  **NrOffsets**:
+      서버가 GridOffsets에 값 2개만 있어야 한다고 요구하는 경우 2로 설정하십시오.
+      서버가 MapServer 또는 ArcGIS인 경우 사용하십시오. MapServer인 경우 OffsetsPositive도 함께 사용하십시오.
+
+   -  **GridCRSOptional**:
+      요청이 크기 조정 안 된 경우 드라이버가 WCS 1.1 GetCoverage 요청에서 Grid\* 파라미터를 건너뛰도록 합니다. GeoServer의 경우 사용하지 마십시오.
+
+   -  **NoGridAxisSwap**:
+      드라이버가 축 순서를 바꿔서는 안 된다고 하려면 이 플래그를 설정하십시오.
+      그리드 도형을 읽어올 때 (WCS 1.1버전에서는 원점과 오프셋, WCS 2.0.1버전에서는 그리드 엔벨로프(envelope), 축 라벨 및 오프셋) 일반적으로는 축 순서를 바꾸지만 이 플래그를 설정한 경우 바꾸지 않습니다. WCS 1.1버전에서는 좌표계의 축들이 역전된 경우 축 순서 바꾸기를 수행할 것입니다. 2.0.1버전에서는 GridFunction에 있는 sequenceRule의 axisOrder가 역전된 상태라고 정의하는 경우 축 순서 바꾸기를 수행할 것입니다. MapServer 및 GeoServer로부터 커버리지 설명을 파싱하는 경우, 일반적으로 WCS 1.1 및 2.0.1버전 모두에 이 플래그가 필요합니다.
+
+   -  **SubsetAxisSwap**:
+      WCS 2.0.1 GetCoverage 요청 작성 시 드라이버가 boundedBy.Envelope.axisLabels에 있는 축 이름들의 순서를 바꿔야 한다고 하려면 이 플래그를 설정하십시오. 서버가 GeoServer인데 EPSG가 축 순서 바꾸기를 지시하는 경우 이 플래그가 필요합니다.
+
+   -  **UseScaleFactor**:
+      WCS 2.0.1 GetCoverage 요청 작성 시 드라이버가 크기 조정(scale-to-size) 접근법이 아니라 비율 조정(scale-by-factor) 접근법을 사용해야 한다고 하려면 이 플래그를 설정하십시오. 서버가 ArcGIS인 경우 이 플래그가 필수입니다.
+
+범위 및 차원 하위 집합 작업
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When WCS version 2.0.1 is used, the range (fields/bands) and the
-dimension can and/or may need to be subsetted. If the data model of the
-coverage contains dimensions beyond the two geographic or map
-coordinates, those dimensions must be sliced for GDAL. The coverage may
-also contain a large number of fields, from which only a subset is
-wanted in the GDAL dataset.
+WCS 2.0.1버전 사용 시, (필드 또는 밴드의) 범위 및 차원의 하위 집합(subset)을 작업할 수 있고, 해야 할 수도 있습니다. 커버리지 데이터 모델이 지리 좌표 또는 맵 좌표 2개를 넘어서는 경우, GDAL을 위해 초과 차원을 분할(slice)시켜야만 합니다. 커버리지가 수많은 필드를 가지고 있을 수도 있는데, GDAL 데이터셋은 커버리지에서 하위 집합만 요구합니다.
 
-Range and dimension subsetting must be done via URL parameters since
-from one coverage it is possible to create more than one different GDAL
-datasets. In the WCS cache this means that there may be the sets of
-files related to a GDAL dataset:
+범위 및 차원 하위 집합 작업은 URL 파라미터를 통해 수행되어야만 합니다. 커버리지 하나로부터 하나 이상의 서로 다른 GDAL 데이터셋들을 생성할 수 있기 때문입니다. WCS 캐시 관점에서, 이는 GDAL 데이터셋과 관련된 파일 집합이 있을 수도 있다는 의미입니다:
 
-#. server Capabilities file and a GDAL dataset metadata file made from
-   it (key = URL with WCS version number)
-#. server DescribeCoverage file, a template GDAL service file made from
-   it, and a GDAL dataset metadata file made for it (key = URL with WCS
-   version number and coverage name)
-#. the GDAL service file specifically for this dataset, and a GDAL
-   dataset metadata file (key = URL with WCS version number, coverage
-   name, and range and dimension subsetting parameters)
+#. 서버 Capabilities 파일과 이로부터 생성된 GDAL 데이터셋 메타데이터 파일 (WCS 버전 숫자를 가진 key = URL)
+#. 서버 DescribeCoverage 파일, 이로부터 생성된 GDAL 서비스 파일 및 이를 위해 생성된 GDAL 데이터셋 메타데이터 파일 (WCS 버전 숫자와 커버리지 이름을 가진 key = URL)
+#. 해당 데이터셋 전용 GDAL 서비스 파일 및 GDAL 데이터셋 메타데이터 파일 (WCS 버전 숫자, 커버리지 이름, 범위 및 차원 하위 집합 작업 파라미터를 가진 key = URL)
 
-The following URL parameters are used to control the range and dimension
-subsetting. Note that these can also be set through options into the
-service file. The ones in URL take precedence.
+다음 URL 파라미터들을 이용해서 범위 및 차원 하위 집합 작업을 제어합니다. 서비스 파일에 옵션을 지정해서 설정할 수도 있다는 사실을 기억하십시오. URL 파라미터를 우선할 것입니다.
 
--  **RangeSubset**: Used to select a subset of coverage fields to the
-   dataset. Syntax: *field_name,field_name:field_name,..* (Note:
-   requires that the server implements the range subsetting extension.)
--  **Subset**: Trim or slice a dimension when fetching data from the
-   server. Syntax:
-   *axis_name(trim_begin_value,trim_end_value);axis_name(slice_value)*
-   Note that trimming the geographic/map coordinates is done by the
-   driver.
+-  **RangeSubset**:
+   데이터셋에 사용할 커버리지 필드의 하위 집합을 선택합니다.
+   문법: *field_name,field_name:field_name,..*
+   (주의: 서버가 범위 하위 집합 확장 사양을 구현하고 있어야 합니다.)
 
-Other WCS parameters
+-  **Subset**:
+   서버로부터 데이터를 가져올 때 차원을 다듬거나(trim) 분할(slice)시킵니다.
+   문법: *axis_name(trim_begin_value,trim_end_value);axis_name(slice_value)*
+   드라이버가 지리 또는 맵 좌표를 다듬는다는 사실을 기억하십시오.
+
+기타 WCS 파라미터
 ~~~~~~~~~~~~~~~~~~~~
 
-The following WCS (version 2.0.1) parameters are recognized besides what
-has been described above. These all can be set either through options or
-directly into the URL. The ones in URL take precedence. Note that it is
-up to the server to support/recognize these.
+앞에서 설명한 파라미터들 외에 다음 WCS 2.0.1버전 파라미터도 인식합니다. 모든 파라미터를 옵션을 통해 또는 URL에 직접 삽입해서 설정할 수 있습니다. URL 파라미터를 우선할 것입니다. 서버 버전에 따라 이 파라미터들을 지원 또는 인식하지 못 할 수도 있다는 사실을 기억하십시오.
 
 -  MediaType
 -  UpdateSequence
@@ -203,88 +174,60 @@ up to the server to support/recognize these.
 -  GEOTIFF:TILING
 -  GEOTIFF:TILEWIDTH
 
-Open options
+열기 옵션
 ~~~~~~~~~~~~
 
-When the "WCS:<URL>" dataset name syntax is used, open options are used
-to control the driver and the contents of the service description file.
-In the case the URL does not contain coverage name, the service
-description file is not used and thus in that case the options are not
-written into it. Open options are given separate to the dataset name,
-with GDAL utility programs they are given using the -oo switch
-(`-oo "NAME=VALUE"`). The -oo switch expects only one option but more
-options can be given repeating the switch.
+"WCS:<URL>" 데이터셋 이름 문법을 사용하는 경우, 드라이버와 서비스 설명 파일의 내용을 제어하기 위해 열기 옵션을 사용합니다. URL이 커버리지 이름을 담고 있지 않다면 서비스 설명 파일을 이용하지 않기 때문에, 서비스 설명 파일에 열기 옵션을 작성하지 않습니다. 데이터셋 이름과는 별개로 열기 옵션을 지정하고, GDAL 유틸리티 프로그램의 경우 -oo 스위치를 사용해서 (*-oo "NAME=VALUE"*) 열기 옵션을 지정합니다. 이 -oo 스위치는 옵션 하나만 지정할 수 있지만, 스위치를 반복 사용하면 하나 이상의 열기 옵션을 지정할 수 있습니다.
 
-In addition to DescribeCoverageExtra and GetCoverageExtra, which are
-stored in the service description file, there is also
-GetCapabilitiesExtra, which can be used as an open option when
-requesting the overall capabilities from the server. The open option
-SKIP_GETCOVERAGE can be used to prevent the driver making a GetCoverage
-request to the server, which it usually does if it can't determine the
-band count and band data type from the capabilities or coverage
-descriptions. This option may be needed if GetCoverage request fails.
+서비스 설명 파일에 저장돼 있는 DescribeCoverageExtra 및 GetCoverageExtra뿐만 아니라, 서버로부터 전체 케이퍼빌리티를 요구하는 경우 열기 옵션으로 사용할 수 있는 GetCapabilitiesExtra도 있습니다. SKIP_GETCOVERAGE 열기 옵션을 지정하면 드라이버가 케이퍼빌리티 또는 커버리지 설명으로부터 밴드 개수 및 밴드 데이터 유형을 판단할 수 없는 경우 일반적으로 수행하는 GetCoverage 요청을 서버로 전송하지 못 하도록 할 수 있습니다. GetCoverage 요청이 실패하는 경우 이 옵션을 지정해야 할 수도 있습니다.
 
-All above listed element names can be given as options to the WCS
-driver. In the case of flags the option should formally be "Name=TRUE",
-but only "Name" suffices.
+WCS 드라이버에 앞에서 설명한 모든 요소 이름들을 옵션으로 지정할 수 있습니다. 옵션은 공식적으로 "Name=TRUE"이어야 하지만, 플래그의 경우 "Name"만으로도 충분합니다.
 
-The cache
+캐시
 ~~~~~~~~~
 
-When the "WCS:<URL>" dataset name syntax is used, the server responses,
-the service description file, and the metadata files are stored in a
-cache. Generally, if the needed resource is in the cache, it will be
-used and no extra calls to the server are done.
+"WCS:<URL>" 데이터셋 이름 문법을 사용하는 경우, 캐시에 서버 응답, 서비스 설명 파일 그리고 메타데이터 파일을 저장합니다. 일반적으로, 캐시에 필요한 리소스가 존재하는 경우 서버에 추가 호출하지 않고 캐시의 리소스를 사용할 것입니다.
 
-The default location of the cache directory is $HOME/.gdal/wcs_cache
+캐시 디렉터리의 기본 위치는 ``$HOME/.gdal/wcs_cache`` 입니다.
 
-The cache contents can be seen as subdatasets using an empty URL:
+비어 있는 URL을 이용해서 캐시의 콘텐츠를 하위 데이터셋으로 볼 수 있습니다:
 
 ::
 
    gdalinfo "WCS:"
 
-The cache control options/flags are
+다음은 캐시 제어 옵션/플래그입니다:
 
--  **CACHE=path** Overrides the default cache location.
--  **CLEAR_CACHE** The cache is completely initialized and all files are
-   deleted.
--  **REFRESH_CACHE** The cache entry, either capabilities or coverage,
-   depending on the call at hand, is deleted.
--  **DELETE_FROM_CACHE=k** The cache entry (subdataset k), is deleted.
+-  **CACHE=path**:
+   기본 캐시 위치를 대체합니다.
 
-The WCS: dataset name syntax
+-  **CLEAR_CACHE**:
+   캐시를 완전히 초기화하고 모든 파일을 삭제합니다.
+
+-  **REFRESH_CACHE**:
+   캐시 항목을 -- 가장 최근 호출에 따라 케이퍼빌리티든 커버리지든 -- 삭제합니다.
+
+-  **DELETE_FROM_CACHE=k**:
+   캐시 항목을 (하위 데이터셋 k를) 삭제합니다.
+
+WCS: 데이터셋 이름 문법
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The URL in the dataset name is not a complete WCS request URL. The
-request URL, specifically, its query part, for GetCapabilities,
-DescribeCoverage, and GetCoverage requests is composed by the driver.
-Typically the user should only need to add to the server address the
-version and coverage parameters. The string 'coverage' can be used as
-the coverage parameter key although different WCS versions use different
-keys. 'coverage' is also always used in the cache key.
+데이터셋 이름에 있는 URL은 완전한 WCS 요청 URL이 아닙니다. GetCapabilities, DescribeCoverage, 및 GetCoverage 요청 URL은 -- 특히 쿼리 부분은 드라이버가 작성합니다. 일반적으로 사용자는 서버 주소에 버전 및 커버리지 파라미터만 추가해주면 됩니다. 'coverage' 문자열을 커버리지 파라미터 키로 사용할 수 있지만, 서로 다른 WCS 버전은 서로 다른 키를 사용합니다. 캐시 키에는 항상 'coverage'를 사용합니다.
 
-The user may add arbitrary standard and non-standard extra parameters to
-the URL. However, when that is done, it should be noted that the URL is
-a cache database key and capability documents are linked to coverage
-documents through the key. Please consider using the Extra open options.
+사용자가 URL에 임의의 표준 및 비표준 추가 파라미터를 추가할 수도 있습니다. 하지만 이런 경우, URL이 캐시 데이터베이스 키이며 케이퍼빌리티 문서는 이 키를 통해 커버리지 문서와 링크된다는 사실을 기억해야 합니다. Extra 열기 옵션을 사용할 것을 권장합니다.
 
-Time
+시간
 ~~~~
 
-This driver includes experimental support for
-time based WCS 1.0.0 servers. On initial access the last offered time
-position will be identified as the DefaultTime. Each time position
-available for the coverage will be treated as a subdataset.
+이 드라이버는 시간 기반 WCS 1.0.0 서버를 실험적으로 지원합니다. 초기 접근 시 마지막으로 제공된 시점(time position)을 DefaultTime으로 식별할 것입니다. 데이터셋에 사용할 수 있는 시점들 각각을 하위 데이터셋으로 취급할 것입니다.
 
-Note that time based subdatasets are not supported when the service
-description is the filename. Currently time support is not available for
-versions other than WCS 1.0.0.
+서비스 설명이 파일명인 경우 시간 기반 하위 데이터셋을 지원하지 않는다는 사실을 기억하십시오. 현재 WCS 1.0.0버전이 아닌 경우 시간 지원을 사용할 수 없습니다.
 
-Examples
+예시
 ~~~~~~~~
 
-A gdalinfo call to a coverage served by MapServer:
+gdalinfo로 MapServer가 서비스하는 커버리지를 호출:
 
 ::
 
@@ -296,8 +239,8 @@ A gdalinfo call to a coverage served by MapServer:
    -oo BandIdentifier=none \
    "WCS:http://194.66.252.155/cgi-bin/BGS_EMODnet_bathymetry/ows?VERSION=1.1.0&coverage=BGS_EMODNET_CentralMed-MCol"
 
-A gdal_translate call to a scaled clip of a coverage served by
-GeoServer:
+
+gdal_translate로 GeoServer가 서비스하는 커버리지의 크기 조정된 한 부분을 호출:
 
 ::
 
@@ -311,7 +254,7 @@ GeoServer:
    "WCS:https://beta-karttakuva.maanmittauslaitos.fi/wcs/service/ows?version=2.0.1&coverage=ortokuva__ortokuva" \
    scaled.tiff
 
-See Also
+참고
 --------
 
--  `OGC WCS Standards <http://www.opengeospatial.org/standards/wcs>`__
+-  `OGC WCS 표준 <http://www.opengeospatial.org/standards/wcs>`_
