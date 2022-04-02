@@ -24,7 +24,7 @@ XML 설명 파일
 
 로컬 서비스 설명 XML 파일을 생성해서 웹 이미지 서비스에 접근할 수 있습니다. 다음 표는 지원하는 이미지 서비스 각각의 예시입니다. ``<GDAL_WMS>`` 요소 앞에 어떤 공백이나 다른 내용도 없다는 사실이 중요합니다.
 
-.. list-table:: Web Image Services
+.. list-table:: Local Service Description XML File for WMS
    :header-rows: 0
 
    * - <GDAL_WMS>
@@ -159,20 +159,14 @@ GDAL 2.3버전부터, GDAL_HTTP_HEADER_FILE 환경설정 옵션이 "key: value" 
 미니 드라이버
 ------------
 
-The GDAL WMS driver has support for several internal 'minidrivers',
-which allow access to different web mapping services. Each of these
-services may support a different set of options in the Service block.
+GDAL WMS 드라이버는 몇몇 내부 '미니 드라이버(minidriver)'를 지원합니다. 이 미니 드라이버들은 각각 서로 다른 웹 매핑 서비스에 접근할 수 있도록 해줍니다. 각 서비스는 Service 블록에 있는 서로 다른 옵션 집합을 지원할 수도 있습니다.
 
 WMS
 ~~~
 
-Communications with an OGC WMS server. Has support for both tiled and
-untiled requests.
+OGC WMS 서버와 통신합니다. 타일화 및 비타일화 요청을 모두 지원합니다.
 
-WMS layers can be queried (through a
-GetFeatureInfo request) with the gdallocationinfo utility, or with a
-GetMetadataItem("Pixel_iCol_iLine", "LocationInfo") call on a band
-object.
+gdallocationinfo 유틸리티를 (GetFeatureInfo 요청을 통해) 이용하면, 또는 밴드 객체에 GetMetadataItem("Pixel_iCol_iLine", "LocationInfo")를 호출하면 WMS 레이어를 쿼리할 수 있습니다.
 
 ::
 
@@ -183,7 +177,7 @@ object.
                               -geoloc -11547071.455 5528616 -xml -b 1
 
 
-Output:
+산출물:
 
 ::
 
@@ -227,72 +221,60 @@ Output:
 TileService
 ~~~~~~~~~~~
 
-Service to support talking to a WorldWind
-`TileService <http://www.worldwindcentral.com/wiki/TileService>`_.
-Access is always tile based.
+WorldWind `TileService <http://www.worldwindcentral.com/wiki/TileService>`_ 와의 통신을 지원합니다.
+언제나 타일 기반으로 접근합니다.
 
 WorldWind
 ~~~~~~~~~
 
-Access to web-based WorldWind tile services. Access is always tile
-based.
+웹 기반 WorldWind 타일 서비스에 접근합니다. 언제나 타일 기반으로 접근합니다.
 
 TMS
 ~~~
 
-The TMS Minidriver is designed primarily to support the users of the
-`TMS
-Specification <http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification>`_.
-This service supports only access by tiles.
+TMS 미니 드라이버는 주로 `TMS 사양 <http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification>`_ 사용자를 지원하기 위해 설계되었습니다.
+이 서비스는 타일 접근만 지원합니다.
 
-Because TMS is similar to many other 'x/y/z' flavored services on the
-web, this service can also be used to access these services. To use it
-in this fashion, you can use replacement variables, of the format ${x},
-${y}, etc.
+TMS가 웹 상의 다른 많은 'x/y/z' 계열 서비스와 유사하기 때문에, 이 서비스를 이용해서 이런 서비스들에도 접근할 수 있습니다. 이 서비스를 이런 방식으로 이용하려면, ${x}, ${y} 등의 서식으로 된 대체 변수를 사용하면 됩니다.
 
-Supported variables (name is case sensitive) are :
+다음 변수들을 지원합니다(이름의 대소문자를 구분합니다):
 
--  ${x} -- x position of the tile
--  ${y} -- y position of the tile. This can be either from the top or
-   the bottom of the tileset, based on whether the YOrigin parameter is
-   set to true or false.
--  ${z} -- z position of the tile -- zoom level
--  ${version} -- version parameter, set in the config file. 기본값은
-   1.0.0.
--  ${format} -- format parameter, set in the config file. 기본값은
-   'jpg'.
--  ${layer} -- layer parameter, set in the config file. 기본값은
-   nothing.
+-  ${x} -- 타일의 x 위치입니다.
 
-| A typical ServerURL might look like:
-| ``http://tilecache.osgeo.org/wms-c/Basic.py/${version}/${layer}/${z}/${x}/${y}.${format}``
-| In order to better suit TMS users, any URL that does not contain "${"
-  will automatically have the string above (after "Basic.py/") appended
-  to their URL.
+-  ${y} -- 타일의 y 위치입니다. YOrigin 파라미터가 참 또는 거짓으로 설정되었느냐에 따라, 타일셋의 최상단 또는 최하단일 수 있습니다.
 
-The TMS Service has 3 XML configuration elements that are different from
-other services: ``Format`` which 기본값은 ``jpg``, ``Layer`` which
-has no default, and ``Version`` which 기본값은 ``1.0.0``.
+-  ${z} -- 타일의 z 위치 -- 확대/축소 수준 -- 입니다.
 
-Additionally, the TMS service respects one additional parameter, at the
-DataWindow level, which is the YOrigin element. This element should be
-one of ``bottom`` (the default in TMS) or ``top``, which matches
-OpenStreetMap and many other popular tile services.
+-  ${version} -- 환경설정 파일에 설정된 버전 파라미터입니다. 기본값은 1.0.0입니다.
 
-Two examples of usage of the TMS service are included in the examples
-below.
+-  ${format} -- 환경설정 파일에 설정된 포맷 파라미터입니다. 기본값은 'jpg'입니다.
+
+-  ${layer} -- 환경설정 파일에 설정된 레이어 파라미터입니다. 기본값은 없습니다.
+
+전형적인 ServerURL은 다음과 같이 보일 것입니다:
+
+``http://tilecache.osgeo.org/wms-c/Basic.py/${version}/${layer}/${z}/${x}/${y}.${format}``
+
+TMS 사용자에게 적합하도록, "${"를 담고 있지 않은 모든 URL에 ("Basic.py/" 뒤의) 문자열을 자동으로 추가할 것입니다.
+
+TMS 서비스는 다른 서비스들과 차별되는 XML 환경설정 요소 3개를 가지고 있습니다:
+
+-  ``Format``: 기본값 ``jpg``
+-  ``Layer``: 기본값 없음
+-  ``Version``: 기본값 ``1.0.0``
+
+뿐만 아니라, TMS 서비스는 DataWindow 수준에서 또 하나의 추가 파라미터 YOrigin 요소를 준수합니다. 이 요소의 값은 (TMS 기본값인) ``bottom`` 또는 오픈스트리트맵 및 다른 많은 유명한 타일 서비스와 일치하는 ``top`` 가운데 하나여야 합니다.
+
+TMS 서비스 활용 예시 2개가 아래 예시에 포함되어 있습니다.
 
 OnEarth 타일화 WMS
 ~~~~~~~~~~~~~~~~~~
 
-The OnEarth Tiled WMS minidriver supports the Tiled WMS specification
-implemented for the JPL OnEarth driver per the specification at
-http://web.archive.org/web/20130511182803/http://onearth.jpl.nasa.gov/tiled.html.
+OnEarth 타일화(Tiled) WMS 미니 드라이버는 JPL OnEarth 드라이버의 사양 별로 구현된 `타일화 WMS 사양 <http://web.archive.org/web/20130511182803/http://onearth.jpl.nasa.gov/tiled.html>`_ 을 지원합니다.
 
-Only the ServerUrl and the TiledGroupName are required, most of the required information 
-is automatically fetched from the remote server using the GetTileService method at open time.
+ServerUrl과 TiledGroupName만 필요하며, 연결 시 GetTileService 메소드를 이용해서 원격 서버로부터 필요한 정보 대부분을 자동으로 가져옵니다.
 
-A typical OnEarth Tiled WMS configuration file might look like:
+전형적인 OnEarth 타일화 WMS 환경설정 파일은 다음과 같이 보일 것입니다:
 
 ::
 
@@ -304,28 +286,26 @@ A typical OnEarth Tiled WMS configuration file might look like:
        </Service>
    </GDAL_WMS>
 
-The TiledWMS minidriver can use the following open options :
+TiledWMS 미니 드라이버는 다음 열기 옵션들을 사용할 수 있습니다:
 
--  TiledGroupName -- The value is a string that identifies one of the tiled services 
-   available on the server
--  Change -- A <Key>:<Value> pair, which will be passed to the server. The key has to 
-   match a change key that the server declares for the respective tiled group.
-   This option can be used multiple times, for different keys.
-   Example:
-   -  Change=time:2020-02-02
+-  **TiledGroupName**:
+   이 옵션의 값은 서버에서 사용할 수 있는 타일화 서비스 가운데 하나를 식별하는 문자열입니다.
 
-These open options are only accepted if the corresponding XML element is not present in the 
-configuration file.
+-  **Change**:
+   서버로 전송할 <Key>:<Value> 쌍입니다. 키는 서버가 해당 타일화 그룹에 선언하는 변경 키(change key)와 일치해야 합니다. 서로 다른 키들을 위해 이 옵션을 여러 번 사용할 수 있습니다.
+
+   *  예시: Change=time:2020-02-02
+
+환경설정 파일에 대응하는 XML 요소가 없는 경우에만 이 열기 옵션을 받아들입니다.
 
 VirtualEarth
 ~~~~~~~~~~~~
 
-Access to web-based Virtual Earth tile services. Access is always tile
-based.
+웹 기반 Virtual Earth 타일 서비스에 접근합니다. 언제나 타일 기반으로 접근합니다.
 
-The ${quadkey} variable must be found in the ServerUrl element.
+ServerUrl 요소에 반드시 ${quadkey} 변수가 있어야만 합니다.
 
-The DataWindow element might be omitted. The default values are :
+DataWindow 요소를 생략할 수도 있습니다. 기본값은 다음과 같습니다:
 
 -  UpperLeftX = -20037508.34
 -  UpperLeftY = 20037508.34
@@ -340,15 +320,9 @@ The DataWindow element might be omitted. The default values are :
 ArcGIS REST API
 ~~~~~~~~~~~~~~~
 
-Access to ArcGIS REST `map service
-resource <http://resources.arcgis.com/en/help/rest/apiref/mapserver.html>`_
-(untiled requests).
+ArcGIS REST `맵 서비스 리소스 <http://resources.arcgis.com/en/help/rest/apiref/mapserver.html>`_ 에 접근합니다. (비타일화 요청)
 
-AGS layers can be
-`queried <http://resources.arcgis.com/en/help/rest/apiref/identify.html>`_
-(through a GetFeatureInfo request) with the gdallocationinfo utility, or
-with a GetMetadataItem("Pixel_iCol_iLine", "LocationInfo") call on a
-band object.
+gdallocationinfo 유틸리티를 (GetFeatureInfo 요청을 통해) 이용하면, 또는 밴드 객체에 GetMetadataItem("Pixel_iCol_iLine", "LocationInfo")를 호출하면 AGS 레이어를 `쿼리 <http://resources.arcgis.com/en/help/rest/apiref/identify.html>`_ 할 수 있습니다.
 
 ::
 
@@ -358,26 +332,19 @@ band object.
 인터넷 이미징 프롵토콜(IIP) (GDAL 2.1 이상 버전)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Access to images served through `IIP(Internet Imaging Protocol)
-protocol <https://en.wikipedia.org/wiki/Internet_Imaging_Protocol>`_.
-The server must support the JTL (Retrieve a tile as a complete JFIF
-image) extension of the IIP protocol.
+`IIP(Internet Imaging Protocol) <https://en.wikipedia.org/wiki/Internet_Imaging_Protocol>`_ 를 통해 서비스되는 이미지에 접근합니다. 서버가 IIP 프로토콜의 (타일을 완전한 JFIF 이미지로 가져오는) JTL 확장 사양을 지원해야만 합니다.
 
-If using the XML syntax, the ServerURL must contain the FIF parameter.
+XML 문법을 사용하는 경우, ServerURL이 FIF 파라미터를 담고 있어야만 합니다.
 
-Otherwise it is also possible to use "IIP:http://foo.com/FIF=image_name"
-syntax as connection string, to retrieve from the server information on
-the full resolution dimension and the number of resolutions.
+그렇지 않은 경우 "IIP:http://foo.com/FIF=image_name" 문법을 연결 문자열로 사용해서 서버로부터 전체 해상도 크기 및 해상도 수준 개수에 관한 정보를 가져올 수도 있습니다.
 
-The XML definition can then be generated with "gdal_translate
-IIP:http://foo.com/FIF=image_name out.xml -of WMS"
+그러면 ``gdal_translate IIP:http://foo.com/FIF=image_name out.xml -of WMS`` 명령어로 XML 정의를 생성할 수 있습니다.
 
 예시
 --------
 
--  | `onearth_global_mosaic.xml <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_onearth_global_mosaic.xml>`_
-     - Landsat mosaic from a `OnEarth <http://onearth.jpl.nasa.gov/>`_
-     WMS server
+-  `onearth_global_mosaic.xml <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_onearth_global_mosaic.xml>`_:
+   `OnEarth <http://onearth.jpl.nasa.gov/>`_ WMS 서버의 랜드샛 모자이크
 
    ::
 
@@ -387,14 +354,10 @@ IIP:http://foo.com/FIF=image_name out.xml -of WMS"
 
       gdal_translate -of JPEG -projwin -10 55 30 35 -outsize 500 250 onearth_global_mosaic.xml onearth_global_mosaic2.jpg
 
-   *Note : this particular server does no longer accept regular WMS
-   queries.*
+   주의: 이 특정 서버는 더 이상 정규 WMS 쿼리를 받아들이지 않습니다.
 
--  `metacarta_wmsc.xml <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_metacarta_wmsc.xml>`_ - It is possible
-   to configure a WMS Service conforming to a WMS-C cache by specifying
-   a number of overviews and specifying the 'block size' as the tile
-   size of the cache. The following example is a sample set up for a
-   19-level "Global Profile" WMS-C cache.
+-  `metacarta_wmsc.xml <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_metacarta_wmsc.xml>`_:
+   오버뷰 개수를 지정하고 '블록 크기'를 캐시의 타일 크기로 지정하면 WMS 서버가 WMS-C 캐시를 준수하도록 환경설정할 수 있습니다. 다음은 19수준 "Global Profile" WMS-C 캐시를 설정하는 예시입니다:
 
    ::
 
@@ -404,8 +367,8 @@ IIP:http://foo.com/FIF=image_name out.xml -of WMS"
 
         .. image:: http://sydney.freeearthfoundation.com/gdalwms/metacarta_wmsc.png
 
--  | `tileservice_bmng.xml <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_tileservice_bmng.xml>`_ -
-     TileService, Blue Marble NG (January)
+-  `tileservice_bmng.xml <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_tileservice_bmng.xml>`_:
+   TileService, Blue Marble NG (1월)
 
    ::
 
@@ -415,8 +378,8 @@ IIP:http://foo.com/FIF=image_name out.xml -of WMS"
 
         .. image:: http://sydney.freeearthfoundation.com/gdalwms/tileservice_bmng.jpg
 
--  | `tileservice_nysdop2004.xml <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_tileservice_nysdop2004.xml>`_
-     - TileService, NYSDOP 2004
+-  `tileservice_nysdop2004.xml <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_tileservice_nysdop2004.xml>`_:
+   TileService, NYSDOP 2004
 
    ::
 
@@ -426,91 +389,86 @@ IIP:http://foo.com/FIF=image_name out.xml -of WMS"
 
         .. image:: http://sydney.freeearthfoundation.com/gdalwms/tileservice_nysdop2004.jpg
 
--  | `OpenStreetMap TMS Service
-     Example <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_openstreetmap_tms.xml>`_: Connect to
-     OpenStreetMap tile service. Note that this file takes advantage of
-     the tile cache; more information about configuring the tile cache
-     settings is available above. Please also change the <UserAgent>, to avoid the
-     default one being used, and potentially blocked by OSM servers in case a too
-     big usage of it would be seen.
-   | ``gdal_translate -of PNG -outsize 512 512 frmt_wms_openstreetmap_tms.xml openstreetmap.png``
+-  `오픈스트리트맵 TMS 서비스 예시 <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_openstreetmap_tms.xml>`_:
+     오픈스트리트맵 타일 서비스에 연결합니다. 이 파일이 타일 캐시를 이용한다는 사실을 기억하십시오. 타일 캐시 환경 설정에 관한 자세한 정보는 앞에서 설명하고 있습니다. 기본 사용자 에이전트를 사용하다가 너무 많은 트래픽을 일으켜서 OSM 서버가 블락할 가능성을 피하기 위해, <UserAgent>도 변경해주십시오.
 
--  | `MetaCarta TMS Layer Example <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_metacarta_tms.xml>`_,
-     accessing the default MetaCarta TMS layer.
-   | ``gdal_translate -of PNG -outsize 512 256 frmt_wms_metacarta_tms.xml metacarta.png``
+   ::
 
--  `BlueMarble Amazon S3 Example <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_bluemarble_s3_tms.xml>`_
-   accessed with the TMS minidriver.
+      gdal_translate -of PNG -outsize 512 512 frmt_wms_openstreetmap_tms.xml openstreetmap.png
 
--  `Google Maps <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_googlemaps_tms.xml>`_ accessed with the TMS
-   minidriver.
+-  `MetaCarta TMS 레이어 예시 <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_metacarta_tms.xml>`_:
+    기본 MetaCarta TMS 레이어에 접근합니다.
 
--  `ArcGIS MapServer Tiles <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_arcgis_mapserver_tms.xml>`_
-   accessed with the TMS minidriver.
+   ::
 
--  OnEarth Tiled WMS `Clementine <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_twms_Clementine.xml>`_,
-   `daily <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_twms_daily.xml>`_, and `srtm <https://github.com/OSGeo/gdal/blob/master/gdal/frmts/wms/frmt_twms_srtm.xml>`_
-   examples.
+      gdal_translate -of PNG -outsize 512 256 frmt_wms_metacarta_tms.xml metacarta.png
 
--  `VirtualEarth Aerial Layer <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_virtualearth.xml>`_ accessed
-   with the VirtualEarth minidriver.
+-  `BlueMarble 아마존 S3 예시 <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_bluemarble_s3_tms.xml>`_:
+   TMS 미니 드라이버로 접근합니다.
 
--  `ArcGIS online sample server layer <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_ags_arcgisonline.xml>`_
-   accessed with the ArcGIS Server REST API minidriver.
+-  `구글 맵 <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_googlemaps_tms.xml>`_:
+   TMS 미니 드라이버로 접근합니다.
 
--  `IIP online sample server layer <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_iip.xml>`_ accessed with
-   the IIP minidriver.
+-  `ArcGIS MapServer 타일 <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_arcgis_mapserver_tms.xml>`_:
+   TMS 미니 드라이버로 접근합니다.
+
+-  OnEarth 타일화 WMS의 `Clementine <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_twms_Clementine.xml>`_, `daily <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_twms_daily.xml>`_ 및 `srtm <https://github.com/OSGeo/gdal/blob/master/gdal/frmts/wms/frmt_twms_srtm.xml>`_ 예시
+
+-  `VirtualEarth 항공사진 레이어 <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_virtualearth.xml>`_:
+   VirtualEarth 미니 드라이버로 접근합니다.
+
+-  `ArcGIS 온라인 샘플 서버 레이어 <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_ags_arcgisonline.xml>`_:
+   ArcGIS 서버 REST API 미니 드라이버로 접근합니다.
+
+-  `IIP 온라인 샘플 서버 레이어 <https://github.com/OSGeo/gdal/blob/master/frmts/wms/frmt_wms_iip.xml>`_:
+   IIP 미니 드라이버로 접근합니다.
 
 열기 문법
 -----------
 
-The WMS driver can open :
+WMS 드라이버는 다음을 열 수 있습니다:
 
--  a local service description XML file :
+-  로컬 서비스 설명 XML 파일:
 
    ::
 
       gdalinfo description_file.xml
 
--  the content of a description XML file provided as filename :
+-  파일명으로 제공되는 설명 XML 파일의 내용:
 
    ::
 
       gdalinfo "<GDAL_WMS><Service name=\"TiledWMS\"><ServerUrl>https://gibs.earthdata.nasa.gov/twms/epsg4326/best/twms.cgi?</ServerUrl><TiledGroupName>MODIS Terra CorrectedReflectance Bands367 tileset</TiledGroupName></Service></GDAL_WMS>"
 
--  the base URL of a WMS service, prefixed with *WMS:* :
+-  *WMS:* 접두어가 붙은 WMS 서비스의 기반 URL:
 
    ::
 
       gdalinfo "WMS:http://wms.geobase.ca/wms-bin/cubeserv.cgi"
 
-   A list of subdatasets will be returned, resulting from the parsing of
-   the GetCapabilities request on that server.
+   해당 서버에 대한 GetCapabilities 요청의 결과물을 파싱해서 생성된 하위 데이터셋 목록을 반환할 것입니다.
 
--  a pseudo GetMap request, such as the subdataset name
-   returned by the previous syntax :
+-  바로 위의 예시에서 반환된 하위 데이터셋 이름 같은 의사 GetMap 요청:
 
    ::
 
       gdalinfo "WMS:http://wms.geobase.ca/wms-bin/cubeserv.cgi?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=DNEC_250K%3AELEVATION%2FELEVATION&SRS=EPSG:42304&BBOX=-3000000,-1500000,6000000,4500000"
 
--  the base URL of a Tiled WMS service, prefixed with
-   *WMS:* and with request=GetTileService as GET argument:
+-  *WMS:* 접두어가 붙고 request=GetTileService가 GET 인자인 타일화 WMS 서비스의 기반 URL:
 
    ::
 
       gdalinfo "WMS:https://gibs.earthdata.nasa.gov/twms/epsg4326/best/twms.cgi?request=GetTileService"
 
-   A list of subdatasets will be returned, resulting from the parsing of
-   the GetTileService request on that server.
+   해당 서버에 대한 GetTileService 요청의 결과물을 파싱해서 생성된 하위 데이터셋 목록을 반환할 것입니다.
 
--  the URL of a REST definition for a ArcGIS MapServer:
+-  ArcGIS MapServer 용 REST 정의의 URL:
 
    ::
 
       gdalinfo "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer?f=json&pretty=true"
 
--  (GDAL >= 2.1.0) the URL of a IIP image:
+-  (GDAL 2.1.0 이상 버전) IIP 이미지의 URL:
 
    ::
 
@@ -519,18 +477,13 @@ The WMS driver can open :
 WMS 서비스 설명 XML 파일 생성
 ----------------------------------------------
 
-The WMS service description XML file can be generated manually, or
-created as the output of the CreateCopy() operation of the WMS driver,
-only if the source dataset is itself a WMS dataset. Said otherwise, you
-can use gdal_translate with as source dataset any of the above syntax
-mentioned in "Open syntax" and as output an XML file. For example:
+WMS 서비스 설명 XML 파일을 직접 생성할 수도, 또는 소스 데이터셋 자체가 WMS 데이터셋인 경우에만 WMS 드라이버의 CreateCopy() 작업의 산출물로 생성할 수도 있습니다. 그렇지 않은 경우, 앞의 "열기 문법"에서 언급된 문법 아무거나 gdal_translate의 소스 데이터셋으로 사용해서 XML 파일을 산출할 수도 있습니다. 다음은 그 예시입니다:
 
 ::
 
    gdal_translate "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer?f=json" wms.xml -of WMS
 
-The generated file will come with default values that you may need to
-edit.
+이렇게 생성된 파일은 사용자가 편집해야 할 수도 있는 기본값을 가질 것입니다.
 
 참고
 --------
@@ -548,3 +501,4 @@ edit.
 -  `ArcGIS 서버 REST API <http://resources.arcgis.com/en/help/rest/apiref/>`_
 
 -  :ref:`raster.wmts` 드라이버
+
