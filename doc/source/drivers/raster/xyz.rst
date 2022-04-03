@@ -1,65 +1,47 @@
 .. _raster.xyz:
 
 ================================================================================
-XYZ -- ASCII Gridded XYZ
+XYZ -- 아스키 그리드화 XYZ
 ================================================================================
 
 .. shortname:: XYZ
 
 .. built_in_by_default::
 
-GDAL supports reading and writing ASCII **gridded** XYZ raster datasets
-(i.e. ungridded XYZ, LIDAR XYZ etc. must be opened by other means. See
-the documentation of the `gdal_grid <gdal_grid.html>`__ utility).
+GDAL은 아스키 **그리드화(gridded)** XYZ 래스터 데이터셋 읽기와 쓰기를 지원합니다. (예를 들어 그리드화되지 않은 XYZ, LIDAR XYZ 등은 다른 방법으로 열어야만 합니다. :ref:`gdal_grid` 유틸리티 문서를 참조하십시오.)
 
-Those datasets are ASCII files with (at least) 3 columns, each line
-containing the X and Y coordinates of the center of the cell and the
-value of the cell.
+이 데이터셋은 각 행이 셀 중심의 X 및 Y 좌표와 셀 값을 담고 있는 열을 (최소한) 3개 가지고 있는 아스키 파일입니다.
 
-The spacing between each cell must be constant.
+각 열 사이의 간격은 일정해야만 합니다.
 
-The following data organization are supported :
+다음과 같은 데이터 구조를 지원합니다:
 
-* Cells with same Y coordinates must be placed on consecutive
-  lines. For a same Y coordinate value, the lines in the dataset must be
-  organized by increasing X values. The value of the Y coordinate can
-  increase or decrease however.
+-  Y좌표가 동일한 셀들은 연속되는 행에 배치해야만 합니다. Y좌표값이 동일한 경우 데이터셋의 행들이 X좌표값이 증가하는 순서여야만 합니다. 하지만 Y좌표값은 증가할 수도 있고 감소할 수도 있습니다.
 
-* or, starting with GDAL 3.2.1, cells with same X coordinates must be placed
-  on consecutive lines. For a same X coordinate value, the columns must be
-  organized by increasing or decreasing Y values. For that organization, no
-  missing value is supported, and the whole dataset will be ingested into
-  memory (thus the driver will limit to 100 million points).
+-  또는, GDAL 3.2.1버전부터 X좌표가 동일한 셀들을 연속되는 행에 배치해야만 합니다. X좌표값이 동일한 경우 데이터셋의 행들이 Y좌표값이 증가 또는 감소하는 순서여야만 합니다. 이런 구조인 경우 누락값을 지원하지 않으며, 데이터셋 전체를 메모리로 불러올 것입니다. (따라서 이 드라이버는 포인트 1억개로 제한될 것입니다.)
 
-The supported column separators are space, comma, semicolon and tabulations.
+열 구분자로 공백, 쉼표, 쌍반점 및 탭을 지원합니다.
 
-The driver tries to autodetect an header line and will look for 'x',
-'lon' or 'east' names to detect the index of the X column, 'y', 'lat' or
-'north' for the Y column and 'z', 'alt' or 'height' for the Z column. If
-no header is present or one of the column could not be identified in the
-header, the X, Y and Z columns (in that order) are assumed to be the
-first 3 columns of each line.
+이 드라이버는 헤더 행을 자동 탐지하려 시도하고 X열의 색인을 탐지하기 위해 'x', 'lon' 또는 'east' 같은 이름을, Y열은 'y', 'lat' 또는 'north'를, 그리고 Z열의 경우 'z', 'alt' 또는 'height'를 검색할 것입니다. 헤더가 존재하지 않거나 헤더에서 열들 가운데 하나를 식별하지 못 하는 경우 각 행의 처음 세 열들을 (순서대로) X열, Y열, Z열로 가정합니다.
 
-The opening of a big dataset can be slow as the driver must scan the
-whole file to determine the dataset size and spatial resolution. The
-driver will autodetect the data type among Byte, Int16, Int32 or
-Float32.
+이 드라이버가 데이터셋 용량 및 공간 해상도를 판단하려면 전체 파일을 스캔해야만 하기 때문에, 대용량 데이터셋을 여는 시간이 오래 걸릴 수도 있습니다. 이 드라이버는 Byte, Int16, Int32 또는 Float32 중에서 데이터 유형을 자동 탐지할 것입니다.
 
-Creation options
+생성 옵션
 ----------------
 
--  **COLUMN_SEPARATOR=**\ a_value : where a_value is a string used to
-   separate the values of the X,Y and Z columns. Defaults to one space
-   character
--  **ADD_HEADER_LINE=**\ YES/NO : whether an header line must be written
-   (content is X <col_sep> Y <col_sep> Z) . Defaults to NO
--  **SIGNIFICANT_DIGITS=**\ a_value : where a_value specifies the number
-   of significant digits to output (%g format; is defaults with 18)
--  **DECIMAL_PRECISION=**\ a_value : where a_value specifies the number
-   of decimal places to output when writing floating-point numbers (%f
-   format; alternative to SIGNIFICANT_DIGITS).
+-  **COLUMN_SEPARATOR=a_value**:
+   X열, Y열, Z열의 값들을 구분하기 위해 쓰이는 문자열입니다. 기본값은 공백 문자 1개입니다.
 
-Driver capabilities
+-  **ADD_HEADER_LINE=YES/NO**:
+   헤더 행을 작성해야만 하는지 여부를 선택합니다. (헤더의 내용은 X <col_sep> Y <col_sep> Z 입니다.) 기본값은 NO입니다.
+
+-  **SIGNIFICANT_DIGITS=a_value**:
+   산출할 유효 숫자(significant digit) 자릿수를 지정합니다. (%g 서식(부동소수점형 실수와 e 지수 표기)이며 기본값은 18입니다.)
+
+-  **DECIMAL_PRECISION=a_value**:
+   부동소수점형 숫자를 작성할 때 산출할 소수점 이하 (decimal place) 자릿수를 지정합니다. (%f 서식(부동소수점형 실수)이며 SIGNIFICANT_DIGITS를 대체할 수도 있습니다.)
+
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
@@ -68,7 +50,8 @@ Driver capabilities
 
 .. supports_virtualio::
 
-See also
+참고
 --------
 
--  Documentation of :ref:`gdal_grid`
+-  :ref:`gdal_grid` 유틸리티
+

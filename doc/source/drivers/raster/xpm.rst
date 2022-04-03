@@ -8,20 +8,13 @@ XPM -- X11 Pixmap
 
 .. built_in_by_default::
 
-GDAL includes support for reading and writing XPM (X11 Pixmap Format)
-image files. These are colormapped one band images primarily used for
-simple graphics purposes in X11 applications. It has been incorporated
-in GDAL primarily to ease translation of GDAL images into a form usable
-with the GTK toolkit.
+GDAL은 XPM (X11 Pixmap 포맷) 이미지 파일 읽기와 쓰기를 지원합니다. 이 포맷은 주로 X11 응용 프로그램에서 간단한 그래픽 목적으로 사용되는, 색상 매핑된 1밴드 이미지입니다. 이 포맷은 주로 GDAL 이미지를 GTK 툴킷에서 사용할 수 있는 형식으로 쉽게 변환하기 위해 GDAL에 포함되었습니다.
 
-The XPM support does not support georeferencing (not available from XPM
-files) nor does it support XPM files with more than one character per
-pixel. New XPM files must be colormapped or greyscale, and colortables
-will be reduced to about 70 colors automatically.
+XPM 드라이버는 (XPM 파일에서 사용할 수 없는) 지리참조 작업을 지원하지 않으며, 픽셀 당 특성(character) 1개 이상을 가지고 있는 XPM 파일도 지원하지 않습니다. 새 XPM 파일은 색상 매핑되거나 회색조이어야만 하며, 색상표를 자동으로 약 70개의 색상으로 줄일 것입니다.
 
-NOTE: Implemented as ``gdal/frmts/xpm/xpmdataset.cpp``.
+주의: ``gdal/frmts/xpm/xpmdataset.cpp`` 로 구현되었습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_createcopy::
