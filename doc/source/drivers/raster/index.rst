@@ -5,7 +5,7 @@ Raster drivers
 ================================================================================
 
 ..
-    배포자에게: 드라이버의 배열 스타일 소개는 빌드 중
+    공헌자분들께: 드라이버의 배열 스타일 소개는 빌드 중
     https://github.com/OSGeo/gdal/blob/master/doc/source/build_driver_summary.py
     가 생성한 파일 driver_summary.rst 로부터 가져온 것입니다.
     깃허브에 저장된 것이 *아닙니다*.
