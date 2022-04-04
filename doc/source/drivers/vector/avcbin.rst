@@ -1,63 +1,46 @@
 .. _vector.avcbin:
 
 ================================================================================
-Arc/Info Binary Coverage
+Arc/Info 바이너리 커버리지
 ================================================================================
 
 .. shortname:: AVCBIN
 
 .. built_in_by_default::
 
-Arc/Info Binary Coverages (eg. Arc/Info V7 and earlier) are supported by OGR
-for read access.
+OGR는 Arc/Info 바이너리 커버리지 (예: Arc/Info 7과 그 이전 버전들) 읽기 접근을 지원합니다.
 
-The label, arc, polygon, centroid, region and text sections of a coverage are
-all supported as layers. Attributes from INFO are appended to labels, arcs,
-polygons or region where appropriate. When available the projection information
-is read and translated. Polygon geometries are collected for polygon and region
-layers from the composing arcs.
+커버리지의 라벨, 원호(arc), 폴리곤, 중심점(centroid), 영역(region) 및 텍스트 부분(text section)을 모두 레이어로 지원합니다. INFO로부터 나온 속성들은 적절한 라벨, 원호, 폴리곤 또는 영역에 추가됩니다. 투영법 정보를 사용할 수 있는 경우 읽어와서 변환합니다. 원호를 구성하는 과정에서 폴리곤 및 영역 레이어에 대한 폴리곤 도형을 수집합니다.
 
-Text sections are represented as point layers. Display height is preserved in
-the HEIGHT attribute field; however, other information about text orientation
-is discarded.
+텍스트 부분을 포인트 레이어로 표현합니다. 표시(display) 높이는 HEIGHT 속성 필드에 보전됩니다. 하지만 텍스트 방향에 관한 다른 정보는 폐기합니다.
 
-Info tables associated with a coverage, but not specifically named to be
-attached to one of the existing geometric layers is currently not accessible
-through OGR. Note that info tables are stored in an 'info' directory at the
-same level as the coverage directory. If this is inaccessible or corrupt no
-info attributes will be appended to coverage layers, but the geometry should
-still be accessible.
+현재 커버리지와 관련되어 있지만 기존 도형 레이어 가운데 하나에 할당되도록 특별히 명명되지는 않은 info 테이블에 OGR를 통해 접근할 수 없습니다. info 테이블은 커버리지 디렉터리와 동일한 수준에 있는 'info' 디렉터리에 저장된다는 사실을 기억하십시오. 이 테이블에 접근할 수 없거나 오류가 발생하는 경우 커버리지 레이어에 어떤 정보 속성도 추가되지 않지만, 도형에는 계속 접근할 수 있을 것입니다.
 
-If the directory contains files with names like w001001.adf then the coverage
-is a :ref:`grid coverage <raster.aig>` suitable
-to read with GDAL, not a vector coverage supported by OGR.
+'info' 디렉터리가 w001001.adf 같은 이름을 가진 파일을 담고 있는 경우, 해당 커버리지는 GDAL로 읽기에 적합한 :ref:`그리드 커버리지 <raster.aig>` 이지 OGR가 지원하는 벡터 커버리지가 아닙니다.
 
-The layers are named as follows:
+레이어는 다음과 같이 명명됩니다:
 
-#. A label layer (polygon labels, or free standing points) is named LAB
-   if present.
-#. A centroid layer (polygon centroids) is named CNT if present.
-#. An arc (line) layer is named ARC if present.
-#. A polygon layer is named "PAL" if present.
-#. A text section is named according to the section subclass.
-#. A region subclass is named according to the subclass name.
+#. 라벨 레이어(폴리곤 라벨 또는 프리 스탠딩 포인트(free standing points))가 있는 경우 LAB으로 명명합니다.
+#. 중심점 레이어(폴리곤 중심점)가 있는 경우 CNT로 명명합니다.
+#. 원호(라인) 레이어가 있는 경우 ARC로 명명합니다.
+#. 폴리곤 레이어가 있는 경우 PAL로 명명합니다.
+#. 텍스트 부분은 부분 하위 클래스에 따라 명명됩니다.
+#. 영역 하위 클래스는 하위 클래스 이름에 따라 명명됩니다.
 
-The Arc/Info binary coverage driver attempts to optimize spatial queries but
-due to the lack of a spatial index this is just accomplished by minimizing
-processing for features not within the spatial window.
+Arc/Info 바이너리 커버리지 드라이버는 공간 쿼리를 최적화하려 시도하지만, 공간 색인이 부족하기 때문에 공간 윈도우 내부에 없는 객체에 대한 처리 작업을 최소화하는 것으로 최적화 작업을 마무리합니다.
+원호 및 폴리곤의 (FID를 이용한) 임의 읽기를 지원하지만 다른 객체 유형은 지원하지 않을 수도 있습니다.
 
-Random (by FID) reads of arcs, and polygons is supported it may not be
-supported for other feature types.
-
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
 .. supports_virtualio::
 
-See Also
+참고
 --------
 
--  `AVCE00 Library Page <http://avce00.maptools.org/>`__
--  :ref:`AVCE00 OGR Driver (.E00) <vector.avce00>`
+-  `AVCE00 라이브러리 페이지 <http://avce00.maptools.org/>`_
+
+-  :ref:`AVCE00 OGR 드라이버 (.E00) <vector.avce00>`
+
