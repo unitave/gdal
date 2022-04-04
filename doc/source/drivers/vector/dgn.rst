@@ -1,35 +1,36 @@
 .. _vector.dgn:
 
-Microstation DGN
+마이크로스테이션 DGN
 ================
 
 .. shortname:: DGN
 
 .. built_in_by_default::
 
-Microstation DGN files from Microstation versions predating version 8.0
-are supported for reading (a :ref:`DGNv8 driver <vector.dgnv8>`, using
-Teigha libraries, is available to read and write DGN v8 files). The
-entire file is represented as one layer (named "elements").
+DGN 드라이버는 마이크로스테이션(Microstation) 버전 8 이전 버전들의 마이크로스테이션 DGN 파일 읽기를 지원합니다. (Teigha 라이브러리를 이용하는 :ref:`DGNv8 드라이버 <vector.dgnv8>` 는 DGN 버전 8 파일을 읽고 쓸 수 있습니다.) 전체 파일은 ("elements"라는 이름의) 레이어 하나로 표현됩니다.
 
-DGN files are considered to have no georeferencing information through
-OGR. Features will all have the following generic attributes:
 
--  Type: The integer type code as listed below in supported elements.
--  Level: The DGN level number (0-63).
--  GraphicGroup: The graphic group number.
--  ColorIndex: The color index from the dgn palette.
--  Weight: The drawing weight (thickness) for the element.
--  Style: The style value for the element.
--  EntityNum and MSLink: The Entity ID and MSLINK values in database linkage.
--  ULink: User data linkage (multiple user data linkages may exist for each element).
+DGN 파일은 OGR를 통한 지리참조 정보를 가지고 있지 않다고 간주됩니다. 모든 객체는 다음과 같은 일반 속성들을 가질 것입니다:
 
-DGN files do not contain spatial indexes; however, the DGN driver does
-take advantage of the extents information at the beginning of each
-element to minimize processing of elements outside the current spatial
-filter window when in effect.
+-  Type: 아래 "지원 요소"에 있는 정수 유형 코드입니다.
 
-Driver capabilities
+-  Level: DGN 수준 번호입니다(0-63).
+
+-  GraphicGroup: 그래픽 그룹 번호입니다.
+
+-  ColorIndex: DGN 색상표의 색상 색인입니다.
+
+-  Weight: 요소에 대한 도면 가중치(굵기)입니다.
+
+-  Style: 요소에 대한 스타일 값입니다.
+
+-  EntityNum 및 MSLink: 데이터베이스 링크의 Entity ID 및 MSLINK 값입니다.
+
+-  ULink: 사용자 데이터 링크입니다. (각 요소마다 사용자 데이터 링크가 여러 개 존재할 수도 있습니다.)
+
+DGN 파일은 공간 색인을 담고 있지 않지만, 공간 필터링 윈도우가 실행되고 있다면 DGN 드라이버는 현재 공간 필터링 윈도우 바깥에 있는 요소들의 처리 작업을 최소화하기 위해 각 요소의 시작 위치에 있는 범위 정보를 활용합니다.
+
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
@@ -38,115 +39,110 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Supported Elements
+지원 요소
 ------------------
 
-The following element types are supported:
+다음과 같은 요소 유형들을 지원합니다:
 
--  Line (3): Line geometry.
--  Line String (4): Multi segment line geometry.
--  Shape (6): Polygon geometry.
--  Curve (11): Approximated as a line geometry.
--  B-Spline (21): Treated (inaccurately) as a line geometry.
--  Arc (16): Approximated as a line geometry.
--  Ellipse (15): Approximated as a line geometry.
--  Text (17): Treated as a point geometry.
+-  Line (3): 라인 도형
 
-Generally speaking any concept of complex objects, and cells as
-associated components is lost. Each component of a complex object or
-cell is treated as a independent feature.
+-  Line String (4): 다중 선분 라인 도형
+
+-  Shape (6): 폴리곤 도형
+
+-  Curve (11): 라인 도형에 가깝습니다.
+
+-  B-Spline (21): 라인 도형으로 (부정확하게) 취급됩니다.
+
+-  Arc (16): 라인 도형에 가깝습니다.
+
+-  Ellipse (15): 라인 도형에 가깝습니다.
+
+-  Text (17): 포인트 도형으로 취급합니다.
+
+일반적으로 복잡 객체들의 모든 개념 및 관련 구성요소로서의 셀들을 누락시킵니다. 복잡 객체의 각 구성요소 또는 셀을 독립 객체로 취급합니다.
 
 MSLINK
 ------
 
-A DGN element can have a correspondence to a row in a database table,
-known as database linkage or database attribute. The EntityNum 
-refers to the database table. The MSLink is the key to find the
-row in that table.
+DGN 요소는 데이터베이스 링크 또는 데이터베이스 속성으로 알려진 데이터베이스에 있는 행 하나에 대응할 수 있습니다. EntityNum은 데이터베이스 테이블을 참조합니다. MSLink는 해당 테이블에 있는 행을 찾기 위한 키입니다.
 
-User data linkage
+사용자 데이터 링크
 -----------------
 
-A DGN element may have multiple user data linkages. Each linkage has 
-a user id, application id and a number of words of data. The user 
-data linkage output reports the data for each different application id
-found as raw hexadecimal words (16bits). The application id is the 
-second word of the raw data.
+DGN 요소 하나가 사용자 데이터 링크(user data linkage) 여러 개를 가질 수도 있습니다. 각 링크는 사용자 ID, 응용 프로그램 ID 그리고 수많은 단어로 된 데이터를 가지고 있습니다. 사용자 데이터 링크 산출물은 발견된 서로 다른 각 응용 프로그램 ID별로 데이터를 원시(raw) 16진법 단어(16비트)로 리포트합니다. 응용 프로그램 ID는 원시 데이터의 두 번째 단어입니다.
 
-Is up to the user how to decode the user raw data, depending on the 
-application id.
+사용자가 응용 프로그램 ID에 따라 사용자 원시 데이터를 어떻게 디코딩할지를 결정해야 합니다.
 
-Styling Information
+스타일 작업 정보
 -------------------
 
-Some drawing information about features can be extracted from the
-ColorIndex, Weight and Style generic attributes; however, for all
-features an OGR style string has been prepared with the values encoded
-in ready-to-use form for applications supporting OGR style strings.
+ColorIndex, Weight 및 Style 일반 속성으로부터 객체에 관한 몇몇 도면(drawing) 정보를 추출할 수 있습니다. 하지만 모든 객체에 대해 OGR 스타일 문자열을 지원하는 응용 프로그램에 사용할 준비가 끝난 형식으로 인코딩된 값들로 OGR 스타일 문자열이 준비되어 있습니다.
 
-The various kinds of linear geometries will carry style information
-indicating the color, thickness and line style (i.e. dotted, solid,
-etc).
+여러 유형의 선형 도형들이 색상, 굵기 및 (점선, 실선 등과 같은) 라인 스타일을 나타내는 스타일 정보를 포함할 것입니다.
 
-Polygons (Shape elements) will carry styling information for the edge as
-well as a fill color if provided. Fill patterns are not supported.
+폴리곤(Shape 요소)은 경계 정보는 물론 지정된 경우 채우기 색상 정보도 포함할 것입니다. 채우기 패턴은 지원하지 않습니다.
 
-Text elements will contain the text, angle, color and size information
-(expressed in ground units) in the style string.
+텍스트 요소는 스타일 문자열에 텍스트, 각도, 색상 및 (지표 단위로 표현된) 크기 정보를 담을 것입니다.
 
-Creation Issues
+생성 문제점
 ---------------
 
-2D DGN files may be written with OGR with significant limitations:
+중대한 제한 사항들을 가진 2차원 DGN 파일을 OGR로 작성할 수도 있습니다:
 
--  Output features have the usual fixed DGN attributes. Attempts to
-   create any other fields will fail.
--  Virtual no effort is currently made to translate OGR feature style
-   strings back into DGN representation information.
--  POINT geometries that are not text (Text is NULL, and the feature
-   style string is not a LABEL) will be translated as a degenerate (0
-   length) line element.
--  Polygon, and multipolygon objects will be translated to simple
-   polygons with all rings other than the first discarded.
--  Polygons and line strings with too many vertices will be split into a
-   group of elements prefixed with a Complex Shape Header or Complex
-   Chain Header element as appropriate.
--  A seed file must be provided (or if not provided,
-   $PREFIX/share/gdal/seed_2d.dgn will be used). Many aspects of the
-   resulting DGN file are determined by the seed file, and cannot be
-   affected via OGR, such as initial view window.
--  The various collection geometries other than MultiPolygon are
-   completely discarded at this time.
--  Geometries which fall outside the "design plane" of the seed file
-   will be discarded, or corrupted in unpredictable ways.
--  DGN files can only have one layer. Attempts to create more than one
-   layer in a DGN file will fail.
+-  산출 객체는 일반적인 고정 DGN 속성을 가집니다. 다른 필드를 생성하려는 시도는 실패할 것입니다.
 
-The dataset creation supports the following options:
+-  현재 OGR 객체 스타일 문자열을 DGN 표현 정보로 다시 변환하기 위한 노력을 거의 하지 않고 있습니다.
 
--  **3D=**\ *YES* or *NO*: Determine whether 2D (seed_2d.dgn) or 3D
-   (seed_3d.dgn) seed file should be used. This option is ignored if the
-   SEED option is provided.
--  **SEED=**\ *filename*: Override the seed file to use.
--  **COPY_WHOLE_SEED_FILE=**\ *YES/NO*: Indicate whether the whole seed
-   file should be copied. If not, only the first three elements (and
-   potentially the color table) will be copied. Default is NO.
--  **COPY_SEED_FILE_COLOR_TABLE=**\ *YES/NO*: Indicates whether the
-   color table should be copied from the seed file. By default this is
-   NO.
--  **MASTER_UNIT_NAME=**\ *name*: Override the master unit name from the
-   seed file with the provided one or two character unit name.
--  **SUB_UNIT_NAME=**\ *name*: Override the sub unit name from the seed
-   file with the provided one or two character unit name.
--  **SUB_UNITS_PER_MASTER_UNIT=**\ *count*: Override the number of
-   subunits per master unit. By default the seed file value is used.
--  **UOR_PER_SUB_UNIT=**\ *count*: Override the number of UORs (Units of
-   Resolution) per sub unit. By default the seed file value is used.
--  **ORIGIN**\ =\ *x,y,z*: Override the origin of the design plane. By
-   default the origin from the seed file is used.
+-  텍스트가 아닌 (Text가 NULL이고 객체 스타일 문자열은 LABEL이 아닌) POINT 도형을 퇴화된 (길이가 0인) 라인 요소로 변환할 것입니다.
 
---------------
+-  폴리곤 및 멀티폴리곤 객체를 첫 번째 고리를 제외한 모든 고리를 폐기한 단순 폴리곤으로 변환할 것입니다.
 
--  `Dgnlib Page <http://dgnlib.maptools.org/>`__
+-  너무 많은 꼭짓점을 가진 폴리곤 및 라인스트링을 복잡 도형 헤더(Complex Shape Header) 또는 복잡 연쇄 헤더(Complex Chain Header)가 적합하게 각각 앞에 붙은 요소 그룹으로 분할할 것입니다.
+
+-  시드 파일을 제공해야만 합니다. (그렇지 않을 경우, ``$PREFIX/share/gdal/seed_2d.dgn`` 을 사용할 것입니다.) 시드 파일이 생성되는 DGN 파일의 많은 양상들을 결정하며, 초기 뷰 윈도우 같은 OGR를 통해 영향을 미칠 수 없습니다.
+
+-  현재 멀티폴리곤을 제외한 다양한 집합 도형을 완전히 폐기합니다.
+
+-  시드 파일의 "설계 평면(design plane)" 바깥에 있는 도형들을 폐기하거나, 또는 예상할 수 없는 방식으로 손상시킬 것입니다.
+
+-  DGN 파일은 레이어 하나만 가질 수 있습니다. DGN 파일에 레이어를 하나 이상 생성하려는 시도는 실패할 것입니다.
+
+데이터셋 생성 시 다음 생성 옵션들을 지원합니다:
+
+-  **3D=YES|NO**:
+   2차원 시드 파일(seed_2d.dgn) 또는 3차원 시드 파일(seed_3d.dgn) 가운데 어떤 시드 파일을 사용할지 선택합니다. SEED 옵션이 지정된 경우 이 옵션을 무시합니다.
+
+-  **SEED=filename**:
+   사용할 시드 파일을 대체합니다.
+
+-  **COPY_WHOLE_SEED_FILE=YES|NO**:
+   시드 파일 전체를 복사해야 할지 여부를 선택합니다. NO로 설정하는 경우, 처음 3개의 요소(와 가능한 경우 색상표)만 복사할 것입니다. 기본값은 NO입니다.
+
+-  **COPY_SEED_FILE_COLOR_TABLE=YES|NO**:
+   시드 파일로부터 색상표를 복사해야 할지 여부를 선택합니다. 기본값은 NO입니다.
+
+-  **MASTER_UNIT_NAME=name**:
+   시드 파일의 마스터 단위 이름을 지정한 문자 1개 또는 2개의 단위 이름으로 대체합니다.
+
+-  **SUB_UNIT_NAME=name**:
+   시드 파일의 서브 단위 이름을 지정한 문자 1개 또는 2개의 단위 이름으로 대체합니다.
+
+-  **SUB_UNITS_PER_MASTER_UNIT=count**:
+   마스터 단위 당 서브 단위의 개수를 대체합니다. 기본적으로 시드 파일의 값을 사용합니다.
+
+-  **UOR_PER_SUB_UNIT=count**:
+   서브 단위 당 URO(Units of Resolution) 개수를 대체합니다. 기본적으로 시드 파일의 값을 사용합니다.
+
+-  **ORIGIN=x,y,z**:
+   설계 평면의 원점을 대체합니다. 기본적으로 시드 파일의 원점을 사용합니다.
+
+참고
+----
+
+-  `Dgnlib 페이지 <http://dgnlib.maptools.org/>`_
+
 -  :ref:`ogr_feature_style`
--  :ref:`DGNv8 driver <vector.dgnv8>` (using Teigha libraries)
+
+-  :ref:`DGNv8 <vector.dgnv8>` 드라이버 (Teigha 라이브러리 사용)
+
