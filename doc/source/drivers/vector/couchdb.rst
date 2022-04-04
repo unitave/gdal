@@ -10,155 +10,122 @@ CouchDB - CouchDB/GeoCouch
 .. deprecated_driver:: version_targeted_for_removal: 3.5
    env_variable: GDAL_ENABLE_DEPRECATED_DRIVER_COUCHDB
 
-This driver can connect to the a CouchDB service, potentially enabled
-with the GeoCouch spatial extension.
+이 드라이버는 CouchDB 공간 확장 사양을 잠재적으로 활성화한 상태로 CouchDB 서비스에 접속할 수 있습니다.
 
-GDAL/OGR must be built with Curl support in order to the CouchDB driver
-to be compiled.
+CouchDB 드라이버를 컴파일하려면 GDAL/OGR를 cURL 지원과 함께 빌드해야만 합니다.
 
-The driver supports read and write operations.
+이 드라이버는 읽기 및 쓰기 작업을 지원합니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
 
 .. supports_georeferencing::
 
-CouchDB vs OGR concepts
+CouchDB 대 OGR 개념
 -----------------------
 
-A CouchDB database is considered as a OGR layer. A CouchDB document is
-considered as a OGR feature.
+CouchDB 데이터베이스는 OGR 레이어로 간주됩니다. CouchDB 문서는 OGR 객체로 간주됩니다.
 
-OGR handles preferably CouchDB documents following the GeoJSON
-specification.
+OGR은 가급적 GeoJSON 사양에 따라 CouchDB 문서를 처리합니다.
 
-Dataset name syntax
+데이터셋 이름 문법
 -------------------
 
-The syntax to open a CouchDB datasource is :
+CouchDB 데이터소스를 열기 위한 다음과 같습니다:
 
 ::
 
    couchdb:http://example.com[/layername]
 
-where http://example.com points to the root of a CouchDB repository and,
-optionally, layername is the name of a CouchDB database.
+이때 http://example.com 는 CouchDB 저장소의 루트를 가리키며, 선택 파라미터인 layername은 CouchDB 데이터베이스의 이름입니다.
 
-It is also possible to directly open a view :
+뷰를 직접 열 수도 있습니다:
 
 ::
 
    couchdb:http://example.com/layername/_design/adesigndoc/_view/aview[?include_docs=true]
 
-The include_docs=true might be needed depending on the value returned by
-the emit() call in the map() function.
+map() 함수에서 emit() 함수를 호출해서 반환된 값에 따라 include_docs=true 파라미터가 필요할 수도 있습니다.
 
-Authentication
+인증
 --------------
 
-Some operations, in particular write operations, require authentication.
-The authentication can be passed with the *COUCHDB_USERPWD* environment
-variable set to user:password or directly in the URL.
+몇몇 작업에 -- 특히 쓰기 작업에는 인증된 접근이 필수입니다. URL에서 ``COUCHDB_USERPWD`` 환경 변수를 사용자명:비밀번호로 설정하면 인증 정보를 전송할 수 있습니다.
 
-Filtering
+필터링
 ---------
 
-The driver will forward any spatial filter set with SetSpatialFilter()
-to the server when GeoCouch extension is available. It also makes the
-same for (very simple) attribute filters set with SetAttributeFilter().
-When server-side filtering fails, it will default back to client-side
-filtering.
+이 드라이버는 GeoCouch 확장 사양을 사용할 수 있을 경우 :cpp:func:`OGRLayer::SetSpatialFilter` 함수에 설정된 모든 공간 필터를 서버로 포워딩할 것입니다. :cpp:func:`OGRLayer::SetAttributeFilter` 함수에 설정된 (매우 단순한) 속성 필터도 마찬가지입니다. 서버 쪽 필터링이 실패한 경우, 기본적으로 클라이언트쪽 필터링으로 돌아올 것입니다.
 
-By default, the driver will try the following spatial filter function
-"_design/ogr_spatial/_spatial/spatial", which is the valid spatial
-filter function for layers created by OGR. If that filter function does
-not exist, but another one exists, you can specify it with the
-COUCHDB_SPATIAL_FILTER configuration option.
+이 드라이버는 기본적으로 "_design/ogr_spatial/_spatial/spatial" 공간 필터 함수를 시도할 것입니다. 이 함수는 OGR가 생성한 레이어에 대해 무결한 공간 필터 함수입니다. 이 필터 함수가 존재하지 않지만 다른 함수는 존재하는 경우, COUCHDB_SPATIAL_FILTER 환경설정 옵션으로 지정할 수 있습니다.
 
-Note that the first time an attribute request is issued, it might
-require write permissions in the database to create a new index view.
+처음으로 속성 요청을 전송하는 경우 새로운 색인 뷰를 생성하기 위해 데이터베이스 쓰기 권한이 필요할 수도 있습니다.
 
-Paging
-------
+페이지 작업(paging)
+------------------
 
-Features are retrieved from the server by chunks of 500 by default. This
-number can be altered with the COUCHDB_PAGE_SIZE configuration option.
+기본적으로 서버로부터 객체들을 500개 덩어리로 가져옵니다. COUCHDB_PAGE_SIZE 환경설정 옵션으로 이 개수를 변경할 수 있습니다.
 
-Write support
+쓰기 지원
 -------------
 
-Table creation and deletion is possible.
+테이블을 생성하고 삭제할 수 있습니다.
 
-Write support is only enabled when the datasource is opened in update
-mode.
+데이터소스를 업데이트 모드로 연 경우에만 쓰기 지원이 활성화됩니다.
 
-When inserting a new feature with CreateFeature(), and if the command is
-successful, OGR will fetch the returned \_id and \_rev and use them.
+:cpp:func:`OGRFeature::CreateFeature` 함수로 새 객체를 삽입할 때 명령어가 성공적으로 실행되었다면, OGR이 반환된 \_id 및 \_rev를 가져와서 OGR FID로 사용할 것입니다.
 
-Write support and OGR transactions
+쓰기 지원과 OGR 트랜잭션
 ----------------------------------
 
-The CreateFeature()/SetFeature() operations are by default issued to the
-server synchronously with the OGR API call. This however can cause
-performance penalties when issuing a lot of commands due to many
-client/server exchanges.
+CreateFeature()/SetFeature() 작업들은 기본적으로 OGR API 호출과 동시에 서버에 전송됩니다. 하지만 수많은 클라이언트/서버 교환 때문에 수많은 명령어들이 전송되는 경우, 이 때문에 성능이 저하될 수도 있습니다.
 
-It is possible to surround the CreateFeature()/SetFeature() operations
-between OGRLayer::StartTransaction() and OGRLayer::CommitTransaction().
-The operations will be stored into memory and only executed at the time
-CommitTransaction() is called.
+:cpp:func:`OGRLayer::StartTransaction()` 과 :cpp:func:`OGRLayer::CommitTransaction()` 사이에 CreateFeature()/SetFeature() 작업을 넣을 수 있습니다. 메모리에 작업을 저장한 다음 :cpp:func:`OGRLayer::CommitTransaction()` 을 호출할 때만 실행할 것입니다.
 
-Layer creation options
+레이어 생성 옵션
 ----------------------
 
-The following layer creation options are supported:
+다음 레이어 생성 옵션들을 지원합니다:
 
--  **UPDATE_PERMISSIONS** = LOGGED_USER|ALL|ADMIN|function(...)|DEFAULT
-   : Update permissions for the new layer.
+-  **UPDATE_PERMISSIONS=LOGGED_USER|ALL|ADMIN|function(...)|DEFAULT**:
+   새 레이어에 대한 권한을 업데이트합니다.
 
-   -  If set to LOGGED_USER (the default), only logged users will be
-      able to make changes in the layer.
-   -  If set to ALL, all users will be able to make changes in the
-      layer.
-   -  If set to ADMIN, only administrators will be able to make changes
-      in the layer.
-   -  If beginning with "function(", the value of the creation option
-      will be used as the content of the `validate_doc_update
-      function <http://guide.couchdb.org/draft/validation.html>`__.
-   -  Otherwise, all users will be allowed to make changes in non-design
-      documents.
+   -  LOGGED_USER(기본값)로 설정하는 경우, 로그인한 사용자만 레이어에 변경 사항을 적용할 수 있습니다.
+   -  ALL로 설정하는 경우, 모든 사용자가 레이어에 변경 사항을 적용할 수 있습니다.
+   -  ADMIN으로 설정하는 경우, 관리자만 레이어에 변경 사항을 적용할 수 있습니다.
+   -  "function("으로 시작하는 경우, 생성 옵션의 값을 `validate_doc_update 함수 <http://guide.couchdb.org/draft/validation.html>`_ 의 내용으로 사용할 것입니다.
+   -  다른 값으로 설정하면, 모든 사용자가 비설계(non-design) 문서에 변경 사항을 적용할 수 있습니다.
 
--  **GEOJSON** = YES|NO : Set to NO to avoid writing documents as
-   GeoJSON documents. Default to YES.
--  **COORDINATE_PRECISION** = int_number : Maximum number of figures
-   after decimal separator to write in coordinates. Default to 15.
-   "Smart" truncation will occur to remove trailing zeros. Note: when
-   opening a dataset in update mode, the
-   OGR_COUCHDB_COORDINATE_PRECISION configuration option can be set to
-   have a similar role.
+-  **GEOJSON=YES|NO**:
+   이 옵션을 NO로 설정하면 문서를 GeoJSON 문서로 작성하는 일을 막을 수 있습니다. 기본값은 YES입니다.
 
-Examples
+-  **COORDINATE_PRECISION=int_number**:
+   좌표값의 소수점 뒤에 작성할 최대 자릿수를 설정합니다. 기본값은 15입니다. 후행 0들을 제거하기 위해 "스마트" 절단(truncation)을 수행할 것입니다.
+   주의: 데이터셋을 업데이트 모드로 열 때, OGR_COUCHDB_COORDINATE_PRECISION 환경설정 옵션을 설정해서 비슷한 역할을 하게 할 수 있습니다.
+
+예시
 --------
 
-Listing the tables of a CouchDB repository:
+CouchDB 저장소의 테이블들을 목록화하기:
 
 ::
 
    ogrinfo -ro "couchdb:http://some_account.some_couchdb_server.com"
 
-Creating and populating a table from a shapefile:
+shapefile로부터 테이블을 생성하고 채우기:
 
 ::
 
    ogr2ogr -f couchdb "couchdb:http://some_account.some_couchdb_server.com" shapefile.shp
 
-See Also
+참고
 --------
 
--  `CouchDB reference <http://wiki.apache.org/couchdb/Reference>`__
--  `GeoCouch source code
-   repository <http://github.com/couchbase/geocouch>`__
--  `Documentation for 'validate_doc_update'
-   function <http://guide.couchdb.org/draft/validation.html>`__
+-  `CouchDB 참조 <http://wiki.apache.org/couchdb/Reference>`_
+
+-  `GeoCouch 소스 코드 저장소 <http://github.com/couchbase/geocouch>`_
+
+-  `'validate_doc_update' 함수 문서 <http://guide.couchdb.org/draft/validation.html>`_
+

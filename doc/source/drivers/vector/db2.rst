@@ -10,132 +10,102 @@ DB2 Spatial
 .. deprecated_driver:: version_targeted_for_removal: 3.5
    env_variable: GDAL_ENABLE_DEPRECATED_DRIVER_DB2
 
-This driver implements support for access to spatial tables in the IBM
-DB2 for Linux, Unix and Windows (DB2 LUW) and the IBM DB2 for z/OS
-relational databases using the default ODBC support incorporated into
-GDAL.
+이 드라이버는 GDAL에 포함된 기본 ODBC 지원을 이용해서 리눅스, 유닉스 및 윈도우 용 (DB2 LUW) IBM DB2의 공간 테이블에, 그리고 z/OS 용 IBM DB2 관계형 데이터베이스에 접근하기 위한 지원을 구현했습니다.
 
-The documentation for the DB2 spatial features can be found online for
-`DB2 for
-z/OS <http://www-01.ibm.com/support/knowledgecenter/SSEPEK_11.0.0/com.ibm.db2z11.doc.spatl/src/spatl/dasz_spatl.dita?lang=en>`__
-and `DB2
-LUW <http://www-01.ibm.com/support/knowledgecenter/SSEPGG_10.5.0/com.ibm.db2.luw.spatial.topics.doc/doc/db2sb03.html>`__
+`z/OS 용 DB2 <http://www-01.ibm.com/support/knowledgecenter/SSEPEK_11.0.0/com.ibm.db2z11.doc.spatl/src/spatl/dasz_spatl.dita?lang=en>`_ 및 `DB2 LUW <http://www-01.ibm.com/support/knowledgecenter/SSEPGG_10.5.0/com.ibm.db2.luw.spatial.topics.doc/doc/db2sb03.html>`_ 에서 DB2 Spatial 객체에 관한 문서를 찾아볼 수 있습니다.
 
-This driver is currently supported only in the Windows environment.
+이 드라이버는 현재 윈도우 환경에서만 지원됩니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
 
 .. supports_georeferencing::
 
-Connecting to a database
+데이터베이스에 연결하기
 ------------------------
 
-| To connect to a DB2 datasource, use a connection string specifying the
-  database name, with additional parameters as necessary. The connection
-  strings must be prefixed with '*DB2ODBC:*'.
-| You can specify either a DSN that has been registered or use
-  parameters that specify the host, port and protocol.
+DB2 데이터소스에 접속하려면, 필요한 추가 파라미터들과 함께 데이터베이스 이름을 지정한 연결 문자열을 사용하십시오. 이 연결 문자열 앞에 반드시 '*DB2ODBC:*' 접두어를 붙여야만 합니다.
+등록된 DSN을 지정하거나 또는 호스트, 포트 및 프로토콜을 지정하는 파라미터를 이용할 수 있습니다.
 
    ::
 
       DB2ODBC:database=dbname;DSN=datasourcename
 
-or
+또는
 
    ::
 
       DB2ODBC:database=dbname;DRIVER={IBM DB2 ODBC DRIVER};Hostname=hostipaddr;PROTOCOL=TCPIP;port=db2port;UID=myuserid;PWD=mypw
 
-The following custom parameters can also be used in the following
-syntax:
+다음 사용자 지정 파라미터도 다음과 같은 문법으로 사용할 수 있습니다:
 
--  **Tables=schema1.table1(geometry column1),schema2.table2(geometry
-   column2)**: By using this parameter you can specify the subset of the
-   layers to be used by the driver. If this parameter is not set, the
-   layers are retrieved from the DB2GSE.ST_GEOMETRY_COLUMNS metadata
-   view. You can omit specifying the schema and the geometry column
-   portions of the syntax.
+-  **Tables=schema1.table1(geometry column1),schema2.table2(geometry column2)**:
+   이 파라미터를 이용하면 드라이버가 사용할 레이어의 하위 집합을 지정할 수 있습니다. 이 파라미터를 지정하지 않는 경우, DB2GSE.ST_GEOMETRY_COLUMNS 메타데이터 뷰로부터 레이어를 가져옵니다. 이 문법에서 스키마와 도형 열을 지정하는 부분을 생략할 수 있습니다.
 
-The parameter names are not case sensitive in the connection strings.
+연결 문자열의 파라미터 이름은 대소문자를 구분하지 않습니다.
 
-Specifying the **Database** parameter is required by the driver in order
-to select the proper database.
+이 드라이버가 알맞은 데이터베이스를 선택할 수 있게 하려면 **Database** 파라미터를 지정해야 합니다.
 
-Layers
+레이어
 ------
 
-By default the DB2 driver will only look for layers that are registered
-in the *DB2GSE.ST_GEOMETRY_COLUMNS* metadata table.
+DB2 드라이버는 기본적으로 DB2GSE.ST_GEOMETRY_COLUMNS 메타데이터 테이블에 등록된 레이어만 검색할 것입니다.
 
-SQL statements
+SQL 선언문
 --------------
 
-The DB2 driver passes SQL statements directly to DB2 by default, rather
-than evaluating them internally when using the ExecuteSQL() call on the
-OGRDataSource, or the -sql command option to ogr2ogr. Attribute query
-expressions are also passed directly through to DB2. It's also possible
-to request the OGR DB2 driver to handle SQL commands with the :ref:`OGR
-SQL <ogr_sql_dialect>` engine, by passing **"OGRSQL"** string to the
-ExecuteSQL() method, as the name of the SQL dialect.
+DB2 드라이버는 OGRDataSource에 ExecuteSQL() 함수를 호출하거나 ogr2ogr에 -sql 명령어 옵션을 사용하는 경우 내부적으로 SQL 선언문을 평가하기 보다는 기본적으로 DB2에 SQL 선언문을 직접 전송합니다. 속성 쿼리 표현식도 DB2에 직접 전송합니다. ExecuteSQL() 메소드에 **"OGRSQL"** 문자열을 SQL 방언 이름으로 전송해서 OGR DB2 드라이버가 SQL 선언문을 :ref:`OGR SQL <ogr_sql_dialect>` 엔진으로 처리하도록 요청할 수도 있습니다.
 
-The DB2 driver in OGR supports the OGRLayer::StartTransaction(),
-OGRLayer::CommitTransaction() and OGRLayer::RollbackTransaction() calls
-in the normal SQL sense.
+OGR에서 DB2 드라이버는 일반적인 SQL 맥락에서 OGRLayer::StartTransaction(), OGRLayer::CommitTransaction() 및 OGRLayer::RollbackTransaction() 호출을 지원합니다.
 
-Creation Issues
+생성 문제점
 ---------------
 
-This driver doesn't support creating new databases. Use the DB2 command
-line or tools like IBM Data Studio to create the database. It does allow
-creation of new layers within an existing database.
+이 드라이버는 새 데이터베이스 생성을 지원하지 않습니다. 데이터베이스를 생성하려면 DB2 명령줄 또는 IBM 데이터 스튜디오 같은 도구들을 이용하십시오. 기존 데이터베이스 안에 새 레이어를 생성할 수는 있습니다.
 
-Layer Creation Options
+레이어 생성 옵션
 ~~~~~~~~~~~~~~~~~~~~~~
 
--  **OVERWRITE**: This may be "YES" to force an existing layer of the
-   desired name to be destroyed before creating the requested layer.
--  **LAUNDER**: This may be "YES" to force new fields created on this
-   layer to have their field names "laundered" into a form more
-   compatible with DB2. This converts to lower case and converts some
-   special characters like "-" and "#" to "_". If "NO" exact names are
-   preserved. The default value is "YES". If enabled the table (layer)
-   name will also be laundered.
--  **PRECISION**: This may be "YES" to force new fields created on this
-   layer to try and represent the width and precision information, if
-   available using numeric(width,precision) or char(width) types. If
-   "NO" then the types float, int and varchar will be used instead. The
-   default is "YES".
--  **DIM={2,3}**: Control the dimension of the layer. Defaults to 2.
--  **GEOM_NAME**: Set the name of geometry column in the new table. If
-   omitted it defaults to *ogr_geometry*.
--  **SCHEMA**: Set name of schema for new table. The default schema is
-   that of the userid used to connect to the database
--  **SRID**: Set the spatial reference id of the new table explicitly.
-   The corresponding entry should already be added to the
-   spatial_ref_sys metadata table. If this parameter is not set the SRID
-   is derived from the authority code of source layer SRS.
+-  **OVERWRITE**:
+   요청한 레이어를 생성하기 전에 요청한 이름을 가진 기존 레이어를 강제로 삭제하고 싶다면 이 옵션을 YES로 설정할 수도 있습니다.
 
-Spatial Index Creation
+-  **LAUNDER**:
+   해당 레이어에 생성되는 새 필드의 이름을 DB2와 좀 더 호환되는 형식으로 강제 "세탁"하려면 이 옵션을 YES로 설정할 수도 있습니다. 이 옵션은 대문자를 소문자로 변환하고, "-" 및 "#" 같은 몇몇 특수 문자를 "_"로 변환합니다. 기본값은 YES입니다. 이 옵션을 활성화하면 테이블(레이어) 이름도 세탁할 것입니다.
+
+-  **PRECISION**:
+   해당 레이어에 생성되는 새 필드가 -- 사용할 수 있는 경우 숫자(길이, 정밀도) 또는 문자(길이) 유형을 사용해서 -- 길이 및 정밀도 정보를 시도하고 표현하게 하려면 이 옵션을 YES로 설정할 수도 있습니다. NO로 설정하면 그 대신 float, int 및 varchar 유형을 사용할 것입니다. 기본값은 YES입니다.
+
+-  **DIM={2,3}**:
+   레이어의 차원을 제어합니다. 기본값은 2입니다.
+
+-  **GEOM_NAME**:
+   새 테이블의 도형 열 이름을 설정합니다. 지정하지 않는 경우 기본값 *ogr_geometry* 를 사용합니다.
+
+-  **SCHEMA**:
+   새 테이블에 대한 스키마의 이름을 설정합니다. 기본 스키마는 userid가 데이터베이스에 접속하기 위해 사용한 스키마입니다.
+
+-  **SRID**:
+   새 테이블의 공간 참조(Spatial Reference) ID를 명확하게 설정합니다. 해당 항목이 이미 spatial_ref_sys 메타데이터 테이블에 추가되어 있어야 합니다. 이 파라미터를 설정하지 않는 경우 소스 레이어 공간 좌표계의 기관 코드로부터 SRID를 파생시킵니다.
+
+공간 색인 생성
 ~~~~~~~~~~~~~~~~~~~~~~
 
-By default the DB2 driver doesn't add spatial indexes to the tables
-during the layer creation. Spatial indexes should be created using the
-DB2 CREATE INDEX command.
+DB2 드라이버는 레이어 생성 과정에서 기본적으로 테이블에 공간 색인을 추가하지 않습니다. ``DB2 CREATE INDEX`` 명령어로 공간 색인을 생성해야 합니다.
 
-Examples
+예시
 --------
 
-Creating a layer from an OGR data source
+OGR 데이터소스로부터 레이어를 생성하기:
 
    ::
 
       ogr2ogr -overwrite  DB2ODBC:database=sample;DSN=sampDSN zipcodes.shp
 
-Connecting to a layer and dump the contents
+레이어에 접속해서 콘텐츠를 덤프하기:
 
    ::
 
       ogrinfo -al DB2ODBC:database=sample;DSN=sampDSN;tables=zipcodes
+
