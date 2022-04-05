@@ -197,25 +197,23 @@ following style string parameters are understood:
 .. list-table::
    :header-rows: 1
 
-   * - Tool
-     - Available on geometry types
-     - Supported parameters
+   * - 도구
+     - 사용할 수 있는 도형 유형
+     - 지원 파라미터
    * - PEN
-     - Point, (Multi)LineString
-     - color (c); width (w); dash pattern (p)
+     - 포인트, (멀티)라인스트링
+     - 색상(c); 굵기(w); 대시 패(p)
    * - BRUSH
-     - (Multi)Polygon, Triangle
-     - foreground color (fc)
+     - (멀티)폴리곤, 삼각형
+     - 전경색(fc)
    * - SYMBOL
-     - Point
-     - color (c)
+     - 포인트
+     - 색상(c)
    * - LABEL
-     - Point
-     - | GDAL >= 2.3.0: text (t); font name (f); font size (s), treated as cap
-       | height; bold (bo); italic (it); text color (c); x and y offsets (dx,
-       | dy); angle (a); anchor point (p); stretch (w)
-       | GDAL <= 2.2.x: text (t); font size (s), treated as cap height; text
-       | color (c); angle (a); anchor point (p)
+     - 포인트
+     - 
+        *  GDAL 2.3.0 이상 버전: 텍스트(t); 글꼴 이름(f); 글꼴 크기(s), 대문자 높이로 취급; 굵은 글꼴(bo); 이탤릭 글꼴(it); 텍스트 색상(s); x 및 y 오프셋(dx,dy); 각도(a); 기준점(p); 스트레치(w)
+        *  GDAL 2.2.x 이전 버전: 텍스트(t); 글꼴 크기(s), 대문자 높이로 취급; 텍스트 색상(s); 각도(a); 기준점(p)
 
 The dataset creation supports the following dataset creation options:
 
