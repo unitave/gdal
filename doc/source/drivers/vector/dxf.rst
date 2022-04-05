@@ -211,8 +211,7 @@ following style string parameters are understood:
      - 색상(c)
    * - LABEL
      - 포인트
-     - 
-        *  GDAL 2.3.0 이상 버전: 텍스트(t); 글꼴 이름(f); 글꼴 크기(s), 대문자 높이로 취급; 굵은 글꼴(bo); 이탤릭 글꼴(it); 텍스트 색상(s); x 및 y 오프셋(dx,dy); 각도(a); 기준점(p); 스트레치(w)
+     -  *  GDAL 2.3.0 이상 버전: 텍스트(t); 글꼴 이름(f); 글꼴 크기(s), 대문자 높이로 취급; 굵은 글꼴(bo); 이탤릭 글꼴(it); 텍스트 색상(s); x 및 y 오프셋(dx,dy); 각도(a); 기준점(p); 스트레치(w)
         *  GDAL 2.2.x 이전 버전: 텍스트(t); 글꼴 크기(s), 대문자 높이로 취급; 텍스트 색상(s); 각도(a); 기준점(p)
 
 The dataset creation supports the following dataset creation options:
