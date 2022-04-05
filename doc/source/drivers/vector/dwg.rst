@@ -1,82 +1,61 @@
 .. _vector.dwg:
 
-AutoCAD DWG
+오토캐드 DWG
 ===========
 
 .. shortname:: DWG
 
-.. build_dependencies:: Open Design Alliance Teigha library
+.. build_dependencies:: 오픈 디자인 얼라이언스 Teigha 라이브러리
 
-OGR supports reading most versions of AutoCAD DWG when built with the
-Open Design Alliance Teigha library. DWG is an binary working format used
-for AutoCAD drawings. A reasonable effort has been made to make the OGR
-DWG driver work similarly to the OGR DXF driver which shares a common
-data model. The entire contents of the .dwg file is represented as a
-single layer named "entities".
+OGR는 오픈 디자인 얼라이언스 Teigha 라이브러리와 함께 빌드된 경우 오토캐드(AutoCAD) DWG 포맷의 거의 모든 버전의 읽기를 지원합니다. DWG는 오토캐드 도면 용으로 사용되는 바이터리 작업 포맷입니다. ORG DWG 드라이버가 공통 데이터 모델을 공유하는 OGR DXF 드라이버와 비슷하게 작동하도록 하기 위해 적정한 시간과 노력을 들였습니다. .dwg 파일의 전체 내용은 "entities" 라는 이름의 단일 레이어로 표현됩니다.
 
-DWG files are considered to have no georeferencing information through
-OGR. Features will all have the following generic attributes:
+DWG 파일은 OGR를 통한 지리참조 정보를 가지고 있지 않다고 간주됩니다. 모든 객체는 다음과 같은 일반 속성들을 가질 것입니다:
 
--  Layer: The name of the DXF layer. The default layer is "0".
--  SubClasses: Where available, a list of classes to which an element
-   belongs.
--  ExtendedEntity: Where available, extended entity attributes all
-   appended to form a single text attribute.
--  Linetype: Where available, the line type used for this entity.
--  EntityHandle: The hexadecimal entity handle. A sort of feature id.
--  Text: The text of labels.
+-  Layer: DXF 레이어의 이름입니다. 기본 레이어는 "0"입니다.
 
-A reasonable attempt is made to preserve line color, line width, text
-size and orientation via OGR feature styling information when
-translating elements. Currently no effort is made to preserve fill
-styles or complex line style attributes.
+-  SubClasses: 사용 가능한 경우, 요소가 속해 있는 클래스들의 목록입니다.
 
-The approximation of arcs, ellipses, circles and rounded polylines as
-linestrings is done by splitting the arcs into subarcs of no more than a
-threshold angle. This angle is the OGR_ARC_STEPSIZE. This defaults to
-four degrees, but may be overridden by setting the configuration
-variable OGR_ARC_STEPSIZE.
+-  ExtendedEntity: 사용 가능한 경우, 단일 텍스트 속성을 형성하도록 모든 확장 요소 속성을 추가합니다.
+
+-  Linetype: 사용 가능한 경우, 이 요소에 사용된 라인 유형입니다.
+
+-  EntityHandle: 16진법 요소 핸들(entity handle)입니다. 일종의 FID(Feature ID)입니다.
+
+-  Text: 라벨의 텍스트입니다.
+
+요소 변환 시 OGR 객체 스타일 작업 정보를 통해 라인 색상, 라인 굵기, 텍스트 크기 및 방향을 보전하려 적정하게 시도합니다. 현재 채우기 스타일 또는 복잡 라인 스타일 속성을 보전하려는 어떤 노력도 하지 않습니다.
+
+원호를 한계 각도를 넘지 않는 하위 원호들로 분할해서 원호(arc), 타원, 원 및 둥글림된(rounded) 폴리라인의 라인스트링 근사치를 생성합니다. :decl_configoption:`OGR_ARC_STEPSIZE` 환경설정 옵션으로 한계 각도를 설정합니다. 기본값은 4도이지만, :decl_configoption:`OGR_ARC_STEPSIZE` 를 설정해서 대체할 수 있습니다.
 
 DWG_INLINE_BLOCKS
 -----------------
 
-The default behavior is for block references to be expanded with the
-geometry of the block they reference. However, if the DWG_INLINE_BLOCKS
-configuration option is set to the value FALSE, then the behavior is
-different as described here.
+블록 참조의 기본 습성은 블록 참조가 참조하는 블록의 도형으로 확장되는 것입니다. 하지만, DWG_INLINE_BLOCKS 환경설정 옵션의 값을 FALSE로 설정하는 경우 습성이 다음과 같이 달라집니다.
 
--  A new layer will be available called blocks. It will contain one or
-   more features for each block defined in the file. In addition to the
-   usual attributes, they will also have a BlockName attribute indicate
-   what block they are part of.
--  The entities layer will have new attributes BlockName, BlockScale, 
-   BlockAngle and BlockAttributes.
--  BlockAttributes will be a list of (tag x value) pairs of all 
-   visible attributes (JSON encoded).
--  block referenced will populate these new fields with the
-   corresponding information (they are null for all other entities).
--  block references will not have block geometry inlined - instead they
-   will have a point geometry for the insertion point.
+-  "blocks"라 불리는 새 레이어를 사용할 수 있습니다. 이 레이어는 파일에 정의된 블록 당 하나 이상의 객체를 담을 것입니다. 이 객체들은 일반적인 속성뿐만 아니라 객체가 속해 있는 블록을 나타내는 BlockName 속성도 가지게 됩니다.
 
-The intention is that with DWG_INLINE_BLOCKS disabled, the block
-references will remain as references and the original block definitions
-will be available via the blocks layer.
+-  "entities" 레이어가 새로운 BlockName, BlockScale, BlockAngle 및 BlockAttributes 속성을 가지게 됩니다.
+
+-  BlockAttributes 속성은 모든 가시(visible) 속성의 (JSON 인코딩된) 태그x값 목록이 될 것입니다.
+
+-  참조된 블록이 이 새 필드들을 대응하는 정보로 채울 것입니다. (다른 모든 요소들의 경우 새 필드가 NULL입니다.)
+
+-  블록 참조는 블록 도형을 그때 그때 즉시 처리하지 않을 것입니다 -- 대신 삽입 포인트를 위한 포인트 도형을 가질 것입니다.
+
+DWG_INLINE_BLOCKS 환경설정 옵션의 목적은, FALSE로 설정하는 경우 블록 참조가 참조로만 남고 "blocks" 레이어를 통해 원본 블록 정보를 사용할 수 있게 된다는 점입니다.
 
 DWG_ATTRIBUTES
 --------------
 
-If option is set to TRUE value, then block attributes are treated as
-feature attributes, one feature attribute for each tag. This option allow
-conversion to rows and columns data such as database tables
+이 옵션을 TRUE로 설정하는 경우, 블록 속성을 태그 하나 당 객체 속성 하나인 객체 속성으로 취급합니다. 이 옵션을 사용하면 블록 속성을 데이터베이스 테이블 같은 행 및 열 데이터로 변환할 수 있습니다.
 
 DWG_ALL_ATTRIBUTES
 ------------------
 
-If option is set to FALSE value, then block attributes are ignored if the
-visible property of the tag attribute is false. To see all attributes set
-DWG_ALL_ATTRIBUTES to TRUE value (this is the default value)
+이 옵션을 FALSE로 설정하면, 태그 속성의 가시 속성이 거짓인 경우 블록 속성을 무시합니다. 모든 속성들을 가시화하려면 DWG_ALL_ATTRIBUTES를 (기본값) TRUE로 설정하십시오.
 
-Building
+빌드 작업
 --------
 
-See :ref:`ODA platform support <vector.oda>` for building GDAL with ODA support.
+GDAL을 ODA 지원과 함께 빌드하려면 :ref:`ODA 플랫폼 지원 <vector.oda>` 을 참조하십시오.
+

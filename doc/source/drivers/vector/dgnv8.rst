@@ -1,6 +1,6 @@
 .. _vector.dgnv8:
 
-Microstation DGN v8
+마이크로스테이션 DGN v8
 ===================
 
 .. versionadded:: 2.2
@@ -9,25 +9,27 @@ Microstation DGN v8
 
 .. build_dependencies:: Open Design Alliance Teigha library
 
-Microstation DGN files from Microstation version 8.0 are supported for
-reading and writing. Each model of the file is represented by a OGR
-layer.
+DGN 드라이버는 마이크로스테이션(Microstation) 버전 8이 생성한 DGN 파일 읽기 및 쓰기를 지원합니다. 각 파일의 모델은 OGR 레이어로 표현됩니다.
 
-This driver requires to be built against the (non open source) Open
-Design Alliance Teigha library.
+이 드라이버는 (오픈 소스가 아닌) 오픈 디자인 얼라이언스의 Teigha 라이브러리를 대상으로 빌드되어야 합니다.
 
-DGN files are considered to have no georeferencing information through
-OGR. Features will all have the following generic attributes:
+DGN 파일은 OGR를 통한 지리참조 정보를 가지고 있지 않다고 간주됩니다. 모든 객체는 다음과 같은 일반 속성들을 가질 것입니다:
 
--  Type: The integer type code as listed below in supported elements.
--  Level: The DGN level number.
--  GraphicGroup: The graphic group number.
--  ColorIndex: The color index from the dgn palette.
--  Weight: The drawing weight (thickness) for the element.
--  Style: The style value for the element.
--  ULink: User data linkage (multiple user data linkages may exist for each element).
+-  Type: 아래 "지원 요소"에 있는 정수 유형 코드입니다.
 
-Driver capabilities
+-  Level: DGN 수준 번호입니다.
+
+-  GraphicGroup: 그래픽 그룹 번호입니다.
+
+-  ColorIndex: DGN 색상표의 색상 색인입니다.
+
+-  Weight: 요소에 대한 도면 가중치(굵기)입니다.
+
+-  Style: 요소에 대한 스타일 값입니다.
+
+-  ULink: 사용자 데이터 링크입니다. (각 요소마다 사용자 데이터 링크가 여러 개 존재할 수도 있습니다.)
+
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
@@ -36,143 +38,150 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Supported Elements
+지원 요소
 ------------------
 
-The following element types are supported in reading:
+읽기 작업 시 다음과 같은 요소 유형들을 지원합니다:
 
--  Cell Header (2): used for polygons with holes
--  Line (3): Line (2 points) geometry.
--  Line String (4): Multi segment line geometry.
--  Shape (6): Polygon geometry.
--  TextNode (7): Container of Text elements.
--  Curve (11): Approximated as a line geometry.
--  ComplexString (12): Treated as line string or compound curve.
--  ComplexShape (14): Treated as polygon or curve polygon.
--  Ellipse (15): Approximated as a line geometry or a circular string.
--  Arc (16): Approximated as a line geometry or a circular string.
--  Text (17): Treated as a point geometry.
--  B-Spline (21): Treated as a line geometry.
--  PointString (22): Treated as multi point.
--  Shared cell reference (35): Treated as point.
+-  Cell Header (2): 구멍이 있는 폴리곤에 사용
 
-Generally speaking any concept of complex objects, and cells as
-associated components is lost. Each component of a complex object or
-cell is treated as a independent feature.
+-  Line (3): 라인 (포인트 2개) 도형
 
-User data linkage
+-  Line String (4): 다중 선분 라인 도형
+
+-  Shape (6): 폴리곤 도형
+
+-  TextNode (7): 텍스트 요소의 컨테이너
+
+-  Curve (11): 라인 도형에 가깝게 취급합니다.
+
+-  ComplexString (12): 라인스트링 또는 복합 곡선(compound curve)으로 취급합니다.
+
+-  ComplexShape (14): 폴리곤 또는 만곡 폴리곤(curve polygon)으로 취급합니다.
+
+-  Ellipse (15): 라인 도형 또는 원호(circular string)에 가깝게 취급합니다.
+
+-  Arc (16): 라인 도형 또는 원호(circular string)에 가깝게 취급합니다.
+
+-  Text (17): 포인트 도형으로 취급합니다.
+
+-  B-Spline (21): 라인 도형으로 취급합니다.
+
+-  PointString (22): 멀티포인트로 취급합니다.
+
+-  Shared cell reference (35): 포인트로 취급합니다.
+
+일반적으로 복잡 객체들의 모든 개념 및 관련 구성요소로서의 셀들을 누락시킵니다. 복잡 객체의 각 구성요소 또는 셀을 독립 객체로 취급합니다.
+
+사용자 데이터 링크
 -----------------
 
-A DGN element may have multiple user data linkages. Each linkage has 
-a user id, application id and a number of words of data. The user 
-data linkage output reports the data for each different application id.
+DGN 요소 하나가 사용자 데이터 링크(user data linkage) 여러 개를 가질 수도 있습니다. 각 링크는 사용자 ID, 응용 프로그램 ID 그리고 수많은 단어로 된 데이터를 가지고 있습니다. 사용자 데이터 링크 산출물은 서로 다른 각 응용 프로그램 ID별로 데이터를 리포트합니다.
 
-For unknown application ids, the raw data is reported as hexadecimal 
-words (16bit). Is up to the user how to decode the user data, depending 
-on the application id.
+알려지지 않은 응용 프로그램 ID의 경우, 원시(raw) 데이터를 16진법 단어(16비트)로 리포트합니다. 사용자가 응용 프로그램 ID에 따라 사용자 원시 데이터를 어떻게 디코딩할지를 결정해야 합니다.
 
-Styling Information
+스타일 작업 정보
 -------------------
 
-Some drawing information about features can be extracted from the
-ColorIndex, Weight and Style generic attributes; however, for all
-features an OGR style string has been prepared with the values encoded
-in ready-to-use form for applications supporting OGR style strings.
+ColorIndex, Weight 및 Style 일반 속성으로부터 객체에 관한 몇몇 도면(drawing) 정보를 추출할 수 있습니다. 하지만 모든 객체에 대해 OGR 스타일 문자열을 지원하는 응용 프로그램에 사용할 준비가 끝난 형식으로 인코딩된 값들로 OGR 스타일 문자열이 준비되어 있습니다.
 
-The various kinds of linear geometries will carry style information
-indicating the color, thickness and line style (i.e. dotted, solid,
-etc).
+여러 유형의 선형 도형들이 색상, 굵기 및 (점선, 실선 등과 같은) 라인 스타일을 나타내는 스타일 정보를 포함할 것입니다.
 
-Polygons (Shape elements) will carry styling information for the edge as
-well as a fill color if provided. Fill patterns are not supported.
+폴리곤(Shape 요소)은 경계 정보는 물론 지정된 경우 채우기 색상 정보도 포함할 것입니다. 채우기 패턴은 지원하지 않습니다.
 
-Text elements will contain the text, angle, color and size information
-(expressed in ground units) in the style string.
+텍스트 요소는 스타일 문자열에 텍스트, 각도, 색상 및 (지표 단위로 표현된) 크기 정보를 담을 것입니다.
 
-Metadata
+메타데이터
 --------
 
-The various metadata items that can be set in the DGN header with the
-dataset creation options (see below) can be retrieved in the "DGN"
-metadata domain.
+DGN 헤더에 데이터셋 생성 옵션으로 (아래 참조) 여러 가지 메타데이터 항목들을 설정하거나, "DGN" 메타데이터 도메인으로부터 여러 가지 메타데이터 항목들을 가져올 수 있습니다.
 
-Creation Issues
+생성 문제점
 ---------------
 
-DGN files may be written with OGR with limitations:
+제한 사항들을 가진 2차원 DGN 파일을 OGR로 작성할 수도 있습니다:
 
--  Output features have the usual fixed DGN attributes. Attempts to
-   create any other fields will fail.
--  Translation from OGR feature style strings back into DGN
-   representation information is limited to a few properties of LABEL
-   (text, font name, size, angle, color), PEN (color) and BRUSH (fill
-   color) tools.
--  POINT geometries that are not text (Text is NULL, and the feature
-   style string is not a LABEL) will be translated as a degenerate (0
-   length) line element.
--  Geometries which fall outside the "design plane" of the seed file
-   will be discarded, or corrupted in unpredictable ways.
+-  산출 객체는 일반적인 고정 DGN 속성을 가집니다. 다른 필드를 생성하려는 시도는 실패할 것입니다.
 
-The dataset creation supports the following options:
+-  LABEL(텍스트, 글꼴 이름, 크기, 각도, 색상), PEN(색상) 및 BRUSH(채우기 색상) 도구의 몇 가지 속성에 대해서만 OGR 객체 스타일 문자열을 DGN 표현 정보로 다시 변환할 수 있습니다.
 
--  **SEED=**\ *filename*: Specify the seed file to use.
--  **COPY_SEED_FILE_COLOR_TABLE=**\ *YES/NO*: Indicates whether the
-   color table should be copied from the seed file. Only taken into
-   account if SEED is specified. By default this is NO.
--  **COPY_SEED_FILE_MODEL=**\ *YES/NO*: Indicates whether the existing
-   models (without their graphic contents) should be copied from the
-   seed file. This holds as well for the view groups and named views to
-   which they are linked to. Only taken into account if SEED is
-   specified. By default this is YES.
--  **COPY_SEED_FILE_MODEL_CONTROL_ELEMENTS=**\ *YES/NO*: Indicates
-   whether the existing control elements of models should be copied from
-   the seed file. Only taken into account if COPY_SEED_FILE_MODEL=YES.
-   By default this is YES.
--  **APPLICATION=**\ *string*: Set Application field in header. If not
-   specified, derived from seed file when set. Otherwise mentions the
-   version of GDAL and the Teigha library used.
--  **TITLE=**\ *string*: Set Title field in header. If not specified,
-   from the seed file.
--  **SUBJECT=**\ *string*: Set Subject field in header. If not
-   specified, from the seed file.
--  **AUTHOR=**\ *string*: Set Author field in header. If not specified,
-   from the seed file.
--  **KEYWORDS=**\ *string*: Set Keywords field in header. If not
-   specified, from the seed file.
--  **TEMPLATE=**\ *string*: Set Template field in header. If not
-   specified, from the seed file.
--  **COMMENTS=**\ *string*: Set Comments field in header. If not
-   specified, from the seed file.
--  **LAST_SAVED_BY=**\ *string*: Set LastSavedBy field in header. If not
-   specified, from the seed file.
--  **REVISION_NUMBER=**\ *string*: Set RevisionNumber field in header.
-   If not specified, from the seed file.
--  **CATEGORY=**\ *string*: Set Category field in header. If not
-   specified, from the seed file.
--  **MANAGER=**\ *string*: Set Manager field in header. If not
-   specified, from the seed file.
--  **COMPANY=**\ *string*: Set Company field in header. If not
-   specified, from the seed file.
+-  텍스트가 아닌 (Text가 NULL이고 객체 스타일 문자열은 LABEL이 아닌) POINT 도형을 퇴화된 (길이가 0인) 라인 요소로 변환할 것입니다.
 
-The layer creation supports the following options:
+-  시드 파일의 "설계 평면(design plane)" 바깥에 있는 도형들을 폐기하거나, 또는 예상할 수 없는 방식으로 손상시킬 것입니다.
 
--  **DESCRIPTION=**\ *string*: Description associated with the layer. If
-   not specified, from the seed file.
--  **DIM=**\ *2/3*: Dimension (ie 2D vs 3D) of the layer. By default, 3,
-   unless the model is reused from the seed file.
+데이터셋 생성 시 다음 생성 옵션들을 지원합니다:
+
+-  **SEED=filename**:
+   사용할 시드 파일을 지정합니다.
+
+-  **COPY_SEED_FILE_COLOR_TABLE=YES/NO**:
+   시드 파일로부터 색상표를 복사해야 할지 여부를 선택합니다. SEED 옵션이 지정된 경우에만 연산에 넣습니다. 기본값은 NO입니다.
+
+-  **COPY_SEED_FILE_MODEL=YES/NO**:
+   시드 파일로부터 기존 모델을 (모델의 그래픽 콘텐츠 없이) 복사해야 할지 여부를 선택합니다. 모델이 링크된 뷰 그룹 및 명명된 뷰도 복사합니다. SEED 옵션이 지정된 경우에만 연산에 넣습니다. 기본값은 YES입니다.
+
+-  **COPY_SEED_FILE_MODEL_CONTROL_ELEMENTS=YES/NO**:
+   시드 파일로부터 기존 모델의 제어 요소들을 복사해야 할지 여부를 선택합니다. COPY_SEED_FILE_MODEL=YES인 경우에만 연산에 넣습니다. 기본값은 YES입니다.
+
+-  **APPLICATION=string**:
+   헤더에 Application 필드를 설정합니다. 지정하지 않는 경우, 시드 파일로부터 파생시킵니다. 그렇게 하지 못 하는 경우 사용한 GDAL 및 Teigha 라이브러리의 버전을 언급합니다.
+
+-  **TITLE=string**:
+   헤더에 Title 필드를 설정합니다. 지정하지 않는 경우, 시드 파일로부터 파생시킵니다.
+   
+-  **SUBJECT=string**:
+   헤더에 Subject 필드를 설정합니다. 지정하지 않는 경우, 시드 파일로부터 파생시킵니다.
+
+-  **AUTHOR=string**:
+   헤더에 Author 필드를 설정합니다. 지정하지 않는 경우, 시드 파일로부터 파생시킵니다.
+
+-  **KEYWORDS=string**:
+   헤더에 Keywords 필드를 설정합니다. 지정하지 않는 경우, 시드 파일로부터 파생시킵니다.
+
+-  **TEMPLATE=string**:
+   헤더에 Template 필드를 설정합니다. 지정하지 않는 경우, 시드 파일로부터 파생시킵니다.
+
+-  **COMMENTS=string**:
+   헤더에 Comments 필드를 설정합니다. 지정하지 않는 경우, 시드 파일로부터 파생시킵니다.
+
+-  **LAST_SAVED_BY=string**:
+   헤더에 LastSavedBy 필드를 설정합니다. 지정하지 않는 경우, 시드 파일로부터 파생시킵니다.
+
+-  **REVISION_NUMBER=string**:
+   헤더에 RevisionNumber 필드를 설정합니다. 지정하지 않는 경우, 시드 파일로부터 파생시킵니다.
+
+-  **CATEGORY=string**:
+   헤더에 Category 필드를 설정합니다. 지정하지 않는 경우, 시드 파일로부터 파생시킵니다.
+
+-  **MANAGER=string**:
+   헤더에 Manager 필드를 설정합니다. 지정하지 않는 경우, 시드 파일로부터 파생시킵니다.
+
+-  **COMPANY=string**:
+   헤더에 Company 필드를 설정합니다. 지정하지 않는 경우, 시드 파일로부터 파생시킵니다.
+
+레이어 생성 시 다음 생성 옵션들을 지원합니다:
+
+-  **DESCRIPTION=string**:
+   레이어와 관련된 설명입니다. 지정하지 않는 경우, 시드 파일로부터 파생시킵니다.
+
+-  **DIM=2/3**:
+   레이어의 차원을 (예: 2차원 대 3차원으로) 설정합니다. 시드 파일로부터 모델을 재사용하지 않는 한 기본값은 3입니다.
 
 
-Building
+빌드 작업
 --------
 
-See :ref:`ODA platform support <vector.oda>` for building GDAL with ODA support.
+GDAL을 ODA 지원과 함께 빌드하려면 :ref:`ODA 플랫폼 지원 <vector.oda>` 을 참조하십시오.
 
 .. toctree::
    :hidden:
 
    oda
 
---------------
+참고
+----
 
--  :ref:`DGN (v7) driver <vector.dgn>`
+-  :ref:`DGN (v7) <vector.dgn>` 드라이버
+
 -  :ref:`ogr_feature_style`
+

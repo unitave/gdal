@@ -10,29 +10,17 @@ DODS/OPeNDAP
 .. deprecated_driver:: version_targeted_for_removal: 3.5
    env_variable: GDAL_ENABLE_DEPRECATED_DRIVER_OGR_DODS
 
-This driver implements read-only support for reading feature data from
-OPeNDAP (DODS) servers. It is optionally included in OGR if built with
-OPeNDAP support libraries.
+이 드라이버는 OPeNDAP(DODS) 서버로부터 객체 데이터를 읽어오기 위한 읽기 전용 지원을 구현합니다. GDAL/OGR를 OPeNDAP 지원 라이브러리와 함께 빌드한 경우 OGR에 포함시킬 수도 있습니다.
 
-When opening a database, its name should be specified in the form
-"DODS:url". The URL may include a constraint expression a shown here.
-Note that it may be necessary to quote or otherwise protect DODS URLs on
-the commandline if they include question mark or ampersand characters as
-these often have special meaning to command shells.
+데이터베이스를 열 때, 데이터베이스 이름을 "DODS:url" 형식으로 지정해줘야 합니다. 이 URL은 이 문서에도 있는 제약 표현식을 포함할 수도 있습니다. DODS URL이 물음표 또는 앤드('&') 문자를 포함하는 경우 이들이 명령줄 셸에서 특수한 의미를 가지는 경우가 많기 때문에, 명령줄에 DODS URL을 입력할 때 큰따옴표 또는 다른 방법으로 URL을 보호해야 할 수도 있습니다.
 
 ::
 
    DODS:http://dods.gso.uri.edu/dods-3.4/nph-dods/broad1999?&press=148
 
-By default top level Sequence, Grid and Array objects will be translated
-into corresponding layers. Sequences are (by default) treated as point
-layers with the point geometries picked up from lat and lon variables if
-available. To provide more sophisticated translation of sequence, grid
-or array items into features it is necessary to provide additional
-information to OGR as DAS (dataset auxiliary information) either from
-the remote server, or locally via the AIS mechanism.
+기본적으로 최상위 수준의 Sequence, Grid 및 Array 객체를 대응하는 레이어로 변환할 것입니다. 기본적으로 Sequence 객체를 -- 위도 및 경도 변수가 존재하는 경우 -- 위도 및 경도를 가진 포인트 도형들로 이루어진 포인트 레이어로 취급합니다. Sequence, Grid 및 Array 객체를 좀 더 정교하게 피처로 변환하려면, 원격 서버 또는 로컬 가운데 하나로부터 OGR에 AIS 메커니즘을 통해 추가 정보를 DAS로서 (데이터셋 보조 정보로서) 넘겨줘야 합니다.
 
-A DAS definition for an OGR layer might look something like:
+OGR 레이어에 대한 DAS 정의는 다음과 비슷하게 보일 수도 있습니다:
 
 ::
 
@@ -58,19 +46,20 @@ A DAS definition for an OGR layer might look something like:
        }
    }
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
-Caveats
--------
-
--  No field widths are captured for attribute fields from DODS.
--  Performance for repeated requests is dramatically improved by
-   enabling DODS caching. Try setting USE_CACHE=1 in your ~/.dodsrc.
-
-See Also
+주의할 점
 --------
 
--  `OPeNDAP <http://www.opendap.org/>`__
+-  DODS로부터 속성 필드 용 필드 길이를 수집할 수 없습니다.
+
+-  DODS 캐시 작업을 활성화하면 반복 요청 처리 속도가 훨씬 빨라집니다. 사용자의 ~/.dodsrc 에 있는 USE_CACHE 옵션을 1로 설정해보십시오.
+
+참고
+--------
+
+-  `OPeNDAP <http://www.opendap.org/>`_
+
