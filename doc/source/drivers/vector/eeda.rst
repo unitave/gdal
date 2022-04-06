@@ -1,6 +1,6 @@
 .. _vector.eeda:
 
-Google Earth Engine Data API
+구글 어스 엔진 데이터 API
 ============================
 
 .. versionadded:: 2.4
@@ -9,198 +9,184 @@ Google Earth Engine Data API
 
 .. build_dependencies:: libcurl
 
-The driver supports read-only operations to list images and their
-metadata as a vector layer, using Google Earth Engine REST API.
+이 드라이버는 구글 어스 엔진 REST API를 이용해서 이미지를 목록화하고 이미지의 메타데이터를 벡터 레이어로 목록화하는 읽기전용 작업을 지원합니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
-Dataset name syntax
+데이터셋 이름 문법
 -------------------
 
-The minimal syntax to open a datasource is :
+데이터소스를 열기 위한 최소한의 문법은 다음과 같습니다:
 
 ::
 
    EEDA:[collection]
 
-where collection is something like
-projects/earthengine-public/assets/COPERNICUS/S2.
+<collection>은 projects/earthengine-public/assets/COPERNICUS/S2 같은 경로입니다.
 
-Open options
+열기 옵션
 ------------
 
-The following open options are available :
+다음 열기 옵션을 사용할 수 있습니다:
 
--  **COLLECTION**\ =string: To specify the collection if not specified
-   in the connection string.
+-  **COLLECTION=string**: 연결 문자열에 <collection>을 지정하지 않은 경우 <collection>을 지정합니다.
 
-Authentication methods
+인증 메소드
 ----------------------
 
-The following authentication methods can be used:
+다음 인증 메소드를 사용할 수 있습니다:
 
--  Authentication Bearer header passed through the EEDA_BEARER or
-   EEDA_BEARER_FILE configuration options.
--  Service account private key file, through the
-   GOOGLE_APPLICATION_CREDENTIALS configuration option.
--  OAuth2 Service Account authentication through the EEDA_PRIVATE_KEY/
-   EEDA_PRIVATE_KEY_FILE + EEDA_CLIENT_EMAIL configuration options.
--  Finally if none of the above method succeeds, the code will check if
-   the current machine is a Google Compute Engine instance, and if so
-   will use the permissions associated to it (using the default service
-   account associated with the VM). To force a machine to be detected as
-   a GCE instance (for example for code running in a container with no
-   access to the boot logs), you can set CPL_MACHINE_IS_GCE to YES.
+-  EEDA_BEARER 또는 EEDA_BEARER_FILE 환경설정 옵션을 통해 전송되는 인증 베어러(Authentication Bearer)
+-  GOOGLE_APPLICATION_CREDENTIALS 환경설정 옵션을 통해 전송되는 서비스 계정 프라이빗 키 파일
+-  EEDA_PRIVATE_KEY 또는 EEDA_PRIVATE_KEY_FILE 및 EEDA_CLIENT_EMAIL 환경설정 옵션을 통해 전송되는 OAuth2 서비스 계정 인증
+-  마지막으로 앞의 세 메소드가 모두 실패한 경우 코드가 현재 머신이 구글 컴퓨트 엔진 인스턴스인지 확인하고, 그렇다면 (가상 머신과 관련된 기본 서비스 계정을 이용해서) 구글 엔진 관련 권한을 사용할 것입니다. 강제로 가상 머신을 구글 컴퓨트 엔진 인스턴스로 (예를 들어 부트 로그에 접근할 수 없는 컨테이너에서 실행되는 코드처럼) 탐지되게 만들려면 CPL_MACHINE_IS_GCE를 YES로 설정하면 됩니다.
 
-Configuration options
+환경설정 옵션
 ---------------------
 
-The following configuration options are available :
+다음 환경설정 옵션들을 사용할 수 있습니다:
 
--  **EEDA_BEARER**\ =value: Authentication Bearer value to pass to the
-   API. This option is only useful when the token is computed by
-   external code. The bearer validity is typically one hour from the
-   time where it as been requested.
--  **EEDA_BEARER_FILE**\ =filename: Similar to EEDA_BEARER option,
-   except than instead of passing the value directly, it is the filename
-   where the value should be read.
--  **GOOGLE_APPLICATION_CREDENTIALS**\ =file.json: Service account
-   private key file that contains a private key and client email
--  **EEDA_PRIVATE_KEY**\ =string: RSA private key encoded as a PKCS#8
-   PEM file, with its header and footer. Used together with
-   EEDA_CLIENT_EMAIL to use OAuth2 Service Account authentication.
-   Requires GDAL to be built against libcrypto++ or libssl.
--  **EEDA_PRIVATE_KEY_FILE**\ =filename: Similar to EEDA_PRIVATE_KEY
-   option, except than instead of passing the value directly, it is the
-   filename where the key should be read.
--  **EEDA_CLIENT_EMAIL**\ =string: email to be specified together with
-   EEDA_PRIVATE_KEY/EEDA_PRIVATE_KEY_FILE to use OAuth2 Service Account
-   authentication.
+-  **EEDA_BEARER**\ =value: API에 전송할 인증 베어러 값입니다. 이 옵션은 외부 코드가 토큰을 계산한 경우에만 유용합니다. 베어러의 무결성은 일반적으로 베어러를 요청한 시간 이후 1시간까지입니다.
+-  **EEDA_BEARER_FILE**\ =filename: 값을 직접 전송하는 대신 값을 읽어와야 할 파일명을 지정한다는 점을 제외하면, EEDA_BEARER 옵션과 비슷합니다.
+-  **GOOGLE_APPLICATION_CREDENTIALS**\ =file.json: 프라이빗 키와 클라이언트 이메일을 담고 있는 서비스 계정 프라이빗 키 파일입니다.
+-  **EEDA_PRIVATE_KEY**\ =string: PKCS#8 PEM 헤더와 푸터를 가진 PKCS#8 PEM 파일로 인코딩된 RSA 프라이빗 키입니다. OAuth2 서비스 계정 인증을 사용하려면 EEDA_CLIENT_EMAIL과 함께 사용해야 합니다. GDAL이 libcrypto++ 또는 libssl을 대상으로 빌드되어 있어야 합니다.
+-  **EEDA_PRIVATE_KEY_FILE**\ =filename: 키를 직접 전송하는 대신 키를 읽어와야 할 파일명을 지정한다는 점을 제외하면, EEDA_PRIVATE_KEY 옵션과 비슷합니다.
+-  **EEDA_CLIENT_EMAIL**\ =string: OAuth2 서비스 계정 인증을 사용하려면 EEDA_PRIVATE_KEY 또는 EEDA_PRIVATE_KEY_FILE과 함께 지정해야 하는 이메일입니다.
 
-Attributes
+속성
 ----------
 
-The layer field definition is built by requesting a single image from
-the collection and guessing the schema from its "properties" element.
-The "eedaconf.json" file from the GDAL configuration will also be read
-to check if the collection schema is described in it, in which case the
-above mentioned schema guessing will not done.
+"collection"으로부터 단일 이미지를 요청해서 이미지의 "properties" 요소에서 스키마를 추정, 레이어 필드 정의를 작성합니다. GDAL 환경설정의 "eedaconf.json" 파일도 읽어와서 "collection"의 스키마가 해당 파일에 서술되어 있는지 확인할 것입니다. 서술되어 있다면 앞에서 언급한 추정 작업을 수행하지 않을 것입니다.
 
-The following attributes will always be present:
+다음 속성들은 항상 존재할 것입니다:
 
-.. table::
-    :widths: 15, 10, 30, 20
+.. list-table:: EEDA Layer Field Definitions
+   :header-rows: 1
+   :column-widths: 15,10,30,20
+   
+   * - 필드명
+     - 유형
+     - 의미
+     - 서버쪽 필터 호환성
+   * - name
+     - String
+     - 이미지 이름 (예: projects/earthengine-public/assets/COPERNICUS/S2/20170430T190351_20170430T190351_T10SEG)
+     - Ｘ
+   * - id
+     - String
+     - 이미지 ID, "projects/\*/assets/" 접두어가 없는 이름과 동일 (예: users/USER/ASSET)
+     - Ｘ
+   * - path
+     - String
+     - (더 이상 사용되지 않아 퇴출된) 이미지 경로, id와 동일
+     - Ｘ
+   * - gdal_dataset
+     - String
+     - :ref:`raster.eedai` 드라이버로 열 수 있는 GDAL 데이터셋 이름 (예: EEDAI:projects/earthengine-public/assets/COPERNICUS/S2/20170430T190351_20170430T190351_T10SEG)
+     - Ｘ
+   * - startTime
+     - DateTime
+     - 촬영 시작 날짜
+     - **Ｏ** (최상위 수준에서의 >= 비교에 제한됨)
+   * - endTime
+     - DateTime
+     - 촬영 종료 날짜
+     - **Ｏ** (최상위 수준에서의 <= 비교에 제한됨)
+   * - updateTime
+     - DateTime
+     - 업데이트 날짜
+     - Ｘ
+   * - sizeBytes
+     - Integer64
+     - 바이트 단위 파일 용량
+     - Ｘ
+   * - band_count
+     - Integer
+     - 밴드 개수
+     - Ｘ
+   * - band_max_width
+     - Integer
+     - 밴드들 가운데 최대 너비
+     - Ｘ
+   * - band_max_height
+     - Integer
+     - 밴드들 가운데 최대 높이
+     - Ｘ
+   * - band_min_pixel_size
+     - Real
+     - 밴드들 가운데 최소 픽셀 크기
+     - Ｘ
+   * - band_upper_left_x
+     - Real
+     - X 원점 (모든 밴드 사이에 동일한 경우에만 설정)
+     - Ｘ
+   * - band_upper_left_y
+     - Real
+     - Y 원점 (모든 밴드 사이에 동일한 경우에만 설정)
+     - Ｘ
+   * - band_crs
+     - String
+     - EPSG:XXXX 또는 WKT 서식의 좌표계 (모든 밴드 사이에 동일한 경우에만 설정)
+     - Ｘ
+   * - other_properties
+     - String
+     - 키가 독립적인 필드가 아닌 키/값 쌍을 가진 직렬화된 JSon 딕셔너리
+     - Ｘ
 
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | Field name          | Type      | Meaning                                                      | Server-side filter compatible |
-    +=====================+===========+==============================================================+===============================+
-    | name                | String    | Image name (e.g. projects/earthengine-public/                | No                            |
-    |                     |           | assets/COPERNICUS/S2/20170430T190351\_                       |                               |
-    |                     |           | 20170430T190351_T10SEG)                                      |                               |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | id                  | String    | Image ID; equivalent to name without the                     | No                            |
-    |                     |           | "projects/\*/assets/" prefix (e.g. users/USER/ASSET)         |                               |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | path                | String    | (Deprecated) Image path; equivalent to id                    | No                            |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | gdal_dataset        | String    | GDAL dataset name (e.g.                                      | No                            |
-    |                     |           | EEDAI:projects/earthengine-public/                           |                               |
-    |                     |           | assets/COPERNICUS/S2/                                        |                               |
-    |                     |           | 20170430T190351_20170430T190351\_                            |                               |
-    |                     |           | T10SEG) that can be opened with the :ref:`raster.eedai`      |                               |
-    |                     |           | driver                                                       |                               |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | startTime           | DateTime  | Acquisition start date                                       | **Yes** (restricted to >=     |
-    |                     |           |                                                              | comparison on top level)      |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | endTime             | DateTime  | Acquisition end date                                         | **Yes** (restricted to <=     |
-    |                     |           |                                                              | comparison on top level)      |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | updateTime          | DateTime  | Update date                                                  | No                            |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | sizeBytes           | Integer64 | File size in bytes                                           | No                            |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | band_count          | Integer   | Number of bands                                              | No                            |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | band_max_width      | Integer   | Maximum width among bands                                    | No                            |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | band_max_height     | Integer   | Maximum height among bands                                   | No                            |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | band_min_pixel_size | Real      | Minimum pixel size among bands                               | No                            |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | band_upper_left_x   | Real      | X origin (only set if equal among all bands)                 | No                            |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | band_upper_left_y   | Real      | Y origin (only set if equal among all bands)                 | No                            |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | band_crs            | String    | CRS as EPSG:XXXX or WKT (only set if equal among all bands)  | No                            |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
-    | other_properties    | String    | Serialized JSon dictionary with key/value pairs where key is | No                            |
-    |                     |           | not a standalone field                                       |                               |
-    +---------------------+-----------+--------------------------------------------------------------+-------------------------------+
+"서버쪽 필터 호환성"이란 속성 필터에 이 필드를 포함시킬 경우 서버로 포워딩한다는 의미입니다. (아닐 경우 클라이언트쪽에서 필터링합니다.)
 
-"Server-side filter compatible" means that when this field is included
-in an attribute filter, it is forwarded to the server (otherwise only
-client-side filtering is done).
-
-Geometry
+도형
 ~~~~~~~~
 
-The footprint of each image is reported as a MultiPolygon with a
-longitude/latitude WGS84 coordinate system (EPSG:4326).
+각 이미지의 촬영 범위(footprint)를 경도/위도 WGS84 좌표계(EPSG:4326)를 사용하는 멀티폴리곤으로 리포트합니다.
 
-Filtering
+필터링
 ~~~~~~~~~
 
-The driver will forward any spatial filter set with SetSpatialFilter()
-to the server. It also makes the same for simple attribute filters set
-with SetAttributeFilter(). The 3 boolean operators (AND, OR, NOT) and
-the comparison operators (=, <>, <, <=, > and >=) are supported.
+이 드라이버는 :cpp:func:`OGRLayer::SetSpatialFilter` 함수에 설정된 모든 공간 필터를 서버로 포워딩할 것입니다. :cpp:func:`OGRLayer::SetAttributeFilter` 함수에 설정된 속성 필터도 마찬가지입니다. 불(boolean) 연산자 3개(AND, OR, NOT) 및 비교 연산자들(=, <>, <, <=, > 및 >=)을 지원합니다.
 
-Paging
+페이지 작업(paging)
 ~~~~~~
 
-Features are retrieved from the server by chunks of 1000 by default (and
-this is the maximum value accepted by the server). This number can be
-altered with the EEDA_PAGE_SIZE configuration option.
+기본적으로 서버로부터 객체들을 1,000개 덩어리로 가져옵니다. (이 값은 서버가 받아들일 수 있는 최대 개수입니다.)  EEDA_PAGE_SIZE 환경설정 옵션으로 이 개수를 변경할 수 있습니다.
 
-Extent and feature count
+범위 및 객체 개수
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-The reported extent and feature count will always be respectively
-(-180,-90,180,90) and -1, given there is no way to get efficient answer
-to those queries from the server.
+리포트되는 범위 및 객체 개수는 언제나 각각 (-180,-90,180,90) 및 -1일 것입니다. 서버로부터 이런 쿼리에 대한 효율적인 응답을 가져올 방법이 없기 때문입니다.
 
-Examples
+예시
 ~~~~~~~~
 
-Listing all images available:
+사용할 수 있는 모든 이미지를 목록화하기:
 
 ::
 
    ogrinfo -ro -al "EEDA:" -oo COLLECTION=projects/earthengine-public/assets/COPERNICUS/S2 --config EEDA_CLIENT_EMAIL "my@email" --config EEDA_PRIVATE_KEY_FILE my.pem
 
-or
+또는
 
 ::
 
    ogrinfo -ro -al "EEDA:projects/earthengine-public/assets/COPERNICUS/S2" --config EEDA_CLIENT_EMAIL "my@email" --config EEDA_PRIVATE_KEY_FILE my.pem
 
-Listing all images under a point of (lat,lon)=(40,-100) :
+(위도,경도)=(40,-100) 포인트 아래 있는 모든 이미지를 목록화하기:
 
 ::
 
    ogrinfo -ro -al "EEDA:projects/earthengine-public/assets/COPERNICUS/S2" -spat -100 40 -100 40 --config EEDA_CLIENT_EMAIL "my@email" --config EEDA_PRIVATE_KEY_FILE my.pem
 
-Listing all images available matching criteria :
+기준과 일치하는 모든 이미지를 목록화하기:
 
 ::
 
    ogrinfo -ro -al "EEDA:projects/earthengine-public/assets/COPERNICUS/S2" -where "startTime >= '2015/03/26 00:00:00' AND endTime <= '2015/06/30 00:00:00' AND CLOUDY_PIXEL_PERCENTAGE < 10" --config EEDA_CLIENT_EMAIL "my@email" --config EEDA_PRIVATE_KEY_FILE my.pem
 
-See Also:
+참고
 ---------
 
--  :ref:`Google Earth Engine Data API Image driver <raster.eedai>`
+-  :ref:`구글 어스 엔진 데이터 API 이미지 <raster.eedai>` 드라이버
+
