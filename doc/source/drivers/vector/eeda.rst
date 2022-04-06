@@ -65,7 +65,6 @@
 
 .. list-table:: EEDA Layer Field Definitions
    :header-rows: 1
-   :widths: 15,10,30,20
    
    * - 필드명
      - 유형
