@@ -7,217 +7,163 @@ ESRI File Geodatabase (FileGDB)
 
 .. build_dependencies:: FileGDB API library
 
-The FileGDB driver provides read and write access to vector layers of
-File Geodatabases (.gdb directories) created by ArcGIS 10 and above. The
-dataset name must be the directory/folder name, and it must end with the
-.gdb extension.
+FileGDB 드라이버는 ArcGIS 10 이상 버전이 생성한 File Geodatabase(.gdb 디렉터리)의 벡터 레이어에 읽기 및 쓰기 접근을 지원합니다. 데이터셋 이름은 디렉터리/폴더 이름이어야만 하며, .gdb 확장자로 끝나야만 합니다.
 
-Note : the :ref:`OpenFileGDB
-driver <vector.openfilegdb>` driver exists as an alternative
-built-in i.e. not depending on a third-party library) read-only driver.
+.. note::
+   
+   :ref:`OpenFileGDB <vector.openfilegdb>` 드라이버가 (예를 들면 제 3자 라이브러리에 의존하지 않는) 내장된 읽기전용 드라이버 대체제로서 존재합니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
 
 .. supports_georeferencing::
 
-Requirements
+요구 사항
 ------------
 
-`FileGDB API SDK <http://www.esri.com/apps/products/download/#File_Geodatabase_API_1.3>`__
+`FileGDB API SDK <http://www.esri.com/apps/products/download/#File_Geodatabase_API_1.3>`_
 
-Curve in geometries are supported on reading with GDAL >= 2.2.
+GDAL 2.2버전부터 도형 안에 있는 곡선의 읽기를 지원합니다.
 
-Bulk feature loading
+벌크 객체 불러오기
 --------------------
 
-The FGDB_BULK_LOAD configuration option can be set to YES to speed-up
-feature insertion (or sometimes solve problems when inserting a lot of
-features (see http://trac.osgeo.org/gdal/ticket/4420). The effect of
-this configuration option is to cause a write lock to be taken and a
-temporary disabling of the indexes. Those are restored when the
-datasource is closed or when a read operation is done.
+FGDB_BULK_LOAD 환경설정 옵션을 YES로 설정하면 객체 삽입의 속도를 향상시킬 수 있습니다. (또는 어떤 경우 수많은 객체를 삽입할 때 발생하는 문제를 해결할 수도 있습니다. http://trac.osgeo.org/gdal/ticket/4420 를 참조하십시오.) 이 환경설정 옵션은 작성 방지(write lock)를 활성화시켜 색인을 임시로 비활성화시키는 효과가 있습니다. 데이터소스를 종료할 때 또는 읽기 작업이 끝났을 때 색인을 복원합니다.
 
-Bulk load is enabled by default for newly
-created layers (unless otherwise specified).
+새로 생성한 레이어에 기본적으로 (달리 지정하지 않는 한) 벌크 불러오기를 활성화합니다.
 
-SQL support
+SQL 지원
 -----------
 
-SQL statements are run through the SQL engine of
-the FileGDB SDK API. This holds for non-SELECT statements. However, due
-to partial/inaccurate support for SELECT statements in current FileGDB
-SDK API versions (v1.2), SELECT statements will be run by default by the
-OGR SQL engine. This can be changed by specifying the *-dialect FileGDB*
-option to ogrinfo or ogr2ogr.
+SELECT 문을 제외하고, FileGDB SDK API의 SQL 엔진을 통해 SQL 문을 실행합니다. 하지만 현재 FileGDB SDK API 버전(v1.2)에서 SELECT 문을 제대로 또는 정확하게 지원하지 못 하기 때문에, SELECT 문은 기본적으로 OGR SQL 엔진으로 실행할 것입니다. ogrinfo 또는 ogr2ogr 유틸리티에 *-dialect FileGDB* 옵션을 지정하면 이 습성을 변경할 수 있습니다.
 
-Special SQL requests
+특수 SQL 요청
 ~~~~~~~~~~~~~~~~~~~~
 
-"GetLayerDefinition a_layer_name" and "GetLayerMetadata a_layer_name"
-can be used as special SQL requests to get respectively the definition
-and metadata of a FileGDB table as XML content.
+"GetLayerDefinition a_layer_name" 및 "GetLayerMetadata a_layer_name"을 특수 SQL 요청으로 이용해서 각각 FileGDB 테이블의 정의 및 메타데이터를 XML 콘텐츠로 가져올 수 있습니다.
 
-Field domains
+필드 도메인
 -------------
 
 .. versionadded:: 3.3
 
-Coded and range field domains are supported.
+인코딩된 그리고 범위가 지정된 필드 도메인을 지원합니다.
 
-Hiearchical organization
+계층 구조
 ------------------------
 
 .. versionadded:: 3.4
 
-The hiearchical organization of tables and feature classes as top-level
-element or within a feature dataset can be explored using the methods
-:cpp:func:`GDALDataset::GetRootGroup`,
-:cpp:func:`GDALGroup::GetGroupNames`, :cpp:func:`GDALGroup::OpenGroup`,
-:cpp:func:`GDALGroup::GetVectorLayerNames` and :cpp:func:`GDALGroup::OpenVectorLayer`
+다음 메소드를 통해 최상위 요소로서의 또는 객체 데이터셋 내부에 있는 테이블 및 객체 클래스들의 계층 구조를 탐색할 수 있습니다:
 
-Transaction support
+   -  :cpp:func:`GDALDataset::GetRootGroup`
+   -  :cpp:func:`GDALGroup::GetGroupNames`, :cpp:func:`GDALGroup::OpenGroup`
+   -  :cpp:func:`GDALGroup::GetVectorLayerNames` 및 :cpp:func:`GDALGroup::OpenVectorLayer`
+
+트랜잭션 지원
 -------------------
 
-The FileGDB driver implements transactions at the database level,
-through an emulation (as per :ref:`rfc-54`),
-since the FileGDB SDK itself does not offer it. This works by backing up
-the current state of a geodatabase when StartTransaction(force=TRUE) is
-called. If the transaction is committed, the backup copy is destroyed.
-If the transaction is rolled back, the backup copy is restored. So this
-might be costly when operating on huge geodatabases.
+FileGDB 드라이버는 (:ref:`rfc-54` 별로) 에뮬레이션을 통해 데이터베이스 수준에서 트랜잭션을 구현합니다. FileGDB SDK 자체는 트랜잭션을 지원하지 않기 때문입니다. StartTransaction(force=TRUE)를 호출했을 때 지리 데이터베이스의 현재 상태를 백업함으로써 트랜잭션이 작동합니다. 트랜잭션이 커밋되면 백업 복사본을 제거합니다. 트랜잭션이 롤백되는 경우, 백업 복사본을 복원합니다. 즉 대용량 지리 데이터베이스를 운용하는 경우 성능을 저하시킬 수도 있습니다.
 
-Starting with GDAL 2.1, on Linux/Unix, instead of a full backup copy
-only layers that are modified are backed up.
+GDAL 2.1버전부터 리눅스/유닉스 상에서는 전체 복사본을 백업하는 대신 수정된 레이어만 백업합니다.
 
-Note that this emulation has an unspecified behavior in case of
-concurrent updates (with different connections in the same or another
-process).
+(동일한 또는 또다른 프로세스에서 서로 다른 연결을 통해) 업데이트가 동시에 여러 번 발생하는 경우 이 에뮬레이션이 불특정한 습성을 보인다는 사실을 기억하십시오.
 
-CreateFeature() support
+CreateFeature() 지원
 -----------------------
 
-The FileGDB SDK API does not allow to create a feature with a FID
-specified by the user. Starting with GDAL 2.1, the FileGDB driver
-implements a special FID remapping technique to enable the user to
-create features at the FID of their choice.
+FileGDB SDK API는 사용자가 지정한 FID를 가진 객체를 생성하지 못 합니다. GDAL 2.1부터, FileGDB 드라이버는 사용자가 선택한 FID를 가진 객체를 생성할 수 있도록 해주는 특별한 FID 재(再)매핑 기술을 구현합니다.
 
-Dataset Creation Options
+데이터셋 생성 옵션
 ------------------------
 
-None.
+없습니다.
 
-Layer Creation Options
+레이어 생성 옵션
 ----------------------
 
--  **FEATURE_DATASET**: When this option is set, the new layer will be
-   created inside the named FeatureDataset folder. If the folder does
-   not already exist, it will be created.
--  **LAYER_ALIAS**\ =string: (GDAL >=2.3) Set layer name alias.
--  **GEOMETRY_NAME**: Set name of geometry column in new layer. Defaults
-   to "SHAPE".
--  **GEOMETRY_NULLABLE**: (GDAL >=2.0) Whether the values of the
-   geometry column can be NULL. Can be set to NO so that geometry is
-   required. Default to "YES"
--  **FID**: Name of the OID column to create. Defaults to "OBJECTID".
-   Note: option was called OID_NAME in releases before GDAL 2
--  **XYTOLERANCE, ZTOLERANCE**: These parameters control the snapping
-   tolerance used for advanced ArcGIS features like network and topology
-   rules. They won't effect any OGR operations, but they will by used by
-   ArcGIS. The units of the parameters are the units of the coordinate
-   reference system.
+-  **FEATURE_DATASET**:
+   이 옵션을 설정하면, 지정한 FeatureDataset 폴더에 새 레이어를 생성할 것입니다. 지정한 폴더가 존재하지 않는 경우 폴더를 생성할 것입니다.
 
-   ArcMap 10.0 and OGR defaults for XYTOLERANCE are 0.001m (or
-   equivalent) for projected coordinate systems, and 0.000000008983153°
-   for geographic coordinate systems.
+-  **LAYER_ALIAS=string**: (GDAL 2.3 이상 버전)
+   레이어 이름의 별명(alias)을 설정합니다.
 
--  **XORIGIN, YORIGIN, ZORIGIN, XYSCALE, ZSCALE**: These parameters
-   control the `coordinate precision
-   grid <http://help.arcgis.com/en/sdk/10.0/java_ao_adf/conceptualhelp/engine/index.html#//00010000037m000000>`__
-   inside the file geodatabase. The dimensions of the grid are
-   determined by the origin, and the scale. The origin defines the
-   location of a reference grid point in space. The scale is the
-   reciprocal of the resolution. So, to get a grid with an origin at 0
-   and a resolution of 0.001 on all axes, you would set all the origins
-   to 0 and all the scales to 1000.
+-  **GEOMETRY_NAME**:
+   새 레이어의 도형 열의 이름을 설정합니다. 기본값은 "SHAPE"입니다.
 
-   *Important*: The domain specified by
-   ``(xmin=XORIGIN, ymin=YORIGIN, xmax=(XORIGIN + 9E+15 / XYSCALE), ymax=(YORIGIN + 9E+15 / XYSCALE))``
-   needs to encompass every possible coordinate value for the feature
-   class. If features are added with coordinates that fall outside the
-   domain, errors will occur in ArcGIS with spatial indexing, feature
-   selection, and exporting data.
+-  **GEOMETRY_NULLABLE**: (GDAL 2.0 이상 버전)
+   도형 열의 값이 NULL일 수 있는지 여부를 선택합니다. 도형을 필수로 하려면 NO로 설정하면 됩니다. 기본값은 "YES"입니다.
 
-   ArcMap 10.0 and OGR defaults:
+-  **FID**:
+   생성할 OID 열의 이름을 설정합니다. 기본값은 "OBJECTID"입니다.
+   주의: GDAL 버전 2 이전 배포판에서는 이 옵션의 이름이 OID_NAME이었습니다.
 
-   -  For geographic coordinate systems: XORIGIN=-400, YORIGIN=-400,
-      XYSCALE=1000000000
-   -  For projected coordinate systems: XYSCALE=10000 for the default
-      XYTOLERANCE of 0.001m. XORIGIN and YORIGIN change based on the
-      coordinate system, but the OGR default of -2147483647 is suitable
-      with the default XYSCALE for all coordinate systems.
+-  **XYTOLERANCE, ZTOLERANCE**:
+   이 파라미터들은 네트워크 및 위상 규칙 같은 고급 ArcGIS 기능을 위한 스냅 허용 오차를 제어합니다. 어떤 OGR 작업에도 영향을 미치지 않지만, ArcGIS에서 사용하는 경우 영향을 미칠 것입니다. 이 파라미터들의 단위는 좌표계 단위입니다.
 
--  **XML_DEFINITION** : When this option is set, its
-   value will be used as the XML definition to create the new table. The
-   root node of such a XML definition must be a <esri:DataElement>
-   element conformant to FileGDBAPI.xsd
--  **CREATE_MULTIPATCH**\ =YES : When this option is set,
-   geometries of layers of type MultiPolygon will be written as
-   MultiPatch
--  **CONFIGURATION_KEYWORD**\ =DEFAULTS/TEXT_UTF16/MAX_FILE_SIZE_4GB/MAX_FILE_SIZE_256TB/GEOMETRY_OUTOFLINE/BLOB_OUTOFLINE/GEOMETRY_AND_BLOB_OUTOFLINE
-   : Customize how data is stored. By default text in
-   UTF-8 and data up to 1TB
+   ArcMap 10.0 및 OGR 기본값은 투영 좌표계의 경우 XYTOLERANCE가 0.001m(또는 이와 동일한 다른 단위의 값)이고, 지리 좌표계의 경우 0.000000008983153°입니다.
 
-Examples
+-  **XORIGIN, YORIGIN, ZORIGIN, XYSCALE, ZSCALE**:
+   이 파라미터들은 File Geodatabase 내부의 `좌표 정밀도 그리드 <http://help.arcgis.com/en/sdk/10.0/java_ao_adf/conceptualhelp/engine/index.html#//00010000037m000000>`_ 를 제어합니다. 그리드의 크기는 원점과 척도로 결정됩니다. 원점은 기준 그리드 포인트의 공간 위치를 정의합니다. 척도는 해상도와 반비례합니다. 따라서, 원점의 위치가 0이고 모든 축에서 해상도가 0.001인 그리드를 얻으려면 모든 원점을 0으로 설정하고 모든 척도를 1000으로 설정해야 할 것입니다.
+
+   *중요*: ``(xmin=XORIGIN, ymin=YORIGIN, xmax=(XORIGIN + 9E+15 / XYSCALE), ymax=(YORIGIN + 9E+15 / XYSCALE))`` 으로 지정된 도메인은 객체 클래스에 가능한 모든 좌표값을 포함시켜야 합니다. 이 도메인 바깥에 위치하는 좌표를 가진 객체를 추가하는 경우, 공간 색인 작업, 객체 선택, 그리고 데이터 탐색 시 ArcGIS에서 오류가 발생할 것입니다.
+
+   ArcMap 10.0 및 OGR 기본값:
+
+   -  지리 좌표계의 경우: XORIGIN=-400, YORIGIN=-400, XYSCALE=1000000000
+   -  투영 좌표계의 경우: XYTOLERANCE가 기본값 0.001m이면 XYSCALE=10000입니다. XORIGIN과 YORIGIN은 좌표계에 따라 달라지지만, 모든 좌표계에 XYSCALE 기본값과 함께 OGR 기본값 -2147483647이 적합합니다.
+
+-  **XML_DEFINITION**:
+   이 옵션을 설정하면, 이 값을 새 테이블을 생성하기 위한 XML 정의로 사용할 것입니다. 이런 XML 정의의 루트 노드는 반드시 FileGDBAPI.xsd를 준수하는 <esri:DataElement>여야만 합니다.
+
+-  **CREATE_MULTIPATCH=YES**:
+   이 옵션을 설정하면, 레이어의 멀티폴리곤 유형 도형을 멀티패치(MultiPatch) 유형으로 작성할 것입니다.
+
+-  **CONFIGURATION_KEYWORD=DEFAULTS/TEXT_UTF16/MAX_FILE_SIZE_4GB/MAX_FILE_SIZE_256TB/GEOMETRY_OUTOFLINE/BLOB_OUTOFLINE/GEOMETRY_AND_BLOB_OUTOFLINE**:
+   데이터 저장 방법을 사용자 지정합니다. 기본적으로 텍스트는 UTF-8로, 그리고 데이터는 1TB 용량까지 저장합니다.
+
+예시
 --------
 
--  Read layer from FileGDB and load into PostGIS:
--  Get detailed info for FileGDB:
+-  FileGDB로부터 레이어를 읽어와서 PostGIS로 불러오기:
 
-Building Notes
+-  FileGDB 상세 정보를 가져오기:
+
+빌드 작업 메모
 --------------
 
-Read the `GDAL Windows Building example for
-Plugins <http://trac.osgeo.org/gdal/wiki/BuildingOnWindows>`__. You will
-find a similar section in nmake.opt for FileGDB. After you are done, go
-to the *$gdal_source_root\ogr\ogrsf_frmts\filegdb* folder and execute:
+`플러그인 용 GDAL 윈도우 빌드 작업 예시 <http://trac.osgeo.org/gdal/wiki/BuildingOnWindows>`_ 를 읽어보십시오. FileGDB 용 :file:`nmake.opt` 파일에 비슷한 단락이 있을 것입니다. 준비가 되었다면 :file:`$gdal_source_root/ogr/ogrsf_frmts/filegdb*` 폴더로 가서 다음 명령어를 실행하십시오:
 
-``nmake /f makefile.vc plugin         nmake /f makefile.vc plugin-install``
+.. code-block:: c
 
-Known Issues
+    nmake /f makefile.vc plugin
+    nmake /f makefile.vc plugin-install
+
+알려진 문제점
 ------------
 
--  The SDK is known to be unable to open layers with particular spatial
-   reference systems. This might be the case if messages "FGDB: Error
-   opening XXXXXXX. Skipping it (Invalid function arguments.)" when
-   running ``ogrinfo --debug on the.gdb`` (reported as warning in GDAL
-   2.0). Using the OpenFileGDB driver will generally solve that issue.
--  FGDB coordinate snapping will cause geometries to be altered during
-   writing. Use the origin and scale layer creation options to control
-   the snapping behavior.
--  Driver can't read data in SDC format (Smart Data Compression) because
-   operation is not supported by the ESRI SDK.
--  Reading data compressed in CDF format (Compressed Data Format)
-   requires ESRI SDK 1.4 or later.
--  Some applications create FileGeodatabases with non-spatial tables which are
-   not present in the GDB_Items metadata table. These tables cannot be opened
-   by the ESRI SDK, so GDAL will automatically fallback to the OpenFileGDB
-   driver to read these tables. Accordingly they will be opened with the
-   limitations of the OpenFileGDB driver (for instance, they will be
-   read only).
+-  SDK가 특정 공간 좌표계를 사용하는 레이어를 열지 못 한다고 알려져 있습니다. ``ogrinfo --debug on the.gdb`` 를 실행할 때 (GDAL 2.0버전에서 경고로 리포트되는) "FGDB: Error opening XXXXXXX. Skipping it (Invalid function arguments.)" 메시지를 반환하는 경우가 이런 경우일 수도 있습니다. 보통 OpenFileGDB 드라이버를 사용하면 해결되는 문제입니다.
+
+-  데이터셋 작성 시 FGDB 좌표 스냅이 도형을 변경하게 됩니다. 원점 및 척도 레이어 생성 옵션을 사용해서 스냅 습성을 제어하십시오.
+
+-  이 드라이버는 SDC(Smart Data Compression) 포맷으로 된 데이터를 읽어오지 못 합니다. ESRI SDK가 해당 포맷의 읽기를 지원하지 않기 때문입니다.
+
+-  CDF(Compressed Data Format) 포맷으로 압축된 데이터를 읽어오려면 ESRI SDK 1.4 이상 버전이 필수입니다.
+
+-  몇몇 응용 프로그램이 GDB_Items 메타데이터에 존재하지 않는 비공간 테이블을 가진 FileGeodatabase 포맷을 생성합니다. ESRI SDK가 이런 테이블을 열지 못 하기 때문에, GDAL은 이런 테이블을 읽기 위해 자동적으로 OpenFileGDB 드라이버로 돌아갈 것입니다. 이에 따라 이런 테이블은 OpenFileGDB 드라이버의 제한 사항과 함께 열릴 것입니다. (예를 들면 읽기전용으로 열릴 것입니다.)
 
 
-Other limitations
+기타 제한 사항
 -----------------
 
-- The FileGeodatabase format (and thus the driver) does not support 64-bit integers.
+- FileGeodatabase 포맷은 (그리고 당연히 드라이버도) 64비트 정수형을 지원하지 않습니다.
 
-Links
+링크
 -----
 
--  `ESRI File Geodatabase API
-   Page <https://github.com/Esri/file-geodatabase-api/>`__
--  :ref:`OpenFileGDB driver <vector.openfilegdb>`, not depending on a
-   third-party library/SDK
+-  `ESRI File Geodatabase API 페이지 <https://github.com/Esri/file-geodatabase-api/>`_
+
+-  제 3자 라이브러리/SDK에 의존하지 않는 :ref:`OpenFileGDB <vector.openfilegdb>` 드라이버
+
