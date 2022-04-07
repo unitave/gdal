@@ -24,7 +24,7 @@ ESRIJSON 드라이버는 -- `ArcGIS 서버 REST API <http://help.arcgis.com/en/a
 
 .. supports_virtualio::
 
-데이터 소스
+데이터소스
 ----------
 
 이 드라이버는 세 가지 유형의 데이터소스를 입력받습니다:
@@ -35,7 +35,7 @@ ESRIJSON 드라이버는 -- `ArcGIS 서버 REST API <http://help.arcgis.com/en/a
 
 -  .json 파일 확장자로 식별되는, ESRIJSON 데이터를 가진 평문 텍스트 파일
 
--  직접 전송되는, ESRI JSON으로 인코딩된 텍스트
+-  직접 전송되는, ESRIJSON으로 인코딩된 텍스트
 
 GDAL 2.3버전부터, 다른 드라이버들과의 혼동을 피하기 위해 'URL', 'filename', 'text' 앞에 'ESRIJSON:' 접두어를 붙여야 할 수도 있습니다.
 
