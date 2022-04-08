@@ -1,43 +1,29 @@
 .. _vector.georss:
 
-GeoRSS : Geographically Encoded Objects for RSS feeds
+GeoRSS : RSS 피드 용 지리 인코딩 객체
 =====================================================
 
 .. shortname:: GeoRSS
 
-.. build_dependencies:: (read support needs libexpat)
+.. build_dependencies:: (읽기 지원에 libexpat 필요)
 
-GeoRSS is a way of encoding location in RSS or Atom feeds.
+GeoRSS(Geographically Encoded Objects for RSS feeds)란 RSS 또는 ATOM 피드에서 위치를 인코딩하는 방식을 말합니다.
 
-OGR has support for GeoRSS reading and writing. Read support is only
-available if GDAL is built with *expat* library support
+OGR는 GeoRSS 읽기 및 쓰기를 지원합니다. GDAL이 *Expat* 라이브러리 지원과 함께 빌드된 경우에만 읽기 지원을 사용할 수 있습니다.
 
-The driver supports RSS documents in RSS 2.0 or Atom 1.0 format.
+이 드라이버는 RSS 2.0 또는 ATOM 1.0 포맷 RSS 문서를 지원합니다.
 
-It also supports the `3 ways of encoding
-location <http://georss.org/model>`__ : GeoRSS simple, GeoRSS GML and
-W3C Geo (the later being deprecated).
+`위치를 인코딩하는 세 가지 방법 <https://georss.org/model.html>`_ -- GeoRSS Simple, GeoRSS GML 그리고 W3C Geo (후자는 퇴출되었습니다) -- 도 지원합니다.
 
-The driver can read and write documents without location information as
-well.
+이 드라이버는 위치 정보가 없는 문서도 읽고 쓸 수 있습니다.
 
-The default datum for GeoRSS document is the WGS84 datum (EPSG:4326).
-Although that GeoRSS locations are encoded in latitude-longitude order
-in the XML file, all coordinates reported or expected by the driver are
-in longitude-latitude order. The longitude/latitude order used by OGR is
-meant for compatibility with most of the rest of OGR drivers and
-utilities. For locations encoded in GML, the driver will support the
-srsName attribute for describing other SRS.
+GeoRSS 문서의 기본 원점(datum)은 WGS84 원점(EPSG:4326)입니다. XML 파일에서 GeoRSS 위치를 위도-경도 순서로 인코딩하긴 하지만, 이 드라이버가 리포트하거나 예상하는 좌표는 모두 경도-위도 순서입니다. OGR가 사용하는 경도/위도 순서는 다른 OGR 드라이버 및 유틸리티 대부분과의 호환성을 위한 것입니다. GML로 인코딩된 위치의 경우, 이 드라이버는 다른 공간 좌표계를 서술하기 위한 srsName을 지원할 것입니다.
 
-Simple and GML encoding support the notion of a *box* as a geometry.
-This will be decoded as a rectangle (Polygon geometry) in OGR Simple
-Feature model.
+Simple 및 GML 인코딩은 *box* 를 도형으로 인식합니다. OGR 단순 피처 모델에서는 *box* 를 직사각형(폴리곤 도형)으로 디코딩할 것입니다.
 
-A single layer is returned while reading a RSS document. Features are
-retrieved from the content of <item> (RSS document) or <entry> (Atom
-document) elements.
+RSS 문서를 읽어오는 동안 단일 레이어 하나를 반환합니다. <item>(RSS 문서) 또는 <entry>(ATOM 문서) 요소의 내용으로부터 객체들을 가져옵니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
@@ -46,10 +32,10 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Encoding issues
+인코딩 문제점
 ---------------
 
-Expat library supports reading the following built-in encodings :
+Expat 라이브러리는 다음 내장 인코딩 읽기를 지원합니다:
 
 -  US-ASCII
 -  UTF-8
@@ -57,37 +43,26 @@ Expat library supports reading the following built-in encodings :
 -  ISO-8859-1
 -  Windows-1252
 
-The content returned by OGR will be encoded in UTF-8, after the
-conversion from the encoding mentioned in the file header is.
+OGR가 반환하는 콘텐츠는 파일 헤더에 언급된 인코딩으로 변환한 다음 UTF-8로 인코딩될 것입니다.
 
-| If your GeoRSS file is not encoded in one of the previous encodings,
-  it will not be parsed by the GeoRSS driver. You may convert it into
-  one of the supported encoding with the *iconv* utility for example and
-  change accordingly the *encoding* parameter value in the XML header.
+사용자의 GeoRSS 파일이 앞의 인코딩 가운데 하나로 인코딩되지 않은 경우, GeoRSS 드라이버로 파싱되지 않을 것입니다. 해당 파일을 지원되는 인코딩 가운데 하나로 -- 예를 들면 *iconv* 유틸리티를 이용해서 -- 변환한 다음 XML 헤더에 있는 *encoding* 파라미터를 그레 맞춰 변경할 수도 있습니다.
 
-When writing a GeoRSS file, the driver expects UTF-8 content to be
-passed in.
+GeoRSS 파일 작성 시, 이 드라이버는 UTF-8 콘텐츠가 전송되어 올 것으로 예상합니다.
 
-Field definitions
+필드 정의
 -----------------
 
-While reading a GeoRSS document, the driver will first make a full scan
-of the document to get the field definitions.
+GeoRSS 문서를 읽어올 때, 드라이버가 먼저 문서 전체를 스캔해서 필드 정의를 가져올 것입니다.
 
-The driver will return elements found in the base schema of RSS channel
-or Atom feeds. It will also return extension elements, that are allowed
-in namespaces.
+이 드라이버는 RSS 채널 또는 ATOM 피드의 기반 스키마에 있는 요소들을 반환할 것입니다. 이름공간(namespace)에 허용되는 확장 사양 요소들도 반환할 것입니다.
 
-Attributes of first level elements will be exposed as fields.
+첫 번째 수준 요소의 속성을 필드로 노출시킬 것입니다.
 
-Complex content (elements inside first level elements) will be returned
-as an XML blob.
+복잡 콘텐츠(첫 번째 수준 요소 안에 있는 요소들)를 XML 블랍(blob)으로 반환할 것입니다.
 
-When a same element is repeated, a number will be appended at the end of
-the attribute name for the repetitions. This is useful for the
-<category> element in RSS and Atom documents for example.
+동일한 요소가 반복되는 경우, 속성 이름 뒤에 반복 횟수를 의미하는 숫자를 붙일 것입니다. RSS 및 ATOM 문서에 있는, 예를 들어 <category> 요소의 경우 이 습성이 유용합니다.
 
-The following content :
+다음과 같은 내용을:
 
 ::
 
@@ -106,7 +81,7 @@ The following content :
            </myns:complexcontent>
        </item>
 
-will be interpreted in the OGR SF model as :
+OGR 단순 피처 모델은 이렇게 해석할 것입니다:
 
 ::
 
@@ -122,115 +97,91 @@ will be interpreted in the OGR SF model as :
      myns_complexcontent (String) = <myns:subelement>Subelement</myns:subelement>
      POINT (2 49)
 
-Creation Issues
+생성 문제점
 ---------------
 
-On export, all layers are written to a single file. Update of existing
-files is not supported.
+내보내기 작업 시, 모든 레이어를 단일 파일로 작성합니다. 기존 파일 업데이트는 지원하지 않습니다.
 
-If the output file already exits, the writing will not occur. You have
-to delete the existing file first.
+산출 파일이 이미 존재하는 경우, 작성하지 않을 것입니다. 먼저 기존 파일을 삭제해야 합니다.
 
-A layer that is created cannot be immediately read without closing and
-reopening the file. That is to say that a dataset is read-only or
-write-only in the same session.
+방금 생성한 파일을 즉시 읽어올 수 없습니다. 종료한 다음 다시 열어야 합니다. 다시 말해 동일한 세션에서 데이터셋이 읽기전용이기도 하고 쓰기전용이기도 하다는 의미입니다.
 
-Supported geometries :
+다음 도형을 지원합니다:
 
--  Features of type wkbPoint/wkbPoint25D.
--  Features of type wkbLineString/wkbLineString25D.
--  Features of type wkbPolygon/wkbPolygon25D.
+-  wkbPoint/wkbPoint25D 유형의 객체
+-  wkbLineString/wkbLineString25D 유형의 객체
+-  wkbPolygon/wkbPolygon25D 유형의 객체
 
-Other type of geometries are not supported and will be silently ignored.
+다른 도형 유형은 지원하지 않으며, 암묵적으로 무시할 것입니다.
 
-The GeoRSS writer supports the following *dataset* creation options:
+GeoRSS 작성기는 다음 *데이터셋* 생성 옵션들을 지원합니다:
 
--  **FORMAT**\ =RSS|ATOM: whether the document must be in RSS 2.0 or
-   Atom 1.0 format. Default value : RSS
--  **GEOM_DIALECT**\ =SIMPLE|GML|W3C_GEO (RSS or ATOM document): the
-   encoding of location information. Default value : SIMPLE
-   W3C_GEO only supports point geometries.
-   SIMPLE or W3C_GEO only support geometries in geographic WGS84
-   coordinates.
--  **USE_EXTENSIONS**\ =YES|NO. Default value : NO. If defined to YES,
-   extension fields (that is to say fields not in the base schema of RSS
-   or Atom documents) will be written. If the field name not found in
-   the base schema matches the foo_bar pattern, foo will be considered
-   as the namespace of the element, and a <foo:bar> element will be
-   written. Otherwise, elements will be written in the <ogr:> namespace.
--  **WRITE_HEADER_AND_FOOTER**\ =YES|NO. Default value : YES. If defined
-   to NO, only <entry> or <item> elements will be written. The user will
-   have to provide the appropriate header and footer of the document.
-   Following options are not relevant in that case.
--  **HEADER** (RSS or Atom document): XML content that will be put
-   between the <channel> element and the first <item> element for a RSS
-   document, or between the xml tag and the first <entry> element for an
-   Atom document. If it is specified, it will overload the following
-   options.
--  **TITLE** (RSS or Atom document): value put inside the <title>
-   element in the header. If not provided, a dummy value will be used as
-   that element is compulsory.
--  **DESCRIPTION** (RSS document): value put inside the <description>
-   element in the header. If not provided, a dummy value will be used as
-   that element is compulsory.
--  **LINK** (RSS document): value put inside the <link> element in the
-   header. If not provided, a dummy value will be used as that element
-   is compulsory.
--  **UPDATED** (Atom document): value put inside the <updated> element
-   in the header. Should be formatted as a XML datetime. If not
-   provided, a dummy value will be used as that element is compulsory.
--  **AUTHOR_NAME** (Atom document): value put inside the <author><name>
-   element in the header. If not provided, a dummy value will be used as
-   that element is compulsory.
--  **ID** (Atom document): value put inside the <id> element in the
-   header. If not provided, a dummy value will be used as that element
-   is compulsory.
+-  **FORMAT=RSS|ATOM**:
+   문서 포맷을 RSS 2.0 또는 ATOM 1.0 가운데 하나로 설정합니다. 기본값은 RSS입니다.
 
-When translating from a source dataset, it may be necessary to rename
-the field names from the source dataset to the expected RSS or ATOM
-attribute names, such as <title>, <description>, etc... This can be done
-with a :ref:`OGR VRT <vector.vrt>` dataset, or by using the "-sql" option
-of the ogr2ogr utility (see :ref:`rfc-21`)
+-  **GEOM_DIALECT=SIMPLE|GML|W3C_GEO**: (RSS 또는 ATOM 문서)
+   위치 정보의 인코딩을 설정합니다. 기본값은 SIMPLE입니다.
+   W3C_GEO는 포인트 도형만 지원합니다.
+   SIMPLE 또는 W3C_GEO는 지리 WGS84 좌표 도형만 지원합니다.
 
-VSI Virtual File System API support
+-  **USE_EXTENSIONS=YES|NO**:
+   기본값은 NO입니다. YES로 설정하면, 확장 사양 필드를 (다시 말해 RSS 또는 ATOM 문서의 기반 스키마에 없는 필드를) 작성할 것입니다. 기반 스키마에 없는 필드명이 foo_bar 패턴과 일치하는 경우, "foo"를 요소의 이름공간으로 간주하고 <foo:bar> 요소를 작성할 것입니다. 그렇지 않으면, <ogr:> 이름공간에 요소를 작성할 것입니다.
+
+-  **WRITE_HEADER_AND_FOOTER=YES|NO**:
+   기본값은 YES입니다. NO로 설정하는 경우, <entry> 또는 <item> 요소만 작성할 것입니다. 사용자가 문서의 알맞은 헤더와 푸터를 작성해줘야 할 것입니다. 이 경우 다음 옵션들은 의미가 없습니다.
+
+-  **HEADER**: (RSS 또는 ATOM 문서)
+   RSS 문서의 경우 <channel> 요소와 첫 번째 <item> 사이에 들어갈, 또는 ATOM 문서의 경우 xml 태그와 첫 번째 <entry> 요소 사이에 들어갈 XML 내용입니다. 이 옵션을 설정하는 경우, 다음 옵션들을 대체할 것입니다.
+
+-  **TITLE**: (RSS 또는 ATOM 문서)
+   헤더의 <title> 요소 안에 넣을 값을 설정합니다. 설정하지 않는 경우, 해당 요소가 필수적이기 때문에 더미값을 사용할 것입니다.
+
+-  **DESCRIPTION**: (RSS 문서)
+   헤더의 <description> 요소 안에 넣을 값을 설정합니다. 설정하지 않는 경우, 해당 요소가 필수적이기 때문에 더미값을 사용할 것입니다.
+
+-  **LINK**: (RSS 문서)
+   헤더의 <link> 요소 안에 넣을 값을 설정합니다. 설정하지 않는 경우, 해당 요소가 필수적이기 때문에 더미값을 사용할 것입니다.
+
+-  **UPDATED**: (ATOM 문서)
+   헤더의 <updated> 요소 안에 넣을 값을 설정합니다. XML 날짜&시간 서식으로 작성되어야 합니다. 설정하지 않는 경우, 해당 요소가 필수적이기 때문에 더미값을 사용할 것입니다.
+
+-  **AUTHOR_NAME**: (ATOM 문서)
+   헤더의 <author><name> 요소 안에 넣을 값을 설정합니다. 설정하지 않는 경우, 해당 요소가 필수적이기 때문에 더미값을 사용할 것입니다.
+
+-  **ID**: (ATOM 문서)
+   헤더의 <id> 요소 안에 넣을 값을 설정합니다. 설정하지 않는 경우, 해당 요소가 필수적이기 때문에 더미값을 사용할 것입니다.
+
+소스 데이터셋으로부터 변환할 때, 소스 데이터셋의 필드 이름을 <title>, <description> 등등 같은 예상되는 RSS 또는 ATOM 속성 이름으로 재명명해야 할 수도 있습니다. 이 작업은 :ref:`OGR VRT <vector.vrt>` 데이터셋으로 할 수도 있고, 또는 ogr2ogr 유틸리티의 "-sql" 옵션을 사용해서 할 수도 있습니다. (:ref:`rfc-21` 을 참조하십시오.)
+
+VSI 가상 파일 시스템 API 지원
 -----------------------------------
 
-The driver supports reading and writing to files managed by VSI Virtual
-File System API, which include "regular" files, as well as files in the
-/vsizip/ (read-write) , /vsigzip/ (read-write) , /vsicurl/ (read-only)
-domains.
+이 드라이버는 VSI 가상 파일 시스템 API가 관리하는 파일의 읽기 및 쓰기를 지원합니다. VSI 가상 파일 시스템 API이 관리하는 파일에는 "정규" 파일은 물론 /vsizip/ (읽기-쓰기) , /vsigzip/ (읽기-쓰기) , /vsicurl/ (읽기 전용) 도메인에 있는 파일도 포함됩니다.
 
-Writing to /dev/stdout or /vsistdout/ is also supported.
+/dev/stdout 또는 /vsistdout/ 에 쓰기도 지원합니다.
 
-Example
+예시
 -------
 
-The ogrinfo utility can be used to dump the content of a GeoRSS datafile
-:
+-  ogrinfo 유틸리티를 사용해서 GeoRSS 데이터 파일의 콘텐츠를 덤프하기:
 
 ::
 
    ogrinfo -ro -al input.xml
 
-| 
-
-The ogr2ogr utility can be used to do GeoRSS to GeoRSS translation. For
-example, to translate a Atom document into a RSS document
+-  ogr2ogr 유틸리티를 사용해서 GeoRSS에서 GeoRSS로 변환하기. 예를 들어, ATOM 문서를 RSS 문서로 변환하기:
 
 ::
 
    ogr2ogr -f GeoRSS output.xml input.xml "select link_href as link, title, content as description, author_name as author, id as guid from georss"
 
-| 
-| Note : in this example we map equivalent fields, from the source name
-  to the expected name of the destination format.
+.. note::
 
-| 
+   이 예시에서 동등한 필드들을, 소스 이름으로부터 대상 포맷의 예상 이름으로 매핑합니다.
 
-The following Python script shows how to read the content of a online
-GeoRSS feed
+-  다음 파이썬 스크립트는 온라인 GeoRSS 피드의 내용을 어떻게 읽어오는지 보여줍니다:
 
-::
+.. code-block:: python
 
        #!/usr/bin/python
        import gdal
@@ -263,14 +214,18 @@ GeoRSS feed
        # Free memory associated with the in-memory file
        gdal.Unlink('/vsimem/temp')
 
-See Also
+참고
 --------
 
--  `Home page for GeoRSS format <http://georss.org/>`__
--  `Wikipedia page for GeoRSS
-   format <http://en.wikipedia.org/wiki/GeoRSS>`__
--  `Wikipedia page for RSS format <http://en.wikipedia.org/wiki/RSS>`__
--  `RSS 2.0 specification <http://www.rssboard.org/rss-specification>`__
--  `Wikipedia page for Atom
-   format <http://en.wikipedia.org/wiki/Atom_(standard)>`__
--  `Atom 1.0 specification <http://www.ietf.org/rfc/rfc4287.txt>`__
+-  `GeoRSS 포맷 홈페이지 <https://georss.org/>`_
+
+-  `GeoRSS 포맷 위키백과 페이지 <http://en.wikipedia.org/wiki/GeoRSS>`_
+
+-  `RSS 포맷 위키백과 페이지 <http://en.wikipedia.org/wiki/RSS>`_
+
+-  `RSS 2.0 사양 <http://www.rssboard.org/rss-specification>`_
+
+-  `ATOM 포맷 위키백과 페이지 <http://en.wikipedia.org/wiki/ATOM_(standard)>`_
+
+-  `ATOM 1.0 사양 <http://www.ietf.org/rfc/rfc4287.txt>`_
+

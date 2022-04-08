@@ -182,8 +182,8 @@ FLATTEN_NESTED_ATTRIBUTES 옵션을 설명하자면, 다음과 같은 GeoJSON �
 -  **DESCRIPTION=string**: (OGR 2.2 이상 버전) (Long)
    객체 집합 수준에 있는 "description" 속성에 작성할 설명입니다. 읽기 작업 시, 레이어의 DESCRIPTION 메타데이터 항목에 이 문자열을 리포트할 것입니다.
 
--  **ID_FIELD=string**: (OGR 2.3 이상 버전) Name of the source field that
-   must be written as the 'id' member of Feature objects.
+-  **ID_FIELD=string**: (OGR 2.3 이상 버전)
+   Feature 객체의 'id' 멤버로 작성해야만 하는 소스 필드의 이름을 설정합니다.
 
 -  **ID_TYPE=AUTO/String/Integer**: (OGR 2.3 이상 버전)
    Feature 객체의 'id' 멤버의 유형을 설정합니다.
