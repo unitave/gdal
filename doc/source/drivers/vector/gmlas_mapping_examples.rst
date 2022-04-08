@@ -1,19 +1,18 @@
 .. _gmlas_mapping_examples:
 
-GMLAS - Mapping examples
+GMLAS - 매핑 예
 ========================
 
-This page gives a few examples of how XML constructs are mapped to OGR
-layers and fields by the :ref:`vector.gmlas` driver.
+이 페이지에서는 :ref:`vector.gmlas` 드라이버가 XML 구조를 어떻게 OGR 레이어 및 필드에 매핑하는지에 관한 몇 가지 예시를 제공합니다.
 
 
 .. list-table:: Mapping examples
    :header-rows: 1
 
-   * - Schema
-     - Document
-     - OGR layers
-     - Comments
+   * - 스키마
+     - 문서
+     - OGR 레이어
+     - 주석
    * - .. code-block:: xml
 
             <schema xmlns="http://www.w3.org/2001/XMLSchema">
@@ -44,7 +43,7 @@ layers and fields by the :ref:`vector.gmlas` driver.
                 id (String) = my_id
                 attr (String) = attr_value
                 name (String) = my_name
-     - Element with attributes and sub-elements of simple type and maximum cardinality of 1.
+     - 단순 유형의 속성 및 하위 요소를 가지고 있고 최대 집합원 개수(cardinality)가 1인 요소
    * - .. code-block:: xml
 
             <schema xmlns="http://www.w3.org/2001/XMLSchema">
@@ -95,7 +94,7 @@ layers and fields by the :ref:`vector.gmlas` driver.
                 ogr_pkid (String) = my_id_dt_array_2
                 parent_id (String) = my_id
                 value (DateTime) = 2016/09/24 15:32:00+00
-     - Example with array and child layer
+     - 배열과 하위 레이어를 가진 예시
    * - .. code-block:: xml
 
             <schema xmlns="http://www.w3.org/2001/XMLSchema">
@@ -149,8 +148,7 @@ layers and fields by the :ref:`vector.gmlas` driver.
                 identifier_name (String) = my_name
                 identifier_namespace (String) = baz
 
-     - Example of nested element, that can be folded into main layer. Use of an
-       attribute on a sub-element.
+     - 주 레이어로 접어 넣을 수 있는 내포 요소의 예시. 하위 요소에 있는 속성 사용.
    * - .. code-block:: xml
 
             <schema xmlns:myns="http://myns"
@@ -265,14 +263,12 @@ layers and fields by the :ref:`vector.gmlas` driver.
                 parent_pkid (String) = my_id2
                 child_pkid (String) = _name_3
 
-     - Example of of a common element "name" referenced by 2 layers "MyFeature"
-       and "MyFeature1". The links are established through the junction layers
-       "MyFeature_names_name_name" and "MyFeature2_names_name_name". 
+     - "MyFeature" 및 "MyFeature1" 두 레이어가 참조하는 공통 요소 "name"의 예시. "MyFeature_names_name_name" 및 "MyFeature2_names_name_name" 두 연결(junction) 레이어를 통해 링크를 확립합니다.
 
 swe:DataArray
 -------------
 
-The following snippet
+다음 코드 조각은
 
 .. code-block:: xml
 
@@ -314,10 +310,9 @@ The following snippet
            <swe:values>2016-09-01T00:00:00+01:00,1,2.34,3,foo,true@@2017-09-01T00:00:00,2,3.45</swe:values>
        </swe:DataArray>
 
-will receive a special processing to be mapped into a dedicated layer:
+전용 레이어로 매핑되도록 특수 처리될 것입니다:
 
 ::
-
 
    Layer name: dataarray_1_components
    Geometry: None
@@ -347,7 +342,8 @@ will receive a special processing to be mapped into a dedicated layer:
      myquantity (Real) = 3.45
 
 
-See Also
+참고
 --------
 
--  :ref:`main documentation page for GMLAS driver <vector.gmlas>`
+-  :ref:`GMLAS 드라이버의 주 문서 페이지 <vector.gmlas>`
+
