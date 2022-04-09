@@ -392,22 +392,21 @@ VSI 가상 파일 시스템 API 지원
      </GMLFeatureClass>
    </GMLFeatureClassList>
 
-Note the presence of the '|' character in the <ElementPath> and
-<GeometryElementPath> elements to specify the wished field/geometry
-element that is a nested XML element. Nested field elements are supported,
-as well as specifying <GeometryElementPath> If
-GeometryElementPath is not specified, the GML driver will use the last
-recognized geometry element.
+<ElementPath> 및 <GeometryElementPath> 요소에 있는 '|' 문자는 원하는 내포 XML 요소인 필드/도형 요소를 지정하기 위한 것이라는 사실을 기억하십시오. 내포 필드 요소는 물론 <GeometryElementPath>도 지정할 수 있습니다.
+<GeometryElementPath>를 지정하지 않으면 GML 드라이버가 가장 최근에 인식한 도형 요소를 사용할 것입니다.
 
-The <GeometryType> element can be specified to force the geometry type.
-Accepted values are : 0 (any geometry type), 1 (point), 2 (linestring),
-3 (polygon), 4 (multipoint), 5 (multilinestring), 6 (multipolygon), 7
-(geometrycollection).
+<GeometryType> 요소를 지정해서 도형 요소를 강제할 수 있습니다. 다음 값들 가운데 하나로 지정할 수 있습니다:
 
-The <GeometryElementPath> and <GeometryType> can
-be specified as many times as there are geometry fields in the GML file.
-Another possibility is to define a <GeomPropertyDefn>element as many
-times as necessary:
+   -  0 (모든 도형 유형)
+   -  1 (포인트)
+   -  2 (라인스트링)
+   -  3 (폴리곤)
+   -  4 (멀티포인트)
+   -  5 (멀티라인스트링)
+   -  6 (멀티폴리곤)
+   -  7 (도형 집합 geometrycollection)
+
+<GeometryElementPath> 및 <GeometryType> 요소는 GML 파일에 있는 도형 필드의 개수만큼 지정할 수 있습니다. 또는 <GeomPropertyDefn> 요소를 필요한 만큼 정의해도 됩니다:
 
 .. code-block:: XML
 
@@ -428,7 +427,7 @@ times as necessary:
      </GMLFeatureClass>
    </GMLFeatureClassList>
 
-The output of *ogrinfo test.gml -ro -al* is:
+``ogrinfo test.gml -ro -al`` 명령어의 산출물은 다음과 같을 것입니다:
 
 ::
 
@@ -449,10 +448,10 @@ The output of *ogrinfo test.gml -ro -al* is:
 고급 .gfs 문법
 --------------------
 
-Specifying ElementPath to find objects embedded into top level objects
+최상위 객체에 내장된 객체를 찾기 위한 ElementPath 지정하기
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let's consider the following test.gml file :
+다음과 같은 test.gml 파일이 있다고 할 때:
 
 .. code-block:: XML
 
@@ -494,11 +493,7 @@ Let's consider the following test.gml file :
      </gml:featureMember>
    </gml:FeatureCollection>
 
-By default, only the TopLevelObject object would be reported and it
-would only use the second geometry. This is not the desired behavior in
-that instance. You can edit the generated .gfs and modify it like the
-following in order to specify a full path to the element (top level XML
-element being omitted) :
+기본적으로 TopLevelObject 객체만 리포트하고 TopLevelObject 객체는 부 도형만 사용할 것입니다. 이 상황에서 바랍직한 습성은 아닙니다. 생성된 .gfs 파일을 편집해서 요소를 가리키는 전체 경로를 지정하도록 다음과 같이 수정할 수 있습니다(최상위 XML 요소를 생략합니다):
 
 .. code-block:: XML
 
@@ -515,14 +510,12 @@ element being omitted) :
      </GMLFeatureClass>
    </GMLFeatureClassList>
 
-Getting XML attributes as OGR fields
+XML 속성을 OGR 필드로 가져오기
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The element@attribute syntax can be used in the <ElementPath> to specify
-that the value of attribute 'attribute' of element 'element' must be
-fetched.
+<ElementPath> 요소에 "요소@속성" 문법을 사용해서 element 요소의 attribute 속성의 값을 가져와야만 한다고 지정할 수 있습니다.
 
-Let's consider the following test.gml file :
+다음과 같은 test.gml 파일과
 
 .. code-block:: XML
 
@@ -535,7 +528,7 @@ Let's consider the following test.gml file :
      </gml:featureMember>
    </gml:FeatureCollection>
 
-and the following associated .gfs file.
+관련 .gfs 파일이 있다고 할 때:
 
 .. code-block:: XML
 
@@ -557,7 +550,7 @@ and the following associated .gfs file.
      </GMLFeatureClass>
    </GMLFeatureClassList>
 
-The output of *ogrinfo test.gml -ro -al* is:
+``ogrinfo test.gml -ro -al`` 명령어의 산출물은 다음과 같을 것입니다:
 
 ::
 
@@ -574,19 +567,14 @@ The output of *ogrinfo test.gml -ro -al* is:
      length (Real) = 5
      length_unit (String) = m
 
-Using conditions on XML attributes
+XML 속성에 조건 사용하기
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A <Condition> element can be specified as a child element of a
-<PropertyDefn>. The content of the Condition follows a minimalistic
-XPath syntax. It must be of the form @attrname[=|!=]'attrvalue' [and|or
-other_cond]*. Note that 'and' and 'or' operators cannot be mixed (their
-precedence is not taken into account).
+<Condition> 요소를 <PropertyDefn>의 하위 요소로 지정할 수 있습니다. <Condition> 요소의 내용은 최소한의 XPath 문법을 따릅니다. 반드시 ``@attrname[=|!=]'attrvalue' [and|or other_cond]`` 형식이어야만 합니다. 'and' 및 'or' 연산자를 함께 사용할 수 없다는 사실을 기억하십시오. (연산자의 우선 순위를 고려하지 않습니다.)
 
-Several <PropertyDefn> can be defined with the same <ElementPath>, but
-with <Condition> that must be mutually exclusive.
+동일한 <ElementPath>를 가진 <PropertyDefn>을 여러 개 정의할 수 있지만, <Condition>은 절대로 동일해서는 안 됩니다.
 
-Let's consider the following testcondition.gml file :
+다음과 같은 testcondition.gml 파일과
 
 .. code-block:: XML
 
@@ -603,7 +591,7 @@ Let's consider the following testcondition.gml file :
      </gml:featureMember>
    </ogr:FeatureCollection>
 
-and the following associated .gfs file.
+관련 .gfs 파일이 있다고 할 때:
 
 .. code-block:: XML
 
@@ -639,7 +627,7 @@ and the following associated .gfs file.
      </GMLFeatureClass>
    </GMLFeatureClassList>
 
-The output of *ogrinfo testcondition.gml -ro -al* is:
+``ogrinfo testcondition.gml -ro -al`` 명령어의 산출물은 다음과 같을 것입니다:
 
 ::
 
@@ -660,18 +648,14 @@ The output of *ogrinfo testcondition.gml -ro -al* is:
      name_others_lang (StringList) = (1:de)
      name_others (StringList) = (1:Deutsche name)
 
-Registry for GML application schemas
+GML 응용 프로그램 스키마의 레지스트리
 ------------------------------------
 
-The "data" directory of the GDAL installation contains a
-"gml_registry.xml" file that links feature types of GML application
-schemas to .xsd or .gfs files that contain their definition. This is
-used in case no valid .gfs or .xsd file is found next to the GML file.
+GDAL 설치본의 "data" 디렉터리는 GML 응용 프로그램 스키마의 객체 유형들을 그 정의를 담고 있는 .xsd 또는 .gfs 파일과 링크시키는 "gml_registry.xml" 파일을 담고 있습니다. GML 파일 옆에 무결한 .xsd 또는 .gfs 파일이 없는 경우 이 파일을 이용합니다.
 
-An alternate location for the registry file can be defined by setting
-its full pathname to the GML_REGISTRY 환경설정 옵션.
+GML_REGISTRY 환경설정 옵션에 전체 경로명을 설정하면 이 레지스트리 파일의 대체 위치를 정의할 수 있습니다.
 
-An example of such a file is :
+다음은 이런 레지스트리 파일의 예시입니다:
 
 .. code-block:: XML
 
@@ -713,30 +697,17 @@ An example of such a file is :
        </namespace>
    </gml_registry>
 
-XML schema definition (.xsd) files are pointed by the schemaLocation
-attribute, whereas OGR .gfs files are pointed by the gfsSchemaLocation
-attribute. In both cases, the filename can be a URL (http://, https://),
-an absolute filename, or a relative filename (relative to the location
-of gml_registry.xml).
+schemaLocation 속성이 XML 스키마 정의 (.xsd) 파일을 가리키는 반면, gfsSchemaLocation 속성은 OGR .gfs 파일을 가리킵니다. 두 경우 모두 파일명이 URL(http://, https://), 절대 파일명, 또는 (gml_registry.xml 파일 위치에 상대적인) 상대 파일명이 될 수 있습니다.
 
-The schema is used if and only if the namespace prefix and URI are found
-in the first bytes of the GML file (e.g.
-*xmlns:ktjkiiwfs="http://xml.nls.fi/ktjkiiwfs/2010/02"*), and that the
-feature type is also detected in the first bytes of the GML file (e.g.
-*ktjkiiwfs:KiinteistorajanSijaintitiedot*). If the element value is
-defined than the schema is used only if the feature type together with
-the value is found in the first bytes of the GML file (e.g.
-*vf:TypSouboru>OB_UKSH*).
+GML 파일의 처음 바이트들에 (예를 들어 ``xmlns:ktjkiiwfs="http://xml.nls.fi/ktjkiiwfs/2010/02"`` 같은) 이름공간 접두어와 URI가 있고, GML 파일의 처음 바이트들에서 (예를 들어 ``ktjkiiwfs:KiinteistorajanSijaintitiedot`` 같은) 객체 유형도 탐지되는 경우에만 스키마를 사용합니다. 
+요소값이 정의되어 있다면, GML 파일의 처음 바이트들에 (예를 들어 ``vf:TypSouboru>OB_UKSH`` 같은) 값을 가진 객체 유형이 있는 경우에만 스키마를 사용합니다.
 
-Building junction tables
+연결 테이블 작성하기
 ------------------------
 
-The
-`ogr_build_junction_table.py <https://github.com/OSGeo/gdal/blob/master/swig/python/gdal-utils/osgeo_utils/samples/ogr_build_junction_table.py>`_
-script can be used to build a `junction
-table <http://en.wikipedia.org/wiki/Junction_table>`_ from OGR layers
-that contain "XXXX_href" fields. Let's considering the following output
-of a GML file with links to other features :
+`ogr_build_junction_table.py <https://github.com/OSGeo/gdal/blob/master/swig/python/gdal-utils/osgeo_utils/samples/ogr_build_junction_table.py>`_ 파이썬 스크립트를 이용하면 "XXXX_href" 필드를 담고 있는 OGR 레이어로부터 `연결 테이블(junction table) <http://en.wikipedia.org/wiki/Junction_table>`_ 을 작성할 수 있습니다.
+
+다른 객체와의 링크를 가지고 있는 다음과 같은 산출 GML 파일이 있다고 할 때:
 
 ::
 
@@ -750,20 +721,19 @@ of a GML file with links to other features :
      [...]
      otherFeature_href (StringList) = (2:#otherFeature.30,#otherFeature.10)
 
-After running
+이 파일을 PostGIS로 가져오기 위해 다음 명령어를 실행하고
 
 ::
 
    ogr2ogr -f PG PG:dbname=mydb my.gml
 
-to import it into PostGIS and
+다음과 같이 파이썬 스크립트를 실행하면
 
 ::
 
    python ogr_build_junction_table.py PG:dbname=mydb
 
-, a *myfeature_otherfeature* table will be created and will contain the
-following content :
+다음과 같은 내용을 담고 있는 *myfeature_otherfeature* 테이블을 생성할 것입니다:
 
 .. list-table:: myfeature_otherfeature Table
    :header-rows: 1
@@ -779,12 +749,12 @@ following content :
    * - myFeature.2
      - otherFeature.10
 
-Reading datasets resulting from a WFS 2.0 join queries
+WFS 2.0 결합(join) 쿼리가 산출하는 데이터셋 읽어오기
 ------------------------------------------------------
 
-The GML driver can read datasets resulting from a WFS 2.0 join queries.
+GML 드라이버는 WFS 2.0 결합(join) 쿼리가 산출하는 데이터셋을 읽을 수 있습니다.
 
-Such datasets typically look like:
+이런 데이터셋은 일반적으로 다음처럼 보일 것입니다:
 
 .. code-block:: XML
 
@@ -832,9 +802,7 @@ Such datasets typically look like:
      </wfs:member>
    </wfs:FeatureCollection>
 
-OGR will group together the attributes from the layers participating to
-the join and will prefix them with the layer name. So the above example
-will be read as the following:
+OGR는 결합에 참여하는 레이어들의 속성들을 함께 그룹화하기 위해 속성 이름 앞에 레이어 이름을 붙일 것입니다. 따라서 앞의 예시 데이터셋을 다음과 같이 읽어올 것입니다:
 
 ::
 
