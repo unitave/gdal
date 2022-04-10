@@ -54,10 +54,10 @@ EEDAI - 구글 어스 엔진 데이터 API 이미지
 다음 환경설정 옵션들을 사용할 수 있습니다:
 
 -  **EEDA_BEARER**\ =value: API에 전송할 인증 베어러 값입니다. 이 옵션은 외부 코드가 토큰을 계산한 경우에만 유용합니다. 베어러의 무결성은 일반적으로 베어러를 요청한 시간 이후 1시간까지입니다.
--  **EEDA_BEARER_FILE**\ =filename: 값을 직접 전송하는 대신 값을 읽어올 수 있는 파일명을 전송한다는 점을 제외하면, EEDA_BEARER 옵션과 비슷합니다.
+-  **EEDA_BEARER_FILE**\ =filename: 값을 직접 전송하는 대신 값을 읽어와야 할 파일명을 지정한다는 점을 제외하면, EEDA_BEARER 옵션과 비슷합니다.
 -  **GOOGLE_APPLICATION_CREDENTIALS**\ =file.json: 프라이빗 키와 클라이언트 이메일을 담고 있는 서비스 계정 프라이빗 키 파일입니다.
 -  **EEDA_PRIVATE_KEY**\ =string: PKCS#8 PEM 헤더와 푸터를 가진 PKCS#8 PEM 파일로 인코딩된 RSA 프라이빗 키입니다. OAuth2 서비스 계정 인증을 사용하려면 EEDA_CLIENT_EMAIL과 함께 사용해야 합니다. GDAL이 libcrypto++ 또는 libssl을 대상으로 빌드되어 있어야 합니다.
--  **EEDA_PRIVATE_KEY_FILE**\ =filename: 키를 직접 전송하는 대신 키를 읽어올 수 있는 파일명을 전송한다는 점을 제외하면, EEDA_PRIVATE_KEY 옵션과 비슷합니다.
+-  **EEDA_PRIVATE_KEY_FILE**\ =filename: 키를 직접 전송하는 대신 키를 읽어와야 할 파일명을 지정한다는 점을 제외하면, EEDA_PRIVATE_KEY 옵션과 비슷합니다.
 -  **EEDA_CLIENT_EMAIL**\ =string: OAuth2 서비스 계정 인증을 사용하려면 EEDA_PRIVATE_KEY 또는 EEDA_PRIVATE_KEY_FILE과 함께 지정해야 하는 이메일입니다.
 
 오버뷰
@@ -98,4 +98,4 @@ EEDAI - 구글 어스 엔진 데이터 API 이미지
 참고
 --------
 
--  :ref:`구글 어스 엔진 데이터 API 드라이버 <vector.eeda>`
+-  :ref:`구글 어스 엔진 데이터 API <vector.eeda>` 드라이버

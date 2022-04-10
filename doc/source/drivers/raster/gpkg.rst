@@ -235,8 +235,8 @@ PNG 타일의 경우, 읽기 시 습성이 다음과 같습니다:
 -  **FIELD_NAME**\ =string: (GDAL 2.3버전 이상) 필드 이름입니다. 타일 그리드화 커버리지 데이터셋에만 사용합니다. 기본값은 Height입니다.
 -  **QUANTITY_DEFINITION**\ =string: (GDAL 2.3버전 이상) 필드의 설명입니다. 타일 그리드화 커버리지 데이터셋에만 사용합니다. 기본값은 Height입니다.
 -  **GRID_CELL_ENCODING**\ =grid-value-is-center/grid-value-is-area/grid-value-is-corner: (GDAL 2.3버전 이상) 그리드 셀 인코딩입니다. 타일 그리드화 커버리지 데이터셋에만 사용합니다. 기본값은 grid-value-is-center로, 이때 AREA_OR_POINT 메타데이터 항목은 설정되지 않습니다.
--  **VERSION**\ =AUTO/1.0/1.1/1.2/1.3: (GDAL 2.2버전 이상) (application_id 및 user_version 필드를 위한) GeoPackage 버전을 설정합니다. AUTO 모드에서는, GDAL 2.3버전부터 1.2에 대응합니다. GDAL 3.3버전부터는 1.3을 사용할 수 있습니다.
--  **ADD_GPKG_OGR_CONTENTS**\ =YES/NO: (GDAL 2.2버전 이상) 벡터 레이어의 객체 개수와 관련 트리거를 보전하기 위한 gpkg_ogr_contents 테이블을 추가할지 여부를 정의합니다. 기본값은 YES입니다.
+-  **VERSION**\ =AUTO/1.0/1.1/1.2/1.3: (GDAL 2.2버전 이상) (application_id 및 user_version 필드를 위한) 지오패키지 버전을 설정합니다. AUTO 모드에서는, GDAL 2.3버전부터 기본값이 1.2입니다. GDAL 3.3버전부터는 1.3을 사용할 수 있습니다.
+-  **ADD_GPKG_OGR_CONTENTS**\ =YES/NO: (GDAL 2.2버전 이상) 벡터 레이어의 객체 개수와 관련 트리거를 보전하기 위한 gpkg_ogr_contents 테이블을 추가할지 여부를 선택합니다. 기본값은 YES입니다.
 
 오버뷰
 ---------
@@ -263,29 +263,29 @@ GDAL에서 나오지 않은 메타데이터의 경우, 이 드라이버는 이�
 지오패키지 확장 지원 수준
 -----------------------------------------
 
-(래스터 범위를 가지고 있는 지오패키지에 한합니다)
+(래스터 스코프(scope)를 가지고 있는 지오패키지에 한합니다.)
 
-.. list-table:: Extensions
+.. list-table:: GeoPackage Extensions
    :header-rows: 1
 
    * - 확장 이름
      - OGC 도입 확장인가?
      - GDAL이 지원하는가?
    * - `다른 간격의 확대/축소 <http://www.geopackage.org/guidance/extensions/zoom_other_intervals.html>`_
-     - ○
-     - ○
+     - Ｏ
+     - Ｏ
    * - `WebP 타일 인코딩 <http://www.geopackage.org/guidance/extensions/tiles_encoding_webp.html>`_
-     - ○
-     - ○
+     - Ｏ
+     - Ｏ
    * - `메타데이터 <http://www.geopackage.org/guidance/extensions/metadata.html>`_
-     - ○
-     - ○
+     - Ｏ
+     - Ｏ
    * - `좌표계 용 WKT <http://www.geopackage.org/guidance/extensions/wkt_for_crs.md>`_ (WKT v2)
-     - ○
+     - Ｏ
      - GDAL 2.2버전 부터 부분 지원. GDAL이 이 확장 사양으로 데이터베이스를 읽어올 수 있습니다. GDAL 3.0버전부터 WKT v2 항목을 지원합니다.
    * - `타일 그리드화 커버리지 데이터 <http://www.geopackage.org/guidance/extensions/tiled_gridded_coverage_data.html>`_
-     - ○
-     - ○, GDAL 2.3버전부터 (GDAL 2.2는 이 확장 사양의 초기 버전을 지원합니다.)
+     - Ｏ
+     - Ｏ, GDAL 2.3버전부터 (GDAL 2.2는 이 확장 사양의 초기 버전을 지원합니다.)
 
 예시
 --------
