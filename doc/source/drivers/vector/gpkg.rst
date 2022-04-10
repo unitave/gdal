@@ -1,38 +1,31 @@
 .. _vector.gpkg:
 
-GPKG -- GeoPackage vector
+GPKG -- 지오패키지 벡터
 =========================
 
 .. shortname:: GPKG
 
 .. build_dependencies:: libsqlite3
 
-This driver implements support for access to spatial tables in the `OGC
-GeoPackage format
-standard <http://www.opengeospatial.org/standards/geopackage>`__ The
-GeoPackage standard uses a SQLite database file as a generic container,
-and the standard defines:
+이 드라이버는 `OGC 지오패키지(GeoPackage) 포맷 표준 <http://www.opengeospatial.org/standards/geopackage>`_ 공간 테이블에 접근 지원을 구현합니다. 지오패키지 표준은 SQLite 데이터베이스 파일을 일반 컨테이너로 사용하며, 다음을 정의하고 있습니다:
 
--  Expected metadata tables (``gpkg_contents``,
-   ``gpkg_spatial_ref_sys``, ``gpkg_geometry_columns``)
--  Binary format encoding for geometries in spatial tables (basically a
-   GPKG standard header object followed by ISO standard well-known
-   binary (WKB))
--  Naming and conventions for extensions (extended feature types) and
-   indexes (how to use SQLite r-tree in an interoperable manner)
+-  예상 메타데이터 테이블 (``gpkg_contents``, ``gpkg_spatial_ref_sys``, ``gpkg_geometry_columns``)
+-  공간 테이블에 있는 도형을 위한 바이너리 포맷 인코딩 (기본적으로 ISO 표준 WKB(Well-Known Binary)를 준수하는 GPKG 표준 헤더 객체)
+-  확장자 명명 및 규범(확장 객체 유형) 및 색인(상호운용적인 방식으로 SQLite R-트리를 사용하는 방법)
 
-This driver reads and writes SQLite files from the file system, so it
-must be run by a user with read/write access to the files it is working
-with.
+이 드라이버는 파일 시스템에서 SQLite 파일을 읽고 쓰기 때문에, 작업 파일에 읽기/쓰기 접근 권한을 가진 사용자가 이 드라이버를 실행해야만 합니다.
 
-The driver also supports reading and writing the
-following non-linear geometry types :CIRCULARSTRING, COMPOUNDCURVE,
-CURVEPOLYGON, MULTICURVE and MULTISURFACE
+이 드라이버는 다음 비선형 도형 유형들도 읽고 쓸 수 있습니다:
 
-GeoPackage raster/tiles are supported. See
-:ref:`GeoPackage raster <raster.gpkg>` documentation page
+   -  CIRCULARSTRING
+   -  COMPOUNDCURVE
+   -  CURVEPOLYGON
+   -  MULTICURVE
+   -  MULTISURFACE
 
-Driver capabilities
+지오패키지 래스터/타일도 지원합니다. :ref:`지오패키지 래스터 <raster.gpkg>` 문서도 읽어보십시오.
+
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
@@ -41,399 +34,277 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Specification version
+사양 버전
 ---------------------
 
-Starting with GDAL 2.2, the driver is able to create GeoPackage
-databases following the 1.0/1.0.1, 1.1 or 1.2 versions. For GDAL 2.2, it
-will automatically adjust to the minimum version required for the
-features of GeoPackage used. For GDAL 2.3 or later, it will default to
-1.2. Explicit version choice can be done by specifying the VERSION
-dataset creation option.
+GDAL 2.2버전부터, 이 드라이버는 1.0/1.0.1, 1.1 또는 1.2버전을 준수하는 지오패키지 데이터베이스를 생성할 수 있습니다. GDAL 2.2버전의 경우, 이 드라이버는 지오패키지가 사용하는 객체가 요구하는 최저 버전으로 자동 조정할 것입니다. GDAL 2.3 이상 버전의 경우, 기본값 1.2버전을 사용할 것입니다. VERSION 데이터셋 생성 옵션을 지정하면 버전을 명확하게 선택할 수 있습니다.
 
-Limitations
+제한 사항
 -----------
 
--  GeoPackage only supports one geometry column per table.
+-  지오패키지는 테이블 하나 당 도형 열 하나만 지원합니다.
 
 SQL
 ---
 
-The driver supports OGR attribute filters, and users are expected to
-provide filters in the SQLite dialect, as they will be executed directly
-against the database.
+이 드라이버는 OGR 속성 필터를 지원하며, 사용자가 SQLite 방언으로 필터를 지정할 것을 기대합니다. 필터가 데이터베이스를 대상으로 직접 실행될 것이기 때문입니다.
 
-SQL SELECT statements passed to ExecuteSQL() are
-also executed directly against the database. If Spatialite is used, a
-recent version (4.2.0) is needed and use of explicit cast operators
-AsGPB() is required to transform GeoPackage geometries to Spatialite
-geometries (the reverse conversion from Spatialite geometries is
-automatically done by the GPKG driver). It is also possible to use with
-any Spatialite version, but in a slower way, by specifying the
-"INDIRECT_SQLITE" dialect. In which case, GeoPackage geometries
-automatically appear as Spatialite geometries after translation by OGR.
+ExecuteSQL()로 전송되는 SQL SELECT 문도 데이터베이스를 대상으로 직접 실행됩니다. Spatialite를 사용하는 경우, 지오패키지 도형을 Spatialite 도형으로 변환하려면 Spatialite 최신 버전(4.2.0)과 명확한 캐스트 연산자 AsGPB()를 사용해야 합니다. (GPKG 드라이버는 Spatialite 도형을 자동으로 역변환할 것입니다.) "INDIRECT_SQLITE" 방언을 지정하면 -- 비록 느리긴 하지만 -- 다른 Spatialite 버전도 사용할 수 있습니다. 이 경우 지오패키지 도형은 OGR가 변환한 이후 자동적으로 Spatialite 도형으로 나타납니다.
 
-Starting with GDAL 2.2, the "DROP TABLE layer_name" and "ALTER TABLE
-layer_name RENAME TO new_layer" statements can be used. They will update
-GeoPackage system tables.
+GDAL 2.2버전부터, "DROP TABLE layer_name" 및 "ALTER TABLE layer_name RENAME TO new_layer" 선언문을 사용할 수 있습니다. 이 선언문들은 지오패키지 시스템 테이블을 업데이트할 것입니다.
 
-Starting with GDAL 2.2, the
-"HasSpatialIndex('table_name','geom_col_name')" statement can be used
-for checking if the table has spatial index on the named geometry
-column.
+GDAL 2.2버전부터, 테이블이 명명된 도형 열에 대한 공간 색인을 가지고 있는지 확인하기 위해 "HasSpatialIndex('table_name','geom_col_name')" 선언문을 사용할 수 있습니다.
 
-When dropping a table, or removing records from tables, the space they
-occupied is not immediately released and kept in the pool of file pages
-that SQLite may reuse later. If you need to shrink the file to its
-minimum size, you need to issue an explicit "VACUUM" SQL request. Note
-that this will result in a full rewrite of the file.
+테이블을 삭제(drop)하거나 테이블로부터 레코드를 제거하는 경우, 테이블 또는 레코드가 차지하고 있던 공간을 즉시 해제하지 않고 SQLite가 나중에 다시 사용할 수도 있는 파일 페이지 풀에 유지합니다. 파일을 최소 용량으로 줄여야 한다면 "VACUUM" SQL 요청을 명확하게 전송해야 합니다. 이 요청은 전체 파일을 다시 작성할 것이라는 사실을 기억하십시오.
 
-SQL functions
+SQL 함수
 ~~~~~~~~~~~~~
 
-The following SQL functions, from the GeoPackage specification, are available :
+지오패키지 사양에 있는 다음 SQL 함수들을 사용할 수 있습니다:
 
--  ST_MinX(geom *Geometry*) : returns the minimum X coordinate of the
-   geometry
--  ST_MinY(geom *Geometry*) : returns the minimum Y coordinate of the
-   geometry
--  ST_MaxX(geom *Geometry*) : returns the maximum X coordinate of the
-   geometry
--  ST_MaxY(geom *Geometry*) : returns the maximum Y coordinate of the
-   geometry
--  ST_IsEmpty(geom *Geometry*) : returns 1 if the geometry is empty (but
-   not null), e.g. a POINT EMPTY geometry
--  ST_GeometryType(geom *Geometry*) : returns the geometry type :
-   'POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING',
-   'MULTIPOINT', 'GEOMETRYCOLLECTION'
--  ST_SRID(geom *Geometry*) : returns the SRID of the geometry
--  GPKG_IsAssignable(expected_geom_type *String*, actual_geom_type
-   *String*) : mainly, needed for the 'Geometry Type Triggers Extension'
+-  ST_MinX(geom *Geometry*) : 도형의 최소 X 좌표를 반환합니다.
+-  ST_MinY(geom *Geometry*) : 도형의 최소 Y 좌표를 반환합니다.
+-  ST_MaxX(geom *Geometry*) : 도형의 최대 X 좌표를 반환합니다.
+-  ST_MaxY(geom *Geometry*) : 도형의 최대 Y 좌표를 반환합니다.
+-  ST_IsEmpty(geom *Geometry*) : 비어 있는 (그러나 NULL은 아닌) 도형인 경우 1을 반환합니다. 예: POINT EMPTY 도형
+-  ST_GeometryType(geom *Geometry*) : 'POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT', 'GEOMETRYCOLLECTION' 도형 유형을 반환합니다.
+-  ST_SRID(geom *Geometry*) : 도형의 SRID를 반환합니다.
+-  GPKG_IsAssignable(expected_geom_type *String*, actual_geom_type *String*) : 주로 '도형 유형 트리거 확장 사양(Geometry Type Triggers Extension)'에 필요합니다.
 
-The following functions, with identical syntax and semantics as in
-Spatialite, are also available :
+Spatialite에서와 동일한 문법과 의미를 가진 다음 함수들도 사용할 수 있습니다:
 
 -  CreateSpatialIndex(table_name *String*, geom_column_name *String*) :
-   creates a spatial index (RTree) on the specified table/geometry
-   column
+   지정한 테이블/도형 열에 공간 색인(R-트리)을 생성합니다.
 -  DisableSpatialIndex(table_name *String*, geom_column_name *String*) :
-   drops an existing spatial index (RTree) on the specified
-   table/geometry column
--  ST_Transform(geom *Geometry*, target_srs_id *Integer*): reproject the geometry
-   to the SRS of specified srs_id. If no SRS with that given srs_id is not found
-   in gpkg_spatial_ref_sys, starting with GDAL 3.2, it will be interpreted as
-   a EPSG code.
+   지정한 테이블/도형 열에 있는 공간 색인(R-트리)을 삭제(drop)합니다.
+-  ST_Transform(geom *Geometry*, target_srs_id *Integer*):
+   도형을 지정한 srs_id 공간 좌표계로 재투영합니다. gpkg_spatial_ref_sys에서 지정한 srs_id를 가진 공간 좌표계를 찾지 못 하는 경우, GDAL 3.2버전부터 srs_id를 EPSG 코드로 해석할 것입니다.
 
-Link with Spatialite
+Spatialite과의 링크
 ~~~~~~~~~~~~~~~~~~~~
 
-If it has been compiled against Spatialite 4.2
-or later, it is also possible to use Spatialite SQL functions. Explicit
-transformation from GPKG geometry binary encoding to Spatialite geometry
-binary encoding must be done.
+GPKG 드라이버를 Spatialite 4.2 이상 버전을 대상으로 컴파일하는 경우, Spatialite SQL 함수도 사용할 수 있습니다. 반드시 GPKG 도형 바이너리 인코딩을 Spatialite 도형 바이너리 인코딩으로 명확하게 변환해야만 합니다.
 
 ::
 
    ogrinfo poly.gpkg -sql "SELECT ST_Buffer(CastAutomagic(geom),5) FROM poly"
 
-Starting with Spatialite 4.3, CastAutomagic is no longer needed.
+Spatialite 4.3버전부터, CastAutomagic이 더 이상 필요하지 않습니다.
 
-Transaction support
+트랜잭션 지원
 -------------------
 
-The driver implements transactions at the database level, per :ref:`rfc-54`
+이 드라이버는 :ref:`rfc-54` 에 따라 데이터베이스 수준에서 트랜잭션을 구현합니다.
 
-Opening options
+열기 옵션
 ---------------
 
-The following open options are available:
+다음 열기 옵션들을 사용할 수 있습니다:
 
--  **LIST_ALL_TABLES**\ =AUTO/YES/NO: (GDAL >=2.2) Whether all tables,
-   including those not listed in gpkg_contents, should be listed.
-   Defaults to AUTO. If AUTO, all tables including those not listed in
-   gpkg_contents will be listed, except if the aspatial extension is
-   found or a table is registered as 'attributes' in gpkg_contents. If
-   YES, all tables including those not listed in gpkg_contents will be
-   listed, in all cases. If NO, only tables registered as 'features',
-   'attributes' or 'aspatial' will be listed.
--  **PRELUDE_STATEMENTS**\ =string (GDAL >= 3.2). SQL statement(s) to
-   send on the SQLite3 connection before any other ones. In
-   case of several statements, they must be separated with the
-   semi-column (;) sign. This option may be useful to
-   `attach another database <https://www.sqlite.org/lang_attach.html>`__
-   to the current one and issue cross-database requests.
+-  **LIST_ALL_TABLES=AUTO/YES/NO**: (GDAL 2.2 이상 버전)
+   모든 테이블을, gpkg_contents에 목록화되어 있지 않은 테이블도 포함해서 목록화해야 할지 여부를 선택합니다. 기본값은 AUTO입니다.
+   AUTO로 설정하면, 비공간(aspatial) 확장 사양이 발견된 경우 또는 테이블이 gpkg_contents에 'attributes'로 등록되어 있는 경우를 제외하고 gpkg_contents에 목록화되어 있지 않은 테이블을 포함하는 모든 테이블을 목록화할 것입니다.
+   YES로 설정하면, 어떤 경우에도 gpkg_contents에 목록화되어 있지 않은 테이블을 포함하는 모든 테이블을 목록화할 것입니다.
+   NO로 설정하면, 'features', 'attributes' 또는 'aspatial'로 등록된 테이블만 목록화할 것입니다.
+
+-  **PRELUDE_STATEMENTS=string**: (GDAL 3.2 이상 버전)
+   SQL 문(들)을 다른 어떤 연결보다 먼저 SQLite3 연결로 전송합니다. SQL 문이 여러 개인 경우, 반드시 쌍반점(';') 기호로 구분해야만 합니다. 현재 데이터베이스에 `또다른 데이터베이스를 붙이고 <https://www.sqlite.org/lang_attach.html>`_ 크로스 데이터베이스 요청을 전송하려면 이 옵션이 유용할 수도 있습니다.
 
    .. note::
-        The attached database must be a GeoPackage one too, so
-        that its geometry blobs are properly recognized (so typically not a Spatialite one)
 
--  **NOLOCK**\= YES/NO (GDAL >= 3.4.2). Defaults is NO.
-   Whether the database should be used without doing any file locking. Setting
-   it to YES will only be honoured when opening in read-only mode and if the
-   journal mode is not WAL.
-   This corresponds to the nolock=1 query parameter described at
-   https://www.sqlite.org/uri.html
+      추가된 데이터베이스의 도형 블랍(blob)을 제대로 인식하기 위해서는 추가된 데이터베이스도 지오패키지 데이터베이스여야만 합니다. (즉 일반적으로 Spatialite 데이터베이스는 아닙니다.)
 
-Note: open options are typically specified with "-oo name=value" syntax
-in most OGR utilities, or with the GDALOpenEx() API call.
+-  **NOLOCK=YES/NO**: (GDAL 3.4.2 이상 버전)
+   기본값은 NO입니다. 데이터베이스를 어떤 파일도 잠그지(lock) 않고 사용해야 할지 여부를 선택합니다.
+   YES로 설정하면, 데이터베이스를 읽기전용 모드로 열었는데 저널(journal) 모드가 WAL이 아닌 경우에만 영향을 미칠 것입니다. https://www.sqlite.org/uri.html 에서 설명하고 있는 "nolock=1" 쿼리 파라미터와 동등합니다.
 
-Note: configuration option :decl_configoption:`OGR_SQLITE_JOURNAL` can
-be used to set the journal mode of the GeoPackage (and thus SQLite)
-file, see also https://www.sqlite.org/pragma.html#pragma_journal_mode.
+주의: 열기 옵션은 대부분의 OGR 유틸리티에서 일반적으로 "-oo name=value" 문법으로 또는 GDALOpenEx() API 호출로 지정됩니다.
 
-Creation Issues
+주의: :decl_configoption:`OGR_SQLITE_JOURNAL` 환경설정 옵션을 사용해서 지오패키지의 (따라서 SQLite의) 저널 모드를 설정할 수도 있습니다. https://www.sqlite.org/pragma.html#pragma_journal_mode 도 참조하십시오.
+
+생성 문제점
 ---------------
 
-When creating a new GeoPackage file, the driver will attempt to force
-the database into a UTF-8 mode for text handling, satisfying the OGR
-strict UTF-8 capability. For pre-existing files, the driver will work
-with whatever it is given.
+새 지오패키지 파일을 생성할 때, 이 드라이버는 데이터베이스의 텍스트 처리를 OGR 엄격 UTF-8 케이퍼빌리티를 만족시키는 UTF-8 모드로 강제하려 시도할 것입니다. 기존 파일의 경우 이 드라이버는 어떤 지정 인코딩이든 작업할 것입니다.
 
-The driver updates the GeoPackage ``last_change`` timestamp when the file is
-created or modified. If consistent binary output is required for
-reproducibility, the timestamp can be forced to a specific value by setting the
-:decl_configoption:`OGR_CURRENT_DATE` global configuration option.
-When setting the option, take care to meet the specific time format
-requirement of the GeoPackage standard,
-e.g. `for version 1.2 <https://www.geopackage.org/spec120/#r15>`__.
+이 드라이버는 파일 생성 또는 수정 시 지오패키지의 ``last_change`` 타임스탬프를 업데이트합니다. 재현 가능성(reproducibility)을 위해 일관된 바이너리 산출물이 필요한 경우, :decl_configoption:`OGR_CURRENT_DATE` 전체 수준 환경설정 옵션을 설정하면 타임스탬프를 특정값으로 강제할 수 있습니다. 이 옵션을 설정할 때 지오패키지 표준이 -- 예를 들면 `1.2버전 <https://www.geopackage.org/spec120/#r15>`_ 이 -- 요구하는 특정한 시간 서식을 따르도록 주의하십시오.
 
-Dataset Creation Options
+데이터셋 생성 옵션
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following creation options (specific to vector, or common with
-raster) are available:
+다음과 같은 (벡터 특화 또는 래스터 공통) 생성 옵션들을 사용할 수 있습니다:
 
--  **VERSION**\ =AUTO/1.0/1.1/1.2/1.3: (GDAL >= 2.2) Set GeoPackage version
-   (for application_id and user_version fields). In AUTO mode, this will
-   be equivalent to 1.2 starting with GDAL 2.3.
-   1.3 is available starting with GDAL 3.3
--  **ADD_GPKG_OGR_CONTENTS**\ =YES/NO: (GDAL >= 2.2) Defines whether to
-   add a gpkg_ogr_contents table to keep feature count, and associated
-   triggers. Defaults to YES.
--  **DATETIME_FORMAT**\ =WITH_TZ/UTC: (GDAL >= 3.2) Defines whether to keep the
-   DateTime values in the time zones as used in the data source (WITH_TZ),
-   or to convert the date and time expressions to UTC (Coordinated Universal Time).
-   Defaults to WITH_TZ. Pedantically, non-UTC time zones are not currently supported
-   by GeoPackage v1.3 (see https://github.com/opengeospatial/geopackage/issues/530).
-   When using UTC format, with a unspecified timezone, UTC will be assumed.
+-  **VERSION=AUTO/1.0/1.1/1.2/1.3**: (GDAL 2.2 이상 버전)
+   (application_id 및 user_version 필드를 위한) 지오패키지 버전을 설정합니다. AUTO 모드에서는, GDAL 2.3버전부터 기본값이 1.2입니다. GDAL 3.3버전부터는 1.3을 사용할 수 있습니다.
 
-Other options are available for raster. See the :ref:`GeoPackage raster <raster.gpkg>`
-documentation page
+-  **ADD_GPKG_OGR_CONTENTS=YES/NO**: (GDAL 2.2 이상 버전)
+   벡터 레이어의 객체 개수와 관련 트리거를 보전하기 위한 gpkg_ogr_contents 테이블을 추가할지 여부를 선택합니다. 기본값은 YES입니다.
 
-Layer Creation Options
+-  **DATETIME_FORMAT=WITH_TZ/UTC**: (GDAL 3.2 이상 버전)
+   데이터소스에 사용된 표준시간대(time zone)의 날짜&시간 값을 유지할지(WITH_TZ), 또는 날짜&시간 표현을 UTC(Coordinated Universal Time; 협정 세계시)로 변환할지 여부를 정의합니다. 기본값은 WITH_TZ입니다.
+   지오패키지 1.3버전은 현재 지나치게 세세한 사항에 얽매여 UTC가 아닌 표준시간대를 지원하지 않습니다. (https://github.com/opengeospatial/geopackage/issues/530 를 참조하십시오.)
+   표준시간대가 지정되지 않은 UTC 서식을 사용하는 경우, UTC로 가정할 것입니다.
+
+래스터 용 다른 옵션들도 사용할 수 있습니다. :ref:`지오패키지 래스터 <raster.gpkg>` 드라이버 문서를 읽어보십시오.
+
+레이어 생성 옵션
 ~~~~~~~~~~~~~~~~~~~~~~
 
--  **GEOMETRY_NAME**: Column to use for the geometry column. Default to
-   "geom". Note: This option was called GEOMETRY_COLUMN in releases before
-   GDAL 2
--  **GEOMETRY_NULLABLE**: Whether the values of the
-   geometry column can be NULL. Can be set to NO so that geometry is
-   required. Default to "YES"
--  **FID**: Column name to use for the OGR FID (primary key in the
-   SQLite database). Default to "fid"
--  **OVERWRITE**: If set to "YES" will delete any existing layers that
-   have the same name as the layer being created. Default to NO
--  **SPATIAL_INDEX**: If set to "YES" will create a spatial
-   index for this layer. Default to YES
--  **PRECISION**: This may be "YES" to force new fields
-   created on this layer to try and represent the width of text fields
-   (in terms of UTF-8 characters, not bytes), if available using
-   TEXT(width) types. If "NO" then the type TEXT will be used instead.
-   The default is "YES".
--  **TRUNCATE_FIELDS**: This may be "YES" to force
-   truncated of field values that exceed the maximum allowed width of
-   text fields, and also to "fix" the passed string if needed to make it
-   a valid UTF-8 string. If "NO" then the value is not truncated nor
-   modified. The default is "NO".
--  **IDENTIFIER**\ =string: Identifier of the layer, as put
-   in the contents table.
--  **DESCRIPTION**\ =string: Description of the layer, as
-   put in the contents table.
--  **ASPATIAL_VARIANT**\ =GPKG_ATTRIBUTES/NOT_REGISTERED:
-   (GDAL >=2.2) How to register non spatial tables. Defaults to
-   GPKG_ATTRIBUTES in GDAL 2.2 or later (behavior in previous version
-   was equivalent to OGR_ASPATIAL). Starting with GeoPackage 1.2, non
-   spatial tables are part of the specification. They are recorded with
-   data_type="attributes" in the gpkg_contents table. This is only
-   compatible of GDAL 2.2 or later.
-   It is also possible to use the NOT_REGISTERED
-   option, in which case the non spatial table is not registered at all
-   in any GeoPackage system tables.
-   Priorly, in OGR 2.0 and 2.1, the "aspatial" extension had been developed for
-   similar purposes, so if selecting OGR_ASPATIAL, non spatial tables will be
-   recorded with data_type="aspatial" and the "aspatial" extension was declared in the
-   gpkg_extensions table. Starting with GDAL 3.3, OGR_ASPATIAL is no longer
-   available on creation.
+-  **GEOMETRY_NAME**:
+   도형 열에 사용할 이름을 설정합니다. 기본값은 "geom"입니다.
+   주의: GDAL 버전 2 이전 배포판에서 이 옵션은 GEOMETRY_COLUMN이었습니다.
+
+-  **GEOMETRY_NULLABLE**:
+   도형 열의 값이 NULL일 수 있는지 여부를 선택합니다. 해당 도형이 필수인 경우 NO로 설정하면 됩니다. 기본값은 YES입니다.
+
+-  **FID**:
+   OGR FID로 (SQLite 데이터베이스에서 기본 키(primary key)로) 사용할 열의 이름을 설정합니다. 기본값은 "fid"입니다.
+
+-  **OVERWRITE**:
+   생성할 레이어와 같은 이름인 기존 레이어를 생성할 레이어로 덮어쓸지 여부를 선택합니다. 기본값은 NO입니다.
+
+-  **SPATIAL_INDEX**:
+   YES로 설정하면 해당 레이어 용 공간 색인을 생성할 것입니다. 기본값은 YES입니다.
+
+-  **PRECISION**:
+   TEXT(width) 유형을 사용할 수 있는 경우, 해당 레이어에 생성되는 새 필드가 텍스트 필드의 길이를 (바이트 길이가 아니라 UTF-8 문자 길이를) 강제로 시도하고 표현하게 하려면 이 옵션을 YES로 설정할 수도 있습니다.
+   NO로 설정하면 그 대신 TEXT 유형을 사용할 것입니다. 기본값은 YES입니다.
+
+-  **TRUNCATE_FIELDS**:
+   텍스트 필드의 최대 길이를 넘어서는 필드값을 강제로 절단(truncate)하고, 전송된 문자열을 무결한 UTF-8 문자열로 변환해야 하는 경우 전송된 문자열을 강제로 "고치도록" 하려면 이 옵션을 YES로 설정할 수도 있습니다.
+   NO로 설정하면 값을 절단하거나 수정하지 않습니다. 기본값은 NO입니다.
+
+-  **IDENTIFIER=string**:
+   contents 테이블에 삽입할 레이어 식별자입니다.
+
+-  **DESCRIPTION=string**:
+   contents 테이블에 삽입할 레이어 설명입니다.
+
+-  **ASPATIAL_VARIANT=GPKG_ATTRIBUTES/NOT_REGISTERED**: (GDAL 2.2 이상 버전)
+   비공간 테이블을 등록할 방법을 설정합니다. GDAL 2.2 이상 버전에서 기본값은 GPKG_ATTRIBUTES입니다. (이전 버전에서의 습성은 OGR_ASPATIAL과 동등했습니다.) 지오패키지 1.2버전부터, 사양에 비공간 테이블을 포함합니다. gpkg_contents 테이블에 비공간 테이블을 data_type="attributes" 속성을 가진 레코드로 작성합니다. 이런 비공간 테이블은 GDAL 2.2 이상 버전에서만 호환됩니다.
+   NOT_REGISTERED로 설정하면, 지오패키지 시스템 테이블에 어떤 비공간 테이블도 등록하지 않습니다.
+   이전 OGR 2.0 및 2.1버전에서 비슷한 목적으로 "aspatial" 확장 사양을 개발했기 때문에, OGR_ASPATIAL로 설정하면 비공간 테이블을 data_type="aspatial" 속성을 가진 레코드로 작성하고 gpkg_extensions 테이블에 "aspatial" 확장 사양을 선언할 것입니다. GDAL 3.3버전부터, 생성 작업 시 더 이상 OGR_ASPATIAL을 사용할 수 없습니다.
 
 
-Metadata
+메타데이터
 --------
 
-GDAL uses the standardized
-`gpkg_metadata <http://www.geopackage.org/spec/#_metadata_table>`__
-and
-`gpkg_metadata_reference <http://www.geopackage.org/spec/#_metadata_reference_table>`__
-tables to read and write metadata, on the dataset and layer objects.
+GDAL은 데이터셋과 레이어 객체에 메타데이터를 읽고 쓰기 위해 표준화된 `gpkg_metadata <http://www.geopackage.org/spec/#_metadata_table>`_ 및 `gpkg_metadata_reference <http://www.geopackage.org/spec/#_metadata_reference_table>`_ 테이블을 사용합니다.
 
-GDAL metadata, from the default metadata domain and possibly other
-metadata domains, is serialized in a single XML document, conformant
-with the format used in GDAL PAM (Persistent Auxiliary Metadata)
-.aux.xml files, and registered with md_scope=dataset and
-md_standard_uri=http://gdal.org in gpkg_metadata. For the dataset, this
-entry is referenced in gpkg_metadata_reference with a
-reference_scope=geopackage. For a layer, this entry is referenced in
-gpkg_metadata_reference with a reference_scope=table and
-table_name={name of the table}
+기본 메타데이터 도메인 및 잠재적인 다른 메타데이터 도메인으로부터 나온 GDAL 메타데이터는 GDAL PAM(Persistent Auxiliary Metadata) .aux.xml 파일에서 사용되는 서식을 준수하는 단일 XML 문서에 직렬화(serialize)되고, gpkg_metadata에 "md_scope=dataset" 및 "md_standard_uri=http://gdal.org" 로 등록됩니다. 데이터셋의 경우, gpkg_metadata_reference에서 이 항목을 "reference_scope=geopackage"로 참조합니다. 레이어의 경우, gpkg_metadata_reference에서 이 항목을 "reference_scope=table" 및 "table_name={name of the table}"로 참조합니다.
 
-Metadata not originating from GDAL can be read by the driver and will be
-exposed as metadata items with keys of the form GPKG_METADATA_ITEM_XXX
-and values the content of the *metadata* columns of the gpkg_metadata
-table. Update of such metadata is not currently supported through GDAL
-interfaces ( although it can be through direct SQL commands).
+이 드라이버는 GDAL로부터 나오지 않은 메타데이터를 읽을 수 있으며, GPKG_METADATA_ITEM_XXX 형식의 키와 gpkg_metadata 테이블의 *metadata* 열의 내용을 값으로 가지는 메타데이터 항목으로 노출시킬 것입니다. 현재 GDAL 인터페이스를 통해 이런 메타데이터를 업데이트하는 것을 지원하지 않습니다. (다만 직접적인 SQL 명령어로 업데이트할 수는 있습니다.)
 
-The specific DESCRIPTION and IDENTIFIER metadata item of the default
-metadata domain can be used in read/write to read from/update the
-corresponding columns of the gpkg_contents table.
+읽기/쓰기 시 기본 메타데이터 도메인의 특정 DESCRIPTION 및 IDENTIFIER 메타데이터 항목을 사용하면 gpkg_contents 테이블의 대응하는 열들을 읽고 업데이트할 수 있습니다.
 
-Non-spatial tables
+비공간 테이블
 ------------------
 
-The core GeoPackage specification of GeoPackage 1.0 and 1.1 did not
-support non-spatial tables. This was added in GeoPackage 1.2 as the
-"attributes" data type.
+지오패키지 1.0 및 1.1의 핵심 지오패키지 사양은 비공간(non-spatial) 테이블을 지원하지 않습니다. 비공간 테이블은 지오패키지 1.2버전에서 "attributes" 데이터 유형으로 추가되었습니다.
 
-The driver allows creating and reading non-spatial tables with the :ref:`vector.geopackage_aspatial`.
+이 드라이버는 :ref:`vector.geopackage_aspatial` 을 이용해서 비공간 테이블을 읽고 쓸 수 있습니다.
 
-Starting with GDAL 2.2, the driver will also, by default, list non
-spatial tables that are not registered through the gdal_aspatial
-extension, and support the GeoPackage 1.2 "attributes" data type as
-well. Starting with GDAL 2.2, non spatial tables are by default created
-following the GeoPackage 1.2 "attributes" data type (can be controlled
-with the ASPATIAL_VARIANT layer creation option)
+GDAL 2.2버전부터, 이 드라이버는 기본적으로 지오패키지 1.2버전의 "attributes" 데이터 유형을 지원하는 것은 물론 gdal_aspatial 확장 사양을 통해 등록되지 않은 비공간 테이블도 목록화할 것입니다.
+GDAL 2.2버전부터, 기본적으로 지오패키지 1.2버전의 "attributes" 데이터 유형을 따라 비공간 테이블을 생성합니다. (이 습성은 ASPATIAL_VARIANT 레이어 생성 옵션으로 제어할 수 있습니다.)
 
-Spatial views
+공간 뷰
 -------------
 
-Views can be created and recognized as valid spatial layers if a
-corresponding record is inserted into the gpkg_contents and
-gpkg_geometry_columns table.
+gpkg_contents 및 gpkg_geometry_columns 테이블에 대응하는 레코드를 삽입한 경우 뷰를 무결한 공간 레이어로 생성하고 인식할 수 있습니다.
 
-Starting with GDAL 2.2, in the case of the columns in the SELECT clause
-of the view acts a integer primary key, then it can be recognized by OGR
-as the FID column of the view, provided it is renamed as OGC_FID.
-Selecting a feature id from a source table without renaming will not be
-sufficient, since due to joins this feature id could appear several
-times. Thus the user must explicitly acknowledge that the column is
-really a primary key.
+GDAL 2.2버전부터, 뷰의 SELECT 문에 있는 열이 정수형 기본 키 역할을 하는 경우 해당 열을 OGC_FID로 재명명하면 OGR가 이 열을 뷰의 FID 열로 인식할 수 있습니다. 이렇게 재명명하지 않고 소스 테이블로부터 객체ID를 선택하는 것은 충분하지 않을 것입니다. 결합(join) 때문에 이 객체ID가 여러 번 나타날 수 있기 때문입니다. 따라서 사용자가 해당 열이 정말로 기본 키인지 확실하게 알고 있어야만 합니다.
 
-For example:
+예를 들면:
 
-.. code-block:: sql
+.. code-blcok:: sql
 
    CREATE VIEW my_view AS SELECT foo.fid AS OGC_FID, foo.geom, ... FROM foo JOIN another_table ON foo.some_id = another_table.other_id
    INSERT INTO gpkg_contents (table_name, identifier, data_type, srs_id) VALUES ( 'my_view', 'my_view', 'features', 4326)
    INSERT INTO gpkg_geometry_columns (table_name, column_name, geometry_type_name, srs_id, z, m) values ('my_view', 'my_geom', 'GEOMETRY', 4326, 0, 0)
 
-This requires GDAL to be compiled with the SQLITE_HAS_COLUMN_METADATA
-option and SQLite3 with the SQLITE_ENABLE_COLUMN_METADATA option.
-Starting with GDAL 2.3, this can be easily verified if the
-SQLITE_HAS_COLUMN_METADATA=YES driver metadata item is declared (for
-example with "ogrinfo --format GPKG")
+이 SQL 문이 성공하려면 GDAL을 SQLITE_ENABLE_COLUMN_METADATA 옵션을 가진 SQLite3 및 SQLITE_HAS_COLUMN_METADATA 옵션과 함께 컴파일해야 합니다.
+GDAL 2.3버전부터, (예를 들어 ``ogrinfo --format GPKG`` 명령어로) SQLITE_HAS_COLUMN_METADATA=YES 드라이버 메타데이터 항목이 선언되었는지를 확인하면 이렇게 컴파일되었는지 쉽게 검증할 수 있습니다.
 
-Coordinate Reference Systems
+좌표계
 ----------------------------
 
-Valid geographic, projected and compound CRS supported in general by GDAL are
-also supported by GeoPackage and stored in the ``gpkg_spatial_ref_sys`` table.
+지오패키지는 GDAL이 일반적으로 지원하는 무결한 지리, 투영 및 복합 좌표계를 지원하고, ``gpkg_spatial_ref_sys`` 테이블에 저장합니다.
 
-Two special hard-coded CRS are reserved per the GeoPackage specification:
+지오패키지 사양 별로 하드 코딩된 특수 좌표계 2개를 준비하고 있습니다:
 
-- SRID 0, for a Undefined Geographic CRS. This one is selected by default if
-  creating a spatial layer without any explicit CRS
+-  정의되지 않은 지리 좌표계를 위한 SRID 0:
+   어떤 좌표계도 명확하게 지정하지 않고 공간 레이어를 생성하는 경우 기본적으로 이 좌표계를 선택합니다.
 
-- SRID -1, for a Undefined Projected CRS. It might be selected by creating a
-  layer with a CRS instantiated from the following WKT string:
-  ``LOCAL_CS["Undefined cartesian SRS"]``. (GDAL >= 3.3)
+-  정의되지 않은 투영 좌표계를 위한 SRID -1: (GDAL 3.3 이상 버전)
+   ``LOCAL_CS["Undefined cartesian SRS"]`` WKT 문자열로부터 인스턴스화된 좌표계를 가진 레이어를 생성하면 이 좌표계를 선택할 수도 있습니다.
 
-Level of support of GeoPackage Extensions
+지오패키지 확장 지원 수준
 -----------------------------------------
 
-(Restricted to those that have a vector scope)
+(벡터 스코프(scope)를 가지고 있는 지오패키지에 한합니다.)
 
-.. list-table:: Extensions
+.. list-table:: GeoPackage Extensions
    :header-rows: 1
 
-   * - Extension name
-     - OGC adopted extension ?
-     - Supported by GDAL?
-   * - `Non-Linear Geometry Types <http://www.geopackage.org/guidance/extensions/nonlinear_geometry_types.html>`__
-     - Yes
-     - Yes, since GDAL 2.1
-   * - `RTree Spatial Indexes <http://www.geopackage.org/guidance/extensions/rtree_spatial_indexes.html>`__
-     - Yes
-     - Yes
-   * - `Metadata <http://www.geopackage.org/guidance/extensions/metadata.html>`__
-     - Yes
-     - Yes
-   * - `Schema <http://www.geopackage.org/guidance/extensions/schema.html>`__
-     - Yes
-     - Yes, since GDAL 3.3 (Geopackage constraints exposed as field domains)
-   * - `WKT for Coordinate Reference Systems <http://www.geopackage.org/guidance/extensions/wkt_for_crs.md>`__ (WKT v2)
-     - Yes
-     -  Partially, since GDAL 2.2. GDAL can read databases using this extension, but cannot interpret a SRS entry that has only a WKT v2 entry.
+   * - 확장 이름
+     - OGC 도입 확장인가?
+     - GDAL이 지원하는가?
+   * - `비선형 도형 유형 <http://www.geopackage.org/guidance/extensions/nonlinear_geometry_types.html>`_
+     - Ｏ
+     - GDAL 2.1버전부터 Ｏ
+   * - `R-트리 공간 색인 <http://www.geopackage.org/guidance/extensions/rtree_spatial_indexes.html>`_
+     - Ｏ
+     - Ｏ
+   * - `메타데이터 <http://www.geopackage.org/guidance/extensions/metadata.html>`_
+     - Ｏ
+     - Ｏ
+   * - `스키마 <http://www.geopackage.org/guidance/extensions/schema.html>`_
+     - Ｏ
+     - GDAL 3.3버전부터 Ｏ (필드 도메인으로 노출되는 지오패키지 제약 조건)
+   * - `좌표계 용 WKT <http://www.geopackage.org/guidance/extensions/wkt_for_crs.md>`_ (WKT v2)
+     - Ｏ
+     -  GDAL 2.2버전 부터 부분 지원. GDAL이 이 확장 사양으로 데이터베이스를 읽어올 수 있지만, WKT v2 항목만 가지고 있는 공간 좌표계 항목을 해석하지는 못 합니다.
    * - :ref:`vector.geopackage_aspatial`
-     - No
-     - Yes. Deprecated in GDAL 2.2 for the *attributes* official data_type
+     - Ｘ
+     - Ｏ (GDAL 2.2버전에서 *attributes* 공식 data_type 퇴출)
 
-Examples
+예시
 --------
 
--  Simple translation of a single shapefile into GeoPackage. The table
-   'abc' will be created with the features from abc.shp and attributes
-   from abc.dbf. The file ``filename.gpkg`` must **not** already exist,
-   as it will be created. For adding new layers into existing geopackage
-   run ogr2ogr with **-update**.
+-  단일 shapefile을 지오패키지로 단순 변환하기. abc.shp의 객체들과 abc.dbf의 속성들로 'abc' 테이블을 생성할 것입니다. ``filename.gpkg`` 파일을 생성할 것이기 때문에, 이 파일이 기존에 존재해서는 절대로 **안 됩니다**. 기존 지오패키지에 새 레이어를 추가하려면  ogr2ogr 유틸리티를 **-update** 스위치와 함께 실행하십시오.
 
    ::
 
       ogr2ogr -f GPKG filename.gpkg abc.shp
 
--  Translation of a directory of shapefiles into a GeoPackage. Each file
-   will end up as a new table within the GPKG file. The file
-   ``filename.gpkg`` must **not** already exist, as it will be created.
+-  shapefile들이 있는 디렉터리를 지오패키지로 변환하기. 각 파일은 GPKG 파일 안에 새 테이블로 각각 작성될 것입니다. ``filename.gpkg`` 파일을 생성할 것이기 때문에, 이 파일이 기존에 존재해서는 절대로 **안 됩니다**.
 
    ::
 
       ogr2ogr -f GPKG filename.gpkg ./path/to/dir
 
--  Translation of a PostGIS database into a GeoPackage. Each table in
-   the database will end up as a table in the GPKG file. The file
-   ``filename.gpkg`` must **not** already exist, as it will be created.
+-  PostGIS 데이터베이스를 GeoPackage로 변환하기. 데이터베이스의 각 테이블은 GPKG 파일 안에 테이블로 각각 작성될 것입니다. ``filename.gpkg`` 파일을 생성할 것이기 때문에, 이 파일이 기존에 존재해서는 절대로 **안 됩니다**.
 
    ::
 
       ogr2ogr -f GPKG filename.gpkg PG:'dbname=mydatabase host=localhost'
 
-- Perform a join between 2 GeoPackage databases:
+-  지오패키지 데이터베이스 2개를 결합(join)시키기:
 
-    ::
+   ::
 
       ogrinfo my_spatial.gpkg \
         -sql "SELECT poly.id, other.foo FROM poly JOIN other_schema.other USING (id)" \
         -oo PRELUDE_STATEMENTS="ATTACH DATABASE 'other.gpkg' AS other_schema"
 
-See Also
+참고
 --------
 
--  :ref:`GeoPackage raster <raster.gpkg>` documentation page
--  `Getting Started With
-   GeoPackage <http://www.geopackage.org/guidance/getting-started.html>`__
--  `OGC GeoPackage format standard <http://www.geopackage.org/spec/>`__
-   specification, HTML format (current/development version of the
-   standard)
--  `OGC GeoPackage Encoding
-   Standard <http://www.opengeospatial.org/standards/geopackage>`__ page
--  `SQLite <http://sqlite.org/>`__
+-  :ref:`지오패키지 래스터 <raster.gpkg>` 드라이버 문서
+-  `지오패키지 알아보기 <http://www.geopackage.org/guidance/getting-started.html>`_
+-  `OGC 지오패키지 포맷 표준 <http://www.geopackage.org/spec/>`_ 사양, HTML 포맷 (표준의 현재/개발 버전)
+-  `OGC 지오패키지 인코딩 표준 <http://www.opengeospatial.org/standards/geopackage>`_ 페이지
+-  `SQLite <http://sqlite.org/>`_
 
 .. toctree::
    :hidden:

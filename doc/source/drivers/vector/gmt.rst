@@ -1,24 +1,15 @@
 .. _vector.gmt:
 
-GMT ASCII Vectors (.gmt)
+GMT 아스키 벡터 (.gmt)
 ========================
 
 .. shortname:: GMT
 
 .. built_in_by_default::
 
-OGR supports reading and writing GMT ASCII vector format. This is the
-format used by the Generic Mapping Tools (GMT) package, and includes
-recent additions to the format to handle more geometry types, and
-attributes. Currently GMT files are only supported if they have the
-extension ".gmt". Old (simple) GMT files are treated as either point, or
-linestring files depending on whether a ">" line is encountered before
-the first vertex. New style files have a variety of auxiliary
-information including geometry type, layer extents, coordinate system
-and attribute field declarations in comments in the header, and for each
-feature can have attributes.
+OGR는 GMT 아스키 벡터 포맷의 읽기 및 쓰기를 지원합니다. GMT(Generic Mapping Tools)가 사용하는 포맷으로, 더 많은 도형 유형과 속성을 처리하기 위한 최신 추가 사양을 포함하고 있습니다. 현재 ".gmt" 확장자를 가진 GMT 파일만 지원합니다. 첫 번째 꼭짓점 전에 ">" 줄이 있느냐 없느냐에 따라 예전 (단순) GMT 파일을 포인트 또는 라인스트링 파일로 취급합니다. 새로운 스타일 파일은 헤더에 있는 주석에 도형 유형, 레이어 범위, 좌표계 및 속성 필드를 포함하는 다양한 보조 정보를 가지고 있으며, 각 객체가 속성을 가질 수 있습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
@@ -27,14 +18,10 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Creation Issues
+생성 문제점
 ---------------
 
-The driver supports creating new GMT files, and appending additional
-features to existing files, but update of existing features is not
-supported. Each layer is created as a separate .gmt file. If a name that
-ends with .gmt is not given, then the GMT driver will take the layer
-name and add the ".gmt" extension.
+GMT 드라이버는 새 GMT 파일 생성 및 기존 파일에 추가적인 객체의 추가를 지원하지만, 기존 객체 업데이트는 지원하지 않습니다. 각 레이어는 개별 .gmt 파일로 생성됩니다. .gmt 확장자로 끝나는 파일명을 지정하지 않는 경우, 이 드라이버는 레이어 이름 뒤에 ".gmt" 확장자를 붙일 것입니다.
 
-Writing to /dev/stdout or /vsistdout/ is supported since GDAL 3.5.0 (note
-that the file will then lack the optional region/bounding box header item)
+GDAL 3.5.0버전부터 /dev/stdout 또는 /vsistdout/에 쓰기를 지원합니다. (이 경우 파일에 선택적인 영역(region)/경계 상자 헤더 항목이 생략될 것이라는 사실을 기억하십시오.)
+

@@ -1,38 +1,35 @@
 .. _vector.geopackage_aspatial:
 
-GeoPackage aspatial extension
+지오패키지 비공간 확장 사양
 =============================
 
-GeoPackage 1.0 Extension
+지오패키지 1.0 확장 사양
 
-Extension follows template from Annex I of the OGC `GeoPackage 1.0 Specification`_.
+이 확장 사양은 OGC `지오패키지 1.0 사양`_ 의 첨부 I(Annex I)의 템플릿을 따릅니다.
 
-Extension Title
+확장 사양 제목
 ---------------
 
-Aspatial Support
+비공간(Aspatial) 지원
 
-Introduction
+소개
 ^^^^^^^^^^^^
 
-Support for aspatial data (i.e. SQLite tables/views without a geometry column),
-potentially with associated metadata.
+관련 메타데이터를 가지고 있을 수도 있는 (예를 들면 도형 열이 없는 SQLite 테이블/뷰 같은) 비공간 데이터를 지원합니다.
 
-This was used in GDAL 2.0 and GDAL 2.1, before the introduction of the
-'attributes' data_type of GeoPackage v1.2. Starting with GDAL 2.2, 'attributes'
-will be used by default, so this extension is now legacy.
+이 확장 사양은 지오패키지 1.2버전의 "attributes" data_type이 도입되기 전, GDAL 2.0 및 2.1버전에서 쓰였습니다. GDAL 2.2버전부터, 기본적으로 "attributes"를 사용할 것이기 때문에 이 확장 사양은 현재 레거시 사양이 되었습니다.
 
-Extension Author
+확장 사양 저자
 ^^^^^^^^^^^^^^^^
 
-`GDAL - Geospatial Data Abstraction Library`_, author_name `gdal`.
+`GDAL - 지리공간 데이터 추상 라이브러리(Geospatial Data Abstraction Library)`_, author_name은 'gdal'입니다.
 
-Extension Name or Template
+확장 사양 이름 또는 템플릿
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 SQL
 
-.. code-block::
+.. code-block:: sql
 
     INSERT INTO gpkg_extensions
     (table_name, column_name, extension_name, definition, scope)
@@ -45,107 +42,96 @@ SQL
         'read-write'
     );
 
-Extension Type
+확장 사양 유형
 ^^^^^^^^^^^^^^
 
-Extension of Existing Requirement in Clause 2.
+기존 요구 사항의 확장 사양은 2번 절에 있습니다.
 
-Applicability
+적용 가능성
 ^^^^^^^^^^^^^
 
-This extension applies to any aspatial user data table or view specified in the
-``gpkg_contents`` table with a lowercase `data_type` column value of "aspatial".
+이 확장 사양은 ``gpkg_contents`` 테이블에서 "data_type" 열의 값이 소문자 "aspatial"로 지정된 모든 비공간 사용자 데이터 테이블 또는 뷰에 적용됩니다.
 
-Scope
+스코프
 ^^^^^
 
-Read-write
+읽기-쓰기
 
-Requirements
+요구 사항
 ^^^^^^^^^^^^
 
-GeoPackage
+지오패키지
 """"""""""
 
-Contents Table - Aspatial
+'contents' 테이블 - Aspatial
 
-The `gpkg_contents` table SHALL contain a row with a lowercase `data_type`
-column value of "aspatial" for each aspatial user data table or view.
+'gpkg_contents' 테이블이 각 비공간 사용자 데이터 테이블 또는 뷰에 "data_type" 열의 값이 소문자 "aspatial"인 행을 담고 있어야 합니다.
 
-User Data Tables
+사용자 데이터 테이블
 
-The second component of the SQL schema for aspatial tables in an Extended
-GeoPackage described in clause 'Contents Table - Aspatial' above are user
-tables or views that contain aspatial user data.
+앞의 "'contents' 테이블 - Aspatial" 절에서 설명하는 확장 지오패키지(Extended GeoPackage)에 있는 비공간 테이블의 SQL 스키마의 두 번째 구성요소는 비공간 사용자 데이터를 담고 있는 사용자 테이블 또는 뷰입니다.
 
-An Extended GeoPackage with aspatial support is not required to contain any
-user data tables. User data tables MAY be empty.
+사용자 데이터 테이블을 담기 위해 비공간을 지원하는 확장 지오패키지를 요구하지 않습니다. 사용자 데이터 테이블이 비어 있을 수도 있기 때문입니다.
 
-An Extended GeoPackage with aspatial support MAY contain tables or views. Every
-such aspatial table or view MAY have a column with column type INTEGER and
-PRIMARY KEY AUTOINCREMENT column constraints per EXAMPLE.
+비공간을 지원하는 확장 지오패키지가 테이블 또는 뷰를 담고 있을 수도 있습니다. 이런 비공간 테이블 또는 뷰는 EXAMPLE 별로 INTEGER 및 PRIMARY KEY AUTOINCREMENT 열 제약 조건 열 유형인 열을 가질 수도 있습니다.
 
 
-.. list-table::
+.. list-table:: Aspatial User Data Table
    :header-rows: 1
 
-   * - Column Name
-     - Type
-     - Description
-     - Null
-     - Default
-     - Key
+   * - 열 이름
+     - 유형
+     - 설명
+     - NULL
+     - 기본값
+     - 키
    * - `id`
      - INTEGER
-     - Autoincrement primary key
-     - no
+     - 자동 증가 기본 키
+     - Ｘ
      -
      - PK
    * - `text_attribute`
      - TEXT
-     - Text attribute of row
-     - yes
+     - 행의 텍스트 속성
+     - Ｏ
      -
      -
    * - `real_attribute`
      - REAL
-     - Real attribute of row
-     - yes
+     - 행의 실수 속성
+     - Ｏ
      -
      -
    * - `boolean_attribute`
      - BOOLEAN
-     - Boolean attribute of row
-     - yes
+     - 행의 불(boolean) 속성
+     - Ｏ
      -
      -
    * - `raster_or_photo`
      - BLOB
-     - Photograph
-     - yes
+     - 사진
+     - Ｏ
      -
      -
 
-An integer primary key of an aspatial table or view allows features to be
-linked to row level metadata records in the `gpkg_metadata` table by
-`SQLite ROWID`_ values in the `gpkg_metadata_reference` table as described
-in clause 2.4.3 Metadata Reference Table.
+비공간 테이블 또는 뷰의 정수형 기본 키는 2.4.3 메타데이터 참조 테이블 절에 설명된 대로 'pkg_metadata_reference' 테이블에 있는 `SQLite ROWID`_ 를 이용해서 객체를 'gpkg_metadata' 테이블에 있는 행 수준 메타데이터 레코드와 링크할 수 있게 해줍니다.
 
-An aspatial table or view SHALL NOT have a geometry column.
+비공간 테이블 또는 뷰가 도형 열을 가지고 있어서는 안 됩니다.
 
-Columns in aspatial tables or views SHALL be defined using only the data types
-specified in Table 1 in Clause 1.1.1.1.3.
+비공간 테이블 또는 뷰에 있는 열은 1.1.1.1.3 절의 1번 표에 지정된 데이터 유형만을 사용해서 정의되어야 합니다.
 
-GeoPackage SQLite Configuration
+지오패키지 SQLite 환경설정
 """""""""""""""""""""""""""""""
 
-None
+없습니다.
 
-GeoPackage SQLite Extension
+지오패키지 SQLite 확장 사양
 """""""""""""""""""""""""""
 
-None
+없습니다.
 
-.. _`GeoPackage 1.0 Specification`: http://www.geopackage.org/
-.. _`GDAL - Geospatial Data Abstraction Library`: http://gdal.org
+.. _`지오패키지 1.0 사양`: http://www.geopackage.org/
+.. _`GDAL - 지리공간 데이터 추상 라이브러리(Geospatial Data Abstraction Library)`: http://gdal.org
 .. _`SQLite ROWID`: http://www.sqlite.org/lang_createtable.html#rowid
