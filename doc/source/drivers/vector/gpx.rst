@@ -238,4 +238,3 @@ FAQ
 -  `GPX 포맷 홈페이지 <http://www.topografix.com/gpx.asp>`_
 
 -  `GPX 1.1 포맷 문서 <http://www.topografix.com/GPX/1/1/>`_
-
