@@ -61,7 +61,7 @@
    gpsbabel
    gpx
    grass
-   gtm
+   hana
    idb
    idrisi
    ili
