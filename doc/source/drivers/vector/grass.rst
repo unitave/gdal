@@ -1,139 +1,100 @@
 .. _vector.grass:
 
-GRASS Vector Format
+GRASS 벡터 포맷
 ===================
 
 .. shortname:: GRASS
 
 .. build_dependencies:: libgrass
 
-GRASS driver can read GRASS (version 6.0 and higher) vector maps. Each
-GRASS vector map is represented as one datasource. A GRASS vector map
-may have 0, 1 or more layers.
+GRASS 드라이버는 (6.0버전 이상의) GRASS벡터 맵을 읽을 수 있습니다. GRASS 벡터 맵 하나 하나가 하나의 데이터소스로 표현됩니다. GRASS 벡터 맵은 레이어를 0개, 1개, 또는 그 이상 가질 수도 있습니다.
 
-GRASS points are represented as wkbPoint, lines and boundaries as
-wkbLineString and areas as wkbPolygon. wkbMulti\* and
-wkbGeometryCollection are not used. More feature types can be mixed in
-one layer. If a layer contains only features of one type, it is set
-appropriately and can be retrieved by OGRLayer::GetLayerDefn();
+GRASS 포인트는 wkbPoint로, 라인 및 경계는 wkbLineString으로, 그리고 영역(area)은 wkbPolygon으로 표현됩니다. wkbMulti\* 및 wkbGeometryCollection은 사용하지 않습니다. 레이어 하나에 여러 객체 유형이 혼합될 수 있습니다. 레이어가 한 가지 유형의 객체만 담고 있는 경우, OGRLayer::GetLayerDefn() 함수로 적절하게 설정해서 가져올 수 있습니다.
 
-If a geometry has more categories of the same layer attached, its
-represented as more features (one for each category).
+도형이 자신이 속해 있는 레이어보다 많은 카테고리를 가지고 있다면, 더 많은 (카테고리 별로 하나의) 객체들로 표현됩니다.
 
-Both 2D and 3D maps are supported.
+2차원 및 3차원 맵 둘 다 지원합니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
-Datasource name
+데이터소스 이름
 ---------------
 
-Datasource name is full path to 'head' file in GRASS vector directory.
-Using names of GRASS environment variables it can be expressed:
+데이터소스 이름은 GRASS vector 디렉터리에 있는 'head' 파일을 가리키는 전체 경로입니다. GRASS 환경 변수의 이름을 사용해서 다음과 같이 표현할 수 있습니다:
 
 ::
 
       $GISDBASE/$LOCATION_NAME/$MAPSET/vector/mymap/head
 
-where 'mymap' is name of a vector map. For example:
+이때 'mymap'이 벡터 맵의 이름입니다. 다음은 그 예시입니다:
 
 ::
 
       /home/cimrman/grass_data/jizerky/jara/vector/liptakov/head
 
-Layer names
+레이어 이름
 -----------
 
-Usually layer numbers are used as layer names. Layer number 0 is used
-for all features without any category. It is possible to optionally give
-names to GRASS layers linked to database however currently this is not
-supported by grass modules. A layer name can be added in 'dbln' vector
-file as '/name' after layer number, for example to original record:
+보통 레이어 번호를 레이어 이름으로 사용합니다. 어떤 카테고리도 가지고 있지 않은 모든 객체에 레이어 번호 0을 사용합니다. 데이터베이스에 링크된 GRASS 레이어에 이름을 지정하도록 선택할 수는 있지만, 현재 GRASS 모듈이 이를 지원하지 않습니다. 'dbln' 벡터 파일의 레이어 번호 뒤에 '/name'으로 레이어 이름을 추가할 수 있습니다. 예를 들어 다음과 같은 원본 레코드에:
 
 ::
 
    1 rivers cat $GISDBASE/$LOCATION_NAME/$MAPSET/dbf/ dbf
 
-it is possible to assign name 'rivers'
+'rivers'라는 이름을 할당할 수 있습니다.
 
 ::
 
    1/rivers rivers cat $GISDBASE/$LOCATION_NAME/$MAPSET/dbf/ dbf
 
-the layer 1 will be listed is layer 'rivers'.
+레이어 1을 'rivers' 레이어로 목록화할 것입니다.
 
-Attribute filter
+속성 필터
 ----------------
 
-If a layer has attributes stored in a database, the query is passed to
-the underlying database driver. That means, that SQL conditions which
-can be used depend on the driver and database to which the layer is
-linked. For example, DBF driver has currently very limited set of SQL
-expressions and PostgreSQL offers very rich set of SQL expressions.
+레이어가 데이터베이스에 저장된 속성을 가지고 있는 경우, 기저 데이터베이스 드라이버에 쿼리를 전송합니다. 즉 레이어와 링크된 데이터베이스와 그 드라이버에 따라 사용할 수 있는 SQL 조건이 달라진다는 뜻입니다. 예를 들어, 현재 DBF 드라이버는 아주 제한적인 SQL 표현식 집합을 지원하지만 PostgreSQL은 매우 풍부한 SQL 표현식 집합을 제공합니다.
 
-If a layer has no attributes linked and it has only categories, OGR
-internal SQL engine is used to evaluate the expression. Category is an
-integer number attached to geometry, it is sort of ID, but it is not FID
-as more features in one layer can have the same category.
+레이어에 링크된 속성이 없고 카테고리만 있는 경우, OGR 내부 SQL 엔진을 이용해서 표현식을 평가합니다. 카테고리는 도형에 첨부된 정수형 숫자로 일종의 ID이지만 FID는 아닙니다. 레이어 하나에 있는 하나 이상의 객체들이 동일한 카테고리를 가질 수 있기 때문입니다.
 
-Evaluation is done once when the attribute filter is set.
+속성 필터를 설정하면 평가를 수행합니다.
 
-Spatial filter
+공간 필터
 --------------
 
-Bounding boxes of features stored in topology structure are used to
-evaluate if a features matches current spatial filter.
+객체가 현재 공간 필터와 일치하는 경우 위상(topology) 구조에 저장된 객체의 경계 상자를 이용해서 평가합니다.
 
-Evaluation is done once when the spatial filter is set.
+공간 필터를 설정하면 평가를 수행합니다.
 
 GISBASE
 -------
 
-GISBASE is full path to the directory where GRASS is installed. By
-default, GRASS driver is using the path given to gdal configure script.
-A different directory can be forced by setting GISBASE environment
-variable. GISBASE is used to find GRASS database drivers.
+GISBASE는 GRASS가 설치된 디렉터리를 가리키는 전체 경로입니다. GRASS 드라이버는 기본적으로 GDAL 환경설정 스크립트에 지정된 경로를 사용하고 있습니다. GISBASE 환경 변수를 설정하면 강제로 다른 디렉터리를 사용하게 할 수 있습니다. GISBASE는 GRASS 데이터베이스 드라이버를 찾기 위해 사용됩니다.
 
-Missing topology
+위상 누락
 ----------------
 
-GRASS driver can read GRASS vector files if topology is available (AKA
-level 2). If an error is reported, telling that the topology is not
-available, it is necessary to build topology within GRASS using v.build
-module.
+GRASS 드라이버는 (2수준이라고도 하는) 위상을 사용할 수 있는 경우 GRASS 벡터 파일을 읽어올 수 있습니다. 위상을 사용할 수 없다는 오류가 발생하면, v.build 모듈을 이용해서 GRASS 안에 위상을 작성해야 합니다.
 
-Random access
+임의 접근
 -------------
 
-If random access (GetFeature instead of GetNextFeature) is used on layer
-with attributes, the reading of features can be quite slow. It is
-because the driver has to query attributes by category for each feature
-(to avoid using a lot of memory) and random access to database is
-usually slow. This can be improved on GRASS side optimizing/writing file
-based (DBF, SQLite) drivers.
+속성을 가진 레이어에 (GetNextFeature 대신 GetFeature 메소드를 사용해서) 임의 접근하는 경우, 객체를 읽어오는 작업이 아주 느릴 수 있습니다. 이 드라이버가 (너무 많은 메모리를 사용하는 일을 피하기 위해) 각 객체에 대해 카테고리 별로 속성을 쿼리해야 하고, 거기에 데이터베이스에 임의 접근하는 작업도 보통 느리기 때문입니다. 파일 기반 (DBF 및 SQLite) 드라이버를 최적화/작성하면 GRASS 쪽에서 속도를 향상시킬 수 있습니다.
 
-Known problem
+알려진 문제점
 -------------
 
-Because of bug in GRASS library, it is impossible to start/stop database
-drivers in FIFO order and FILO order must be used. The GRASS driver for
-OGR is written with this limit in mind and drivers are always closed if
-not used and if a driver remains opened kill() is used to terminate it.
-It can happen however in rare cases, that the driver will try to stop
-database driver which is not the last opened and an application hangs.
-This can happen if sequential read (GetNextFeature) of a layer is not
-finished (reading is stopped before last available feature is reached),
-features from another layer are read and then the reading of the first
-layer is finished, because in that case kill() is not used.
+GRASS 라이브러리의 버그로 인해 데이터베이스 드라이버를 FIFO(First In, First Out) 순서로 시작/종료할 수 없기 때문에 FILO(First In, Last Out) 순서를 사용해야만 합니다. OGR GRASS 드라이버는 이 제한을 염두에 두고 작성되어, 드라이버를 사용하지 않는 경우 항상 종료시키고 드라이버가 계속 열려 있는 경우 kill() 메소드를 이용해서 종료시킵니다. 하지만 드라이버가 가장 최근 열리지 않아 응용 프로그램이 멈춘 데이터베이스 드라이버를 종료시키려 시도하는 경우가 아주 드물게 일어날 수 있습니다. 레이어를 (GetNextFeature 메소드로) 순차적으로 읽어오는 작업이 끝나지 않았는데 (마지막으로 사용할 수 있는 객체에 접근하기 전에 읽기가 멈췄는데) 또다른 레이어의 객체를 읽어온 다음 처음 레이어를 읽어오는 경우 이런 일이 발생할 수도 있습니다. 이 경우 kill() 메소드를 사용하지 않기 때문입니다.
 
-See Also
+참고
 --------
 
--  `GRASS GIS home page <http://grass.osgeo.org>`__
+-  `GRASS GIS 홈페이지 <http://grass.osgeo.org>`_
 
---------------
+감사의 말
+---------
 
-Development of this driver was financially supported by Faunalia
-(`www.faunalia.it <http://www.faunalia.it/>`__).
+이 드라이버는 `Faunalia <http://www.faunalia.it/>`_ 사의 재정 지원으로 개발되었습니다.
+
