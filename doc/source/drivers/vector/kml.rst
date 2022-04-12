@@ -1,24 +1,17 @@
 .. _vector.kml:
 
-KML - Keyhole Markup Language
+KML - 키홀 마크업 언어
 =============================
 
 .. shortname:: KML
 
 .. build_dependencies:: (read support needs libexpat) 
 
-Keyhole Markup Language (KML) is an XML-based language for managing the
-display of 3D geospatial data. KML has been accepted as an OGC standard,
-and is supported in one way or another on the major GeoBrowsers. Note
-that KML by specification uses only a single projection, EPSG:4326. All
-OGR KML output will be presented in EPSG:4326. As such OGR will create
-layers in the correct coordinate system and transform any geometries.
+KML(Keyhole Markup Language)은 3차원 지리공간 데이터의 표시(display)를 관리하기 위한 XML 기반 언어입니다. KML은 OGC 표준으로 받아들여졌으며, 주요 지리 브라우저(GeoBrowser)들 상에서 어떤 방식으로든 지원되고 있습니다. KML 사양은 EPSG:4326 투영법 하나만 사용한다는 사실을 기억하십시오. 모든 OGR KML 산출물은 EPSG:4326 좌표계를 사용할 것입니다. OGR는 레이어를 정확한 좌표계로 생성하고 모든 도형을 그에 맞춰 변환할 것입니다.
 
-At this time, only vector layers are handled by the KML driver. *(there
-are additional scripts supplied with the GDAL project that can build
-other kinds of output)*
+KML 드라이버는 현재 벡터 레이어만 처리합니다. (*GDAL 프로젝트와 함께 제공되는 추가 스크립트로 다른 유형의 산출물을 작성할 수 있습니다.*)
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
@@ -27,49 +20,31 @@ Driver capabilities
 
 .. supports_virtualio::
 
-KML Reading
+KML 읽기
 ~~~~~~~~~~~
 
-KML reading is only available if GDAL/OGR is built with the Expat XML
-Parser, otherwise only KML writing will be supported.
+GDAL/OGR가 Expat XML 파서와 함께 빌드된 경우에만 KML 파일을 읽을 수 있습니다. 그렇지 않다면 KML 쓰기만 지원할 것입니다.
 
-Supported geometry types are ``Point``, ``Linestring``, ``Polygon``,
-``MultiPoint``, ``MultiLineString``, ``MultiPolygon`` and
-``MultiGeometry``. There are limitations, for example: the nested nature
-of folders in a source KML file is lost; folder ``<description>`` tags
-will not carry through to output. Folders containing
-multiple geometry types, like POINT and POLYGON, are supported.
+``Point``, ``Linestring``, ``Polygon``, ``MultiPoint``, ``MultiLineString``, ``MultiPolygon`` 및 ``MultiGeometry`` 도형 유형을 지원합니다. 제한 사항도 있습니다. 예를 들면 소스 KML 파일에 있는 폴더의 내포 본질은 사라지고, 폴더의 ``<description>`` 태그는 산출물에 작성되지 않을 것입니다.
+도형 유형 여러 개를 -- 예를 들어 POINT와 POLYGON을 함께 -- 담고 있는 폴더를 지원합니다.
 
-KML Writing
+KML 쓰기
 ~~~~~~~~~~~
 
-Since not all features of KML are able to be represented in the Simple
-Features geometry model, you will not be able to generate many
-KML-specific attributes from within GDAL/OGR. Please try a few test
-files to get a sense of what is possible.
+KML의 모든 객체를 OGR 단순 피처 도형 모델로 표현할 수는 없기 때문에, GDAL/OGR 내에서 많은 KML 특화 속성을 생성하지 못 할 것입니다. 어떤 것이 가능한지 감을 잡으려면 먼저 테스트 파일 몇 개를 시도해보십시오.
 
-When outputting KML, the OGR KML driver will translate each OGR Layer
-into a KML Folder (you may encounter unexpected behavior if you try to
-mix the geometry types of elements in a layer, e.g. ``LINESTRING`` and
-``POINT`` data).
+KML 파일을 산출할 때, OGR KML 드라이버는 각 OGR 레이어를 KML 폴더로 변환할 것입니다. (레이어 하나에 요소들의 도형 유형을 -- 예를 들면 ``LINESTRING`` 과 ``POINT`` 데이터를 -- 혼합하려 하는 경우 예상하지 못 한 습성이 드러날 수도 있습니다.)
 
-The KML Driver will rename some layers, or source KML folder names, into
-new names it considers valid, for example '``Layer #0``', the default
-name of the first unnamed Layer, becomes ``'Layer__0'``.
+KML 드라이버는 몇몇 레이어 또는 소스 KML 폴더의 이름을 드라이버가 무결한 것으로 간주하는 새 이름으로 재명명할 것입니다. 예를 들어 첫 번째 이름 없는 레이어의 기본명인 '``Layer #0``' 을 ``'Layer__0'`` 으로 재명명합니다.
 
-KML is mix of formatting and feature data. The <description> tag of a
-Placemark will be displayed in most geobrowsers as an HTML-filled
-balloon. When writing KML, Layer element attributes are added as simple
-schema fields. This best preserves feature type information.
+KML은 서식 및 객체 데이터의 혼합물입니다. 대부분의 지리 브라우저는 위치표시(Placemark)의 <description> 태그를 HTML으로 채워진 풍선으로 출력할 것입니다. KML을 작성할 때, 레이어 요소 속성을 단순 스키마 필드로 추가합니다. 이렇게 하면 객체 유형 정보를 가장 잘 보전합니다.
 
-Limited support is available for fills, line color and other styling
-attributes. Please try a few sample files to get a better sense of
-actual behavior.
+채우기, 라인 색상 및 기타 스타일 작업 속성을 제한적으로 지원합니다. 실제 습성에 대한 감을 잡으려면 먼저 샘플 파일 몇 개를 시도해보십시오.
 
-Encoding issues
+인코딩 문제점
 ~~~~~~~~~~~~~~~
 
-Expat library supports reading the following built-in encodings :
+Expat 라이브러리는 다음 내장 인코딩 읽기를 지원합니다:
 
 -  US-ASCII
 -  UTF-8
@@ -77,86 +52,68 @@ Expat library supports reading the following built-in encodings :
 -  ISO-8859-1
 -  Windows-1252
 
-The content returned by OGR will be encoded in UTF-8, after the
-conversion from the encoding mentioned in the file header is.
+OGR가 반환하는 콘텐츠는 파일 헤더에 언급된 인코딩으로 변환한 다음 UTF-8로 인코딩될 것입니다.
 
-| If your KML file is not encoded in one of the previous encodings, it
-  will not be parsed by the KML driver. You may convert it into one of
-  the supported encoding with the *iconv* utility for example and change
-  accordingly the *encoding* parameter value in the XML header.
+KML 파일이 앞의 인코딩 가운데 하나로 인코딩되지 않은 경우, KML 드라이버는 해당 파일을 파싱하지 않을 것입니다. 해당 파일을 지원되는 인코딩 가운데 하나로 -- 예를 들면 *iconv* 유틸리티를 이용해서 -- 변환한 다음 XML 헤더에 있는 *encoding* 파라미터를 그에 맞춰 변경할 수도 있습니다.
 
-When writing a KML file, the driver expects UTF-8 content to be passed
-in.
+KML 파일 작성 시, 이 드라이버는 UTF-8 콘텐츠가 전송되어 올 것으로 예상합니다.
 
-Creation Options
+생성 옵션
 ~~~~~~~~~~~~~~~~
 
-The following dataset creation options are supported:
+다음 데이터셋 생성 옵션들을 지원합니다:
 
--  **NameField**: Allows you to specify the field to use for the KML
-   <name> element. Default value : 'Name'
--  **DescriptionField**: Allows you to specify the field to use for the
-   KML <description> element. Default value : 'Description'
--  **AltitudeMode**: Allows you to specify the AltitudeMode to use for
-   KML geometries. This will only affect 3D geometries and must be one
-   of the valid KML options. See the `relevant KML reference
-   material <http://code.google.com/apis/kml/documentation/kml_tags_21.html#altitudemode>`__
-   for further information.
+-  **NameField**:
+   KML <name> 요소를 위해 사용할 필드를 지정할 수 있습니다. 기본값은 'Name'입니다.
+
+-  **DescriptionField**:
+   KML <description> 요소를 위해 사용할 필드를 지정할 수 있습니다. 기본값은 'Description'입니다.
+
+-  **AltitudeMode**:
+   KML 도형에 사용할 AltitudeMode를 지정할 수 있습니다. 이 옵션은 3차원 도형에만 영향을 미치며, 무결한 KML 옵션 가운데 하나여야만 합니다. 자세한 정보는 `관련 KML 참고 자료 <http://code.google.com/apis/kml/documentation/kml_tags_21.html#altitudemode>`_ 를 참조하십시오.
 
    ::
 
       ogr2ogr -f KML output.kml input.shp -dsco AltitudeMode=absolute
 
--  **DOCUMENT_ID**\ =string: Starting with GDAL 2.2, the DOCUMENT_ID
-   datasource creation option can be used to specified the id of the
-   root <Document> node. The default value is root_doc.
+-  **DOCUMENT_ID=string**:
+   GDAL 2.2버전부터, DOCUMENT_ID 데이터소스 생성 옵션을 사용해서 루트 <Document> 노드의 ID를 지정할 수 있습니다. 기본값은 'root_doc'입니다.
 
-VSI Virtual File System API support
+VSI 가상 파일 시스템 API 지원
 -----------------------------------
 
-The driver supports reading and writing to files managed by VSI Virtual
-File System API, which include "regular" files, as well as files in the
-/vsizip/ (read-write) , /vsigzip/ (read-write) , /vsicurl/ (read-only)
-domains.
+이 드라이버는 VSI 가상 파일 시스템 API가 관리하는 파일의 읽기 및 쓰기를 지원합니다. VSI 가상 파일 시스템 API이 관리하는 파일에는 "정규" 파일은 물론 /vsizip/ (읽기-쓰기) , /vsigzip/ (읽기-쓰기) , /vsicurl/ (읽기 전용) 도메인에 있는 파일도 포함됩니다.
 
-Writing to /dev/stdout or /vsistdout/ is also supported.
+/dev/stdout 또는 /vsistdout/ 에 쓰기도 지원합니다.
 
-Example
+예시
 -------
 
-The ogr2ogr utility can be used to dump the results of a PostGIS query
-to KML:
+-  ogr2ogr 유틸리티를 사용해서 KML에 대한 PostGIS 쿼리의 결과물을 덤프하기:
 
-::
+   ::
 
-   ogr2ogr -f KML output.kml PG:'host=myserver dbname=warmerda' -sql "SELECT pop_1994 from canada where province_name = 'Alberta'"
+      ogr2ogr -f KML output.kml PG:'host=myserver dbname=warmerda' -sql "SELECT pop_1994 from canada where province_name = 'Alberta'"
 
-How to dump contents of .kml file as OGR sees it:
+-  .kml 파일의 내용을 OGR가 인식하는 대로 덤프하는 방법:
 
-::
+   ::
 
-   ogrinfo -ro somedisplay.kml
+      ogrinfo -ro somedisplay.kml
 
-Caveats
+주의할 점
 -------
 
-Google Earth seems to have some limits regarding the number of
-coordinates in complex geometries like polygons. If the problem appears,
-then problematic geometries are displayed completely or partially
-covered by vertical stripes. Unfortunately, there are no exact number
-given in the KML specification about this limitation, so the KML driver
-will not warn about potential problems. One of possible and tested
-solutions is to simplify a line or a polygon to remove some coordinates.
-Here is the whole discussion about this issue on the `Google KML
-Developer Forum <http://groups.google.com/group/kml-support>`__, in the
-`polygon displays with vertical
-stripes <http://groups.google.com/group/kml-support-getting-started/browse_thread/thread/e6995b8073e69c41>`__
-thread.
+구글 어스가 폴리곤 같은 복잡 도형의 좌표 개수와 관련된 몇 가지 제한을 가지고 있는 것으로 보입니다.
+이런 문제가 발생할 경우, 문제가 되는 도형이 완전히 또는 부분적으로 수직 스트라이프로 덮입니다.
+안타깝지만 KML 사양은 이런 제한 사항에 관한 정확한 개수를 명기하고 있지 않기 때문에, KML 드라이버가 이런 잠재적인 문제에 관해 경고하지 않을 것입니다.
+사용할 수 있고 테스트된 해결 방법 가운데 하나는 라인 또는 폴리곤을 단순화해서 좌표 몇 개를 제거하는 것입니다.
+`구글 KML 개발자 포럼 <http://groups.google.com/group/kml-support>`_ 의 `수직 스트라이프와 함께 표시되는 폴리곤(polygon displays with vertical stripes) <http://groups.google.com/group/kml-support-getting-started/browse_thread/thread/e6995b8073e69c41>`_ 스레드에서 이 문제점에 관해 토의하고 있습니다.
 
-See Also
+참고
 --------
 
--  `KML Specification <https://developers.google.com/kml/?csw=1>`__
--  `KML
-   Tutorial <https://developers.google.com/kml/documentation/kml_tut>`__
--  :ref:`LIBKML driver <vector.libkml>` An alternative GDAL KML driver
+-  `KML 사양 <https://developers.google.com/kml/?csw=1>`_
+-  `KML 예제 <https://developers.google.com/kml/documentation/kml_tut>`_
+-  :ref:`LIBKML <vector.libkml>` 드라이버: 대안 GDAL KML 드라이버
+
