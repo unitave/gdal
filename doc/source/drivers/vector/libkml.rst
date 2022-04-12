@@ -1,34 +1,19 @@
 .. _vector.libkml:
 
-LIBKML Driver (.kml .kmz)
+LIBKML 드라이버 (.kml .kmz)
 =========================
 
 .. shortname:: LIBKML
 
 .. build_dependencies:: libkml
 
-The LIBKML driver is a client of
-`Libkml <https://github.com/libkml/libkml>`__ , a reference
-implementation of `KML <http://www.opengeospatial.org/standards/kml/>`__
-reading and writing, in the form of a cross platform C++ library. You
-must build and install Libkml in order to use this OGR driver. Note: you
-need to build libkml 1.3 or master.
+LIBKML 드라이버는 `KML <http://www.opengeospatial.org/standards/kml/>`_ 읽기 및 쓰기를 크로스 플랫폼 C++ 라이브러리의 형태로 참조 구현한 `libkml <https://github.com/libkml/libkml>`_ 의 클라이언트입니다. 이 OGR 드라이버를 사용하기 위해서는 libkml을 빌드하고 설치해야만 합니다. libkml 1.3버전 또는 마스터 브랜치를 빌드해야 한다는 점을 주의하십시오.
 
-Note that if you build and include this LIBKML driver, it will become
-the default reader of KML for ogr, overriding the previous :ref:`KML
-driver <vector.kml>`. You can still specify either KML or LIBKML as
-the output driver via the command line
+LIBKML 드라이버를 빌드하고 포함시키는 경우, OGR에서 이전 :ref:`KML 드라이버 <vector.kml>` 를 무시하고 이 드라이버를 KML의 기본 판독기로 사용할 것이라는 사실을 기억하십시오. 그래도 명령줄을 통해 산출 드라이버를 KML 또는 LIBKML 가운데 하나로 지정할 수 있습니다.
 
-Libkml from Google provides reading services for any valid KML file.
-However, please be advised that some KML facilities do not map into the
-Simple Features specification OGR uses as its internal structure.
-Therefore, a best effort will be made by the driver to understand the
-content of a KML file read by libkml into ogr, but your mileage may
-vary. Please try a few KML files as samples to get a sense of what is
-understood. In particular, nesting of feature sets more than one deep
-will be flattened to support ogr's internal format.
+구글이 제공하는 libkml은 무결한 모든 KML 파일에 대한 읽기 서비스를 지원합니다. 하지만, 일부 KML 특수 기능은 OGR가 사용하는 단순 피처(Simple Feature) 사양의 내부 구조로 매핑되지 않기 때문에 주의해야 합니다. 따라서 이 드라이버는 libkml 라이브러리를 이용해서 OGR로 읽어온 KML 파일의 내용을 이해하기 위해 최선을 다할 테지만, 그 결과는 다를 수 있습니다. 드라이버가 어떤 것을 이해하는지에 대해 감을 잡으려면 KML 파일을 몇 개 샘플로 시도해보십시오. 특히 심도가 1을 초과하는 객체 집합의 내포 작업은 OGR의 내부 포맷을 지원하기 위해 평탄화될 것입니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
@@ -37,712 +22,415 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Datasource
+데이터소스
 ----------
+데이터소스를 KML 파일 ``somefile.kml``, 디렉터리 ``somedir/``, 또는 KMZ 파일 ``somefile.kmz`` 로 지정할 수도 있습니다.
 
-You may specify a datasource
-as a kml file ``somefile.kml``, a directory ``somedir/``, or a kmz
-file ``somefile.kmz``.
-
-By default on directory and kmz datasources, an index file of all the
-layers will be read from or written to doc.kml. It contains a
-`<NetworkLink> <https://developers.google.com/kml/documentation/kmlreference#networklink>`__
-to each layer file in the datasource. This feature can be turned off by
-setting the environment variable LIBKML_USE_DOC.KML to "no"
+디렉터리 및 KMZ 데이터소스의 경우 기본적으로 doc.kml 파일에 모든 레이어의 색인 파일을 읽고 쓸 것입니다. 이 파일은 데이터소스에 있는 각 레이어의 `<NetworkLink> <https://developers.google.com/kml/documentation/kmlreference#networklink>`_ 를 담고 있습니다. LIBKML_USE_DOC.KML 환경설정 옵션을 NO로 설정해서 이 기능을 비활성화시킬 수 있습니다.
 
 StyleTable
 ~~~~~~~~~~
 
-Datasource style tables are written to the
-`<Document> <https://developers.google.com/kml/documentation/kmlreference#document>`__
-in a .kml, style/style.kml in a kmz file, or style.kml in a directory,
-as one or more
-`<Style> <https://developers.google.com/kml/documentation/kmlreference#style>`__
-elements. Not all of :ref:`ogr_feature_style` can translate into
-KML.
+데이터소스 스타일 테이블은 KML 파일의 경우 .kml 파일의, KMZ 파일의 경우 style/style.kml 파일의, 또는 디렉터리의 경우 style.kml 파일의 `<Document> <https://developers.google.com/kml/documentation/kmlreference#document>`_ 에 하나 이상의 `<Style> <https://developers.google.com/kml/documentation/kmlreference#style>`_ 요소로 작성됩니다. 모든 :ref:`ogr_feature_style` 을 KML로 변환하지는 못 합니다.
 
-Datasource creation options
+데이터소스 생성 옵션
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following datasource creation options can be
-used to generate a
-`<atom:Author> <https://developers.google.com/kml/documentation/kmlreference#atomauthor>`__
-element at the top Document level.
+다음과 같은 데이터소스 생성 옵션들을 사용해서 최상위 <Document> 수준에 `<atom:Author> <https://developers.google.com/kml/documentation/kmlreference#atomauthor>`_ 요소를 생성할 수 있습니다.
 
 -  **AUTHOR_NAME**
 -  **AUTHOR_URI**
 -  **AUTHOR_EMAIL**
 
-The href of an
-`<atom:link> <https://developers.google.com/kml/documentation/kmlreference#atomlink>`__
-element at the top Document level can be specified with the **LINK**
-creation option.
+**LINK** 데이터소스 생성 옵션을 사용해서 최상위 <Document> 수준에 있는 `<atom:link> <https://developers.google.com/kml/documentation/kmlreference#atomlink>`_ 요소의 하이퍼텍스트 참조(href)를 지정할 수 있습니다.
 
-The
-`<phoneNumber> <https://developers.google.com/kml/documentation/kmlreference#phonenumber>`__
-element at the top Document level can be specified with the
-**PHONENUMBER** creation option. The value must follow the syntax of
-`IETF RFC 3966 <http://tools.ietf.org/html/rfc3966>`__.
+**PHONENUMBER** 데이터소스 생성 옵션을 사용해서 최상위 <Document> 수준에 있는 `<phoneNumber> <https://developers.google.com/kml/documentation/kmlreference#phonenumber>`_ 요소를 지정할 수 있습니다. 이 옵션의 값은 `IETF RFC 3966 <http://tools.ietf.org/html/rfc3966>`_ 의 문법을 따라야만 합니다.
 
-Starting with GDAL 2.2, the DOCUMENT_ID datasource creation option can
-be used to specified the id of the root <Document> node. The default
-value is root_doc.
+GDAL 2.2버전부터, **DOCUMENT_ID** 데이터소스 생성 옵션을 사용해서 루트 <Document> 노드의 ID를 지정할 수 있습니다. 기본값은 'root_doc'입니다.
 
-Container properties
+컨테이너 속성
 ^^^^^^^^^^^^^^^^^^^^
 
-The following dataset creation options can be used to set container
-options :
+다음과 같은 데이터셋 생성 옵션들을 사용해서 컨테이너 옵션을 설정할 수 있습니다:
 
 -  **NAME**:
-   `<name> <https://developers.google.com/kml/documentation/kmlreference#name>`__
-   element
+   `<name> <https://developers.google.com/kml/documentation/kmlreference#name>`_ 요소
 -  **VISIBILITY**:
-   `<visibility> <https://developers.google.com/kml/documentation/kmlreference#visibility>`__
-   element
+   `<visibility> <https://developers.google.com/kml/documentation/kmlreference#visibility>`_ 요소
 -  **OPEN**:
-   `<open> <https://developers.google.com/kml/documentation/kmlreference#open>`__
-   element
+   `<open> <https://developers.google.com/kml/documentation/kmlreference#open>`_ 요소
 -  **SNIPPET**:
-   `<snippet> <https://developers.google.com/kml/documentation/kmlreference#snippet>`__
-   element
+   `<snippet> <https://developers.google.com/kml/documentation/kmlreference#snippet>`_ 요소
 -  **DESCRIPTION**:
-   `<description> <https://developers.google.com/kml/documentation/kmlreference#description>`__
-   element
+   `<description> <https://developers.google.com/kml/documentation/kmlreference#description>`_ 요소
 
-List style
+목록 스타일
 ^^^^^^^^^^
 
-The following dataset creation options can be used to control how the
-main folder (folder of layers) appear in the Places panel of the Earth
-browser, trough a
-`<ListStyle> <https://developers.google.com/kml/documentation/kmlreference#liststyle>`__
-element:
+다음과 같은 데이터셋 생성 옵션들을 사용해서 `<ListStyle> <https://developers.google.com/kml/documentation/kmlreference#liststyle>`_ 요소를 통해 구글 어스 브라우저의 장소(Places) 패널에 주 폴더(레이어 폴더)가 나타나는 방식을 제어할 수 있습니다:
 
--  **LISTSTYLE_TYPE**: can be one of "check", "radioFolder",
-   "checkOffOnly" or "checkHideChildren". Sets the
-   `<listItemType> <https://developers.google.com/kml/documentation/kmlreference#listItemType>`__
-   element.
--  **LISTSTYLE_ICON_HREF**: URL of the icon to display for the main
-   folder. Sets the href element of the
-   `<ItemIcon> <https://developers.google.com/kml/documentation/kmlreference#itemicon>`__
-   element.
+-  **LISTSTYLE_TYPE**:
+   "check", "radioFolder", "checkOffOnly" 또는 "checkHideChildren" 가운데 하나로 지정할 수 있습니다.
+   이 옵션은 `<listItemType> <https://developers.google.com/kml/documentation/kmlreference#listItemType>`_ 요소를 설정합니다.
+-  **LISTSTYLE_ICON_HREF**:
+   주 폴더에 표시할 아이콘의 URL을 지정합니다.
+   이 옵션은 `<ItemIcon> <https://developers.google.com/kml/documentation/kmlreference#itemicon>`_ 요소의 <href> 요소를 설정합니다.
 
-Balloon style
+말풍선 스타일
 ^^^^^^^^^^^^^
 
-If a style *foo* is defined, it is possible to add a
-`<BalloonStyle> <https://developers.google.com/kml/documentation/kmlreference#balloonstyle>`__
-element to it, by specifying the **foo_BALLOONSTYLE_BGCOLOR** and/or
-**foo_BALLOONSTYLE_TEXT** elements.
+*foo* 스타일을 정의한 경우, **foo_BALLOONSTYLE_BGCOLOR** 그리고/또는 **foo_BALLOONSTYLE_TEXT** 옵션을 지정해서 해당 스타일에 `<BalloonStyle> <https://developers.google.com/kml/documentation/kmlreference#balloonstyle>`_ 요소를 추가할 수 있습니다.
 
 NetworkLinkControl
 ^^^^^^^^^^^^^^^^^^
 
-A
-`<NetworkLinkControl> <https://developers.google.com/kml/documentation/kmlreference#networklinkcontrol>`__
-element can be defined if at least one of the following dataset creation
-option is specified:
+다음 데이터셋 생성 옵션들 가운데 최소한 하나를 지정하면 `<NetworkLinkControl> <https://developers.google.com/kml/documentation/kmlreference#networklinkcontrol>`_ 요소를 정의할 수 있습니다:
 
--  **NLC_MINREFRESHPERIOD** : to set the
-   `<minRefreshPeriod> <https://developers.google.com/kml/documentation/kmlreference#minrefreshperiod>`__
-   element
--  **NLC_MAXSESSIONLENGTH** : to set the
-   `<maxSessionLength> <https://developers.google.com/kml/documentation/kmlreference#maxsessionlength>`__
-   element
--  **NLC_COOKIE** : to set the
-   `<cookie> <https://developers.google.com/kml/documentation/kmlreference#cookie>`__
-   element
--  **NLC_MESSAGE** : to set the
-   `<message> <https://developers.google.com/kml/documentation/kmlreference#message>`__
-   element
--  **NLC_LINKNAME** : to set the
-   `<linkName> <https://developers.google.com/kml/documentation/kmlreference#linkname>`__
-   element
--  **NLC_LINKDESCRIPTION** : to set the
-   `<linkDescription> <https://developers.google.com/kml/documentation/kmlreference#linkdescription>`__
-   element
--  **NLC_LINKSNIPPET** : to set the
-   `<linkSnippet> <https://developers.google.com/kml/documentation/kmlreference#linksnippet>`__
-   element
--  **NLC_EXPIRES** : to set the
-   `<expires> <https://developers.google.com/kml/documentation/kmlreference#expires>`__
-   element
+-  **NLC_MINREFRESHPERIOD** :
+   `<minRefreshPeriod> <https://developers.google.com/kml/documentation/kmlreference#minrefreshperiod>`_ 요소를 설정합니다.
+-  **NLC_MAXSESSIONLENGTH** :
+   `<maxSessionLength> <https://developers.google.com/kml/documentation/kmlreference#maxsessionlength>`_ 요소를 설정합니다.
+-  **NLC_COOKIE** :
+   `<cookie> <https://developers.google.com/kml/documentation/kmlreference#cookie>`_ 요소를 설정합니다.
+-  **NLC_MESSAGE** :
+   `<message> <https://developers.google.com/kml/documentation/kmlreference#message>`_ 요소를 설정합니다.
+-  **NLC_LINKNAME** :
+   `<linkName> <https://developers.google.com/kml/documentation/kmlreference#linkname>`_ 요소를 설정합니다.
+-  **NLC_LINKDESCRIPTION** :
+   `<linkDescription> <https://developers.google.com/kml/documentation/kmlreference#linkdescription>`_ 요소를 설정합니다.
+-  **NLC_LINKSNIPPET** :
+   `<linkSnippet> <https://developers.google.com/kml/documentation/kmlreference#linksnippet>`_ 요소를 설정합니다.
+-  **NLC_EXPIRES** :
+   `<expires> <https://developers.google.com/kml/documentation/kmlreference#expires>`_ 요소를 설정합니다.
 
-Update documents
+문서 업데이트
 ^^^^^^^^^^^^^^^^
+**UPDATE_TARGETHREF** 데이터셋 생성 옵션을 정의하는 경우, `<Update> <https://developers.google.com/kml/documentation/kmlreference#update>`_ 요소를 가진 NetworkLinkControl KML 파일을 업데이트할 것입니다. `업데이트 예제 <https://developers.google.com/kml/documentation/updates>`_ 를 참조하십시오.
 
-When defining the dataset creation option **UPDATE_TARGETHREF**, a
-NetworkLinkControl KML file with an
-`<Update> <https://developers.google.com/kml/documentation/kmlreference#update>`__
-element will be generated. See the `tutorial about
-update <https://developers.google.com/kml/documentation/updates>`__.
+레이어 상에서의 CreateFeature() 작업은 `<Create> <https://developers.google.com/kml/documentation/kmlreference#create>`_ 요소로 변환될 것입니다.
 
-The CreateFeature() operation on a layer will be translated as a
-`<Create> <https://developers.google.com/kml/documentation/kmlreference#create>`__
-element.
+레이어 상에서의 SetFeature() 작업은 `<Change> <https://developers.google.com/kml/documentation/kmlreference#change>`_ 요소로 변환될 것입니다.
 
-The SetFeature() operation on a layer will be translated as a
-`<Change> <https://developers.google.com/kml/documentation/kmlreference#change>`__
-element.
+레이어 상에서의 DeleteFeature() 작업은 `<Delete> <https://developers.google.com/kml/documentation/kmlreference#delete>`_ 요소로 변환될 것입니다.
 
-The DeleteFeature() operation on a layer will be translated as a
-`<Delete> <https://developers.google.com/kml/documentation/kmlreference#delete>`__
-element.
-
-Layer
+레이어
 -----
 
-:cpp:class:`OGRLayer` are mapped
-to kml files as a
-`<Document> <https://developers.google.com/kml/documentation/kmlreference#document>`__
-or
-`<Folder> <https://developers.google.com/kml/documentation/kmlreference#folder>`__,
-and in kmz files or directories as a separate kml file.
+:cpp:class:`OGRLayer` 클래스는 KML 파일에서 `<Document> <https://developers.google.com/kml/documentation/kmlreference#document>`_ 또는 `<Folder> <https://developers.google.com/kml/documentation/kmlreference#folder>`_ 요소로 매핑되며, KMZ 파일 또는 디렉터리의 경우 개별 KML 파일로 변환됩니다.
 
-Style
+스타일
 ~~~~~
 
-Layer style tables can not be read from or written to a kml layer that
-is a
-`<Folder> <https://developers.google.com/kml/documentation/kmlreference#folder>`__,
-otherwise they are in the
-`<Document> <https://developers.google.com/kml/documentation/kmlreference#document>`__
-that is the layer.
+레이어 스타일 테이블은 `<Folder> <https://developers.google.com/kml/documentation/kmlreference#folder>`_ 요소인 KML 레이어에서 읽거나 쓸 수 없습니다. 그렇지 않은 경우 레이어인 `<Document> <https://developers.google.com/kml/documentation/kmlreference#document>`_ 요소 안에 있습니다.
 
-Schema
+스키마
 ~~~~~~
 
-Read and write of
-`<Schema> <https://developers.google.com/kml/documentation/kmlreference#schema>`__
-is supported for .kml files, .kmz files, and directories.
+KML 파일, KMZ 파일 및 디렉터리에서 `<Schema> <https://developers.google.com/kml/documentation/kmlreference#schema>`_ 요소의 읽기 및 쓰기를 지원합니다.
 
-Layer creation options
+레이어 생성 옵션
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The following layer creation options can be used
-to generate a
-`<LookAt> <https://developers.google.com/kml/documentation/kmlreference#lookat>`__
-element at the layer level.
+다음 레이어 생성 옵션들을 사용해서 레이어 수준에 있는 `<LookAt> <https://developers.google.com/kml/documentation/kmlreference#lookat>`_ 요소를 생성할 수 있습니다:
 
--  **LOOKAT_LONGITUDE** (required)
--  **LOOKAT_LATITUDE** (required)
--  **LOOKAT_RANGE** (required)
+-  **LOOKAT_LONGITUDE**: (필수)
+-  **LOOKAT_LATITUDE**: (필수)
+-  **LOOKAT_RANGE**: (필수)
 -  **LOOKAT_HEADING**
 -  **LOOKAT_TILT**
 -  **LOOKAT_ALTITUDE**
 -  **LOOKAT_ALTITUDEMODE**
 
-Alternatively, a
-`<Camera> <https://developers.google.com/kml/documentation/kmlreference#camera>`__
-element can be generated.
+또는 `<Camera> <https://developers.google.com/kml/documentation/kmlreference#camera>`_ 요소를 생성할 수도 있습니다:
 
--  **CAMERA_LONGITUDE** (required)
--  **CAMERA_LATITUDE** (required)
--  **CAMERA_ALTITUDE** (required)
--  **CAMERA_ALTITUDEMODE** (required)
+-  **CAMERA_LONGITUDE**: (필수)
+-  **CAMERA_LATITUDE**: (필수)
+-  **CAMERA_ALTITUDE**: (필수)
+-  **CAMERA_ALTITUDEMODE**: (필수)
 -  **CAMERA_HEADING**
 -  **CAMERA_TILT**
 -  **CAMERA_ROLL**
 
-A
-`<Region> <https://developers.google.com/kml/documentation/kmlreference#region>`__
-element can be generated to control when objects of the layer are
-visible or not. If REGION_XMIN, REGION_YMIN, REGION_XMAX and
-REGION_YMAX, the region coordinates are determined from the spatial
-extent of the features being written in the layer.
+`<Region> <https://developers.google.com/kml/documentation/kmlreference#region>`_ 요소를 생성해서 레이어의 객체의 가시성을 제어할 수 있습니다. REGION_XMIN, REGION_YMIN, REGION_XMAX 및 REGION_YMAX를 지정하는 경우, 레이어에 작성되고 있는 객체의 공간 범위로부터 영역 좌표를 판단합니다:
 
--  **ADD_REGION=YES/NO** : defaults to NO
--  **REGION_XMIN** (optional) : defines the west coordinate of the
-   region.
--  **REGION_YMIN** (optional) : defines the south coordinate of the
-   region.
--  **REGION_XMAX** (optional) : defines the east coordinate of the
-   region.
--  **REGION_YMAX** (optional) : defines the north coordinate of the
-   region.
--  **REGION_MIN_LOD_PIXELS** (optional) : minimum size in pixels of the
-   region so that it is displayed. Defaults to 256.
--  **REGION_MAX_LOD_PIXELS** (optional) : maximum size in pixels of the
-   region so that it is displayed. Defaults to -1 (infinite).
--  **REGION_MIN_FADE_EXTENT** (optional) : distance over which the
-   geometry fades, from fully opaque to fully transparent. Defaults to
-   0.
--  **REGION_MAX_FADE_EXTENT** (optional) : distance over which the
-   geometry fades, from fully transparent to fully opaque. Defaults to
-   0.
+-  **ADD_REGION=YES/NO** :
+   기본값은 NO입니다.
+-  **REGION_XMIN**: (선택적)
+   영역의 서쪽 좌표를 정의합니다.
+-  **REGION_YMIN**: (선택적)
+   영역의 남쪽 좌표를 정의합니다.
+-  **REGION_XMAX**: (선택적)
+   영역의 동쪽 좌표를 정의합니다.
+-  **REGION_YMAX**: (선택적)
+   영역의 북쪽 좌표를 정의합니다.
+-  **REGION_MIN_LOD_PIXELS**: (선택적)
+   영역이 표시되기 위한 픽셀 단위 최소 크기입니다. 기본값은 256입니다.
+-  **REGION_MAX_LOD_PIXELS**: (선택적)
+   영역이 표시되기 위한 픽셀 단위 최대 크기입니다. 기본값은 -1(무한대)입니다.
+-  **REGION_MIN_FADE_EXTENT**: (선택적)
+   도형이 완전 불투명으로부터 완전 투명으로 희미해지는 거리를 정의합니다. 기본값은 0입니다.
+-  **REGION_MAX_FADE_EXTENT**: (선택적)
+   도형이 완전 투명으로부터 완전 불투명으로 뚜렷해지는 거리를 정의합니다. 기본값은 0입니다.
 
-A
-`<ScreenOverlay> <https://developers.google.com/kml/documentation/kmlreference#screenoverlay>`__
-element can be added to display a logo, a legend, etc...
+`<ScreenOverlay> <https://developers.google.com/kml/documentation/kmlreference#screenoverlay>`_ 요소를 사용해서 로고, 범례 등등을 추가할 수 있습니다:
 
--  **SO_HREF** (required) : URL of the image to display.
--  **SO_NAME** (optional)
--  **SO_DESCRIPTION** (optional)
--  **SO_OVERLAY_X** (optional)
--  **SO_OVERLAY_Y** (optional)
--  **SO_OVERLAY_XUNITS** (optional)
--  **SO_OVERLAY_YUNITS** (optional)
--  **SO_SCREEN_X** (optional). Defaults to 0.05
--  **SO_SCREEN_Y** (optional). Defaults to 0.05
--  **SO_SCREEN_XUNITS** (optional). Defaults to Fraction
--  **SO_SCREEN_YUNITS** (optional). Defaults to Fraction
--  **SO_SIZE_X** (optional)
--  **SO_SIZE_Y** (optional)
--  **SO_SIZE_XUNITS** (optional)
--  **SO_SIZE_YUNITS** (optional)
+-  **SO_HREF**: (필수) 표시할 이미지의 URL을 지정합니다.
+-  **SO_NAME**: (선택적)
+-  **SO_DESCRIPTION**: (선택적)
+-  **SO_OVERLAY_X**: (선택적)
+-  **SO_OVERLAY_Y**: (선택적)
+-  **SO_OVERLAY_XUNITS**: (선택적)
+-  **SO_OVERLAY_YUNITS**: (선택적)
+-  **SO_SCREEN_X**: (선택적). 기본값은 0.05입니다.
+-  **SO_SCREEN_Y**: (선택적). 기본값은 0.05입니다.
+-  **SO_SCREEN_XUNITS**: (선택적). 기본값은 분수(fraction)입니다.
+-  **SO_SCREEN_YUNITS**: (선택적). 기본값은 분수(fraction)입니다.
+-  **SO_SIZE_X**: (선택적)
+-  **SO_SIZE_Y**: (선택적)
+-  **SO_SIZE_XUNITS**: (선택적)
+-  **SO_SIZE_YUNITS**: (선택적)
 
-By default, layers are written as
-`<Document> <https://developers.google.com/kml/documentation/kmlreference#document>`__
-elements. By settings the **FOLDER** layer creation option to YES, it is
-also possible to write them as
-`<Folder> <https://developers.google.com/kml/documentation/kmlreference#folder>`__
-elements (only in .kml files).
+기본적으로 레이어를 `<Document> <https://developers.google.com/kml/documentation/kmlreference#document>`_ 요소로 작성합니다. **FOLDER** 레이어 생성 옵션을 YES로 설정하면, (KML 파일인 경우에만) 레이어를 `<Folder> <https://developers.google.com/kml/documentation/kmlreference#folder>`_ 요소로도 작성할 수 있습니다.
 
-The following layer creation options can be used to set container
-options :
+다음 레이어 생성 옵션들을 사용해서 컨테이너 옵션을 설정할 수 있습니다:
 
 -  **NAME**:
-   `<name> <https://developers.google.com/kml/documentation/kmlreference#name>`__
-   element
+   `<name> <https://developers.google.com/kml/documentation/kmlreference#name>`_ 요소
 -  **VISIBILITY**:
-   `<visibility> <https://developers.google.com/kml/documentation/kmlreference#visibility>`__
-   element
+   `<visibility> <https://developers.google.com/kml/documentation/kmlreference#visibility>`_ 요소
 -  **OPEN**:
-   `<open> <https://developers.google.com/kml/documentation/kmlreference#open>`__
-   element
+   `<open> <https://developers.google.com/kml/documentation/kmlreference#open>`_ 요소
 -  **SNIPPET**:
-   `<snippet> <https://developers.google.com/kml/documentation/kmlreference#snippet>`__
-   element
+   `<snippet> <https://developers.google.com/kml/documentation/kmlreference#snippet>`_ 요소
 -  **DESCRIPTION**:
-   `<description> <https://developers.google.com/kml/documentation/kmlreference#description>`__
-   element
+   `<description> <https://developers.google.com/kml/documentation/kmlreference#description>`_ 요소
 
-The following layer creation options can be used to control how the
-folder of a layer appear in the Places panel of the Earth browser,
-trough a
-`<ListStyle> <https://developers.google.com/kml/documentation/kmlreference#liststyle>`__
-element:
+다음과 같은 레이어 생성 옵션들을 사용해서 `<ListStyle> <https://developers.google.com/kml/documentation/kmlreference#liststyle>`_ 요소를 통해 구글 어스 브라우저의 장소(Places) 패널에 해당 레이어의 폴더가 나타나는 방식을 제어할 수 있습니다:
 
--  **LISTSTYLE_TYPE**: can be one of "check", "radioFolder",
-   "checkOffOnly" or "checkHideChildren". Sets the
-   `<listItemType> <https://developers.google.com/kml/documentation/kmlreference#listItemType>`__
-   element.
--  **LISTSTYLE_ICON_HREF**: URL of the icon to display for the layer
-   folder. Sets the href element of the
-   `<ItemIcon> <https://developers.google.com/kml/documentation/kmlreference#itemicon>`__
-   element.
+-  **LISTSTYLE_TYPE**:
+   "check", "radioFolder", "checkOffOnly" 또는 "checkHideChildren" 가운데 하나로 지정할 수 있습니다.
+   이 옵션은 `<listItemType> <https://developers.google.com/kml/documentation/kmlreference#listItemType>`_ 요소를 설정합니다.
+-  **LISTSTYLE_ICON_HREF**:
+   레이어에 표시할 아이콘의 URL을 지정합니다.
+   이 옵션은 `<ItemIcon> <https://developers.google.com/kml/documentation/kmlreference#itemicon>`_ 요소의 <href> 요소를 설정합니다.
 
-Feature
+피처
 -------
 
-An :cpp:class:`OGRFeature`
-generally translates to kml as a
-`<Placemark> <https://developers.google.com/kml/documentation/kmlreference#placemark>`__,
-and vice-versa.
+:cpp:class:`OGRFeature` 클래스는 일반적으로 KML의 `<Placemark> <https://developers.google.com/kml/documentation/kmlreference#placemark>`_ 요소로 변환되고, 그 반대의 경우도 마찬가지입니다.
 
-If the model field is defined, a
-`<Model> <https://developers.google.com/kml/documentation/kmlreference#model>`__
-object within the Placemark will be generated.
+model 필드를 정의한 경우, <Placemark> 요소 안에 `<Model> <https://developers.google.com/kml/documentation/kmlreference#model>`_ 객체를 생성할 것입니다.
 
-If the networklink field is defined, a
-`<NetworkLink> <https://developers.google.com/kml/documentation/kmlreference#networklink>`__
-will be generated. Other networklink fields are optional.
+networklink 필드를 정의한 경우, `<NetworkLink> <https://developers.google.com/kml/documentation/kmlreference#networklink>`_ 를 생성할 것입니다. 다른 networklink 필드들은 선택적입니다.
 
-If the photooverlay field is defined, a
-`<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`__
-will be generated (provided that the camera_longitude, camera_latitude,
-camera_altitude, camera_altitudemode, head and/or tilt and/or roll,
-leftfov, rightfov, bottomfov, topfov, near fields are also set. The
-shape field is optional.
+photooverlay 필드를 정의한 경우, `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 를 생성할 것입니다. (camera_longitude, camera_latitude, camera_altitude, camera_altitudemode, head 그리고/또는 tilt 그리고/또는 roll, leftfov, rightfov, bottomfov, topfov, near 필드도 설정되었다고 가정합니다. shape 필드는 선택적입니다.)
 
-In case the PhotoOverlay is a big image, it is highly recommended to
-tile it and generate overview levels, as explained in the `PhotoOverlay
-tutorial <https://developers.google.com/kml/documentation/photos>`__. In
-which case, the URL should contain the "$[level]", "$[x]" and "$[y]"
-sub-strings in the photooverlay field, and the imagepyramid_tilesize,
-imagepyramid_maxwidth, imagepyramid_maxheight and
-imagepyramid_gridorigin fields should be set.
+<PhotoOverlay> 객체가 대용량 이미지인 경우, `PhotoOverlay 예제 <https://developers.google.com/kml/documentation/photos>`_ 에서 설명하는 대로 타일화해서 오버뷰 수준들을 생성할 것을 강력히 권장합니다. 이 경우, URL이 photooverlay 필드에 있는 "$[level]", "$[x]" 및 "$[y]" 하위 문자열을 담고 있어야 하고, imagepyramid_tilesize, imagepyramid_maxwidth, imagepyramid_maxheight 및 imagepyramid_gridorigin 필드가 설정되어 있어야 합니다.
 
-Placemark, Model, NetworkLink and PhotoOverlay objects can have an
-associated camera if the camera_longitude, camera_latitude,
-camera_altitude, camera_altitudemode, head and/or tilt and/or roll
-fields are defined.
+Placemark, Model, NetworkLink 및 PhotoOverlay 객체는 camera_longitude, camera_latitude, camera_altitude, camera_altitudemode, head 그리고/또는 tilt 그리고/또는 roll 필드가 정의되어 있는 경우 관련 카메라를 가질 수 있습니다.
 
-KML `<GroundOverlay> <https://developers.google.com/kml/documentation/kmlreference#groundoverlay>`__
-elements are supported for reading (unless the
-LIBKML_READ_GROUND_OVERLAY configuration option is set to FALSE). For
-such elements, there are icon and drawOrder fields.
+(LIBKML_READ_GROUND_OVERLAY 환경설정 옵션이 FALSE로 설정되지 않은 이상) KML `<GroundOverlay> <https://developers.google.com/kml/documentation/kmlreference#groundoverlay>`_ 요소의 읽기를 지원합니다. 이 요소는 icon 및 drawOrder 필드를 가지고 있습니다.
 
 .. _style-1:
 
-Style
+스타일
 ~~~~~
 
-Style Strings at the feature level are Mapped to KML as either a
-`<Style> <https://developers.google.com/kml/documentation/kmlreference#style>`__
-or
-`<StyleUrl> <https://developers.google.com/kml/documentation/kmlreference#styleurl>`__
-in each
-`<Placemark> <https://developers.google.com/kml/documentation/kmlreference#placemark>`__.
+피처 수준의 스타일 문자열은 KML의 각 `<Placemark> <https://developers.google.com/kml/documentation/kmlreference#placemark>`_ 에 `<Style> <https://developers.google.com/kml/documentation/kmlreference#style>`_ 또는 `<StyleUrl> <https://developers.google.com/kml/documentation/kmlreference#styleurl>`_ 가운데 하나로 매핑됩니다.
 
-When reading a kml feature and the environment variable
-LIBKML_RESOLVE_STYLE is set to yes, styleurls are looked up in the style
-tables and the features style string is set to the style from the table.
-This is to allow reading of shared styles by applications, like
-mapserver, that do not read style tables.
+KML 피처를 읽어올 때 LIBKML_RESOLVE_STYLE 환경 변수가 YES로 설정되어 있는 경우, 스타일 테이블에서 StyleUrl을 검색해서 피처 스타일 문자열을 테이블로부터 나온 스타일로 설정합니다. 이렇게 하면 스타일 테이블을 읽어오지 않는 MapServer 같은 응용 프로그램에 공유 스타일을 읽어오게 할 수 있습니다.
 
-When reading a kml feature and the environment variable
-LIBKML_EXTERNAL_STYLE is set to yes, a styleurl that is external to the
-datasource is read from disk or fetched from the server and parsed into
-the datasource style table. If the style kml can not be read or
-LIBKML_EXTERNAL_STYLE is set to no then the styleurl is copied to the
-style string.
+KML 피처를 읽어올 때 LIBKML_EXTERNAL_STYLE 환경 변수가 YES로 설정되어 있는 경우, 디스크 또는 서버로부터 데이터소스 외부에 있는 StyleUrl을 가져와서 데이터소스 스타일 테이블에 파싱합니다. 스타일 KML을 읽어올 수 없거나 LIBKML_EXTERNAL_STYLE 환경 변수가 NO로 설정되어 있다면, StyleUrl을 스타일 문자열로 복사합니다.
 
-When reading a kml StyleMap the default mapping is set to normal. If you
-wish to use the highlighted styles set the environment variable
-LIBKML_STYLEMAP_KEY to "highlight"
+KML StyleMap을 읽어올 때 기본 매핑은 "NORMAL"로 설정됩니다. 강조 스타일을 이용하고 싶다면 LIBKML_STYLEMAP_KEY 환경 변수를 "HIGHLIGHT"으로 설정하십시오.
 
-When writing a kml, if there exist 2 styles of the form
-"astylename_normal" and "astylename_highlight" (where astylename is any
-string), then a StyleMap object will be creating from both styles and
-called "astylename".
+KML 작성 시, "astylename_normal"과 "astylename_highlight" 형식의 스타일 2개가 있는 경우 (이때 astylename은 어떤 문자열이라도 될 수 있습니다) 두 스타일 모두로부터 StyleMap 객체를 생성하고 "astylename"으로 명명할 것입니다.
 
-Fields
+필드
 ------
 
-OGR fields (feature attributes) are mapped to kml with
-`<Schema> <https://developers.google.com/kml/documentation/kmlreference#schema>`__;
-and
-`<SimpleData> <https://developers.google.com/kml/documentation/kmlreference#simpledata>`__,
-except for some special fields as noted below.
+OGR 필드(피처 속성)는 KML에 `<Schema> <https://developers.google.com/kml/documentation/kmlreference#schema>`_ 그리고 `<SimpleData> <https://developers.google.com/kml/documentation/kmlreference#simpledata>`_ 로 매핑됩니다. 아래 따로 설명하는 몇몇 특수 필드는 예외입니다.
 
-Note: it is also possible to export fields as
-`<Data> <https://developers.google.com/kml/documentation/kmlreference#data>`__
-elements if the LIBKML_USE_SCHEMADATA configuration option is set to NO.
+주의: LIBKML_USE_SCHEMADATA 환경설정 옵션을 NO로 설정해서 필드를 `<Data> <https://developers.google.com/kml/documentation/kmlreference#data>`_ 요소로도 내보낼 수 있습니다.
 
-A rich set of environment variables are available to define how fields
-in input and output, map to a KML
-`<Placemark> <https://developers.google.com/kml/documentation/kmlreference#placemark>`__.
-For example, if you want a field called 'Cities' to map to the
-`<name> <https://developers.google.com/kml/documentation/kmlreference#name>`__;
-tag in KML, you can set an environment variable.
+풍부한 환경 변수 집합을 사용해서 입력물과 산출물의 필드들을 어떻게 KML `<Placemark> <https://developers.google.com/kml/documentation/kmlreference#placemark>`_ 에 매핑시킬지 정의할 수 있습니다.
+예를 들어 'Cities'라는 필드를 KML에 `<name> <https://developers.google.com/kml/documentation/kmlreference#name>`_ 태그로 매핑시키고 싶다면, Name 환경 변수를 설정하면 됩니다.
 
 Name
-   This String field maps to the kml tag
-   `<name> <https://developers.google.com/kml/documentation/kmlreference#name>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_NAME_FIELD .
+   이 문자열 필드는 KML `<name> <https://developers.google.com/kml/documentation/kmlreference#name>`_ 태그에 매핑됩니다.
+   LIBKML_NAME_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 description
-   This String field maps to the kml tag
-   `<description> <https://developers.google.com/kml/documentation/kmlreference#description>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_DESCRIPTION_FIELD .
+   이 문자열 필드는 KML `<description> <https://developers.google.com/kml/documentation/kmlreference#description>`_ 태그에 매핑됩니다.
+   LIBKML_DESCRIPTION_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 timestamp
-   This string or datetime or date and/or time field maps to the kml tag
-   `<timestamp> <https://developers.google.com/kml/documentation/kmlreference#timestamp>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_TIMESTAMP_FIELD .
+   이 문자열 또는 날짜&시간 또는 날짜 그리고/또는 시간 유형 필드는 KML `<timestamp> <https://developers.google.com/kml/documentation/kmlreference#timestamp>`_ 태그에 매핑됩니다.
+   LIBKML_TIMESTAMP_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 begin
-   This string or datetime or date and/or time field maps to the kml tag
-   `<begin> <https://developers.google.com/kml/documentation/kmlreference#begin>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_BEGIN_FIELD .
+   이 문자열 또는 날짜&시간 또는 날짜 그리고/또는 시간 유형 필드는 KML `<begin> <https://developers.google.com/kml/documentation/kmlreference#begin>`_ 태그에 매핑됩니다.
+   LIBKML_BEGIN_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 end
-   This string or datetime or date and/or time field maps to the kml tag
-   `<end> <https://developers.google.com/kml/documentation/kmlreference#end>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_END_FIELD .
+   이 문자열 또는 날짜&시간 또는 날짜 그리고/또는 시간 유형 필드는 KML `<end> <https://developers.google.com/kml/documentation/kmlreference#end>`_ 태그에 매핑됩니다.
+   LIBKML_END_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 altitudeMode
-   This string field maps to the kml tag
-   `<altitudeMode> <https://developers.google.com/kml/documentation/kmlreference#altitudemode>`__
-   or
-   `<gx:altitudeMode> <https://developers.google.com/kml/documentation/kmlreference#gxaltitudemode>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_ALTITUDEMODE_FIELD .
+   이 문자열 필드는 KML `<altitudeMode> <https://developers.google.com/kml/documentation/kmlreference#altitudemode>`_ 또는 `<gx:altitudeMode> <https://developers.google.com/kml/documentation/kmlreference#gxaltitudemode>`_ 태그에 매핑됩니다.
+   LIBKML_ALTITUDEMODE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 tessellate
-   This integer field maps to the kml tag
-   `<tessellate> <https://developers.google.com/kml/documentation/kmlreference#tessellate>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_TESSELLATE_FIELD .
+   이 정수형 필드는 KML `<tessellate> <https://developers.google.com/kml/documentation/kmlreference#tessellate>`_ 태그에 매핑됩니다.
+   LIBKML_TESSELLATE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 extrude
-   This integer field maps to the kml tag
-   `<extrude> <https://developers.google.com/kml/documentation/kmlreference#extrude>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_EXTRUDE_FIELD .
+   이 정수형 필드는 KML `<extrude> <https://developers.google.com/kml/documentation/kmlreference#extrude>`_ 태그에 매핑됩니다.
+   LIBKML_EXTRUDE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 visibility
-   This integer field maps to the kml tag
-   `<visibility> <https://developers.google.com/kml/documentation/kmlreference#visibility>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_VISIBILITY_FIELD .
+   이 정수형 필드는 KML `<visibility> <https://developers.google.com/kml/documentation/kmlreference#visibility>`_ 태그에 매핑됩니다.
+   LIBKML_VISIBILITY_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 icon
-   This string field maps to the kml tag
-   `<icon> <https://developers.google.com/kml/documentation/kmlreference#icon>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_ICON_FIELD .
+   이 문자열 필드는 KML `<icon> <https://developers.google.com/kml/documentation/kmlreference#icon>`_ 태그에 매핑됩니다.
+   LIBKML_ICON_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 drawOrder
-   This integer field maps to the kml tag
-   `<drawOrder> <https://developers.google.com/kml/documentation/kmlreference#draworder>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_DRAWORDER_FIELD .
+   이 정수형 필드는 KML `<drawOrder> <https://developers.google.com/kml/documentation/kmlreference#draworder>`_ 태그에 매핑됩니다.
+   LIBKML_DRAWORDER_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 snippet
-   This integer field maps to the kml tag
-   `<snippet> <https://developers.google.com/kml/documentation/kmlreference#snippet>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_SNIPPET_FIELD .
+   이 정수형 필드는 KML `<snippet> <https://developers.google.com/kml/documentation/kmlreference#snippet>`_ 태그에 매핑됩니다.
+   LIBKML_SNIPPET_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 heading
-   This real field maps to the kml tag
-   `<heading> <https://developers.google.com/kml/documentation/kmlreference#heading>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_HEADING_FIELD. When reading, this field is present
-   only if a Placemark has a Camera with a heading element.
+   이 실수형 필드는 KML `<heading> <https://developers.google.com/kml/documentation/kmlreference#heading>`_ 태그에 매핑됩니다.
+   LIBKML_HEADING_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다. 읽기 작업 시, <Placemark>가 <heading> 요소를 가진 <Camera>를 가지고 있는 경우에만 이 필드가 존재합니다.
 tilt
-   This real field maps to the kml tag
-   `<tilt> <https://developers.google.com/kml/documentation/kmlreference#tilt>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_TILT_FIELD. When reading, this field is present only
-   if a Placemark has a Camera with a tilt element.
+   이 실수형 필드는 KML `<tilt> <https://developers.google.com/kml/documentation/kmlreference#tilt>`_ 태그에 매핑됩니다.
+   LIBKML_TILT_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다. 읽기 작업 시, <Placemark>가 <tilt> 요소를 가진 <Camera>를 가지고 있는 경우에만 이 필드가 존재합니다.
 roll
-   This real field maps to the kml tag
-   `<roll> <https://developers.google.com/kml/documentation/kmlreference#roll>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_ROLL_FIELD. When reading, this field is present only
-   if a Placemark has a Camera with a roll element.
+   이 실수형 필드는 KML `<roll> <https://developers.google.com/kml/documentation/kmlreference#roll>`_ 태그에 매핑됩니다.
+   LIBKML_ROLL_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다. 읽기 작업 시, <Placemark>가 <roll> 요소를 가진 <Camera>를 가지고 있는 경우에만 이 필드가 존재합니다.
 model
-   This string field can be used to define the URL of a 3D
-   `<model> <https://developers.google.com/kml/documentation/kmlreference#model>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_MODEL_FIELD.
+   이 문자열 필드를 사용해서 3차원 `<model> <https://developers.google.com/kml/documentation/kmlreference#model>`_ 의 URL을 정의할 수 있습니다.
+   LIBKML_MODEL_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 scale_x
-   This real field maps to the x element of the kml tag
-   `<scale> <https://developers.google.com/kml/documentation/kmlreference#scale>`__
-   for a 3D model. The name of the ogr field can be changed with the
-   environment variable LIBKML_SCALE_X_FIELD.
+   이 실수형 필드는 3차원 모델 용 KML `<scale> <https://developers.google.com/kml/documentation/kmlreference#scale>`_ 태그의 x 요소에 매핑됩니다.
+   LIBKML_SCALE_X_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 scale_y
-   This real field maps to the y element of the kml tag
-   `<scale> <https://developers.google.com/kml/documentation/kmlreference#scale>`__\ for
-   a 3D model. The name of the ogr field can be changed with the
-   environment variable LIBKML_SCALE_Y_FIELD.
+   이 실수형 필드는 3차원 모델 용 KML `<scale> <https://developers.google.com/kml/documentation/kmlreference#scale>`_ 태그의 y 요소에 매핑됩니다.
+   LIBKML_SCALE_Y_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 scale_z
-   This real field maps to the z element of the kml tag
-   `<scale> <https://developers.google.com/kml/documentation/kmlreference#scale>`__\ for
-   a 3D model. The name of the ogr field can be changed with the
-   environment variable LIBKML_SCALE_Z_FIELD.
+   이 실수형 필드는 3차원 모델 용 KML `<scale> <https://developers.google.com/kml/documentation/kmlreference#scale>`_ 태그의 z 요소에 매핑됩니다.
+   LIBKML_SCALE_Z_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 networklink
-   This string field maps to the href element of the kml tag
-   `<href> <https://developers.google.com/kml/documentation/kmlreference#href>`__
-   of a NetworkLink. The name of the ogr field can be changed with the
-   environment variable LIBKML_NETWORKLINK_FIELD.
+   이 문자열 필드는 KML NetworkLink의 `<href> <https://developers.google.com/kml/documentation/kmlreference#href>`_ 태그의 href 요소에 매핑됩니다.
+   LIBKML_NETWORKLINK_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 networklink_refreshvisibility
-   This integer field maps to kml tag
-   `<refreshVisibility> <https://developers.google.com/kml/documentation/kmlreference#refreshvisibility>`__
-   of a NetworkLink. The name of the ogr field can be changed with the
-   environment variable LIBKML_NETWORKLINK_REFRESHVISIBILITY_FIELD.
+   이 정수형 필드는 KML NetworkLink의 `<refreshVisibility> <https://developers.google.com/kml/documentation/kmlreference#refreshvisibility>`_ 태그에 매핑됩니다.
+   LIBKML_NETWORKLINK_REFRESHVISIBILITY_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 networklink_flytoview
-   This integer field maps to kml tag
-   `<flyToView> <https://developers.google.com/kml/documentation/kmlreference#flytoview>`__
-   of a NetworkLink. The name of the ogr field can be changed with the
-   environment variable LIBKML_NETWORKLINK_FLYTOVIEW_FIELD.
+   이 정수형 필드는 KML NetworkLink의 `<flyToView> <https://developers.google.com/kml/documentation/kmlreference#flytoview>`_ 태그에 매핑됩니다.
+   LIBKML_NETWORKLINK_FLYTOVIEW_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 networklink_refreshmode
-   This string field maps to kml tag
-   `<refreshMode> <https://developers.google.com/kml/documentation/kmlreference#refreshmode>`__
-   of a NetworkLink. The name of the ogr field can be changed with the
-   environment variable LIBKML_NETWORKLINK_REFRESHMODE_FIELD.
+   이 문자열 필드는 KML NetworkLink의 `<refreshMode> <https://developers.google.com/kml/documentation/kmlreference#refreshmode>`_ 태그에 매핑됩니다.
+   LIBKML_NETWORKLINK_REFRESHMODE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 networklink_refreshinterval
-   This real field maps to kml tag
-   `<refreshInterval> <https://developers.google.com/kml/documentation/kmlreference#refreshinterval>`__
-   of a NetworkLink. The name of the ogr field can be changed with the
-   environment variable LIBKML_NETWORKLINK_REFRESHINTERVAL_FIELD.
+   이 실수형 필드는 KML NetworkLink의 `<refreshInterval> <https://developers.google.com/kml/documentation/kmlreference#refreshinterval>`_ 태그에 매핑됩니다.
+   LIBKML_NETWORKLINK_REFRESHINTERVAL_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 networklink_viewrefreshmode
-   This string field maps to kml tag
-   `<viewRefreshMode> <https://developers.google.com/kml/documentation/kmlreference#viewrefreshmode>`__
-   of a NetworkLink. The name of the ogr field can be changed with the
-   environment variable LIBKML_NETWORKLINK_VIEWREFRESHMODE_FIELD.
+   이 문자열 필드는 KML NetworkLink의 `<viewRefreshMode> <https://developers.google.com/kml/documentation/kmlreference#viewrefreshmode>`_ 태그에 매핑됩니다.
+   LIBKML_NETWORKLINK_VIEWREFRESHMODE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 networklink_viewrefreshtime
-   This real field maps to kml tag
-   `<viewRefreshTime> <https://developers.google.com/kml/documentation/kmlreference#viewrefreshtime>`__
-   of a NetworkLink. The name of the ogr field can be changed with the
-   environment variable LIBKML_NETWORKLINK_VIEWREFRESHTIME_FIELD.
+   이 실수형 필드는 KML NetworkLink의 `<viewRefreshTime> <https://developers.google.com/kml/documentation/kmlreference#viewrefreshtime>`_ 태그에 매핑됩니다.
+   LIBKML_NETWORKLINK_VIEWREFRESHTIME_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 networklink_viewboundscale
-   This real field maps to kml tag
-   `<viewBoundScale> <https://developers.google.com/kml/documentation/kmlreference#viewboundscale>`__
-   of a NetworkLink. The name of the ogr field can be changed with the
-   environment variable LIBKML_NETWORKLINK_VIEWBOUNDSCALE_FIELD.
+   이 실수형 필드는 KML NetworkLink의 `<viewBoundScale> <https://developers.google.com/kml/documentation/kmlreference#viewboundscale>`_ 태그에 매핑됩니다.
+   LIBKML_NETWORKLINK_VIEWBOUNDSCALE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 networklink_viewformat
-   This string field maps to kml tag
-   `<viewFormat> <https://developers.google.com/kml/documentation/kmlreference#viewformat>`__
-   of a NetworkLink. The name of the ogr field can be changed with the
-   environment variable LIBKML_NETWORKLINK_VIEWFORMAT_FIELD.
+   이 문자열 필드는 KML NetworkLink의 `<viewFormat> <https://developers.google.com/kml/documentation/kmlreference#viewformat>`_ 태그에 매핑됩니다.
+   LIBKML_NETWORKLINK_VIEWFORMAT_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 networklink_httpquery
-   This string field maps to kml tag
-   `<httpQuery> <https://developers.google.com/kml/documentation/kmlreference#httpquery>`__
-   of a NetworkLink. The name of the ogr field can be changed with the
-   environment variable LIBKML_NETWORKLINK_HTTPQUERY_FIELD.
+   이 문자열 필드는 KML NetworkLink의 `<httpQuery> <https://developers.google.com/kml/documentation/kmlreference#httpquery>`_ 태그에 매핑됩니다.
+   LIBKML_NETWORKLINK_HTTPQUERY_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 camera_longitude
-   This real field maps to kml tag
-   `<longitude> <https://developers.google.com/kml/documentation/kmlreference#longitude>`__
-   of a
-   `<Camera> <https://developers.google.com/kml/documentation/kmlreference#camera>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_CACameraMERA_LONGITUDE_FIELD.
+   이 실수형 필드는 KML `<Camera> <https://developers.google.com/kml/documentation/kmlreference#camera>`_ 의 `<longitude> <https://developers.google.com/kml/documentation/kmlreference#longitude>`_ 태그에 매핑됩니다.
+   LIBKML_CACameraMERA_LONGITUDE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 camera_latitude
-   This real field maps to kml tag
-   `<latitude> <https://developers.google.com/kml/documentation/kmlreference#latitude>`__
-   of a
-   `<Camera> <https://developers.google.com/kml/documentation/kmlreference#camera>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_CAMERA_LATITUDE_FIELD.
+   이 실수형 필드는 KML `<Camera> <https://developers.google.com/kml/documentation/kmlreference#camera>`_ 의 `<latitude> <https://developers.google.com/kml/documentation/kmlreference#latitude>`_ 태그에 매핑됩니다.
+   LIBKML_CAMERA_LATITUDE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 camera_altitude
-   This real field maps to kml tag
-   `<altitude> <https://developers.google.com/kml/documentation/kmlreference#altitude>`__
-   of a
-   `<Camera> <https://developers.google.com/kml/documentation/kmlreference#camera>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_CAMERA_ALTITUDE_FIELD.
+   이 실수형 필드는 KML `<Camera> <https://developers.google.com/kml/documentation/kmlreference#camera>`_ 의 `<altitude> <https://developers.google.com/kml/documentation/kmlreference#altitude>`_ 태그에 매핑됩니다.
+   LIBKML_CAMERA_ALTITUDE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 camera_altitudemode
-   This real field maps to kml tag
-   `<altitudeMode> <https://developers.google.com/kml/documentation/kmlreference#altitudemode>`__
-   of a
-   `<Camera> <https://developers.google.com/kml/documentation/kmlreference#camera>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_CAMERA_ALTITUDEMODE_FIELD.
+   이 실수형 필드는 KML `<Camera> <https://developers.google.com/kml/documentation/kmlreference#camera>`_ 의 `<altitudeMode> <https://developers.google.com/kml/documentation/kmlreference#altitudemode>`_ 태그에 매핑됩니다.
+   LIBKML_CAMERA_ALTITUDEMODE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 photooverlay
-   This string field maps to the href element of the kml tag
-   `<href> <https://developers.google.com/kml/documentation/kmlreference#href>`__
-   of a
-   `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_PHOTOOVERLAY_FIELD.
+   이 문자열 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<href> <https://developers.google.com/kml/documentation/kmlreference#href>`_ 태그의 <href> 요소에 매핑됩니다.
+   LIBKML_PHOTOOVERLAY_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 leftfov
-   This real field maps to to kml tag
-   `<LeftFov> <https://developers.google.com/kml/documentation/kmlreference#leftfov>`__
-   of a
-   `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_LEFTFOV_FIELD.
+   이 실수형 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<LeftFov> <https://developers.google.com/kml/documentation/kmlreference#leftfov>`_ 태그에 매핑됩니다.
+   LIBKML_LEFTFOV_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 rightfov
-   This real field maps to to kml tag
-   `<RightFov> <https://developers.google.com/kml/documentation/kmlreference#rightfov>`__
-   of a
-   `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_RightFOV_FIELD.
+   이 실수형 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<RightFov> <https://developers.google.com/kml/documentation/kmlreference#rightfov>`_ 태그에 매핑됩니다.
+   LIBKML_RightFOV_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 bottomfov
-   This real field maps to to kml tag
-   `<BottomFov> <https://developers.google.com/kml/documentation/kmlreference#bottomfov>`__
-   of a
-   `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_BOTTOMTFOV_FIELD.
+   이 실수형 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<BottomFov> <https://developers.google.com/kml/documentation/kmlreference#bottomfov>`_ 태그에 매핑됩니다.
+   LIBKML_BOTTOMTFOV_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 topfov
-   This real field maps to to kml tag
-   `<TopFov> <https://developers.google.com/kml/documentation/kmlreference#topfov>`__
-   of a
-   `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_TOPFOV_FIELD.
+   이 실수형 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<TopFov> <https://developers.google.com/kml/documentation/kmlreference#topfov>`_ 태그에 매핑됩니다.
+   LIBKML_TOPFOV_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 near
-   This real field maps to to kml tag
-   `<Near> <https://developers.google.com/kml/documentation/kmlreference#leftfov>`__
-   of a
-   `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_NEAR_FIELD.
+   이 실수형 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<Near> <https://developers.google.com/kml/documentation/kmlreference#leftfov>`_ 태그에 매핑됩니다.
+   LIBKML_NEAR_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 shape
-   This string field maps to to kml tag
-   `<shape> <https://developers.google.com/kml/documentation/kmlreference#shape>`__
-   of a
-   `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_SHAPE_FIELD.
+    이 문자열 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<shape> <https://developers.google.com/kml/documentation/kmlreference#shape>`_ 태그에 매핑됩니다.
+   LIBKML_SHAPE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
+   variable .
 imagepyramid_tilesize
-   This integer field maps to to kml tag
-   `<tileSize> <https://developers.google.com/kml/documentation/kmlreference#tilesize>`__
-   of a
-   `<ImagePyramid> <https://developers.google.com/kml/documentation/kmlreference#imagepyramid>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_IMAGEPYRAMID_TILESIZE.
+   이 정수형 필드는 KML `<ImagePyramid> <https://developers.google.com/kml/documentation/kmlreference#imagepyramid>`_ 의 `<tileSize> <https://developers.google.com/kml/documentation/kmlreference#tilesize>`_ 태그에 매핑됩니다.
+   LIBKML_IMAGEPYRAMID_TILESIZE 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 imagepyramid_maxwidth
-   This integer field maps to to kml tag
-   `<maxWidth> <https://developers.google.com/kml/documentation/kmlreference#maxwidth>`__
-   of a
-   `<ImagePyramid> <https://developers.google.com/kml/documentation/kmlreference#imagepyramid>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_IMAGEPYRAMID_MAXWIDTH.
+   이 정수형 필드는 KML `<ImagePyramid> <https://developers.google.com/kml/documentation/kmlreference#imagepyramid>`_ 의 `<maxWidth> <https://developers.google.com/kml/documentation/kmlreference#maxwidth>`_ 태그에 매핑됩니다.
+   LIBKML_IMAGEPYRAMID_MAXWIDTH 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 imagepyramid_maxheight
-   This integer field maps to to kml tag
-   `<maxHeight> <https://developers.google.com/kml/documentation/kmlreference#maxheight>`__
-   of a
-   `<ImagePyramid> <https://developers.google.com/kml/documentation/kmlreference#imagepyramid>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_IMAGEPYRAMID_MAXHEIGHT.
+   이 정수형 필드는 KML `<ImagePyramid> <https://developers.google.com/kml/documentation/kmlreference#imagepyramid>`_ 의 `<maxHeight> <https://developers.google.com/kml/documentation/kmlreference#maxheight>`_ 태그에 매핑됩니다.
+   LIBKML_IMAGEPYRAMID_MAXHEIGHT 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 imagepyramid_gridorigin
-   This string field maps to to kml tag
-   `<gridOrigin> <https://developers.google.com/kml/documentation/kmlreference#maxheight>`__
-   of a
-   `<ImagePyramid> <https://developers.google.com/kml/documentation/kmlreference#imagepyramid>`__.
-   The name of the ogr field can be changed with the environment
-   variable LIBKML_IMAGEPYRAMID_GRIDORIGIN.
+   이 문자열 필드는 KML `<ImagePyramid> <https://developers.google.com/kml/documentation/kmlreference#imagepyramid>`_ 의 `<gridOrigin> <https://developers.google.com/kml/documentation/kmlreference#maxheight>`_ 태그에 매핑됩니다.
+   LIBKML_IMAGEPYRAMID_GRIDORIGIN 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 OGR_STYLE
-   This string field maps to a features style string, OGR reads this
-   field if there is no style string set on the feature.
+   이 문자열 필드는 피처 스타일 문자열에 매핑되며, 피처에 설정된 스타일 문자열이 없는 경우 OGR가 이 필드를 읽어옵니다.
 
-Geometry
+도형
 --------
 
-Translation of :cpp:class:`OGRGeometry` to
-KML Geometry is pretty strait forwards with only a couple of exceptions.
-Point to
-`<Point> <https://developers.google.com/kml/documentation/kmlreference#point>`__
-(unless heading and/or tilt and/or roll field names are found, in which
-case a
-`Camera <https://developers.google.com/kml/documentation/kmlreference#camera>`__
-object will be generated), LineString to
-`<LineString> <https://developers.google.com/kml/documentation/kmlreference#linestring>`__,
-LinearRing to
-`<LinearRing> <https://developers.google.com/kml/documentation/kmlreference#linearring>`__,
-and Polygon to
-`<Polygon> <https://developers.google.com/kml/documentation/kmlreference#polygon>`__.
-In OGR a polygon contains an array of LinearRings, the first one being
-the outer ring. KML has the tags  
-`<outerBoundaryIs> <https://developers.google.com/kml/documentation/kmlreference#outerboundaryis>`__ and 
-`<innerBoundaryIs> <https://developers.google.com/kml/documentation/kmlreference#innerboundaryis>`__ to
-differentiate between the two. OGR has several Multi types of geometry :
-GeometryCollection, MultiPolygon, MultiPoint, and MultiLineString. When
-possible, OGR will try to map
-`<MultiGeometry> <https://developers.google.com/kml/documentation/kmlreference#multigeometry>`__
-to the more precise OGR geometry type (MultiPoint, MultiLineString or
-MultiPolygon), and default to GeometryCollection in case of mixed
-content.
+:cpp:class:`OGRGeometry` 클래스를 KML 도형으로 변환하는 것은 두어 가지 예외를 제외하면 매우 간단한 편입니다.
 
-Sometimes kml geometry will span the dateline, In applications like qgis
-or mapserver this will create horizontal lines all the way around the
-globe. Setting the environment variable LIBKML_WRAPDATELINE to "yes"
-will cause the libkml driver to split the geometry at the dateline when
-read.
+-  포인트를 `<Point> <https://developers.google.com/kml/documentation/kmlreference#point>`_ 로 (heading 그리고/또는 tilt 그리고/또는 roll 필드명이 존재하는 경우 `Camera <https://developers.google.com/kml/documentation/kmlreference#camera>`_ 객체를 생성할 것입니다.)
 
-VSI Virtual File System API support
+-  라인스트링을 `<LineString> <https://developers.google.com/kml/documentation/kmlreference#linestring>`_ 으로
+
+-  선형 고리(LinearRing)를 `<LinearRing> <https://developers.google.com/kml/documentation/kmlreference#linearring>`_ 으로
+
+-  폴리곤을 `<Polygon> <https://developers.google.com/kml/documentation/kmlreference#polygon>`_ 으로
+
+OGR에서 폴리곤은 선형 고리 배열을 담고 있으며, 이때 첫 번째 고리가 외곽 고리(outer ring)입니다. KML은 이 두 가지 고리를 구분하기 위한 `<outerBoundaryIs> <https://developers.google.com/kml/documentation/kmlreference#outerboundaryis>`_ 및 `<innerBoundaryIs> <https://developers.google.com/kml/documentation/kmlreference#innerboundaryis>`_ 태그를 가지고 있습니다.
+
+OGR는 다중 도형 유형 몇 개를 가지고 있습니다:
+
+-  도형 집합(GeometryCollection)
+-  멀티폴리곤(MultiPolygon)
+-  멀티포인트(MultiPoint)
+-  멀티라인스트링(MultiLineString)
+
+가능한 경우, OGR는 `<MultiGeometry> <https://developers.google.com/kml/documentation/kmlreference#multigeometry>`_ 를 더 정밀한 OGR 도형 유형으로 (멀티포인트, 멀티라인스트링 또는 멀티폴리곤으로) 매핑하려 시도할 것입니다. 혼합된 콘텐츠의 경우 기본값은 도형 집합입니다.
+
+KML 도형이 날짜 변경선을 걸치는 경우가 있는데, QGIS 또는 MapServer 같은 응용 프로그램에서 이런 도형은 지구 전체를 한바퀴 도는 수평 라인을 생성할 것입니다. LIBKML_WRAPDATELINE 환경 변수를 YES로 설정하면 LIBKML 드라이버가 이런 도형을 읽어올 때 해당 도형을 날짜 변경선으로 분할할 것입니다.
+
+VSI 가상 파일 시스템 API 지원
 -----------------------------------
 
-The driver supports reading and writing to files managed by VSI Virtual
-File System API, which include "regular" files, as well as files in the
-/vsizip/ (read-write) , /vsigzip/ (read-write) , /vsicurl/ (read-only)
-domains.
+이 드라이버는 VSI 가상 파일 시스템 API가 관리하는 파일의 읽기 및 쓰기를 지원합니다. VSI 가상 파일 시스템 API가 관리하는 파일에는 "정규" 파일은 물론 /vsizip/ (읽기-쓰기) , /vsigzip/ (읽기-쓰기) , /vsicurl/ (읽기 전용) 도메인에 있는 파일도 포함됩니다.
 
-Writing to /dev/stdout or /vsistdout/ is also supported.
+/dev/stdout 또는 /vsistdout/ 에 쓰기도 지원합니다.
 
-Example
+예시
 -------
 
-The following bash script will build a
-:ref:`csv <vector.csv>` file and a
-:ref:`vrt <vector.vrt>` file, and then translate them
-to KML using :ref:`ogr2ogr` into a .kml
-file with timestamps and styling.
+다음 배시(bash) 스크립트는 :ref:`csv <vector.csv>` 파일과 :ref:`vrt <vector.vrt>` 파일을 생성한 다음 :ref:`ogr2ogr` 유틸리티를 이용해서 그 파일들을 타임스탬프와 스타일 정보를 가진 KML 파일로 변환할 것입니다:
 
 ::
-
-
 
    #!/bin/bash
    # Copyright (c) 2010, Brian Case
@@ -844,4 +532,3 @@ file with timestamps and styling.
 
    ogr2ogr -f libkml qed.kml qed.vrt
 
-     
