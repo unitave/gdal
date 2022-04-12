@@ -374,7 +374,7 @@ near
    이 실수형 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<Near> <https://developers.google.com/kml/documentation/kmlreference#leftfov>`_ 태그에 매핑됩니다.
    LIBKML_NEAR_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
 shape
-    이 문자열 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<shape> <https://developers.google.com/kml/documentation/kmlreference#shape>`_ 태그에 매핑됩니다.
+   이 문자열 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<shape> <https://developers.google.com/kml/documentation/kmlreference#shape>`_ 태그에 매핑됩니다.
    LIBKML_SHAPE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
    variable .
 imagepyramid_tilesize
