@@ -41,8 +41,8 @@ Datasource
 ----------
 
 You may specify a datasource
-as a kml file ``somefile.kml`` , a directory ``somedir/`` , or a kmz
-file ``somefile.kmz`` .
+as a kml file ``somefile.kml``, a directory ``somedir/``, or a kmz
+file ``somefile.kmz``.
 
 By default on directory and kmz datasources, an index file of all the
 layers will be read from or written to doc.kml. It contains a
