@@ -168,7 +168,7 @@ shapefile로 변환 시 문제점
 VSI 가상 파일 시스템 API 지원
 -----------------------------------
 
-이 드라이버는 VSI 가상 파일 시스템 API가 관리하는 파일의 읽기 및 쓰기를 지원합니다. VSI 가상 파일 시스템 API이 관리하는 파일에는 "정규" 파일은 물론 /vsizip/ (읽기-쓰기) , /vsigzip/ (읽기-쓰기) , /vsicurl/ (읽기 전용) 도메인에 있는 파일도 포함됩니다.
+이 드라이버는 VSI 가상 파일 시스템 API가 관리하는 파일의 읽기 및 쓰기를 지원합니다. VSI 가상 파일 시스템 API가 관리하는 파일에는 "정규" 파일은 물론 /vsizip/ (읽기-쓰기) , /vsigzip/ (읽기-쓰기) , /vsicurl/ (읽기 전용) 도메인에 있는 파일도 포함됩니다.
 
 /dev/stdout 또는 /vsistdout/ 에 쓰기도 지원합니다.
 
@@ -238,3 +238,4 @@ FAQ
 -  `GPX 포맷 홈페이지 <http://www.topografix.com/gpx.asp>`_
 
 -  `GPX 1.1 포맷 문서 <http://www.topografix.com/GPX/1/1/>`_
+
