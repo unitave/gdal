@@ -1,194 +1,149 @@
 .. _vector.mssqlspatial:
 
-MSSQLSpatial - Microsoft SQL Server Spatial Database
+MSSQLSpatial - 마이크로소프트 SQL 서버 공간 데이터베이스
 ====================================================
 
 .. shortname:: MSSQLSpatial
 
-.. build_dependencies:: ODBC library
+.. build_dependencies:: ODBC 라이브러리
 
-This driver implements support for access to spatial tables in Microsoft
-SQL Server 2008+ which contains the geometry and geography data types to
-represent the geometry columns.
+MSSQLSpatial 드라이버는 마이크로소프트 SQL 서버 2008 이상 버전에 있는 도형 열을 표현하기 위한 도형 및 지리 데이터 유형을 담고 있는 공간 테이블에 대한 접근을 지원합니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
 
 .. supports_georeferencing::
 
-Connecting to a database
+데이터베이스에 접속하기
 ------------------------
 
-| To connect to a MSSQL datasource, use a connection string specifying
-  the database name, with additional parameters as necessary. The
-  connection strings must be prefixed with '*MSSQL:*'.
+MSSQL 데이터소스에 접근하려면, 데이터베이스 이름을 지정하는 연결 문자열을 필요한 추가 파라미터와 함께 사용하십시오. 연결 문자열 앞에 '*MSSQL:*' 접두어를 반드시 붙여야만 합니다.
 
    ::
 
       MSSQL:server=.\MSSQLSERVER2008;database=dbname;trusted_connection=yes
 
-In addition to the standard parameters of the `ODBC driver connection
-string <http://msdn.microsoft.com/en-us/library/ms130822.aspx>`__ format
-the following custom parameters can also be used in the following
-syntax:
+`ODBC 드라이버 연결 문자열 <http://msdn.microsoft.com/en-us/library/ms130822.aspx>`_ 서식으로 된 표준 파라미터 이외에도 다음 사용자 지정 파라미터를 다음과 같은 문법으로 사용할 수도 있습니다:
 
--  **Tables=schema1.table1(geometry column1),schema2.table2(geometry
-   column2)**: By using this parameter you can specify the subset of the
-   layers to be used by the driver. If this parameter is not set, the
-   layers are retrieved from the geometry_columns metadata table. You
-   can omit specifying the schema and the geometry column portions of
-   the syntax.
--  **GeometryFormat=native|wkb|wkt|wkbzm**: The desired format in which
-   the geometries should be retrieved from the server. The default value
-   is 'native' in this case the native SqlGeometry and SqlGeography
-   serialization format is used. When using the 'wkb' or 'wkt' setting
-   the geometry representation is converted to 'Well Known Binary' and
-   'Well Known Text' at the server. This conversion requires a
-   significant overhead at the server and makes the feature access
-   slower than using the native format. The wkbzm format can only be
-   used with SQL Server 2012.
+-  **Tables=schema1.table1(geometry column1),schema2.table2(geometry column2)**:
+   이 파라미터를 사용해서 드라이버가 사용할 레이어들의 부분 집합을 지정할 수 있습니다. 이 파라미터를 설정하지 않는 경우, geometry_columns 메타데이터 테이블로부터 레이어를 가져옵니다. 이 문법에서 스키마 및 도형 열을 지정하는 부분을 생략할 수 있습니다.
 
-The parameter names are not case sensitive in the connection strings.
+-  **GeometryFormat=native|wkb|wkt|wkbzm**:
+   서버로부터 어떤 포맷으로 도형을 가져와야 할지를 지정합니다. 이 경우 기본값은 'native'로, 이 경우 네이티브 SqlGeometry 및 SqlGeography 직렬화(serialization) 포맷을 사용합니다. 'wkb' 또는 'wkt'로 설정하는 경우 서버에서 도형 표현을 'WKB(Well Known Binary)' 및 'WKT(Well Known Text)'로 변환합니다. 이 변환 작업은 서버에서 상당한 간접 비용(overhead)을 치르도록 요구하기 때문에 네이티브 포맷을 사용할 때보다 객체 접근이 더 느려집니다. 'wkbzm' 포맷은 SQL 서버 2012에 접속하는 경우에만 사용할 수 있습니다.
 
-Specifying the **Database** parameter is required by the driver in order
-to select the proper database.
+연결 문자열에 있는 파라미터 이름은 대소문자를 구분하지 않습니다.
 
-The connection may contain the optional **Driver** parameter if a custom
-SQL server driver should be loaded (like FreeTDS). The default is **{SQL
-Server}**
+이 드라이버가 알맞은 데이터베이스를 선택할 수 있게 하려면 **Database** 파라미터를 지정해야 합니다.
 
-Layers
+사용자 지정 (FreeTDS 같은) SQL 서버 드라이버를 불러와야 하는 경우 연결 문자열에 선택적인 **Driver** 파라미터가 포함될 수도 있습니다. 이 파라미터의 기본값은 **{SQL Server}** 입니다.
+
+레이어
 ------
 
-If the user defines the environment variable
-*MSSQLSPATIAL_LIST_ALL_TABLES=YES* (and does not specify Tables= in the
-connection string), all regular user tables will be treated as layers.
-This option is useful if you want tables with with no spatial data
+사용자가 MSSQLSPATIAL_LIST_ALL_TABLES 환경 변수를 YES로 정의한 경우 (그리고 연결 문자열에 'Tables='를 지정하지 않은 경우) 모든 정규 사용자 테이블을 레이어로 취급할 것입니다. 공간 데이터가 없는 테이블을 원한다면 이 옵션이 유용합니다.
 
-By default the MSSQL driver will only look for layers that are
-registered in the *geometry_columns* metadata table.
-If the user defines the environment variable
-*MSSQLSPATIAL_USE_GEOMETRY_COLUMNS=NO* then the driver will look for all
-user spatial tables found in the system catalog
+기본적으로 MSSQLSpatial 드라이버는 *geometry_columns* 메타데이터 테이블에 등록된 레이어만 검색할 것입니다. 사용자가 MSSQLSPATIAL_USE_GEOMETRY_COLUMNS 환경 변수를 NO로 정의하면 드라이버가 시스템 카탈로그에 있는 모든 사용자 공간 테이블을 검색할 것입니다.
 
-SQL statements
+SQL 선언문
 --------------
 
-The MS SQL Spatial driver passes SQL statements directly to MS SQL by
-default, rather than evaluating them internally when using the
-ExecuteSQL() call on the OGRDataSource, or the -sql command option to
-ogr2ogr. Attribute query expressions are also passed directly through to
-MSSQL. It's also possible to request the OGR MSSQL driver to handle SQL
-commands with the :ref:`OGR SQL <ogr_sql_dialect>` engine, by passing
-**"OGRSQL"** string to the ExecuteSQL() method, as the name of the SQL
-dialect.
+MSSQLSpatial 드라이버는 OGRDataSource 상에 ExecuteSQL() 함수를 호출하거나 ogr2ogr 유틸리티에 '-sql' 명령어 옵션을 사용하는 경우, 내부적으로 SQL 문을 평가하기보다는 기본적으로 MS SQL에 SQL 문을 직접 전송합니다. 속성 쿼리 표현식도 MS SQL에 직접 전송합니다. ExecuteSQL() 메소드에 **"OGRSQL"** 문자열을 SQL 방언 이름으로 전송해서 MSSQLSpatial 드라이버가 SQL 문을 :ref:`OGR SQL <ogr_sql_dialect>` 엔진으로 처리하도록 요청할 수도 있습니다.
 
-The MSSQL driver in OGR supports the OGRLayer::StartTransaction(),
-OGRLayer::CommitTransaction() and OGRLayer::RollbackTransaction() calls
-in the normal SQL sense.
+OGR에서 MSSQLSpatial 드라이버는 일반적인 SQL 맥락에서 OGRLayer::StartTransaction(), OGRLayer::CommitTransaction() 및 OGRLayer::RollbackTransaction() 호출을 지원합니다.
 
-Creation Issues
+생성 문제점
 ---------------
 
-This driver doesn't support creating new databases, you might want to
-use the *Microsoft SQL Server Client Tools* for this purpose, but it
-does allow creation of new layers within an existing database.
+이 드라이버는 새 데이터베이스 생성을 지원하지 않습니다. 데이터베이스를 생성하려면 마이크로소프트 SQL 서버 클라이언트 도구(Microsoft SQL Server Client Tools)를 이용하십시오. 기존 데이터베이스 안에 새 레이어를 생성할 수는 있습니다.
 
-Layer Creation Options
+레이어 생성 옵션
 ~~~~~~~~~~~~~~~~~~~~~~
 
--  **GEOM_TYPE**: The GEOM_TYPE layer creation option can be set to one
-   of "geometry" or "geography". If this option is not specified the
-   default value is "geometry". So as to create the geometry column with
-   "geography" type, this parameter should be set "geography". In this
-   case the layer must have a valid spatial reference of one of the
-   geography coordinate systems defined in the
-   **sys.spatial_reference_systems** SQL Server metadata table.
-   Projected coordinate systems are not supported in this case.
--  **OVERWRITE**: This may be "YES" to force an existing layer of the
-   desired name to be destroyed before creating the requested layer.
--  **LAUNDER**: This may be "YES" to force new fields created on this
-   layer to have their field names "laundered" into a form more
-   compatible with MSSQL. This converts to lower case and converts some
-   special characters like "-" and "#" to "_". If "NO" exact names are
-   preserved. The default value is "YES". If enabled the table (layer)
-   name will also be laundered.
--  **PRECISION**: This may be "YES" to force new fields created on this
-   layer to try and represent the width and precision information, if
-   available using numeric(width,precision) or char(width) types. If
-   "NO" then the types float, int and varchar will be used instead. The
-   default is "YES".
--  **DIM={2,3}**: Control the dimension of the layer. Defaults to 3.
--  **GEOMETRY_NAME**: Set the name of geometry column in the new table.
-   If omitted it defaults to *ogr_geometry*.
--  **SCHEMA**: Set name of schema for new table. If this parameter is
-   not supported the default schema "*dbo"* is used.
--  **SRID**: Set the spatial reference id of the new table explicitly.
-   The corresponding entry should already be added to the
-   spatial_ref_sys metadata table. If this parameter is not set the SRID
-   is derived from the authority code of source layer SRS.
--  **SPATIAL_INDEX**: Boolean flag (YES/NO) to
-   enable/disable the automatic creation of a spatial index on the newly
-   created layers (enabled by default).
--  **UPLOAD_GEOM_FORMAT**: Specify the geometry format
-   (wkb or wkt) when creating or modifying features. The default is wkb.
--  **FID**: Name of the FID column to create. Defaults
-   to ogr_fid.
--  **FID64**: Specifies whether to create the FID
-   column with bigint type to handle 64bit wide ids. Default = NO
--  **GEOMETRY_NULLABLE**: Specifies whether the values
-   of the geometry column can be NULL. Default = YES
--  **EXTRACT_SCHEMA_FROM_LAYER_NAME**: (From GDAL 2.3.0) Can be set to
-   NO to avoid considering the dot character as the separator between
-   the schema and the table name. Defaults to YES.
+-  **GEOM_TYPE**:
+   "geometry" 또는 "geography" 가운데 하나로 설정할 수 있습니다. 이 옵션을 지정하지 않는 경우 기본값은 "geometry"입니다. 즉 "geography" 유형을 가진 도형 열을 생성하려면 이 옵션을 "geography"로 설정해야 한다는 뜻입니다. 이 경우 레이어가 **sys.spatial_reference_systems** SQL 서버 메타데이터 테이블에 정의된 지리 좌표계 가운데 하나인 무결한 공간 좌표계를 사용해야만 합니다.
+   이 경우 투영 좌표계는 지원하지 않습니다.
 
-Configuration options
+-  **OVERWRITE**:
+   요청한 레이어를 생성하기 전에 요청한 이름을 가진 기존 레이어를 강제로 삭제하고 싶다면 이 옵션을 YES로 설정할 수도 있습니다.
+
+-  **LAUNDER**:
+   해당 레이어에 생성되는 새 필드의 이름을 MS SQL과 좀 더 호환되는 형식으로 강제 "세탁"하려면 이 옵션을 YES로 설정할 수도 있습니다. 이 옵션은 대문자를 소문자로 변환하고, "-" 및 "#" 같은 몇몇 특수 문자를 "_"로 변환합니다. 기본값은 YES입니다. 이 옵션을 활성화하면 테이블(레이어) 이름도 세탁할 것입니다.
+
+-  **PRECISION**:
+   해당 레이어에 생성되는 새 필드가 -- 사용할 수 있는 경우 숫자(길이, 정밀도) 또는 문자(길이) 유형을 사용해서 -- 길이 및 정밀도 정보를 시도하고 표현하게 하려면 이 옵션을 YES로 설정할 수도 있습니다. NO로 설정하면 그 대신 float, int 및 varchar 유형을 사용할 것입니다. 기본값은 YES입니다.
+
+-  **DIM={2,3}**:
+   레이어의 차원을 제어합니다. 기본값은 3입니다.
+
+-  **GEOMETRY_NAME**:
+   새 테이블의 도형 열 이름을 설정합니다. 지정하지 않는 경우 기본값 *ogr_geometry* 를 사용합니다.
+
+-  **SCHEMA**:
+   새 테이블에 대한 스키마의 이름을 설정합니다. 이 파라미터를 지원하지 않는 경우 기본 스키마 "*dbo*"를 사용합니다.
+
+-  **SRID**:
+   새 테이블의 공간 좌표계(Spatial Reference) ID를 명확하게 설정합니다. 해당 항목이 이미 spatial_ref_sys 메타데이터 테이블에 추가되어 있어야 합니다. 이 파라미터를 설정하지 않는 경우 소스 레이어 공간 좌표계의 기관 코드로부터 SRID를 파생시킵니다.
+
+-  **SPATIAL_INDEX**:
+   새로 생성되는 레이어 상에 공간 색인을 자동 생성할지 여부를 선택하는 불(boolean) 플래그입니다. 기본값은 YES입니다.
+
+-  **UPLOAD_GEOM_FORMAT**:
+   객체 생성 또는 수정 시 사용할 도형 포맷(wkb 또는 wkt)을 지정합니다. 기본값은 'wkb'입니다.
+
+-  **FID**:
+   생성할 FID 열의 이름을 지정합니다. 기본값은 'ogr_fid'입니다.
+
+-  **FID64**:
+   64비트 길이의 ID를 처리하기 위해 BigInt 유형의 FID 열을 생성할지 여부를 선택합니다. 기본값은 NO입니다.
+
+-  **GEOMETRY_NULLABLE**:
+   도형 열의 값이 NULL일 수 있는지 여부를 선택합니다. 기본값은 YES입니다.
+
+-  **EXTRACT_SCHEMA_FROM_LAYER_NAME**: (GDAL 2.3.0버전부터)
+   점('.') 문자를 스키마와 테이블 이름 사이의 구분자로 간주하지 않으려면 NO로 설정하면 됩니다. 기본값은 YES입니다.
+
+환경설정 옵션
 ---------------------
 
 There are a variety of `Configuration
-Options <http://trac.osgeo.org/gdal/wiki/ConfigOptions>`__ which help
+Options <http://trac.osgeo.org/gdal/wiki/ConfigOptions>`_ which help
 control the behavior of this driver.
 
--  **MSSQLSPATIAL_USE_BCP**: (From GDAL 2.1.0) Enable bulk insert when
-   adding features. This option requires to to compile GDAL against a
-   bulk copy enabled ODBC driver like SQL Server Native Client 11.0. To
-   specify a BCP supported driver in the connection string, use the
-   driver parameter, like DRIVER={SQL Server Native Client 11.0}. If
-   GDAL is compiled against SQL Server Native Client 10.0 or 11.0 the
-   driver is selected automatically not requiring to specify that in the
-   connection string. If GDAL is compiled against SQL Server Native
-   Client 10.0 or 11.0 the default setting of this parameter is TRUE,
-   otherwise the parameter is ignored by the driver.
--  **MSSQLSPATIAL_BCP_SIZE**: (From GDAL 2.1.0) Specifies the bulk
-   insert batch size. The larger value makes the insert faster, but
-   consumes more memory. Default = 1000.
--  **MSSQLSPATIAL_OGR_FID**: Override FID column name. Default =
-   ogr_fid.
--  **MSSQLSPATIAL_ALWAYS_OUTPUT_FID**: Always retrieve the FID value of
-   the recently created feature (even if it is not a true IDENTITY
-   column). Default = "NO".
--  **MSSQLSPATIAL_SHOW_FID_COLUMN**: Force to display the FID columns as
-   a feature attribute. Default = "NO".
--  **MSSQLSPATIAL_USE_GEOMETRY_COLUMNS**: Use/create geometry_columns
-   metadata table in the database. Default = "YES".
--  **MSSQLSPATIAL_LIST_ALL_TABLES**: Use mssql catalog to list available
-   layers. Default = "NO".
--  **MSSQLSPATIAL_USE_GEOMETRY_VALIDATION**: (From GDAL 3.0) Let the
-   driver detect the geometries which would trigger run time errors at
-   MSSQL server. The driver tries to correct these geometries before
-   submitting that to the server. Default = "YES".
+-  **MSSQLSPATIAL_USE_BCP**: (GDAL 2.1.0버전부터)
+   객체 추가 시 벌크(bulk) 삽입을 활성화합니다. 이 옵션을 사용하려면 GDAL을 SQL 서버 네이티브 클라이언트 11.0 같은 벌크 복사가 활성화된 ODBC 드라이버를 대상으로 컴파일해야 합니다. 연결 문자열에 BCP(Bulk CoPy) 지원 드라이버를 지정하려면 ``DRIVER={SQL Server Native Client 11.0}`` 같은 드라이버 파라미터를 사용하십시오. GDAL이 SQL 서버 네이티브 클라이언트 10.0 또는 11.0을 대상으로 컴파일된 경우, 이 드라이버를 자동으로 선택하기 때문에 연결 문자열에 지정할 필요가 없습니다. GDAL이 SQL 서버 네이티브 클라이언트 10.0 또는 11.0을 대상으로 컴파일된 경우 이 옵션의 기본 설정값은 TRUE이고, 그렇지 않다면 드라이버가 이 옵션을 무시합니다.
 
-Transaction support
+-  **MSSQLSPATIAL_BCP_SIZE**: (GDAL 2.1.0버전부터)
+   벌크 삽입 배치(batch) 용량을 지정합니다. 값이 높을수록 삽입 작업이 빨라지지만 더 많은 메모리를 소비합니다. 기본값은 1000입니다.
+
+-  **MSSQLSPATIAL_OGR_FID**:
+   FID 열 이름을 대체합니다. 기본값은 'ogr_fid'입니다.
+
+-  **MSSQLSPATIAL_ALWAYS_OUTPUT_FID**:
+   항상 (실제 IDENTITY 열이 아니더라도) 최근 생성된 객체의 FID 값을 가져옵니다. 기본값은 NO입니다.
+
+-  **MSSQLSPATIAL_SHOW_FID_COLUMN**:
+   FID 열을 객체 속성으로 강제 출력합니다. 기본값은 NO입니다.
+
+-  **MSSQLSPATIAL_USE_GEOMETRY_COLUMNS**:
+   데이터베이스에서 geometry_columns 메타데이터 테이블을 사용/생성합니다. 기본값은 YES입니다.
+
+-  **MSSQLSPATIAL_LIST_ALL_TABLES**:
+   사용할 수 있는 레이어를 목록화하기 위해 MS SQL 카탈로그를 이용합니다. 기본값은 NO입니다.
+
+-  **MSSQLSPATIAL_USE_GEOMETRY_VALIDATION**: (GDAL 3.0버전부터)
+   드라이버가 MS SQL 서버에서 런타임 오류를 촉발시키는 도형을 탐지할 수 있게 해줍니다. 드라이버가 해당 도형을 서버에 제출(submit)하기 전에 수정하려 시도합니다. 기본값은 YES입니다.
+
+트랜잭션 지원
 -------------------
 
-The driver implements transactions at the dataset level, per :ref:`rfc-54`
+이 드라이버는 :ref:`rfc-54` 을 따라 데이터셋 수준에서 트랜잭션을 구현합니다.
 
-Examples
+예시
 --------
 
-Creating a layer from an OGR data source
+-  OGR 데이터소스로부터 레이어를 생성하기:
 
    ::
 
@@ -196,7 +151,7 @@ Creating a layer from an OGR data source
 
       ogr2ogr -overwrite -f MSSQLSpatial "MSSQL:server=127.0.0.1;database=TestDB;UID=SA;PWD=DummyPassw0rd" "rivers.gpkg"
       
-Connecting to a layer and dump the contents
+-  레이어에 접속해서 콘텐츠를 덤프하기:
 
    ::
 
@@ -204,7 +159,7 @@ Connecting to a layer and dump the contents
       
       ogrinfo -al "MSSQL:server=127.0.0.1;database=TestDB;driver=ODBC Driver 17 for SQL Server;UID=SA;PWD=DummyPassw0rd"
 
-Connecting with username/password
+-  사용자명/비밀번호로 접속하기:
 
    ::
    
