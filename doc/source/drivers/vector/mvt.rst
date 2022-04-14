@@ -28,7 +28,7 @@ the zoom level and (x, y) the coordinate of the tile in a given zoom
 level. The origin of the tiling system is the top-left tile (XYZ
 convention). For example, for zoom levels 0 and 1 :
 
-::
+.. code-block:: json
 
    /metadata.json
    /0/
