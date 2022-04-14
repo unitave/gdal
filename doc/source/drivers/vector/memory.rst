@@ -7,37 +7,26 @@ Memory
 
 .. built_in_by_default::
 
-This driver implements read and write access layers of features
-contained entirely in memory. This is primarily useful as a high
-performance, and highly malleable working data store. All update
-options, geometry types, and field types are supported.
+Memory 드라이버는 전체가 메모리에 담겨 있는 객체들의 레이어에 대한 읽기 및 쓰기 접근을 구현합니다. 성능 향상은 물론 주로 순응성이 매우 좋은 작업 데이터 저장소로서 유용합니다. 모든 업데이트 옵션, 도형 유형 및 필드 유형을 지원합니다.
 
-There is no way to open an existing Memory datastore. It must be created
-with CreateDataSource() and populated and used from that handle. When
-the datastore is closed all contents are freed and destroyed.
+기존 Memory 데이터 저장소를 열 수는 없습니다. CreateDataSource() 메소드로 Memory 데이터 저장소를 생성해야만 하며, 해당 핸들로부터 데이터 저장소를 채우고 사용해야만 합니다. 데이터 저장소를 종료하면 모든 콘텐츠를 해제하고 삭제합니다.
 
-The driver does not implement spatial or attribute indexing, so spatial
-and attribute queries are still evaluated against all features. Fetching
-features by feature id should be very fast (just an array lookup and
-feature copy).
+이 드라이버는 공간 또는 속성 색인 작업을 구현하지 않았기 때문에, 공간 및 속성 쿼리는 모든 객체를 대상으로 평가됩니다. 객체ID(FID)로 객체를 가져오는 작업의 속도는 매우 빠를 것입니다. (배열 검색 후 객체를 복사하는 것뿐이기 때문입니다.)
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
 
 .. supports_georeferencing::
 
-Creation Issues
+생성 문제점
 ---------------
 
-Any name may be used for a created datasource. There are no datasource
-or layer creation options supported. Layer names need to be unique, but
-are not otherwise constrained.
+생성되는 데이터 저장소에 어떤 이름이든 지어줄 수 있습니다. 데이터 저장소 또는 레이어 생성 옵션은 지원하지 않습니다. 레이어 이름은 유일해야 하지만, 유일하도록 제약하지는 않습니다.
 
-Before GDAL 2.1, feature ids passed to CreateFeature() are preserved
-*unless* they exceed 10000000 in which case they will be reset to avoid
-a requirement for an excessively large and sparse feature array.
-Starting with GDAL 2.1, sparse IDs can be handled.
+GDAL 2.1 이전 버전에서는 FID가 10,000,000개를 초과하지 않는 이상 CreateFeature()에 전송되는 FID를 보전합니다. 초과하는 경우, 지나치게 대용량이며 희박한 객체 배열에 대한 요구 사항을 피하기 위해 FID를 리셋할 것입니다.
+GDAL 2.1버전부터, 희박 ID들을 처리할 수 있습니다.
 
-New fields can be added or removed to a layer that already has features.
+이미 객체를 가지고 있는 레이어에 새 필드를 추가하거나 제거할 수 있습니다.
+

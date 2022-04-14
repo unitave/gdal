@@ -1,36 +1,23 @@
 .. _vector.mitab:
 
-MapInfo TAB and MIF/MID
+MapInfo TAB 및 MIF/MID
 =======================
 
 .. shortname:: MITAB
 
 .. built_in_by_default::
 
-MapInfo datasets in native (TAB) format and in interchange (MIF/MID)
-format are supported for reading and writing.
-Update of existing TAB files is supported (append of new features,
-modifications and deletions of existing features,
-adding/renaming/deleting fields, ...). Update of existing MIF/MID files
-is not supported.
+MITAB 드라이버는 네이티브(TAB) 포맷 및 정보 교환(MIF/MID) 포맷으로 되어 있는 MapInfo 데이터셋의 읽기 및 쓰기를 지원합니다. 기존 TAB 파일의 (새 객체 추가, 기존 객체 수정 및 삭제, 필드 추가/재명명/삭제 등등) 업데이트도 지원합니다. 기존 MIF/MID 파일의 업데이트는 지원하지 않습니다.
 
-Note: In the rest of this document "MIF/MID File" is used to refer to a
-pair of .MIF + .MID files, and "TAB file" refers to the set of files for
-a MapInfo table in binary form (usually with extensions .TAB, .DAT,
-.MAP, .ID, .IND).
+주의: 이 문서에서 "MIF/MID 파일"이라고 하면 .MIF 및 .MID 파일쌍을 의미하고, "TAB 파일"은 바이너리 형식의 MapInfo 테이블을 위한 (보통 .TAB, .DAT, .MAP, .ID, .IND 확장자를 가진) 파일 집합을 의미합니다.
 
-The MapInfo driver treats a whole directory of files as a dataset, and a
-single file within that directory as a layer. In this case the directory
-name should be used as the dataset name.
+MITAB 드라이버는 전체 파일을 담고 있는 디렉터리를 데이터셋으로 취급하며, 해당 디렉터리 안에 있는 단일 파일을 레이어 하나로 취급합니다. 이 경우 디렉터리 이름을 데이터셋 이름으로 사용해야 합니다.
 
-However, it is also possible to use one of the files (.tab or .mif) in a
-MapInfo set as the dataset name, and then it will be treated as a
-dataset with one single layer.
+하지만 MapInfo 집합의 (.tab 또는 .mif) 파일들 가운데 하나를 데이터셋 이름으로 사용해서 단일 레이어 하나를 가진 데이터셋으로 취급하게 할 수도 있습니다.
 
-MapInfo coordinate system information is supported for reading and
-writing.
+MapInfo 좌표계 정보의 읽기 및 쓰기를 지원합니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
@@ -39,44 +26,26 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Creation Issues
+생성 문제점
 ---------------
 
-The TAB File format requires that the bounds (geographical extents) of a
-new file be set before writing the first feature.
+TAB 파일 포맷은 첫 번째 객체를 작성하기 전에 새 파일의 경계(지리 범위)를 설정할 것을 요구합니다.
 
-There is currently no automated setting of valid default bounds for each
-spatial reference system, so for the time being, the MapInfo driver sets
-the following default bounds when a new layer is created:
+현재 각 공간 좌표계에 대해 무결한 기본 경계를 자동 설정할 방법이 없기 때문에, 당분간은 새 레이어를 생성할 때 MITAB 드라이버가 다음과 같은 기본 경계를 설정합니다:
 
--  For a file in LAT/LON (geographic) coordinates: BOUNDS (-180, -90)
-   (180, 90)
--  For any other projection: BOUNDS (-30000000 + false_easting,
-   -15000000 + false_northing) (30000000 + false_easting, 15000000 +
-   false_northing)
+-  위도/경도 (지리) 좌표의 경우: BOUNDS (-180, -90) (180, 90)
+-  다른 모든 투영법의 경우: BOUNDS (-30000000 + false_easting, -15000000 + false_northing) (30000000 + false_easting, 15000000 + false_northing)
 
-It is possible to override those bounds through two mechanisms.
+다음 두 가지 메커니즘을 통해 이 기본 경계를 대체할 수 있습니다.
 
--  specify a user-defined file that contain projection definitions with
-   bounds. The name of this file must be specified with the
-   MITAB_BOUNDS_FILE configuration option. This allows users to override
-   the default bounds for existing projections, and to define bounds for
-   new projections not listed in the hard-coded table in the driver. The
-   format of the file is a simple text file with one CoordSys string per
-   line. The CoordSys lines should follow the MIF specs, and MUST
-   include the optional Bounds definition at the end of the line, e.g.
+-  경계를 가진 투영법 정의를 담은 사용자 정의 파일을 지정합니다. MITAB_BOUNDS_FILE 환경설정 옵션으로 이 파일의 이름을 반드시 지정해줘야만 합니다. 이렇게 하면 사용자가 기존 투영법을 위한 기본 경계를 무시하고 드라이버의 테이블에 하드 코딩되어 있지 않은 새 투영법을 위한 경계를 정의할 수 있습니다. 이 파일의 포맷은 단순 텍스트 파일로 한 줄 당 CoordSys 문자열 하나를 가지고 있습니다. CoordSys 줄은 MIF 사양을 따라야 하고, 줄 마지막에 반드시 다음 예시 같은 선택적인 경계 정의를 포함해야만 합니다:
 
    ::
 
       # Lambert 93 French bounds
       CoordSys Earth Projection 3, 33, "m", 3, 46.5, 44, 49.00000000002, 700000, 6600000 Bounds (75000, 6000000) (1275000, 7200000)
 
-   It is also possible to establish a mapping between a source CoordSys
-   and a target CoordSys with bounds. Such a mapping is specified by
-   adding a line starting with "Source = " followed by a CoordSys
-   (spaces before or after the equal sign do not matter). The following
-   line should start with "Destination = " followed by a CoordSys with
-   bounds, e.g.
+   소스 CoordSys와 대상 CoordSys의 경계들을 매핑시킬 수도 있습니다. CoordSys 앞에 "Source = "를 추가하고 (이때 등호 앞뒤의 공백은 없어도 됩니다) 그 다음 줄의 CoordSys 앞에 "Destination = "을 추가하면 매핑을 지정할 수 있습니다. 다음은 그 예시입니다:
 
    ::
 
@@ -84,64 +53,51 @@ It is possible to override those bounds through two mechanisms.
       Source      = CoordSys Earth Projection 3, 33, "m", 3, 46.5, 44, 49, 700000, 6600000
       Destination = CoordSys Earth Projection 3, 33, "m", 3, 46.5, 44, 49.00000000001, 700000, 6600000 Bounds (-792421, 5278231) (3520778, 9741029)
 
--  use the BOUNDS layer creation option (see below)
+-  BOUNDS 레이어 생성 옵션을 지정합니다. (아래 참조)
 
-If no coordinate system is provided when creating a layer, the
-projection case is used, not geographic, which can result in very low
-precision if the coordinates really are geographic. You can add "-a_srs
-WGS84" to the **ogr2ogr** commandline during a translation to force
-geographic mode.
+레이어 생성 시 좌표계를 지정하지 않는 경우, 지리 좌표계가 아니라 투영법을 사용합니다. 이때 좌표가 실제로 지리 좌표계라면 산출물의 좌표 정밀도가 매우 떨어질 수 있습니다. 변환 도중 지리 좌표계 모드를 강제하려면 **ogr2ogr** 명령줄에 "-a_srs WGS84"를 추가하면 됩니다.
 
-MapInfo feature attributes suffer a number of limitations:
+MapInfo 객체 속성에는 몇 가지 제한 사항들이 적용됩니다:
 
--  Only Integer, Real and String field types can be created. The various
-   list, and binary field types cannot be created.
--  For String fields, the field width is used to establish storage size
-   in the .dat file. This means that strings longer than the field width
-   will be truncated
--  String fields without an assigned width are treated as 254
-   characters.
+-  정수형, 실수형 및 문자열 필드 유형만 생성할 수 있습니다. 다양한 목록 및 바이너리 필드 유형은 생성하지 못 합니다.
+-  문자열 필드의 경우, .dat 파일에 저장소 크기를 확실히 지정하기 위해 필드 길이를 사용합니다. 즉 필드 길이보다 긴 문자열을 절단(truncate)할 것이라는 뜻입니다.
+-  할당된 길이가 없는 문자열 필드는 문자 254개 길이로 취급합니다.
 
-Dataset Creation Options
+데이터셋 생성 옵션
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
--  **FORMAT=MIF**: To create MIF/MID instead of TAB files (TAB is the
-   default).
--  **SPATIAL_INDEX_MODE=QUICK/OPTIMIZED**: The default is QUICK force
-   "quick spatial index mode". In this mode writing files can be about 5
-   times faster, but spatial queries can be up to 30 times slower. This
-   can be set to OPTIMIZED to generate optimized spatial index.
--  **BLOCKSIZE=[512,1024,...,32256]** (multiples of 512):
-   Block size for .map files. Defaults to 512.
-   MapInfo 15.2 and above creates .tab files with a blocksize of 16384
-   bytes. Any MapInfo version should be able to handle block sizes from
-   512 to 32256.
+-  **FORMAT=MIF**:
+   TAB 파일 대신 MIF/MID 파일을 생성합니다. (TAB이 기본값입니다.)
 
-Layer Creation Options
+-  **SPATIAL_INDEX_MODE=QUICK/OPTIMIZED**:
+   기본값 QUICK은 "빠른 공간 색인 모드"를 강제합니다. 이 모드에서는 파일 작성이 5배 정도 더 빠르지만, 공간 쿼리는 30배까지 느려질 수 있습니다. 이 옵션을 OPTIMIZED로 설정하면 최적화된 공간 색인을 생성할 수 있습니다.
+
+-  **BLOCKSIZE=[512,1024,...,32256]**: (512의 배수)
+   .map 파일의 블록 용량을 설정합니다. 기본값은 512입니다.
+   MapInfo 15.2 이상 버전은 블록 용량이 16,384바이트인 .tab 파일을 생성합니다. 모든 MapInfo 버전이 512에서 32,256까지의 블록 용량을 처리할 수 있을 것입니다.
+
+레이어 생성 옵션
 ~~~~~~~~~~~~~~~~~~~~~~
 
--  **BOUNDS=xmin,ymin,xmax,ymax**: Define custom layer
-   bounds to increase the accuracy of the coordinates. Note: the
-   geometry of written features must be within the defined box.
--  **ENCODING=**\ *value*: (GDAL >=2.3) Define the encoding for field
-   names and field values. The encoding name is specified in the format
-   supported by CPLRecode (e.g. ISO-8859-1, CP1251, CP1252 ...) and
-   internally converted to MapInfo charsets names. Default value is ''
-   that equals to 'Neutral' MapInfo charset.
--  **DESCRIPTION=**\ *value*: (GDAL >= 3.1.0) Friendly layer name (only for
-   TAB format). Friendly names can be up to 256 characters long and can include
-   most ASCII characters. Supported by MapInfo Pro v15.0 or higher.
+-  **BOUNDS=xmin,ymin,xmax,ymax**:
+   좌표 정밀도를 향상시키기 위해 사용자 지정 레이어 경계를 정의합니다.
+   주의: 작성되는 객체의 도형이 정의하는 경계 상자 안에 들어와야만 합니다.
 
-Configuration options
+-  **ENCODING=value**: (GDAL 2.3 이상 버전)
+   필드 이름 및 값에 사용할 인코딩을 정의합니다. CPLRecode가 정의하는 (ISO-8859-1, CP1251, CP1252 등등 같은) 형식으로 인코딩 이름을 지정하고, 내부적으로 MapInfo 문자 집합(charset) 이름으로 변환합니다. 기본값은 (어떤 문자도 변환하지 않는) '중립' MapInfo 문자 집합과 동일한 '' 입니다.
+
+-  **DESCRIPTION=value**: (GDAL 3.1.0 이상 버전)
+   친화적인 레이어 이름을 지정합니다. (TAB 포맷 전용) 친화적 이름은 문자 256개까지의 길이가 될 수 있으며, 대부분의 아스키 문자를 포함할 수 있습니다. MapInfo Pro 15.0 이상 버전에서 지원합니다.
+
+환경설정 옵션
 ~~~~~~~~~~~~~~~~~~~~~
 
--  :decl_configoption:`MITAB_SET_TOWGS84_ON_KNOWN_DATUM` =YES/NO:
-   (GDAL >= 3.0.3). The default behavior, starting with GDAL 3.0.3, is NO.
-   That is, the TOWGS84 parameters read from the .tab header will *not* be set
-   on the Datum object of the CRS, when the datum can be inferred.
+-  :decl_configoption:`MITAB_SET_TOWGS84_ON_KNOWN_DATUM` =YES/NO: (GDAL 3.0.3 이상 버전)
+   GDAL 3.0.3버전부터 기본값은 NO입니다. 다시 말해 원점을 추정할 수 있는 경우 .tab 파일의 헤더로부터 읽어온 TOWGS84 파라미터를 좌표계의 Datum 객체에 설정하지 *않을* 것이라는 뜻입니다.
 
-See Also
+참고
 ~~~~~~~~
 
--  `MITAB Page <http://mitab.maptools.org/>`__
--  `About friendly layer names <https://support.pitneybowes.com/SearchArticles/VFP05_KnowledgeWithSidebarHowTo?id=kA180000000CtuHCAS&popup=false&lang=en_US>`__
+-  `MITAB 페이지 <http://mitab.maptools.org/>`_
+-  `친화적인 레이어 이름에 관해 <https://support.pitneybowes.com/SearchArticles/VFP05_KnowledgeWithSidebarHowTo?id=kA180000000CtuHCAS&popup=false&lang=en_US>`_
+
