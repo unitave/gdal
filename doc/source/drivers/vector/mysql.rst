@@ -5,148 +5,102 @@ MySQL
 
 .. shortname:: MySQL
 
-.. build_dependencies:: MySQL library
+.. build_dependencies:: MySQL 라이브러리
 
-This driver implements read and write access for spatial data in
-`MySQL <http://www.mysql.org/>`__ tables.
+MySQL 드라이버는 `MySQL <http://www.mysql.org/>`_ 테이블에 있는 공간 데이터에 대한 읽기 및 쓰기 접근을 구현합니다.
 
-When opening a database, its name should be specified in the form
-"MYSQL:dbname[,options]" where the options can include comma separated
-items like "user=*userid*", "password=*password*", "host=*host*" and
-"port=*port*".
+데이터베이스를 열 때, 데이터베이스 이름을 "MYSQL:dbname[,options]" 형식으로 지정해야 합니다. 이때 [,options] 자리에 "user=*userid*", "password=*password*", "host=*host*" 및 "port=*port*" 같은 항목을 쉼표로 구분해서 넣을 수 있습니다.
 
-As well, a "tables=*table*;*table*..." option can be added to restrict
-access to a specific list of tables in the database. This option is
-primarily useful when a database has a lot of tables, and scanning all
-their schemas would take a significant amount of time.
+또한 데이터베이스에 있는 특정 테이블에 접근하려면 "tables=*table*;*table*..." 옵션을 추가하면 됩니다. 데이터베이스에 수많은 테이블이 존재하기 때문에 모든 테이블의 스키마를 스캐닝하는 시간이 상당히 오래 걸리는 경우 이 옵션이 특히 유용합니다.
 
-Currently all regular user tables are assumed to be layers from an OGR
-point of view, with the table names as the layer names. Named views are
-not currently supported.
+현재 모든 정규 사용자 테이블을 OGR 시점에서 레이어로 가정합니다. 이때 테이블 이름이 레이어 이름이 됩니다. 이름을 가진 뷰는 현재 지원하지 않습니다.
 
-If a single integer field is a primary key, it will be used as the FID
-otherwise the FID will be assigned sequentially, and fetches by FID will
-be extremely slow.
+단일 정수형 필드가 기본 키인 경우 FID로 사용할 것입니다. 그렇지 않다면 FID를 순차적으로 할당하는데, FID로 가져오는 속도가 매우 느릴 것입니다.
 
-By default, SQL statements are passed directly to the MySQL database
-engine. It's also possible to request the driver to handle SQL commands
-with :ref:`OGR SQL <ogr_sql_dialect>` engine, by passing **"OGRSQL"**
-string to the ExecuteSQL() method, as name of the SQL dialect.
+기본적으로 MySQL 데이터베이스 엔진에 SQL 선언문을 직접 전송합니다. ExecuteSQL() 메소드에 **"OGRSQL"** 문자열을 SQL 방언 이름으로 전송해서 MySQL 드라이버가 SQL 선언문을 :ref:`OGR SQL <ogr_sql_dialect>` 엔진으로 처리하도록 요청할 수도 있습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
 
 .. supports_georeferencing::
 
-Caveats
+주의할 점
 -------
 
--  In the case of a layer defined by a SQL statement, fields either
-   named "OGC_FID" or those that are defined as NOT NULL, are a PRIMARY
-   KEY, and are an integer-like field will be assumed to be the FID.
--  Geometry fields are read from MySQL using WKB format. Versions older
-   than 5.0.16 of MySQL are known to have issues with some WKB
-   generation and may not work properly.
--  The OGR_FID column, which can be overridden with the MYSQL_FID layer
-   creation option, is implemented as a **INT UNIQUE NOT NULL
-   AUTO_INCREMENT** field. This appears to implicitly create an index on
-   the field.
--  The geometry column, which defaults to *SHAPE* and can be overridden
-   with the GEOMETRY_NAME layer creation option, is created as a **NOT
-   NULL** column in unless SPATIAL_INDEX is disabled. By default a
-   spatial index is created at the point the table is created.
--  SRS information is stored using the OGC Simple Features for SQL
-   layout, with *geometry_columns* and *spatial_ref_sys* metadata tables
-   being created in the specified database if they do not already exist.
-   The *spatial_ref_sys* table is **not** pre-populated with SRS and
-   EPSG values like PostGIS. If no EPSG code is found for a given table,
-   the MAX(SRID) value will be used. With MySQL 8.0 or later, the
-   *ST_SPATIAL_REFERENCE_SYSTEMS* table provided by the database is used
-   instead of *spatial_ref_sys*.
--  Connection timeouts to the server can be specified with the
-   **MYSQL_TIMEOUT** environment variable. For example, SET
-   MYSQL_TIMEOUT=3600. It is possible this variable only has an impact
-   when the OS of the MySQL server is Windows.
--  The MySQL driver opens a connection to the database using
-   CLIENT_INTERACTIVE mode. You can adjust this setting
-   (interactive_timeout) in your mysql.ini or mysql.cnf file of your
-   server to your liking.
--  We are using WKT to insert geometries into the database. If you are
-   inserting big geometries, you will need to be aware of the
-   *max_allowed_packet* parameter in the MySQL configuration. By default
-   it is set to 1M, but this will not be large enough for really big
-   geometries. If you get an error message like: *Got a packet bigger
-   than 'max_allowed_packet' bytes*, you will need to increase this
-   parameter.
+-  SQL 선언문으로 정의되는 레이어의 경우, "OGC_FID"로 명명된 필드 또는 NOT NULL로 정의된 필드를 PRIMARY KEY로 그리고 유사 정수형 필드를 FID로 가정할 것입니다.
 
-Creation Issues
+-  WKB 포맷을 이용해서 MySQL로부터 도형 필드를 읽어옵니다. MySQL 5.0.16 이전 버전들은 WKB 생성 관련 문제점을 가지고 있는 것으로 알려져 있기 때문에 제대로 작동하지 않을 수도 있습니다.
+
+-  MYSQL_FID 레이어 생성 옵션으로 대체할 수 있는 OGR_FID 열은 **INT UNIQUE NOT NULL AUTO_INCREMENT** 필드로 구현되었습니다. 이렇게 하면 필드에 내재적으로 색인을 생성한 것으로 나타납니다.
+
+-  기본 이름이 *SHAPE* 이고 GEOMETRY_NAME 레이어 생성 옵션으로 대체할 수 있는 도형 열은 SPATIAL_INDEX를 비활성화하지 않은 이상 **NOT NULL** 열로 생성됩니다. 기본적으로 테이블을 생성하는 순간 공간 색인을 생성합니다.
+
+-  SQL 레이아웃에 OGC 단순 피처(Simple Feature)를 이용해서 공간 좌표계를 저장합니다. 지정한 데이터베이스에 이미 *geometry_columns* 및 *spatial_ref_sys* 메타데이터 테이블이 없다면 두 테이블을 생성합니다. PostGIS처럼 사전에 *spatial_ref_sys* 테이블을 공간 좌표계 및 EPSG 값들로 채우지 **않습니다**. 지정한 테이블에 EPSG 코드가 하나도 없는 경우 MAX(SRID) 값을 사용합니다. MySQL 8.0버전부터, *spatial_ref_sys* 메타데이터 테이블 대신 데이터베이스가 제공하는 *ST_SPATIAL_REFERENCE_SYSTEMS* 테이블을 사용합니다.
+
+-  **MYSQL_TIMEOUT** 환경 변수로 -- 예를 들어 ``MYSQL_TIMEOUT=3600`` 처럼 -- 서버 연결 시간 제한을 지정할 수 있습니다. 이 변수는 MySQL 서버의 OS가 윈도우인 경우에만 영향을 미칠 수도 있습니다.
+
+-  MySQL 드라이버는 CLIENT_INTERACTIVE 모드를 사용해서 서버에 연결을 엽니다. 사용자 서버의 mysql.ini 또는 mysql.cnf 파일에 있는 이 (interactive_timeout) 설정을 사용자 마음대로 조정할 수 있습니다.
+
+-  WKT를 이용해서 데이터베이스에 도형을 삽입하지 않습니다. 대용량 도형을 삽입하는 경우, MySQL 환경설정에 있는 *max_allowed_packet* 파라미터를 신경써야 할 것입니다. 이 파라미터는 기본적으로 1MB로 설정되어 있지만, 도형이 정말로 대용량인 경우 충분하지 않을 것입니다. "Got a packet bigger than 'max_allowed_packet' bytes" 같은 오류 메시지가 뜰 경우, 이 파라미터의 값을 높여야 할 것입니다.
+
+생성 문제점
 ---------------
 
-The MySQL driver does not support creation of new datasets (a database
-within MySQL), but it does allow creation of new layers within an
-existing database.
+MySQL 드라이버는 새 데이터셋(MySQL 내부의 데이터베이스) 생성을 지원하지 않지만, 기존 데이터베이스 안에 새 레이어를 생성할 수는 있습니다.
 
-By default, the MySQL driver will attempt to preserve the precision of
-OGR features when creating and reading MySQL layers. For integer fields
-with a specified width, it will use **DECIMAL** as the MySQL field type
-with a specified precision of 0. For real fields, it will use **DOUBLE**
-with the specified width and precision. For string fields with a
-specified width, **VARCHAR** will be used.
+MySQL 드라이버는 기본적으로 MySQL 레이어를 생성하고 읽어올 때 OGR 객체의 정밀도를 보전하려 시도할 것입니다. 길이가 지정된 정수형 필드의 경우, 정밀도가 0으로 지정된 **DECIMAL** 을 MySQL 필드 유형으로 사용할 것입니다. 실수형 필드의 경우, 길이 및 정밀도가 지정된 **DOUBLE** 을 사용할 것입니다. 길이가 지정된 문자열 필드의 경우, **VARCHAR** 를 사용할 것입니다.
 
-The MySQL driver makes no allowances for character encodings at this
-time.
+MySQL 드라이버는 현재 문자 인코딩을 허용하지 않습니다.
 
-The MySQL driver is not transactional at this time.
+MySQL 드라이버는 현재 트랜잭션도 허용하지 않습니다.
 
-Layer Creation Options
+레이어 생성 옵션
 ~~~~~~~~~~~~~~~~~~~~~~
 
--  **OVERWRITE**: This may be "YES" to force an existing layer of the
-   desired name to be destroyed before creating the requested layer.
--  **LAUNDER**: This may be "YES" to force new fields created on this
-   layer to have their field names "laundered" into a form more
-   compatible with MySQL. This converts to lower case and converts some
-   special characters like "-" and "#" to "_". If "NO" exact names are
-   preserved. The default value is "YES".
--  **PRECISION**: This may be "TRUE" to attempt to preserve field widths
-   and precisions for the creation and reading of MySQL layers. The
-   default value is "TRUE".
--  **GEOMETRY_NAME**: This option specifies the name of the geometry
-   column. The default value is "SHAPE".
--  **FID**: This option specifies the name of the FID column. The
-   default value is "OGR_FID". Note: option was called MYSQL_FID in
-   releases before GDAL 2
--  **FID64**: This may be "TRUE" to create a FID column
-   that can support 64 bit identifiers. The default value is "FALSE".
--  **SPATIAL_INDEX**: May be "NO" to stop automatic creation of a
-   spatial index on the geometry column, allowing NULL geometries and
-   possibly faster loading.
--  **ENGINE**: Optionally specify database engine to use. In MySQL 4.x
-   this must be set to MyISAM for spatial tables.
+-  **OVERWRITE**:
+   요청한 레이어를 생성하기 전에 요청한 이름을 가진 기존 레이어를 강제로 삭제하고 싶다면 이 옵션을 YES로 설정할 수도 있습니다.
 
-The following example datasource name opens the database schema
-*westholland* with password *psv9570* for userid *root* on the port
-*3306*. No hostname is provided, so localhost is assumed. The tables=
-directive means that only the bedrijven table is scanned and presented
-as a layer for use.
+-  **LAUNDER**:
+   해당 레이어에 생성되는 새 필드의 이름을 MySQL과 좀 더 호환되는 형식으로 강제 "세탁"하려면 이 옵션을 YES로 설정할 수도 있습니다. 이 옵션은 대문자를 소문자로 변환하고, "-" 및 "#" 같은 몇몇 특수 문자를 "_"로 변환합니다. 이 옵션을 NO로 설정하면 이름을 그대로 보전합니다. 기본값은 YES입니다.
+
+-  **PRECISION**:
+   MySQL 레이어의 생성 및 읽기를 위해 길이 및 정밀도 정보를 보전하려 시도하려면 이 옵션을 TRUE로 설정할 수도 있습니다. 기본값은 TRUE입니다.
+
+-  **GEOMETRY_NAME**:
+   도형 열 이름을 설정합니다. 기본값은 'SHAPE'입니다.
+
+-  **FID**:
+   FID 열의 이름을 지정합니다. 기본값은 'OGR_FID'입니다.
+   주의: GDAL 2 이전 배포판들에서는 이 옵션이 MYSQL_FID였습니다.
+
+-  **FID64**:
+   64비트 길이의 식별자를 지원할 수 있는 FID 열을 생성하려면 이 옵션을 TRUE로 설정할 수도 있습니다. 기본값은 FALSE입니다.
+
+-  **SPATIAL_INDEX**:
+   도형 열에 공간 색인을 자동 생성하지 않으려면 이 옵션을 NO로 설정할 수도 있습니다.
+   이 경우 NULL 도형을 허용하며, 불러오기가 더 빨라질 수도 있습니다.
+
+-  **ENGINE**:
+   사용할 데이터베이스 엔진을 지정할 수 있는 선택적 옵션입니다. MySQL 4.x버전에서 공간 테이블을 사용하려면 이 옵션을 반드시 MyISAM으로 설정해야만 합니다.
+
+예시
+----
+
+-  다음 예시 데이터소스 이름은 *3306* 포트에서 *root* 사용자명과 *psv9570* 비밀번호로 *westholland* 데이터베이스 스키마를 엽니다. 호스트명을 지정하지 않았기 때문에 localhost로 가정합니다. 'tables=directive'는 bedrijven 테이블만 스캔해서 사용할 레이어로 나타낸다는 의미입니다:
 
 ::
 
    MYSQL:westholland,user=root,password=psv9570,port=3306,tables=bedrijven
 
-The following example uses ogr2ogr to create copy the world_borders
-layer from a shapefile into a MySQL table. It overwrites a table with
-the existing name *borders2*, sets a layer creation option to specify
-the geometry column name to *SHAPE2*.
+-  다음 예시는 ogr2ogr 유틸리티를 이용해서 shapefile의 world_borders 레이어를 MySQL 테이블로 생성/복사합니다. 기존 *borders2* 테이블이 존재하는 경우 덮어쓰고, 레이어 생성 옵션으로 도형 열 이름을 *SHAPE2* 로 지정합니다:
 
 ::
 
    ogr2ogr -f MySQL MySQL:test,user=root world_borders.shp -nln borders2 -update -overwrite -lco GEOMETRY_NAME=SHAPE2
 
-The following example uses ogrinfo to return some summary information
-about the borders2 layer in the test database.
+-  다음 예시는 ogrinfo 유틸리티를 이용해서 test 데이터베이스에 있는 borders2 레이어에 관한 몇몇 요약 정보를 반환합니다:
 
 ::
 
@@ -169,5 +123,4 @@ about the borders2 layer in the test database.
        cntry_name: String (80.0)
        area: Real (15.2)
        pop_cntry: Real (15.2)
-
 

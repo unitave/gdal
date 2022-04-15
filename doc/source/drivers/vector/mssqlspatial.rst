@@ -107,9 +107,7 @@ OGR에서 MSSQLSpatial 드라이버는 일반적인 SQL 맥락에서 OGRLayer::S
 환경설정 옵션
 ---------------------
 
-There are a variety of `Configuration
-Options <http://trac.osgeo.org/gdal/wiki/ConfigOptions>`_ which help
-control the behavior of this driver.
+이 드라이버의 습성을 제어하는 데 도움이 되는 다양한 `환경설정 옵션 <http://trac.osgeo.org/gdal/wiki/ConfigOptions>`_ 들이 있습니다:
 
 -  **MSSQLSPATIAL_USE_BCP**: (GDAL 2.1.0버전부터)
    객체 추가 시 벌크(bulk) 삽입을 활성화합니다. 이 옵션을 사용하려면 GDAL을 SQL 서버 네이티브 클라이언트 11.0 같은 벌크 복사가 활성화된 ODBC 드라이버를 대상으로 컴파일해야 합니다. 연결 문자열에 BCP(Bulk CoPy) 지원 드라이버를 지정하려면 ``DRIVER={SQL Server Native Client 11.0}`` 같은 드라이버 파라미터를 사용하십시오. GDAL이 SQL 서버 네이티브 클라이언트 10.0 또는 11.0을 대상으로 컴파일된 경우, 이 드라이버를 자동으로 선택하기 때문에 연결 문자열에 지정할 필요가 없습니다. GDAL이 SQL 서버 네이티브 클라이언트 10.0 또는 11.0을 대상으로 컴파일된 경우 이 옵션의 기본 설정값은 TRUE이고, 그렇지 않다면 드라이버가 이 옵션을 무시합니다.
