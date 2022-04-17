@@ -15,7 +15,7 @@ pct2rgb.py
 
 .. code-block::
 
-    pct2rgb.py [-of format] [-b band] [-rgba] source_file dest_file
+    pct2rgb.py [-of format] [-b band] [-rgba] [-pct palette_file] source_file dest_file
 
 설명
 -----------
@@ -35,6 +35,10 @@ pct2rgb.py
 .. option:: -rgba
 
     (기본값인 RGB 파일 대신) RGBA 파일을 생성합니다.
+
+.. option:: -pct <palette_file>
+
+    색상표를 <source_file>로부터 가져오는 대신 <palette_file>로부터 추출합니다. 파일이 여러 개인 경우 색상표가 일관성을 가지도록 하는 데 사용할 수 있습니다. <palette_file>은 색상표를 가진 GDAL 지원 포맷 래스터 파일 또는 지원 포맷 (txt, qml, qlr) 색상 파일 가운데 하나여야만 합니다.
 
 .. option:: <source_file>
 

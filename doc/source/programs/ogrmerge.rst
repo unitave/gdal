@@ -48,7 +48,7 @@ ogrmerge.py
 
 .. program:: ogrmerge.py
 
-.. option:: -o <out_dsname
+.. option:: -o <out_dsname>
 
     산출 데이터셋의 이름을 설정합니다. 필수 옵션입니다.
 

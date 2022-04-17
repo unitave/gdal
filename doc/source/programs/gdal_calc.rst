@@ -79,7 +79,7 @@ gdal_calc.py
 
     산출 파일 용 GDAL 포맷입니다.
 
-.. option:: color-table=<filename>
+.. option:: --color-table=<filename>
 
     산출 래스터에 사용될 (색상표 색인 해석을 가진) 색상표(또는 ColorTable 객체)의 파일명을 지정할 수 있게 해줍니다. 지원 포맷: (예를 들어 gdaldem에서와 비슷하지만 색상 이름을 지원하지 않는) txt, qlr, (예를 들면 QGIS로부터 내보낸) qml
 

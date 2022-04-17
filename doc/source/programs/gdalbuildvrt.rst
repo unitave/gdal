@@ -67,7 +67,7 @@ gdalbuildvrt는 산출되는 VRT에 들어갈 모든 파일들이 비슷한 특�
 
 .. option:: -tap
 
-    (대상에 정렬된 픽셀(target aligned pixels)) 산출물 파일의 범위의 좌표를 :option:`-tr` 옵션의 값에 정렬시켜 정렬된 범위가 최소 범위를 포함하도록 합니다.
+    (대상에 정렬된 픽셀(target aligned pixels)) 산출물 파일의 범위의 좌표를 :option:`-tr` 옵션의 값에 정렬시켜 정렬된 범위가 최소 범위를 포함하도록 합니다. 이때 정렬이란 xmin / resx, ymin / resy, xmax / resx 및 ymax / resy가 정수형 값이라는 의미입니다.
 
 .. option:: -te xmin ymin xmax ymax
 

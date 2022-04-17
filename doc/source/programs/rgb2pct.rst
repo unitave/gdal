@@ -15,7 +15,7 @@ rgb2pct.py
 
 .. code-block::
 
-    rgb2pct.py [-n colors | -pct palette_file] [-of format] <source_file> <dest_file>
+    rgb2pct.py [-n colors | -pct palette_file] [-of format] [-pct palette_file] <source_file> <dest_file>
 
 설명
 -----------
@@ -35,6 +35,10 @@ rgb2pct.py
 .. option:: -of <format>
 
     산출물 포맷을 선택합니다. GDAL 2.3버전부터 이 옵션을 지정하지 않는 경우 확장자로부터 포맷을 추정합니다. (이전 버전까지는 GTiff를 사용했습니다.) 단축 포맷명을 사용하십시오. 의사색상표를 지원하는 산출물 포맷만 사용해야 합니다.
+
+.. option:: -pct <palette_file>
+
+    색상표를 <source_file>로부터 가져오는 대신 <palette_file>로부터 추출합니다. 파일이 여러 개인 경우 색상표가 일관성을 가지도록 하는 데 사용할 수 있습니다. <palette_file>은 색상표를 가진 GDAL 지원 포맷 래스터 파일 또는 지원 포맷 (txt, qml, qlr) 색상 파일 가운데 하나여야만 합니다.
 
 .. option:: <source_file>
 

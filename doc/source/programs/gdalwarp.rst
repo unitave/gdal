@@ -134,7 +134,7 @@ gdalwarp
 
 .. option:: -tap
 
-    (대상 정렬 픽셀(target aligned pixels)) 정렬된 범위가 최소 범위를 포함하도록, 산출물 파일의 범위 좌표를 :option:`-tr` 의 값들에 정렬시킵니다.
+    (대상 정렬 픽셀(target aligned pixels)) 정렬된 범위가 최소 범위를 포함하도록, 산출물 파일의 범위 좌표를 :option:`-tr` 의 값들에 정렬시킵니다. 이때 정렬이란 xmin / resx, ymin / resy, xmax / resx 및 ymax / resy가 정수형 값이라는 의미입니다.
 
 .. option:: -ts <width> <height>
 
