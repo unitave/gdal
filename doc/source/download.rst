@@ -13,14 +13,20 @@
 현재 배포판
 ------------------------------------------------------------------------------
 
+* **2022-03-08** `gdal-3.4.2.tar.gz`_ `3.4.2 릴리스 노트`_ (`3.4.2 md5`_)
+
+.. _`3.4.2 릴리스 노트`: https://github.com/OSGeo/gdal/blob/v3.4.2/gdal/NEWS.md
+.. _`gdal-3.4.2.tar.gz`: https://github.com/OSGeo/gdal/releases/download/v3.4.2/gdal-3.4.2.tar.gz
+.. _`3.4.2 md5`: https://github.com/OSGeo/gdal/releases/download/v3.4.2/gdal-3.4.2.tar.gz.md5
+
+이전 배포판
+------------------------------------------------------------------------------
+
 * **2021-12-27** `gdal-3.4.1.tar.gz`_ `3.4.1 릴리스 노트`_ (`3.4.1 md5`_)
 
 .. _`3.4.1 릴리스 노트`: https://github.com/OSGeo/gdal/blob/v3.4.1/gdal/NEWS.md
 .. _`gdal-3.4.1.tar.gz`: https://github.com/OSGeo/gdal/releases/download/v3.4.1/gdal-3.4.1.tar.gz
 .. _`3.4.1 md5`: https://github.com/OSGeo/gdal/releases/download/v3.4.1/gdal-3.4.1.tar.gz.md5
-
-이전 배포판
-------------------------------------------------------------------------------
 
 * **2021-11-08** `gdal-3.4.0.tar.gz`_ `3.4.0 릴리스 노트`_ (`3.4.0 md5`_)
 
