@@ -62,20 +62,20 @@ SQL 함수
 
 지오패키지 사양에 있는 다음 SQL 함수들을 사용할 수 있습니다:
 
--  ST_MinX(geom *Geometry*) : 도형의 최소 X 좌표를 반환합니다.
--  ST_MinY(geom *Geometry*) : 도형의 최소 Y 좌표를 반환합니다.
--  ST_MaxX(geom *Geometry*) : 도형의 최대 X 좌표를 반환합니다.
--  ST_MaxY(geom *Geometry*) : 도형의 최대 Y 좌표를 반환합니다.
--  ST_IsEmpty(geom *Geometry*) : 비어 있는 (그러나 NULL은 아닌) 도형인 경우 1을 반환합니다. 예: POINT EMPTY 도형
--  ST_GeometryType(geom *Geometry*) : 'POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT', 'GEOMETRYCOLLECTION' 도형 유형을 반환합니다.
--  ST_SRID(geom *Geometry*) : 도형의 SRID를 반환합니다.
--  GPKG_IsAssignable(expected_geom_type *String*, actual_geom_type *String*) : 주로 '도형 유형 트리거 확장 사양(Geometry Type Triggers Extension)'에 필요합니다.
+-  ST_MinX(geom *Geometry*): 도형의 최소 X 좌표를 반환합니다.
+-  ST_MinY(geom *Geometry*): 도형의 최소 Y 좌표를 반환합니다.
+-  ST_MaxX(geom *Geometry*): 도형의 최대 X 좌표를 반환합니다.
+-  ST_MaxY(geom *Geometry*): 도형의 최대 Y 좌표를 반환합니다.
+-  ST_IsEmpty(geom *Geometry*): 비어 있는 (그러나 NULL은 아닌) 도형인 경우 1을 반환합니다. 예: POINT EMPTY 도형
+-  ST_GeometryType(geom *Geometry*): 'POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT', 'GEOMETRYCOLLECTION' 도형 유형을 반환합니다.
+-  ST_SRID(geom *Geometry*): 도형의 SRID를 반환합니다.
+-  GPKG_IsAssignable(expected_geom_type *String*, actual_geom_type *String*): 주로 '도형 유형 트리거 확장 사양(Geometry Type Triggers Extension)'에 필요합니다.
 
 Spatialite에서와 동일한 문법과 의미를 가진 다음 함수들도 사용할 수 있습니다:
 
--  CreateSpatialIndex(table_name *String*, geom_column_name *String*) :
+-  CreateSpatialIndex(table_name *String*, geom_column_name *String*):
    지정한 테이블/도형 열에 공간 색인(R-트리)을 생성합니다.
--  DisableSpatialIndex(table_name *String*, geom_column_name *String*) :
+-  DisableSpatialIndex(table_name *String*, geom_column_name *String*):
    지정한 테이블/도형 열에 있는 공간 색인(R-트리)을 삭제(drop)합니다.
 -  ST_Transform(geom *Geometry*, target_srs_id *Integer*):
    도형을 지정한 srs_id 공간 좌표계로 재투영합니다. gpkg_spatial_ref_sys에서 지정한 srs_id를 가진 공간 좌표계를 찾지 못 하는 경우, GDAL 3.2버전부터 srs_id를 EPSG 코드로 해석할 것입니다.
@@ -96,10 +96,10 @@ Spatialite 4.3버전부터, CastAutomagic이 더 이상 필요하지 않습니�
 
 이 드라이버는 :ref:`rfc-54` 에 따라 데이터베이스 수준에서 트랜잭션을 구현합니다.
 
-열기 옵션
----------------
+데이터셋 열기 옵션
+------------------
 
-다음 열기 옵션들을 사용할 수 있습니다:
+다음 데이터셋 열기 옵션들을 사용할 수 있습니다:
 
 -  **LIST_ALL_TABLES=AUTO/YES/NO**: (GDAL 2.2 이상 버전)
    모든 테이블을, gpkg_contents에 목록화되어 있지 않은 테이블도 포함해서 목록화해야 할지 여부를 선택합니다. 기본값은 AUTO입니다.
@@ -118,7 +118,7 @@ Spatialite 4.3버전부터, CastAutomagic이 더 이상 필요하지 않습니�
    기본값은 NO입니다. 데이터베이스를 어떤 파일도 잠그지(lock) 않고 사용해야 할지 여부를 선택합니다.
    YES로 설정하면, 데이터베이스를 읽기전용 모드로 열었는데 저널(journal) 모드가 WAL이 아닌 경우에만 영향을 미칠 것입니다. https://www.sqlite.org/uri.html 에서 설명하고 있는 "nolock=1" 쿼리 파라미터와 동등합니다.
 
-주의: 열기 옵션은 대부분의 OGR 유틸리티에서 일반적으로 "-oo name=value" 문법으로 또는 GDALOpenEx() API 호출로 지정됩니다.
+주의: 열기 옵션은 대부분의 OGR 유틸리티에서 일반적으로 "-oo name=value" 문법으로 또는 ``GDALOpenEx()`` API 호출로 지정됩니다.
 
 주의: :decl_configoption:`OGR_SQLITE_JOURNAL` 환경설정 옵션을 사용해서 지오패키지의 (따라서 SQLite의) 저널 모드를 설정할 수도 있습니다. https://www.sqlite.org/pragma.html#pragma_journal_mode 도 참조하십시오.
 
@@ -149,6 +149,8 @@ Spatialite 4.3버전부터, CastAutomagic이 더 이상 필요하지 않습니�
 
 레이어 생성 옵션
 ~~~~~~~~~~~~~~~~~~~~~~
+
+다음 레이어 생성 옵션들을 사용할 수 있습니다:
 
 -  **GEOMETRY_NAME**:
    도형 열에 사용할 이름을 설정합니다. 기본값은 "geom"입니다.
@@ -185,6 +187,39 @@ Spatialite 4.3버전부터, CastAutomagic이 더 이상 필요하지 않습니�
    NOT_REGISTERED로 설정하면, 지오패키지 시스템 테이블에 어떤 비공간 테이블도 등록하지 않습니다.
    이전 OGR 2.0 및 2.1버전에서 비슷한 목적으로 "aspatial" 확장 사양을 개발했기 때문에, OGR_ASPATIAL로 설정하면 비공간 테이블을 data_type="aspatial" 속성을 가진 레코드로 작성하고 gpkg_extensions 테이블에 "aspatial" 확장 사양을 선언할 것입니다. GDAL 3.3버전부터, 생성 작업 시 더 이상 OGR_ASPATIAL을 사용할 수 없습니다.
 
+환경설정 옵션
+-------------
+
+다음 :ref:`환경설정 옵션들 <configoptions>` 을 사용할 수 있습니다:
+
+-  :decl_configoption:`OGR_SQLITE_JOURNAL`:
+   이 옵션을 이용해서 지오패키지 (및 당연히 SQLite) 파일의 저널 모드를 설정할 수 있습니다.
+  https://www.sqlite.org/pragma.html#pragma_journal_mode 도 읽어보십시오.
+
+-  :decl_configoption:`OGR_SQLITE_CACHE`:
+   :ref:`성능 힌트 <target_drivers_vector_gpkg_performance_hints>` 를 읽어보십시오.
+
+-  :decl_configoption:`OGR_SQLITE_SYNCHRONOUS`: see 
+   :ref:`성능 힌트 <target_drivers_vector_gpkg_performance_hints>` 를 읽어보십시오.
+
+-  :decl_configoption:`OGR_SQLITE_LOAD_EXTENSIONS` =extension1,...,extensionN,ENABLE_SQL_LOAD_EXTENSION: (GDAL 3.5.0 이상 버전)
+   데이터베이스를 열 때 불러올 확장 사양을 담고 있는 공유 라이브러리들의 이름을 쉼표로 구분한 목록을 지정합니다. 파일을 직접 불러올 수 없는 경우, 다양한 운영 체제 특화 확장 사양을 추가하려 시도할 것입니다. 즉 예를 들어 "samplelib"을 불러오지 못 하는 경우 "samplelib.so" 또는 "samplelib.dylib" 또는 "samplelib.dll" 같은 이름들도 시도할 수 있습니다.
+   특수값 ``ENABLE_SQL_LOAD_EXTENSION`` 을 이용해서 SQL ``load_extension()`` 함수를 이용할 수 있습니다. 이 함수는 SQLite 3버전 표준 빌드에서 일반적으로 비활성화되어 있습니다.
+   확장 사양을 신뢰할 수 없는 경우 확장 사양을 불러오는 것이 잠재적인 보안 위협이 될 수 있습니다.
+
+-  :decl_configoption:`OGR_SQLITE_PRAGMA`:
+   이 옵션을 이용하면 어떤 SQLite `PRAGMA 선언문 <http://www.sqlite.org/pragma.html>`_ 이든 지정할 수 있습니다. 문법은 다음과 같습니다.
+
+   ::
+
+      OGR_SQLITE_PRAGMA = "pragma_name=pragma_value[,pragma_name2=pragma_value2]"
+
+-  :decl_configoption:`OGR_CURRENT_DATE`:
+   이 드라이버는 파일 생성 또는 수정 시 지오패키지의 ``last_change`` 타임스탬프를 업데이트합니다. 재현 가능성(reproducibility)을 위해 일관된 바이너리 산출물이 필요한 경우, 이 전체 수준 환경설정 옵션을 설정하면 타임스탬프를 특정값으로 강제할 수 있습니다. 이 옵션을 설정할 때 지오패키지 표준이 -- 예를 들면 `1.2버전 <https://www.geopackage.org/spec120/#r15>`_ 이 -- 요구하는 특정한 시간 서식을 따르도록 주의하십시오.
+
+-  :decl_configoption:`SQLITE_USE_OGR_VFS`:
+   이 옵션을 YES로 설정하면 GDAL/OGR I/O 레이어가 추가적인 버퍼/캐시 작업을 사용할 수 있고, I/O 속도도 향상시킬 수 있습니다. 더 자세한 정보는 :ref:`여기 <target_user_virtual_file_systems_file_caching>` 를 참조하십시오.
+   이 옵션을 활성화한 경우 어떤 파일도 잠그지 않기 때문에 동시 편집 시 데이터베이스에 오류가 발생할 수도 있다는 사실을 주의하십시오.
 
 메타데이터
 --------
@@ -267,6 +302,13 @@ GDAL 2.3버전부터, (예를 들어 ``ogrinfo --format GPKG`` 명령어로) SQL
    * - :ref:`vector.geopackage_aspatial`
      - Ｘ
      - Ｏ (GDAL 2.2버전에서 *attributes* 공식 data_type 퇴출)
+
+.. _target_drivers_vector_gpkg_performance_hints:
+
+성능 힌트
+---------
+
+:ref:`SQLite 드라이버 <target_drivers_vector_sqlite_performance_hints>` 에 언급된 것과 동일한 성틍 힌트들이 적용됩니다.
 
 예시
 --------

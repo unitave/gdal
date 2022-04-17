@@ -35,18 +35,18 @@ GDAL 2.2버전부터, 응용 프로그램 스키마 주도 GML 용 또다른 드
 
 이 드라이버의 판독기 부분은 OGR가 Xerces 링크를 포함해서 빌드된 경우에만 작동합니다. Xerces를 사용할 수 없는 경우, OGR가 Expat 링크를 포함해서 빌드된 경우에도 판독기가 작동합니다. XML 검증은 기본적으로 비활성화됩니다. GML 쓰기 부분은 Xerces 또는 Expat이 없더라도 항상 지원됩니다.
 
-주의: 빌드 시 Xerces 및 Expat 둘 다 사용할 수 있다면, GML 드라이버는 가능한 경우 (호환되는 인코딩으로 된 GML 파일의 경우) 런타임에서 Expat 파서를 우선적으로 선택하고, 그 외의 경우 Xerces 파서를 기본값으로 선택할 것입니다. 하지만 **GML_PARSER** 환경설정 옵션을 **EXPAT** 또는 **XERCES** 로 설정하면 드라이버의 파서 선택을 강제할 수 있습니다.
+주의: 빌드 시 Xerces 및 Expat 둘 다 사용할 수 있다면, GML 드라이버는 가능한 경우 (호환되는 인코딩으로 된 GML 파일의 경우) 런타임에서 Expat 파서를 우선적으로 선택하고, 그 외의 경우 Xerces 파서를 기본값으로 선택할 것입니다. 하지만 :decl_configoption:`GML_PARSER` 환경설정 옵션을 **EXPAT** 또는 **XERCES** 로 설정하면 드라이버의 파서 선택을 강제할 수 있습니다.
 
 좌표계 지원
 -----------
 
-GML 드라이버는 좌표계를 지원합니다. 레이어의 모든 도형이 동일한 srsName 속성값을 가지고 있는 경우에만 좌표계를 리포트합니다. (예를 들어 WFS 1.1.0버전이 반환하는) 지리 좌표계가 "urn:ogc:def:crs:EPSG:" (또는 GDAL 2.1.2버전부터 "http://www.opengis.net/def/crs/EPSG/0/") 같은 srsName인 경우 축 순서가 표준이 요구하는 [위도,경도]일 것이지만, 이는 일반적이지 않은 순서로 축 순서를 인식하지 못 하는 응용 프로그램에서 문제가 발생할 수도 있습니다. 따라서 이 드라이버는 기본적으로 좌표 순서를 뒤바꿔서 [경도,위도] 순서로 만들고, 축 순서를 지정하지 않은 공간 좌표계를 리포트할 것입니다. **GML_INVERT_AXIS_ORDER_IF_LAT_LONG** 환경설정 옵션을 **NO** 로 설정하면 원본 [위도,경도] 순서와 축 순서를 지정한 공간 좌표계를 가져올 수 있습니다.
+GML 드라이버는 좌표계를 지원합니다. 레이어의 모든 도형이 동일한 srsName 속성값을 가지고 있는 경우에만 좌표계를 리포트합니다. (예를 들어 WFS 1.1.0버전이 반환하는) 지리 좌표계가 "urn:ogc:def:crs:EPSG:" (또는 GDAL 2.1.2버전부터 "http://www.opengis.net/def/crs/EPSG/0/") 같은 srsName인 경우 축 순서가 표준이 요구하는 [위도,경도]일 것이지만, 이는 일반적이지 않은 순서로 축 순서를 인식하지 못 하는 응용 프로그램에서 문제가 발생할 수도 있습니다. 따라서 이 드라이버는 기본적으로 좌표 순서를 뒤바꿔서 [경도,위도] 순서로 만들고, 축 순서를 지정하지 않은 공간 좌표계를 리포트할 것입니다. :decl_configoption:`GML_INVERT_AXIS_ORDER_IF_LAT_LONG` 환경설정 옵션을 **NO** 로 설정하면 원본 [위도,경도] 순서와 축 순서를 지정한 공간 좌표계를 가져올 수 있습니다.
 
-srsName이 (목적 상 "urn:ogc:def:crs:EPSG::XXXX" 형식이 더 명확하겠지만) "EPSG:XXXX" 형식이고 파일의 좌표가 [위도,경도] 순서인 경우도 있습니다. OGR는 기본적으로 EPSG 축 순서를 고려하지 않고 좌표를 [위도,경도] 순서로 리포트할 것입니다. 하지만 **GML_CONSIDER_EPSG_AS_URN** 환경설정 옵션을 **YES** 로 설정하면 앞 문단에서 설명한 규칙이 적용될 것입니다.
+srsName이 (목적 상 "urn:ogc:def:crs:EPSG::XXXX" 형식이 더 명확하겠지만) "EPSG:XXXX" 형식이고 파일의 좌표가 [위도,경도] 순서인 경우도 있습니다. OGR는 기본적으로 EPSG 축 순서를 고려하지 않고 좌표를 [위도,경도] 순서로 리포트할 것입니다. 하지만 :decl_configoption:`GML_CONSIDER_EPSG_AS_URN` 환경설정 옵션을 **YES** 로 설정하면 앞 문단에서 설명한 규칙이 적용될 것입니다.
 
 이런 규칙은 EPSG 선호 축 순서가 [편북,편동]인 투영 좌표계에도 적용됩니다.
 
-GDAL 2.1.2버전부터, SWAP_COORDINATES 열기 옵션(또는 GML_SWAP_COORDINATES 환경설정 옵션)을 AUTO/YES/NO로 설정할 수 있습니다. 이 옵션은 x/y 또는 경도/위도 좌표 순서를 뒤바꿔야 할지 여부를 제어합니다. AUTO 모드에서는, 드라이버가 순서를 바꿔야만 하는지를 srsName과 CONSIDER_EPSG_AS_URN 및 INVERT_AXIS_ORDER_IF_LAT_LONG 같은 다른 옵션들의 값으로부터 판단할 것입니다. SWAP_COORDINATES 옵션을 YES로 설정하면 GML에 나타나는 좌표 순서와 상관없이 항상 순서를 뒤바꿀 것입니다. NO로 설정하면 동일한 순서를 유지할 것입니다. 기본값은 AUTO입니다.
+GDAL 2.1.2버전부터, SWAP_COORDINATES 열기 옵션(또는 :decl_configoption:`GML_SWAP_COORDINATES` 환경설정 옵션)을 AUTO/YES/NO로 설정할 수 있습니다. 이 옵션은 x/y 또는 경도/위도 좌표 순서를 뒤바꿔야 할지 여부를 제어합니다. AUTO 모드에서는, 드라이버가 순서를 바꿔야만 하는지를 srsName과 CONSIDER_EPSG_AS_URN 및 INVERT_AXIS_ORDER_IF_LAT_LONG 같은 다른 옵션들의 값으로부터 판단할 것입니다. SWAP_COORDINATES 옵션을 YES로 설정하면 GML에 나타나는 좌표 순서와 상관없이 항상 순서를 뒤바꿀 것입니다. NO로 설정하면 동일한 순서를 유지할 것입니다. 기본값은 AUTO입니다.
 
 스키마
 ------
@@ -57,14 +57,16 @@ GDAL 2.1.2버전부터, SWAP_COORDINATES 열기 옵션(또는 GML_SWAP_COORDINAT
 
 GML 파일을 처음으로 열 때 관련 .xsd 파일이 없거나 정확하게 파싱되지 않은 경우, 객체 유형 집합, 각 객체 유형 관련 속성, 그리고 다른 데이터셋 수준 정보를 판단하기 위해 GML 파일 전체를 완전히 스캔합니다. 대상 GML 파일과 동일한 기본명에 .gfs 확장자를 붙인 파일에 이 정보를 저장합니다. 이후 동일한 GML 파일에 접근할 때, 접근 속도를 높이기 위해 데이터셋 수준 정보를 사전 정의하고 있는 .gfs 파일을 이용할 것입니다. GML 파일을 어떻게 파싱할 것인지 그 방법을 변경하기 위해 제한적인 범위에서 .gfs 파일을 직접 편집할 수도 있습니다. 관련 .gml 파일이 더 최근의 타임스탬프를 가지고 있을 경우 .gfs 파일을 무시할 것이라는 사실을 주의하십시오.
 
-객체 유형 및 필드 목록을 결정하기 위해 GML 파일을 사전 스캔할 때, 필드 유형을 시도하고 결정하기 위해 필드의 내용도 스캔합니다. 일부 응용 프로그램에서는 모든 필드를 그냥 문자열 필드로 취급하면 더 쉽게 스캔할 수 있습니다. **GML_FIELDTYPES** 환경설정 옵션을 **ALWAYS_STRING** 으로 설정하면 됩니다.
+객체 유형 및 필드 목록을 결정하기 위해 GML 파일을 사전 스캔할 때, 필드 유형을 시도하고 결정하기 위해 필드의 내용도 스캔합니다. 일부 응용 프로그램에서는 모든 필드를 그냥 문자열 필드로 취급하면 더 쉽게 스캔할 수 있습니다. :decl_configoption:`GML_FIELDTYPES` 환경설정 옵션을 **ALWAYS_STRING** 으로 설정하면 됩니다.
 
-**GML_ATTRIBUTES_TO_OGR_FIELDS** 환경설정 옵션을 **YES** 로 설정하면 OGR 필드를 생성하기 위해 GML 요소의 속성도 연산에 넣을 것입니다.
+:decl_configoption:`GML_ATTRIBUTES_TO_OGR_FIELDS` 환경설정 옵션을 **YES** 로 설정하면 OGR 필드를 생성하기 위해 GML 요소의 속성도 연산에 넣을 것입니다.
 
-CPLSetConfigOption() 함수를 통해 또는 환경 변수로 환경설정 옵션을 설정할 수 있습니다.
+다음 :ref:`환경설정 옵션 <configoptions>` 을 사용할 수 있습니다:
 
-**GML_GFS_TEMPLATE** 환경설정 옵션(또는 **GFS_TEMPLATE** 열기 옵션)을 **path_to_template.gfs** 로 설정하면 사전 정의된 GFS 파일을 무조건적으로 사용할 수 있습니다. 수많은 개별 GML 파일을 연속으로 가져오는 데 (**-append**) 전체 GML 집합의 완전하게 일관된 데이터 레이아웃을 보전하고자 하는 경우 이 옵션이 매우 유용합니다.
-**GML_GFS_TEMPLATE** 환경설정 옵션을 사용하는 경우 **-lco LAUNDER=yes** 를 설정하지 않도록 주의해주십시오. 연속적인 GML 가져오기 실행들 사이에 속성 이름을 정확하게 인식할 수 없게 만들기 때문입니다.
+CPLSetConfigOption() 함수를 통해 또는 환경 변수로 :ref:`환경설정 옵션 <configoptions>` 을 설정할 수 있습니다.
+
+:decl_configoption:`GML_GFS_TEMPLATE` 환경설정 옵션(또는 **GFS_TEMPLATE** 열기 옵션)을 **path_to_template.gfs** 로 설정하면 사전 정의된 GFS 파일을 무조건적으로 사용할 수 있습니다. 수많은 개별 GML 파일을 연속으로 가져오는 데 (**-append**) 전체 GML 집합의 완전하게 일관된 데이터 레이아웃을 보전하고자 하는 경우 이 옵션이 매우 유용합니다.
+:decl_configoption:`GML_GFS_TEMPLATE` 환경설정 옵션을 사용하는 경우 **-lco LAUNDER=yes** 를 설정하지 않도록 주의해주십시오. 연속적인 GML 가져오기 실행들 사이에 속성 이름을 정확하게 인식할 수 없게 만들기 때문입니다.
 
 특정 GML 응용 프로그램 스키마
 ----------------------------------
@@ -100,7 +102,7 @@ OGR 2.2버전부터, GML 드라이버는 일본 FGD GML v4 파일의 읽기를 �
 
 사용자가 .gfs 파일을 변경해서 <GeometryElementPath> 요소로 그 경로를 지정, 적절한 도형을 선택하게 할 수 있습니다. 아래 .gfs 문법 설명을 참조하십시오.
 
-TopoCurve, TopoSurface, MultiCurve를 포함하는 GML 도형을 지원합니다. TopoCurve 유형 GML 도형을 두 가지 도형 유형 가운데 하나로 해석할 수 있습니다. TopoCurve 유형 GML 도형에 있는 <Edge> 요소가 곡선 및 곡선에 대응하는 노드들을 담고 있습니다. 기본적으로 주 도형인 곡선만 OGRMultiLineString으로 리포트합니다. 노드를 OGRMultiPoint로 가져오려면, 환경설정 옵션 **GML_GET_SECONDARY_GEOM** 을 **YES** 로 설정해야 합니다. 이 옵션을 설정하면 부 도형만 리포트합니다.
+TopoCurve, TopoSurface, MultiCurve를 포함하는 GML 도형을 지원합니다. TopoCurve 유형 GML 도형을 두 가지 도형 유형 가운데 하나로 해석할 수 있습니다. TopoCurve 유형 GML 도형에 있는 <Edge> 요소가 곡선 및 곡선에 대응하는 노드들을 담고 있습니다. 기본적으로 주 도형인 곡선만 OGRMultiLineString으로 리포트합니다. 노드를 OGRMultiPoint로 가져오려면, 환경설정 옵션 :decl_configoption:`GML_GET_SECONDARY_GEOM` 을 **YES** 로 설정해야 합니다. 이 옵션을 설정하면 부 도형만 리포트합니다.
 
 Arc, ArcString, ArcByBulge, ArcByCenterPoint, Circle 및 CircleByCenterPoints를 원형 스트링(circular string) OGR 도형으로 반환할 것입니다. CurveComposite, MultiCurve, Surface 같은 다른 GML 도형이 이런 GML 도형들을 담고 있는 경우, 대응하는 비선형 OGR 도형도 반환할 것입니다.
 GML3 응용 프로그램 스키마를 읽어올 때 CurvePropertyType, SurfacePropertyType, MultiCurvePropertyType 또는 MultiSurfacePropertyType 같은 도형 필드의 선언도 잠재적인 비선형 도형이라고 해석하고, 대응하는 OGR 도형을 레이어 도형 유형으로 사용할 것입니다.
@@ -108,14 +110,14 @@ GML3 응용 프로그램 스키마를 읽어올 때 CurvePropertyType, SurfacePr
 gml:xlink 분해하기
 -------------------
 
-gml:xlink 분해(resolve)를 지원합니다. 분해기(resolver)가 xlink:href 태그를 담고 있는 요소를 발견하면, 동일한 GML 파일, 파일 시스템에 있는 다른 GML 파일, 또는 cURL을 사용하는 웹 상에서 대응하는 gml:id를 가진 요소를 찾으려 시도합니다. 분해를 활성화하려면 **GML_SKIP_RESOLVE_ELEMS** 환경설정 옵션을 **NONE** 으로 설정하십시오.
+gml:xlink 분해(resolve)를 지원합니다. 분해기(resolver)가 xlink:href 태그를 담고 있는 요소를 발견하면, 동일한 GML 파일, 파일 시스템에 있는 다른 GML 파일, 또는 cURL을 사용하는 웹 상에서 대응하는 gml:id를 가진 요소를 찾으려 시도합니다. 분해를 활성화하려면 :decl_configoption:`GML_SKIP_RESOLVE_ELEMS` 환경설정 옵션을 **NONE** 으로 설정하십시오.
 
-분해된 파일이 이미 존재하지 않는 경우, 기본적으로 원본 파일과 같은 디렉터리에 분해된 파일을 ".resolved.gml" 확장자로 저장할 것입니다. **GML_SAVE_RESOLVED_TO** 환경설정 옵션을 이용해서 이 습성을 변경할 수 있습니다. 이 옵션을 **SAME** 으로 설정하면 원본 파일을 덮어씁니다. **filename ending with .gml** 로 설정하면 해당 위치에 저장합니다. 다른 설정값은 모두 무시합니다. 분해기가 어떤 이유로든 파일을 작성하지 못 하는 경우, CPLGenerateTempFilename("ResolvedGML") 함수를 이용해서 생성되는 임시 파일로 저장하려 시도할 것입니다. 그렇게 하지 못 한다면, 분해 작업이 실패합니다.
+분해된 파일이 이미 존재하지 않는 경우, 기본적으로 원본 파일과 같은 디렉터리에 분해된 파일을 ".resolved.gml" 확장자로 저장할 것입니다. :decl_configoption:`GML_SAVE_RESOLVED_TO` 환경설정 옵션을 이용해서 이 습성을 변경할 수 있습니다. 이 옵션을 **SAME** 으로 설정하면 원본 파일을 덮어씁니다. **filename ending with .gml** 로 설정하면 해당 위치에 저장합니다. 다른 설정값은 모두 무시합니다. 분해기가 어떤 이유로든 파일을 작성하지 못 하는 경우, CPLGenerateTempFilename("ResolvedGML") 함수를 이용해서 생성되는 임시 파일로 저장하려 시도할 것입니다. 그렇게 하지 못 한다면, 분해 작업이 실패합니다.
 
 분해 작업 알고리즘이 대용량 파일에 최적화되지 않았다는 사실을 기억하십시오. xlink:href 태그를 수천 개 이상 가진 파일의 경우 처리 시간이 몇 분을 넘길 수도 있습니다. 매 256개 링크마다 CPLDebug() 함수를 통해 대략적인 진행 상황을 출력합니다. CPL_DEBUG 환경 변수를 설정해야 이를 볼 수 있습니다.
-사용자가 필요없는 요소를 하나라도 알고 있다면 분해 작업 시간을 줄일 수 있습니다. **GML_SKIP_RESOLVE_ELEMS** 환경설정 옵션에 필요없는 요소의 이름을 쉼표로 구분한 목록을 설정하십시오. (기본값) **ALL** 로 설정하면 모든 분해 작업을 건너뜁니다. **NONE** 으로 설정하면 모든 xlink를 분해합니다.
+사용자가 필요없는 요소를 하나라도 알고 있다면 분해 작업 시간을 줄일 수 있습니다. :decl_configoption:`GML_SKIP_RESOLVE_ELEMS` 환경설정 옵션에 필요없는 요소의 이름을 쉼표로 구분한 목록을 설정하십시오. (기본값) **ALL** 로 설정하면 모든 분해 작업을 건너뜁니다. **NONE** 으로 설정하면 모든 xlink를 분해합니다.
 
-대체 분해 메소드를 사용할 수 있습니다. **GML_SKIP_RESOLVE_ELEMS HUGE** 환경설정 옵션을 이용하면 이 대체 메소드를 활성화시킬 것입니다. 이 경우 대응하는 모든 gml:id 관계를 식별하기 위한 임시 SQLite 데이터베이스를 이용해서 모든 gml:xlink를 분해할 것입니다. 이 SQL 기반 처리 과정 마지막에, **NONE** 으로 설정한 경우와 정확히 동일하지만 그 제한 사항은 없는 분해된 파일을 생성할 것입니다. gml:xlink와 gml:id 관계성을 분해하기 위해 외부 (임시) DBMS를 사용할 때의 주요 장점은 다음과 같습니다:
+대체 분해 메소드를 사용할 수 있습니다. :decl_configoption:`GML_SKIP_RESOLVE_ELEMS HUGE` 환경설정 옵션을 이용하면 이 대체 메소드를 활성화시킬 것입니다. 이 경우 대응하는 모든 gml:id 관계를 식별하기 위한 임시 SQLite 데이터베이스를 이용해서 모든 gml:xlink를 분해할 것입니다. 이 SQL 기반 처리 과정 마지막에, **NONE** 으로 설정한 경우와 정확히 동일하지만 그 제한 사항은 없는 분해된 파일을 생성할 것입니다. gml:xlink와 gml:id 관계성을 분해하기 위해 외부 (임시) DBMS를 사용할 때의 주요 장점은 다음과 같습니다:
 
 -  메모리 용량 제약이 없습니다. **NONE** 메소드는 전체 GML 노드 트리를 인메모리(in-memory) 저장합니다. 즉 32비트 플랫폼 상에서는 메모리 할당 제한 때문에 실질적으로 1GB를 초과하는 어떤 GML 파일도 처리하지 못 한다는 의미입니다. 파일 시스템 기반 DBMS를 사용하면 이 문제점을 간단히 피할 수 있습니다.
 
@@ -148,11 +150,11 @@ GML 드라이버는 폴리곤이 내부 구멍을 하나라도 담고 있는 경
 
 **주의** : 최신 해석을 사용하기 위해서는 GDAL/OGR를 GEOS 라이브러리를 대상으로 빌드해야 합니다.
 
-하지만 어쨌든 **GML_FACE_HOLE_NEGATIVE** 환경설정 옵션을 이용하면, GML 3 위상(Topology)을 파싱할 때 실제로 적용할 해석을 선택할 수 있습니다:
+하지만 어쨌든 :decl_configoption:`GML_FACE_HOLE_NEGATIVE` 환경설정 옵션을 이용하면, GML 3 위상(Topology)을 파싱할 때 실제로 적용할 해석을 선택할 수 있습니다:
 
--  **GML_FACE_HOLE_NEGATIVE NO** (*기본* 옵션)을 선택하면 최신 해석 규칙을 활성화합니다.
+-  :decl_configoption:`GML_FACE_HOLE_NEGATIVE` =NO(*기본* 옵션)를 선택하면 최신 해석 규칙을 활성화합니다.
 
--  그러나 **GML_FACE_HOLE_NEGATIVE YES** 를 명확하게 설정하면 예전 해석 규칙을 활성화합니다.
+-  그러나 :decl_configoption:`GML_FACE_HOLE_NEGATIVE` =YES를 명확하게 설정하면 예전 해석 규칙을 활성화합니다.
 
 인코딩 문제점
 ---------------
@@ -178,7 +180,7 @@ GML 파일 작성 시, 이 드라이버는 UTF-8 콘텐츠가 전송되어 올 �
 
 이 드라이버는 GML WFS 문서를 읽어올 때 gml:id 속성의 내용을 *gml_id* 라는 문자열 필드로 노출시킵니다. GML 3 문서를 작성할 때 필드 이름이 *gml_id* 라면 해당 필드의 내용도 생성되는 객체의 gml:id 속성의 내용을 작성하는 데 사용할 것입니다.
 
-이 드라이버는 파일 시작 위치에 있는 fid(GML 2 문서, GML 3에서는 gml:id) 속성의 존재를 자동 탐지합니다. 이 속성이 탐지되면, 기본적으로 *fid* (GML 3에서는 *gml_id*) 필드로 노출시킵니다. **GML_EXPOSE_FID** 또는 **GML_EXPOSE_GML_ID** 환경설정 옵션들을 각각 **YES** 또는 **NO** 로 설정하면 자동 탐지를 무시할 수 있습니다.
+이 드라이버는 파일 시작 위치에 있는 fid(GML 2 문서, GML 3에서는 gml:id) 속성의 존재를 자동 탐지합니다. 이 속성이 탐지되면, 기본적으로 *fid* (GML 3에서는 *gml_id*) 필드로 노출시킵니다. :decl_configoption:`GML_EXPOSE_FID` 또는 :decl_configoption:`GML_EXPOSE_GML_ID` 환경설정 옵션들을 각각 **YES** 또는 **NO** 로 설정하면 자동 탐지를 무시할 수 있습니다.
 
 GML 2 문서를 작성할 때 필드 이름이 *fid* 라면 해당 필드의 내용도 생성되는 객체의 fid 속성의 내용을 작성하는 데 사용할 것입니다.
 
@@ -187,11 +189,11 @@ GML 2 문서를 작성할 때 필드 이름이 *fid* 라면 해당 필드의 내
 
 여러 레이어들 사이에 공유되는 GML 파서는 GML 데이터소스 하나 당 하나뿐입니다. GML 드라이버는 기본적으로 레이어에 처음 접근할 때마다 파일 처음부터 다시 읽기 시작하기 때문에, 대용량 GML 파일의 경우 성능이 저하될 수 있습니다.
 
-동일한 레이어에 속해 있는 모든 객체가 파일에 순차적으로 작성된 경우 **GML_READ_MODE** 환경설정 옵션을 **SEQUENTIAL_LAYERS** 로 설정할 수 있습니다. 그러면 레이어를 하나씩 완전히 읽어올 때 판독기가 필요없는 리셋을 하지 않을 것입니다. 최상의 성능을 보이려면, 레이어를 파일에 나타나는 순서대로 읽어와야만 합니다.
+동일한 레이어에 속해 있는 모든 객체가 파일에 순차적으로 작성된 경우 :decl_configoption:`GML_READ_MODE` 환경설정 옵션을 **SEQUENTIAL_LAYERS** 로 설정할 수 있습니다. 그러면 레이어를 하나씩 완전히 읽어올 때 판독기가 필요없는 리셋을 하지 않을 것입니다. 최상의 성능을 보이려면, 레이어를 파일에 나타나는 순서대로 읽어와야만 합니다.
 
 .xsd 및 .gfs 파일이 둘 다 없는 경우, .gfs 파일 작성 시 파서가 레이어들의 레이아웃을 탐지할 것입니다. 레이어들이 순차적이라면, .gfs 파일에 *<SequentialLayers>true</SequentialLayers>* 요소를 작성해서 사용자가 명확하게 설정하지 않더라도 GML_READ_MODE 환경설정 옵션을 자동적으로 SEQUENTIAL_LAYERS로 초기화할 것입니다.
 
-GML_READ_MODE 환경설정 옵션을 INTERLEAVED_LAYERS로 설정하면 서로 다른 레이어들의 객체들이 교차삽입된 GML 파일을 읽어올 수 있습니다. 이 경우, GetNextFeature() 매소드의 의미가 다음과 같이 살짝 변경될 것입니다: NULL이 반환되더라도 반드시 현재 레이어의 모든 객체를 읽었다는 뜻이 아니라 아직 읽어올 객체가 있지만 또다른 레이어에 속해 있다는 뜻이 될 수도 있습니다. 이런 경우 다음과 비슷한 코드를 이용해서 파일을 읽어야 합니다:
+:decl_configoption:`GML_READ_MODE` 환경설정 옵션을 INTERLEAVED_LAYERS로 설정하면 서로 다른 레이어들의 객체들이 교차삽입된 GML 파일을 읽어올 수 있습니다. 이 경우, GetNextFeature() 매소드의 의미가 다음과 같이 살짝 변경될 것입니다: NULL이 반환되더라도 반드시 현재 레이어의 모든 객체를 읽었다는 뜻이 아니라 아직 읽어올 객체가 있지만 또다른 레이어에 속해 있다는 뜻이 될 수도 있습니다. 이런 경우 다음과 비슷한 코드를 이용해서 파일을 읽어야 합니다:
 
 ::
 
@@ -270,7 +272,8 @@ GML_READ_MODE 환경설정 옵션을 INTERLEAVED_LAYERS로 설정하면 서로 �
 
 내보내기 작업 시, 단일 GML 파일에 모든 레이어를 단일 객체 집합으로 작성합니다. 각 레이어의 이름을 해당 레이어에 있는 객체의 요소 이름으로 사용합니다. 언제나 도형을 객체의 ogr:geometryProperty 요소로 작성합니다.
 
-GML 작성기는 다음과 같은 데이터셋 생성 옵션들을 지원합니다:
+데이터셋 생성 옵션
+------------------
 
 -  **XSISCHEMAURI**:
    이 옵션을 설정하는 경우, 이 URI를 스키마 위치로서 삽입할 것입니다. OGR가 스키마 파일에 실제로 접근하지 않기 때문에, 사용자가 이 URI가 반드시 OGR가 생산한 GML 데이터 파일의 스키마와 일치하도록 해야 한다는 사실을 기억하십시오.

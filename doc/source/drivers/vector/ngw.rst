@@ -1,6 +1,6 @@
 .. _vector.ngw:
 
-NGW -- NextGIS Web
+NGW -- NextGIS 웹
 ==================
 
 .. versionadded:: 2.4
@@ -9,76 +9,65 @@ NGW -- NextGIS Web
 
 .. build_dependencies:: libcurl
 
-NextGIS Web - is a server GIS, which allows storing and editing geodata
-and to display maps in web browser. Also NextGIS Web can share geodata
-with other NextGIS software.
+NextGIS 웹은 서버 GIS로, 지리 데이터(geodata)를 저장하고 편집할 수 있으며 웹브라우저에 맵을 출력할 수 있습니다. 또한 NextGIS 웹은 다른 NextGIS 소프트웨어와 지리 데이터를 공유할 수 있습니다.
 
-NextGIS Web has the following features:
+NextGIS 웹은 다음과 같은 기능을 가지고 있습니다:
 
--  Display maps in a web browser (different maps with different layers
-   and styles)
--  Flexible permissions management
--  Load geodata from PostGIS or import from GIS formats (ESRI Shape,
-   GeoJSON or GeoTIFF)
--  Load vector geodata in the following formats: GeoJSON, CSV, ESRI
-   Shape, Mapinfo tab
--  Import map styles from QGIS project or set them manually
--  Act as a server for TMS, WMS, MVT, WFS
--  Act as a client for WMS
--  User can add photos to records, change record attributes via web
-   interface or WFS-T protocol
+-  웹브라우저에 (서로 다른 레이어 및 스타일을 가진 서로 다른) 맵을 출력하기
+-  유연한 권한 관리
+-  PostGIS로부터 지리 데이터 불러오기 또는 GIS 포맷(ESRI Shapefile, GeoJSON 또는 GeoTIFF)로부터 가져오기
+-  다음 포맷에 있는 벡터 지리 데이터 불러오기: GeoJSON, CSV, ESRI Shapefile, Mapinfo 탭(tab)
+-  QGIS 프로젝트로부터 맵 스타일 가져오기 또는 직접 설정하기
+-  TMS, WMS, MVT, WFS 서버 역할
+-  WMS 클라이언트 역할
+-  사용자가 웹 인터페이스 또는 WFS-T 프로토콜을 통해 레코드에 사진을 추가하고 레코드 속성을 변경할 수 있습니다.
 
-NextGIS Web - is an open source software (license GPL v2+, see `GNU
-General Public License, version
-2 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html>`__).
+NextGIS 웹은 오픈소스 소프트웨어입니다. (GPL 버전 2 이상의 사용 허가, `GNU 일반 공중 사용 허가서 버전 2 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html>`_ 참조)
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
-Driver
+드라이버
 ------
 
-The driver can connect to the services implementing the NextGIS Web REST API.
-NGW driver requires cURL support in GDAL. The driver supports read and write
-operations.
+NGW 드라이버는 NextGIS 웹 REST API를 구현하는 서비스에 접속할 수 있습니다.
+이 드라이버를 사용하려면 GDAL이 cURL을 지원해야 합니다. 이 드라이버는 읽기 및 쓰기 작업을 지원합니다.
 
-Dataset name syntax
+데이터셋 이름 문법
 -------------------
 
-The minimal syntax to open a NGW datasource is: NGW:[NextGIS Web
-URL][/resource/][resource identifier]
+NGW 데이터소스를 열 수 있는 최소한의 문법은 다음과 같습니다:
 
--  **NextGIS Web URL** may be an URL to nextgis.com cloud service (for
-   example, https://demo.nextgis.com), or some other URL including port
-   and additional path (for example, http://192.168.1.1:8000/test).
--  **resource** is mandatory keyword dividing resource identifier from
-   the rest of URL.
--  **resource identifier** this is positive number from 0 and above.
-   This may be a resource group, vector, PostGIS or raster layer, style.
+::
 
-All vector layers, PostGIS, raster layers, styles will list as child resources
-if identifier is resource group. In other case this will be a separate layer.
+   NGW:[NextGIS Web URL][/resource/][resource identifier]
 
-Configuration options
+-  **NextGIS Web URL** 은 nextgis.com 클라우드 서비스를 (예를 들어 https://demo.nextgis.com 을) 가리키는 URL일 수도 있습니다. 또는 포트 번호와 추가 경로를 포함하는 (예를 들면 http://192.168.1.1:8000/test 같은) 다른 URL일 수도 있습니다.
+-  **resource** 는 리소스 식별자를 URL 나머지 부분과 구분하는 필수 키워드입니다.
+-  **resource identifier** 는 0 이상의 양의 숫자입니다. 리소스 그룹, 벡터, PostGIS 또는 래스터 레이어, 스타일일 수도 있습니다.
+
+모든 벡터 레이어, PostGIS, 래스터 레이어, 스타일은 식별자가 리소스 그룹인 경우 하위 리소스로 목록화됩니다. 그렇지 않은 경우 각각 개별 레이어가 될 것입니다.
+
+환경설정 옵션
 ---------------------
 
-The following configuration options are available:
+다음 :ref:`환경설정 옵션들 <configoptions>` 을 사용할 수 있습니다:
 
--  **NGW_USERPWD**: User name and password separated with colon.
+-  :decl_configoption:`NGW_USERPWD`: User name and password separated with colon.
    Optional and can be set using open options.
--  **NGW_BATCH_SIZE**: Size of feature insert and update operations
+-  :decl_configoption:`NGW_BATCH_SIZE`: Size of feature insert and update operations
    cache before send to server. If batch size is -1 batch mode is
    disabled. Delete operation will execute immediately.
--  **NGW_PAGE_SIZE**: If supported by server, fetch features from remote
+-  :decl_configoption:`NGW_PAGE_SIZE`: If supported by server, fetch features from remote
    server will use paging. The -1 value disables paging even it
    supported by server.
--  **NGW_NATIVE_DATA**: Whether to store the json *extensions* key in
+-  :decl_configoption:`NGW_NATIVE_DATA`: Whether to store the json *extensions* key in
    feature native data.
--  **NGW_JSON_DEPTH**: The depth of json response that can be parsed. If
+-  :decl_configoption:`NGW_JSON_DEPTH`: The depth of json response that can be parsed. If
    depth is greater than this value, parse error occurs.
--  **NGW_EXTENSIONS**: Comma separated extensions list. Available values are 
+-  :decl_configoption:`NGW_EXTENSIONS`: Comma separated extensions list. Available values are 
    `description` and `attachment`. This needed to fill native data.
 
 Authentication
@@ -136,7 +125,7 @@ Paging
 
 Features can retrieved from NextGIS Web by chunks if supported by server
 (available since NextGIS Web 3.1). The chunk size can be altered with
-the NGW_PAGE_SIZE configuration option or PAGE_SIZE open option.
+the :decl_configoption:`NGW_PAGE_SIZE` configuration option or PAGE_SIZE open option.
 
 Write support
 -------------

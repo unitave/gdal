@@ -74,7 +74,7 @@ OGR GeoJSON 드라이버는 Point, LineString, Polygon, GeometryCollection, Feat
 
 스키마 탐지는 String, Integer, Real, StringList, IntegerList 및 RealList, Integer(Boolean), Date, Time 및 DateTime 유형의 필드를 인식할 것입니다.
 
-**ATTRIBUTES_SKIP** 환경 변수를 **YES** 로 설정하면 드라이버가 속성을 처리하는 것을 막을 수 있습니다. 기본 습성은 모든 속성을 (앞에서 설명한 것처럼 합집합으로) 보전하는 것입니다. 이는 **ATTRIBUTES_SKIP=NO** 설정과 동일한 효과입니다.
+:decl_configoption:`ATTRIBUTES_SKIP` 환경설정 옵션을 YES로 설정하면 드라이버가 속성을 처리하는 것을 막을 수 있습니다. 기본 습성은 모든 속성을 (앞에서 설명한 것처럼 합집합으로) 보전하는 것입니다. 이는 :decl_configoption:`ATTRIBUTES_SKIP` 옵션을 NO로 설정한 것과 동일한 효과입니다.
 
 NATIVE_DATA 열기 옵션을 YES로 설정하면, Feature JSon 객체를 OGRFeature 객체의 NativeData 속성에 직렬화된 JSon 객체로 저장할 것입니다. (그리고 NativeMediaType 속성에 "application/vnd.geo+json"을 저장할 것입니다.)
 쓰기 작업 시, 작성할 OGRFeature의 NativeMediaType 속성이 직렬화된 JSon 객체인 문자열로 설정되었다면 이 객체의 (예를 들면 "property" 딕셔너리도 아니고 도형 좌표의 처음 3개의 차원도 아닌) 추가 멤버들을 사용해서 OGRFeature로부터 생성된 JSon 객체를 향상시킬 것입니다. 더 자세한 정보는 :ref:`rfc-60` 을 참조하십시오.
@@ -88,6 +88,8 @@ Geometry
 
 환경설정 옵션
 ---------------------
+
+다음 :ref:`환경설정 옵션들 <configoptions>` 을 사용할 수 있습니다:
 
 -  :decl_configoption:`GEOMETRY_AS_COLLECTION`:
    도형의 변환을 제어하기 위해 사용합니다. YES로 설정하면 OGRGeometryCollection 유형으로 도형들을 묶습니다.

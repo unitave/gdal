@@ -26,7 +26,7 @@ LIBKML 드라이버를 빌드하고 포함시키는 경우, OGR에서 이전 :re
 ----------
 데이터소스를 KML 파일 ``somefile.kml``, 디렉터리 ``somedir/``, 또는 KMZ 파일 ``somefile.kmz`` 로 지정할 수도 있습니다.
 
-디렉터리 및 KMZ 데이터소스의 경우 기본적으로 doc.kml 파일에 모든 레이어의 색인 파일을 읽고 쓸 것입니다. 이 파일은 데이터소스에 있는 각 레이어의 `<NetworkLink> <https://developers.google.com/kml/documentation/kmlreference#networklink>`_ 를 담고 있습니다. LIBKML_USE_DOC.KML 환경설정 옵션을 NO로 설정해서 이 기능을 비활성화시킬 수 있습니다.
+디렉터리 및 KMZ 데이터소스의 경우 기본적으로 doc.kml 파일에 모든 레이어의 색인 파일을 읽고 쓸 것입니다. 이 파일은 데이터소스에 있는 각 레이어의 `<NetworkLink> <https://developers.google.com/kml/documentation/kmlreference#networklink>`_ 를 담고 있습니다. :decl_configoption:`LIBKNL_USE_DOC.KML` 환경설정 옵션을 NO로 설정해서 이 기능을 비활성화시킬 수 있습니다.
 
 StyleTable
 ~~~~~~~~~~
@@ -229,7 +229,7 @@ photooverlay 필드를 정의한 경우, `<PhotoOverlay> <https://developers.goo
 
 Placemark, Model, NetworkLink 및 PhotoOverlay 객체는 camera_longitude, camera_latitude, camera_altitude, camera_altitudemode, head 그리고/또는 tilt 그리고/또는 roll 필드가 정의되어 있는 경우 관련 카메라를 가질 수 있습니다.
 
-(LIBKML_READ_GROUND_OVERLAY 환경설정 옵션이 FALSE로 설정되지 않은 이상) KML `<GroundOverlay> <https://developers.google.com/kml/documentation/kmlreference#groundoverlay>`_ 요소의 읽기를 지원합니다. 이 요소는 icon 및 drawOrder 필드를 가지고 있습니다.
+(:decl_configoption:`LIBKNL_READ_GROUND_OVERLAY` 환경설정 옵션이 FALSE로 설정되지 않은 이상) KML `<GroundOverlay> <https://developers.google.com/kml/documentation/kmlreference#groundoverlay>`_ 요소의 읽기를 지원합니다. 이 요소는 icon 및 drawOrder 필드를 가지고 있습니다.
 
 .. _style-1:
 
@@ -238,11 +238,11 @@ Placemark, Model, NetworkLink 및 PhotoOverlay 객체는 camera_longitude, camer
 
 피처 수준의 스타일 문자열은 KML의 각 `<Placemark> <https://developers.google.com/kml/documentation/kmlreference#placemark>`_ 에 `<Style> <https://developers.google.com/kml/documentation/kmlreference#style>`_ 또는 `<StyleUrl> <https://developers.google.com/kml/documentation/kmlreference#styleurl>`_ 가운데 하나로 매핑됩니다.
 
-KML 피처를 읽어올 때 LIBKML_RESOLVE_STYLE 환경 변수가 YES로 설정되어 있는 경우, 스타일 테이블에서 StyleUrl을 검색해서 피처 스타일 문자열을 테이블로부터 나온 스타일로 설정합니다. 이렇게 하면 스타일 테이블을 읽어오지 않는 MapServer 같은 응용 프로그램에 공유 스타일을 읽어오게 할 수 있습니다.
+KML 피처를 읽어올 때 :decl_configoption:`LIBKNL_RESOLVE_STYLE` 환경설정 옵션이 YES로 설정되어 있는 경우, 스타일 테이블에서 StyleUrl을 검색해서 피처 스타일 문자열을 테이블로부터 나온 스타일로 설정합니다. 이렇게 하면 스타일 테이블을 읽어오지 않는 MapServer 같은 응용 프로그램에 공유 스타일을 읽어오게 할 수 있습니다.
 
-KML 피처를 읽어올 때 LIBKML_EXTERNAL_STYLE 환경 변수가 YES로 설정되어 있는 경우, 디스크 또는 서버로부터 데이터소스 외부에 있는 StyleUrl을 가져와서 데이터소스 스타일 테이블에 파싱합니다. 스타일 KML을 읽어올 수 없거나 LIBKML_EXTERNAL_STYLE 환경 변수가 NO로 설정되어 있다면, StyleUrl을 스타일 문자열로 복사합니다.
+KML 피처를 읽어올 때 :decl_configoption:`LIBKNL_EXTERNAL_STYLE` 환경설정 옵션이 YES로 설정되어 있는 경우, 디스크 또는 서버로부터 데이터소스 외부에 있는 StyleUrl을 가져와서 데이터소스 스타일 테이블에 파싱합니다. 스타일 KML을 읽어올 수 없거나 :decl_configoption:`LIBKNL_EXTERNAL_STYLE이 NO로 설정되어 있다면, StyleUrl을 스타일 문자열로 복사합니다.
 
-KML StyleMap을 읽어올 때 기본 매핑은 "NORMAL"로 설정됩니다. 강조 스타일을 이용하고 싶다면 LIBKML_STYLEMAP_KEY 환경 변수를 "HIGHLIGHT"으로 설정하십시오.
+KML StyleMap을 읽어올 때 기본 매핑은 "NORMAL"로 설정됩니다. 강조 스타일을 이용하고 싶다면 :decl_configoption:`LIBKNL_STYLEMAP_KEY` 환경설정 옵션을 "HIGHLIGHT"으로 설정하십시오.
 
 KML 작성 시, "astylename_normal"과 "astylename_highlight" 형식의 스타일 2개가 있는 경우 (이때 astylename은 어떤 문자열이라도 될 수 있습니다) 두 스타일 모두로부터 StyleMap 객체를 생성하고 "astylename"으로 명명할 것입니다.
 
@@ -251,145 +251,144 @@ KML 작성 시, "astylename_normal"과 "astylename_highlight" 형식의 스타�
 
 OGR 필드(피처 속성)는 KML에 `<Schema> <https://developers.google.com/kml/documentation/kmlreference#schema>`_ 그리고 `<SimpleData> <https://developers.google.com/kml/documentation/kmlreference#simpledata>`_ 로 매핑됩니다. 아래 따로 설명하는 몇몇 특수 필드는 예외입니다.
 
-주의: LIBKML_USE_SCHEMADATA 환경설정 옵션을 NO로 설정해서 필드를 `<Data> <https://developers.google.com/kml/documentation/kmlreference#data>`_ 요소로도 내보낼 수 있습니다.
+주의: :decl_configoption:`LIBKNL_USE_SCHEMADATA` 환경설정 옵션을 NO로 설정해서 필드를 `<Data> <https://developers.google.com/kml/documentation/kmlreference#data>`_ 요소로도 내보낼 수 있습니다.
 
-풍부한 환경 변수 집합을 사용해서 입력물과 산출물의 필드들을 어떻게 KML `<Placemark> <https://developers.google.com/kml/documentation/kmlreference#placemark>`_ 에 매핑시킬지 정의할 수 있습니다.
-예를 들어 'Cities'라는 필드를 KML에 `<name> <https://developers.google.com/kml/documentation/kmlreference#name>`_ 태그로 매핑시키고 싶다면, Name 환경 변수를 설정하면 됩니다.
+풍부한 :ref:`환경설정 옵션 <configoptions>` 집합을 사용해서 입력물과 산출물의 필드들을 어떻게 KML `<Placemark> <https://developers.google.com/kml/documentation/kmlreference#placemark>`_ 에 매핑시킬지 정의할 수 있습니다.
+예를 들어 'Cities'라는 필드를 KML에 `<name> <https://developers.google.com/kml/documentation/kmlreference#name>`_ 태그로 매핑시키고 싶다면, 환경설정 옵션을 설정하면 됩니다.
 
-Name
+-  **name**:
    이 문자열 필드는 KML `<name> <https://developers.google.com/kml/documentation/kmlreference#name>`_ 태그에 매핑됩니다.
-   LIBKML_NAME_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-description
+   :decl_configoption:`LIBKNL_NAME_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **description**:
    이 문자열 필드는 KML `<description> <https://developers.google.com/kml/documentation/kmlreference#description>`_ 태그에 매핑됩니다.
-   LIBKML_DESCRIPTION_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-timestamp
+   :decl_configoption:`LIBKNL_DESCRIPTION_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **timestamp**:
    이 문자열 또는 날짜&시간 또는 날짜 그리고/또는 시간 유형 필드는 KML `<timestamp> <https://developers.google.com/kml/documentation/kmlreference#timestamp>`_ 태그에 매핑됩니다.
-   LIBKML_TIMESTAMP_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-begin
+   :decl_configoption:`LIBKNL_TIMESTAMP_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **begin**:
    이 문자열 또는 날짜&시간 또는 날짜 그리고/또는 시간 유형 필드는 KML `<begin> <https://developers.google.com/kml/documentation/kmlreference#begin>`_ 태그에 매핑됩니다.
-   LIBKML_BEGIN_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-end
+   :decl_configoption:`LIBKNL_BEGIN_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **end**:
    이 문자열 또는 날짜&시간 또는 날짜 그리고/또는 시간 유형 필드는 KML `<end> <https://developers.google.com/kml/documentation/kmlreference#end>`_ 태그에 매핑됩니다.
-   LIBKML_END_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-altitudeMode
+   :decl_configoption:`LIBKNL_END_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **altitudeMode**:
    이 문자열 필드는 KML `<altitudeMode> <https://developers.google.com/kml/documentation/kmlreference#altitudemode>`_ 또는 `<gx:altitudeMode> <https://developers.google.com/kml/documentation/kmlreference#gxaltitudemode>`_ 태그에 매핑됩니다.
-   LIBKML_ALTITUDEMODE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-tessellate
+   :decl_configoption:`LIBKNL_ALTITUDEMODE_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **tessellate**:
    이 정수형 필드는 KML `<tessellate> <https://developers.google.com/kml/documentation/kmlreference#tessellate>`_ 태그에 매핑됩니다.
-   LIBKML_TESSELLATE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-extrude
+   :decl_configoption:`LIBKNL_TESSELLATE_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **extrude**:
    이 정수형 필드는 KML `<extrude> <https://developers.google.com/kml/documentation/kmlreference#extrude>`_ 태그에 매핑됩니다.
-   LIBKML_EXTRUDE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-visibility
+   :decl_configoption:`LIBKNL_EXTRUDE_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **visibility**:
    이 정수형 필드는 KML `<visibility> <https://developers.google.com/kml/documentation/kmlreference#visibility>`_ 태그에 매핑됩니다.
-   LIBKML_VISIBILITY_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-icon
+   :decl_configoption:`LIBKNL_VISIBILITY_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **icon**:
    이 문자열 필드는 KML `<icon> <https://developers.google.com/kml/documentation/kmlreference#icon>`_ 태그에 매핑됩니다.
-   LIBKML_ICON_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-drawOrder
+   :decl_configoption:`LIBKNL_ICON_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **drawOrder**:
    이 정수형 필드는 KML `<drawOrder> <https://developers.google.com/kml/documentation/kmlreference#draworder>`_ 태그에 매핑됩니다.
-   LIBKML_DRAWORDER_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-snippet
+   :decl_configoption:`LIBKNL_DRAWORDER_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **snippet**:
    이 정수형 필드는 KML `<snippet> <https://developers.google.com/kml/documentation/kmlreference#snippet>`_ 태그에 매핑됩니다.
-   LIBKML_SNIPPET_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-heading
+   :decl_configoption:`LIBKNL_SNIPPET_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **heading**:
    이 실수형 필드는 KML `<heading> <https://developers.google.com/kml/documentation/kmlreference#heading>`_ 태그에 매핑됩니다.
-   LIBKML_HEADING_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다. 읽기 작업 시, <Placemark>가 <heading> 요소를 가진 <Camera>를 가지고 있는 경우에만 이 필드가 존재합니다.
-tilt
+   :decl_configoption:`LIBKNL_HEADING_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다. 읽기 작업 시, <Placemark>가 <heading> 요소를 가진 <Camera>를 가지고 있는 경우에만 이 필드가 존재합니다.
+-  **tilt**:
    이 실수형 필드는 KML `<tilt> <https://developers.google.com/kml/documentation/kmlreference#tilt>`_ 태그에 매핑됩니다.
-   LIBKML_TILT_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다. 읽기 작업 시, <Placemark>가 <tilt> 요소를 가진 <Camera>를 가지고 있는 경우에만 이 필드가 존재합니다.
-roll
+   :decl_configoption:`LIBKNL_TILT_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다. 읽기 작업 시, <Placemark>가 <tilt> 요소를 가진 <Camera>를 가지고 있는 경우에만 이 필드가 존재합니다.
+-  **roll**:
    이 실수형 필드는 KML `<roll> <https://developers.google.com/kml/documentation/kmlreference#roll>`_ 태그에 매핑됩니다.
-   LIBKML_ROLL_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다. 읽기 작업 시, <Placemark>가 <roll> 요소를 가진 <Camera>를 가지고 있는 경우에만 이 필드가 존재합니다.
-model
+   :decl_configoption:`LIBKNL_ROLL_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다. 읽기 작업 시, <Placemark>가 <roll> 요소를 가진 <Camera>를 가지고 있는 경우에만 이 필드가 존재합니다.
+-  **model**:
    이 문자열 필드를 사용해서 3차원 `<model> <https://developers.google.com/kml/documentation/kmlreference#model>`_ 의 URL을 정의할 수 있습니다.
-   LIBKML_MODEL_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-scale_x
+   :decl_configoption:`LIBKNL_MODEL_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **scale_x**:
    이 실수형 필드는 3차원 모델 용 KML `<scale> <https://developers.google.com/kml/documentation/kmlreference#scale>`_ 태그의 x 요소에 매핑됩니다.
-   LIBKML_SCALE_X_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-scale_y
+   :decl_configoption:`LIBKNL_SCALE_X_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **scale_y**:
    이 실수형 필드는 3차원 모델 용 KML `<scale> <https://developers.google.com/kml/documentation/kmlreference#scale>`_ 태그의 y 요소에 매핑됩니다.
-   LIBKML_SCALE_Y_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-scale_z
+   :decl_configoption:`LIBKNL_SCALE_Y_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **scale_z**:
    이 실수형 필드는 3차원 모델 용 KML `<scale> <https://developers.google.com/kml/documentation/kmlreference#scale>`_ 태그의 z 요소에 매핑됩니다.
-   LIBKML_SCALE_Z_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-networklink
+   :decl_configoption:`LIBKNL_SCALE_Z_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **networklink**:
    이 문자열 필드는 KML NetworkLink의 `<href> <https://developers.google.com/kml/documentation/kmlreference#href>`_ 태그의 href 요소에 매핑됩니다.
-   LIBKML_NETWORKLINK_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-networklink_refreshvisibility
+   :decl_configoption:`LIBKNL_NETWORKLINK_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **networklink_refreshvisibility**:
    이 정수형 필드는 KML NetworkLink의 `<refreshVisibility> <https://developers.google.com/kml/documentation/kmlreference#refreshvisibility>`_ 태그에 매핑됩니다.
-   LIBKML_NETWORKLINK_REFRESHVISIBILITY_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-networklink_flytoview
+   :decl_configoption:`LIBKNL_NETWORKLINK_REFRESHVISIBILITY_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **networklink_flytoview**:
    이 정수형 필드는 KML NetworkLink의 `<flyToView> <https://developers.google.com/kml/documentation/kmlreference#flytoview>`_ 태그에 매핑됩니다.
-   LIBKML_NETWORKLINK_FLYTOVIEW_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-networklink_refreshmode
+   :decl_configoption:`LIBKNL_NETWORKLINK_FLYTOVIEW_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **networklink_refreshmode**:
    이 문자열 필드는 KML NetworkLink의 `<refreshMode> <https://developers.google.com/kml/documentation/kmlreference#refreshmode>`_ 태그에 매핑됩니다.
-   LIBKML_NETWORKLINK_REFRESHMODE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-networklink_refreshinterval
+   :decl_configoption:`LIBKNL_NETWORKLINK_REFRESHMODE_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **networklink_refreshinterval**:
    이 실수형 필드는 KML NetworkLink의 `<refreshInterval> <https://developers.google.com/kml/documentation/kmlreference#refreshinterval>`_ 태그에 매핑됩니다.
-   LIBKML_NETWORKLINK_REFRESHINTERVAL_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-networklink_viewrefreshmode
+   :decl_configoption:`LIBKNL_NETWORKLINK_REFRESHINTERVAL_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **networklink_viewrefreshmode**:
    이 문자열 필드는 KML NetworkLink의 `<viewRefreshMode> <https://developers.google.com/kml/documentation/kmlreference#viewrefreshmode>`_ 태그에 매핑됩니다.
-   LIBKML_NETWORKLINK_VIEWREFRESHMODE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-networklink_viewrefreshtime
+   :decl_configoption:`LIBKNL_NETWORKLINK_VIEWREFRESHMODE_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **networklink_viewrefreshtime**:
    이 실수형 필드는 KML NetworkLink의 `<viewRefreshTime> <https://developers.google.com/kml/documentation/kmlreference#viewrefreshtime>`_ 태그에 매핑됩니다.
-   LIBKML_NETWORKLINK_VIEWREFRESHTIME_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-networklink_viewboundscale
+   :decl_configoption:`LIBKNL_NETWORKLINK_VIEWREFRESHTIME_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **networklink_viewboundscale**:
    이 실수형 필드는 KML NetworkLink의 `<viewBoundScale> <https://developers.google.com/kml/documentation/kmlreference#viewboundscale>`_ 태그에 매핑됩니다.
-   LIBKML_NETWORKLINK_VIEWBOUNDSCALE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-networklink_viewformat
+   :decl_configoption:`LIBKNL_NETWORKLINK_VIEWBOUNDSCALE_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **networklink_viewformat**:
    이 문자열 필드는 KML NetworkLink의 `<viewFormat> <https://developers.google.com/kml/documentation/kmlreference#viewformat>`_ 태그에 매핑됩니다.
-   LIBKML_NETWORKLINK_VIEWFORMAT_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-networklink_httpquery
+   :decl_configoption:`LIBKNL_NETWORKLINK_VIEWFORMAT_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **networklink_httpquery**:
    이 문자열 필드는 KML NetworkLink의 `<httpQuery> <https://developers.google.com/kml/documentation/kmlreference#httpquery>`_ 태그에 매핑됩니다.
-   LIBKML_NETWORKLINK_HTTPQUERY_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-camera_longitude
+   :decl_configoption:`LIBKNL_NETWORKLINK_HTTPQUERY_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **camera_longitude**:
    이 실수형 필드는 KML `<Camera> <https://developers.google.com/kml/documentation/kmlreference#camera>`_ 의 `<longitude> <https://developers.google.com/kml/documentation/kmlreference#longitude>`_ 태그에 매핑됩니다.
-   LIBKML_CACameraMERA_LONGITUDE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-camera_latitude
+   :decl_configoption:`LIBKNL_CACameraMERA_LONGITUDE_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **camera_latitude**:
    이 실수형 필드는 KML `<Camera> <https://developers.google.com/kml/documentation/kmlreference#camera>`_ 의 `<latitude> <https://developers.google.com/kml/documentation/kmlreference#latitude>`_ 태그에 매핑됩니다.
-   LIBKML_CAMERA_LATITUDE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-camera_altitude
+   :decl_configoption:`LIBKNL_CAMERA_LATITUDE_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **camera_altitude**:
    이 실수형 필드는 KML `<Camera> <https://developers.google.com/kml/documentation/kmlreference#camera>`_ 의 `<altitude> <https://developers.google.com/kml/documentation/kmlreference#altitude>`_ 태그에 매핑됩니다.
-   LIBKML_CAMERA_ALTITUDE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-camera_altitudemode
+   :decl_configoption:`LIBKNL_CAMERA_ALTITUDE_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **camera_altitudemode**:
    이 실수형 필드는 KML `<Camera> <https://developers.google.com/kml/documentation/kmlreference#camera>`_ 의 `<altitudeMode> <https://developers.google.com/kml/documentation/kmlreference#altitudemode>`_ 태그에 매핑됩니다.
-   LIBKML_CAMERA_ALTITUDEMODE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-photooverlay
+   :decl_configoption:`LIBKNL_CAMERA_ALTITUDEMODE_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **photooverlay**:
    이 문자열 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<href> <https://developers.google.com/kml/documentation/kmlreference#href>`_ 태그의 <href> 요소에 매핑됩니다.
-   LIBKML_PHOTOOVERLAY_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-leftfov
+   :decl_configoption:`LIBKNL_PHOTOOVERLAY_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **leftfov**:
    이 실수형 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<LeftFov> <https://developers.google.com/kml/documentation/kmlreference#leftfov>`_ 태그에 매핑됩니다.
-   LIBKML_LEFTFOV_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-rightfov
+   :decl_configoption:`LIBKNL_LEFTFOV_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **rightfov**:
    이 실수형 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<RightFov> <https://developers.google.com/kml/documentation/kmlreference#rightfov>`_ 태그에 매핑됩니다.
-   LIBKML_RightFOV_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-bottomfov
+   :decl_configoption:`LIBKNL_RightFOV_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **bottomfov**:
    이 실수형 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<BottomFov> <https://developers.google.com/kml/documentation/kmlreference#bottomfov>`_ 태그에 매핑됩니다.
-   LIBKML_BOTTOMTFOV_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-topfov
+   :decl_configoption:`LIBKNL_BOTTOMTFOV_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **topfov**:
    이 실수형 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<TopFov> <https://developers.google.com/kml/documentation/kmlreference#topfov>`_ 태그에 매핑됩니다.
-   LIBKML_TOPFOV_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-near
+   :decl_configoption:`LIBKNL_TOPFOV_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **near**:
    이 실수형 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<Near> <https://developers.google.com/kml/documentation/kmlreference#leftfov>`_ 태그에 매핑됩니다.
-   LIBKML_NEAR_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-shape
+   :decl_configoption:`LIBKNL_NEAR_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **shape**:
    이 문자열 필드는 KML `<PhotoOverlay> <https://developers.google.com/kml/documentation/kmlreference#photooverlay>`_ 의 `<shape> <https://developers.google.com/kml/documentation/kmlreference#shape>`_ 태그에 매핑됩니다.
-   LIBKML_SHAPE_FIELD 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-   variable .
-imagepyramid_tilesize
+   :decl_configoption:`LIBKNL_SHAPE_FIELD` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **imagepyramid_tilesize**:
    이 정수형 필드는 KML `<ImagePyramid> <https://developers.google.com/kml/documentation/kmlreference#imagepyramid>`_ 의 `<tileSize> <https://developers.google.com/kml/documentation/kmlreference#tilesize>`_ 태그에 매핑됩니다.
-   LIBKML_IMAGEPYRAMID_TILESIZE 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-imagepyramid_maxwidth
+   :decl_configoption:`LIBKNL_IMAGEPYRAMID_TILESIZE` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **imagepyramid_maxwidth**:
    이 정수형 필드는 KML `<ImagePyramid> <https://developers.google.com/kml/documentation/kmlreference#imagepyramid>`_ 의 `<maxWidth> <https://developers.google.com/kml/documentation/kmlreference#maxwidth>`_ 태그에 매핑됩니다.
-   LIBKML_IMAGEPYRAMID_MAXWIDTH 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-imagepyramid_maxheight
+   :decl_configoption:`LIBKNL_IMAGEPYRAMID_MAXWIDTH` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **imagepyramid_maxheight**:
    이 정수형 필드는 KML `<ImagePyramid> <https://developers.google.com/kml/documentation/kmlreference#imagepyramid>`_ 의 `<maxHeight> <https://developers.google.com/kml/documentation/kmlreference#maxheight>`_ 태그에 매핑됩니다.
-   LIBKML_IMAGEPYRAMID_MAXHEIGHT 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-imagepyramid_gridorigin
+   :decl_configoption:`LIBKNL_IMAGEPYRAMID_MAXHEIGHT` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **imagepyramid_gridorigin**:
    이 문자열 필드는 KML `<ImagePyramid> <https://developers.google.com/kml/documentation/kmlreference#imagepyramid>`_ 의 `<gridOrigin> <https://developers.google.com/kml/documentation/kmlreference#maxheight>`_ 태그에 매핑됩니다.
-   LIBKML_IMAGEPYRAMID_GRIDORIGIN 환경 변수로 OGR 필드의 이름을 변경할 수 있습니다.
-OGR_STYLE
+   :decl_configoption:`LIBKNL_IMAGEPYRAMID_GRIDORIGIN` 환경설정 옵션으로 OGR 필드의 이름을 변경할 수 있습니다.
+-  **OGR_STYLE**:
    이 문자열 필드는 피처 스타일 문자열에 매핑되며, 피처에 설정된 스타일 문자열이 없는 경우 OGR가 이 필드를 읽어옵니다.
 
 도형
@@ -416,7 +415,7 @@ OGR는 다중 도형 유형 몇 개를 가지고 있습니다:
 
 가능한 경우, OGR는 `<MultiGeometry> <https://developers.google.com/kml/documentation/kmlreference#multigeometry>`_ 를 더 정밀한 OGR 도형 유형으로 (멀티포인트, 멀티라인스트링 또는 멀티폴리곤으로) 매핑하려 시도할 것입니다. 혼합된 콘텐츠의 경우 기본값은 도형 집합입니다.
 
-KML 도형이 날짜 변경선을 걸치는 경우가 있는데, QGIS 또는 MapServer 같은 응용 프로그램에서 이런 도형은 지구 전체를 한바퀴 도는 수평 라인을 생성할 것입니다. LIBKML_WRAPDATELINE 환경 변수를 YES로 설정하면 LIBKML 드라이버가 이런 도형을 읽어올 때 해당 도형을 날짜 변경선으로 분할할 것입니다.
+KML 도형이 날짜 변경선을 걸치는 경우가 있는데, QGIS 또는 MapServer 같은 응용 프로그램에서 이런 도형은 지구 전체를 한바퀴 도는 수평 라인을 생성할 것입니다. :decl_configoption:`LIBKNL_WRAPDATELINE` 환경설정 옵션을 YES로 설정하면 LIBKML 드라이버가 이런 도형을 읽어올 때 해당 도형을 날짜 변경선으로 분할할 것입니다.
 
 VSI 가상 파일 시스템 API 지원
 -----------------------------------

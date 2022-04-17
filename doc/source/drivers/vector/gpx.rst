@@ -92,7 +92,7 @@ OGR 단순 피처 모델에서 다음과 같이 해석할 것입니다:
      navaid_runways (String) = <navaid:runway designation="H1" length="80" width="80" surface="ASPH-G" ></navaid:runway>
      navaid_magvar (Integer) = 12
 
-주의: GPX 드라이버는 확장 사양 요소가 GPX 파일의 첫 번째 레코드에 있는 경우에만 그 내용을 산출할 것입니다. 확장 사양이 첫 번째 레코드 이후에 나타나는 경우, **GPX_USE_EXTENSIONS** 환경 변수로 파일 전체를 강제로 명확하게 파싱할 수 있습니다.
+주의: GPX 드라이버는 확장 사양 요소가 GPX 파일의 첫 번째 레코드에 있는 경우에만 그 내용을 산출할 것입니다. 확장 사양이 첫 번째 레코드 이후에 나타나는 경우, :decl_configoption:`GPX_USE_EXTENSIONS` 환경 변수로 파일 전체를 강제로 명확하게 파싱할 수 있습니다.
 
 생성 문제점
 ---------------
@@ -113,14 +113,16 @@ OGR 단순 피처 모델에서 다음과 같이 해석할 것입니다:
 wkbPoint/wkbPoint25D 도형을 가진 "track_points"라는 이름의 레이어가 있다면, 해당 레이어에 있는 객체들의 순열(sequence)로부터 GPX 파일에 트랙을 작성할 것입니다. 이 방법으로 트랙 포인트에 원시(raw) 좌표뿐만 아니라 각 트랙 포인트에 대한 GPX 속성을 설정합니다. 'track_fid' 필드의 동일한 값 덕분에 포인트가 동일한 트랙에 속해 있는지를 식별할 수 있습니다. (그리고 'track_seg_id' 필드의 값에 따라 트랙을 트랙 선분(track segment)으로 분할할 것입니다.) 트랙 객체를 제대로 재구성하기 위해서는 트랙 선분들을 반드시 차례대로 작성해야만 합니다. 트랙의 <name> 요소를 채우려면 첫 번째 트랙 포인트에 'track_name' 필드를 설정하면 됩니다.
 마찬가지로, wkbPoint/wkbPoint25D 도형을 가진 "route_points"라는 이름의 레이어가 있다면 'route_fid' 필드에 동일한 값을 가진 포인트들의 순열로부터 GPX 파일에 경로를 작성할 것입니다. 경로의 <name> 요소를 채우려면 첫 번째 경로 포인트에 'route_name' 필드를 설정하면 됩니다.
 
-GPX 작성기는 다음 *레이어* 생성 옵션들을 지원합니다:
+레이어 생성 옵션
+----------------
 
 -  **FORCE_GPX_TRACK**:
    객체 유형이 wkbLineString인 레이어 작성 시 GPX 드라이버는 기본적으로 wkbLineString 객체들을 경로로 작성하려 합니다. FORCE_GPX_TRACK=YES를 지정하면, 트랙으로 작성할 것입니다.
 -  **FORCE_GPX_ROUTE**:
    객체 유형이 wkbMultiLineString인 레이어 작성 시 GPX 드라이버는 기본적으로 wkbMultiLineString 객체들을 트랙으로 작성하려 합니다. FORCE_GPX_ROUTE=YES를 지정하면, 멀티라인이 단일 라인 하나만으로 이루어져 있는 경우 경로로 작성할 것입니다.
 
-GPX 작성기는 다음 *데이터셋* 생성 옵션들을 지원합니다:
+데이터셋 생성 옵션
+------------------
 
 -  **GPX_USE_EXTENSIONS**:
    GPX 드라이버는 기본적으로 GPX XML 정의(name, cmt 등등)와 일치하지 않는 속성 필드들을 폐기할 것입니다.
@@ -143,7 +145,7 @@ shapefile로 변환 시 문제점
 
 -  *track_points* 레이어를 shapefile로 변환할 때, DBF 파일에서 "track_seg_id" 및 "track_seg_point_id" 필드 이름을 문자 10개 길이로 절단(truncate)하기 때문에 이름이 중복되게 됩니다.
 
-   이런 상황을 막으려면, GPX_SHORT_NAMES 환경설정 옵션을 TRUE로 설정해서 이 이름들을 각각 "trksegid" 및 "trksegptid"로 리포트되게 만들어 DBF 파일에 유일명으로 변환될 수 있게 해주면 됩니다. *route_points* 레이어의 "route_point_id" 필드도 "rteptid"로 재명명될 것입니다. 그러나 확장 사양 필드 이름에 대해서는 어떤 특정한 처리도 하지 않을 것이라는 사실을 기억하십시오.
+   이런 상황을 막으려면, :decl_configoption:`GPX_SHORT_NAMES` 환경설정 옵션을 TRUE로 설정해서 이 이름들을 각각 "trksegid" 및 "trksegptid"로 리포트되게 만들어 DBF 파일에 유일명으로 변환될 수 있게 해주면 됩니다. *route_points* 레이어의 "route_point_id" 필드도 "rteptid"로 재명명될 것입니다. 그러나 확장 사양 필드 이름에 대해서는 어떤 특정한 처리도 하지 않을 것이라는 사실을 기억하십시오.
 
    GPX 파일의 track_points 레이어를 shapefile 집합으로 변환하기:
 

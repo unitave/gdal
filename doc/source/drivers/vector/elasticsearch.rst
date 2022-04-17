@@ -84,20 +84,6 @@ Elasticsearch 색인 내부에서 매핑되는 각 유형을 OGR 레이어로 �
 
    ogr2ogr -progress --config ES_WRITEMAP /path/to/file/map.txt -f "Elasticsearch" http://localhost:9200 my_shapefile.shp
 
-Elasticsearch 작성기는 다음 환경설정 옵션들을 지원합니다. GDAL 2.1버전부터, 레이어 생성 옵션을 사용할 수 있으며 이를 사용하는 편이 좋습니다:
-
--  **ES_WRITEMAP=/path/to/mapfile.txt**:
-   색인에 삽입하기 전에 사용자가 수정할 수 있는 매핑 파일을 생성합니다. 어떤 객체도 작성하지 않을 것입니다. 이 옵션은 단일 레이어 하나만 생성하는 경우에만 제대로 작동할 것이라는 사실을 기억하십시오. GDAL 2.1버전부터, **WRITE_MAPPING** 레이어 생성 옵션을 사용하는 편이 좋습니다.
-
--  **ES_META=/path/to/mapfile.txt**:
-   드라이버에 사용자 정의 필드 매핑을 사용하라고 지시합니다. GDAL 2.1버전부터, **MAPPING** 레이어 생성 옵션을 사용하는 편이 좋습니다.
-
--  **ES_BULK=5000000**:
-   한 번씩 삽입할 문서들을 저장할 버퍼의 바이트 단위 최대 용량을 설정합니다. 레코드 개수를 적게 설정하면 Elasticsearch 내부 메모리 소비를 줄일 수 있지만 삽입하는 데 더 오래 걸립니다. GDAL 2.1버전부터, **BULK_SIZE** 레이어 생성 옵션을 사용하는 편이 좋습니다.
-
--  **ES_OVERWRITE=1**:
-   기존 색인을 삭제하고 현재 색인을 덮어씁니다. GDAL 2.1버전부터, **OVERWRITE** 레이어 생성 옵션을 사용하는 편이 좋습니다.
-
 도형 유형
 --------------
 
@@ -360,6 +346,23 @@ GDAL 2.1버전부터, 이 드라이버는 다음과 같은 레이어 생성 옵�
 
 -  **IGNORE_SOURCE_ID=YES/NO**:
    CreateFeature() 함수로 전송되는 객체의 \_id 필드를 무시할지 여부를 선택합니다. 기본값은 NO입니다.
+
+환경설정 옵션
+-------------
+
+다음 (퇴출된) :ref:`환경설정 옵션들 <configoptions>` 을 사용할 수 있습니다. GDAL 2.1버전부터 레이어 생성 옵션도 사용할 수 있으며 이를 사용하는 편이 좋습니다(위 단락 참조):
+
+-  :decl_configoption:`ES_WRITEMAP` =/path/to/mapfile.txt:
+   색인에 삽입하기 전에 사용자가 수정할 수 있는 매핑 파일을 생성합니다. 어떤 객체도 작성하지 않을 것입니다. 이 옵션은 단일 레이어 하나만 생성하는 경우에만 제대로 작동할 것이라는 사실을 기억하십시오. GDAL 2.1버전부터, **WRITE_MAPPING** 레이어 생성 옵션을 사용하는 편이 좋습니다.
+
+-  :decl_configoption:`ES_META` =/path/to/mapfile.txt:
+   드라이버에 사용자 정의 필드 매핑을 사용하라고 지시합니다. GDAL 2.1버전부터, **MAPPING** 레이어 생성 옵션을 사용하는 편이 좋습니다.
+
+-  :decl_configoption:`ES_BULK` =5000000:
+   한 번씩 삽입할 문서들을 저장할 버퍼의 바이트 단위 최대 용량을 설정합니다. 레코드 개수를 적게 설정하면 Elasticsearch 내부 메모리 소비를 줄일 수 있지만 삽입하는 데 더 오래 걸립니다. GDAL 2.1버전부터, **BULK_SIZE** 레이어 생성 옵션을 사용하는 편이 좋습니다.
+
+-  :decl_configoption:`ES_OVERWRITE` =1:
+   기존 색인을 삭제하고 현재 색인을 덮어씁니다. GDAL 2.1버전부터, **OVERWRITE** 레이어 생성 옵션을 사용하는 편이 좋습니다.
 
 예시
 --------

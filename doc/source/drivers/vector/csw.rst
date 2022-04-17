@@ -32,8 +32,20 @@ CSW 데이터소스를 열기 위한 최소한의 문법은 다음과 같습니�
 
    CSW:http://path/to/CSW/endpoint
 
+필터링
+---------
 
-다음과 같은 열기 옵션들을 사용할 수 있습니다:
+이 드라이버는 :cpp:func:`OGRLayer::SetSpatialFilter` 함수에 설정된 모든 공간 필터를 서버로 포워딩할 것입니다. 가능한 경우 :cpp:func:`OGRLayer::SetAttributeFilter` 함수에 설정된 속성 필터에 대해서도 (OGR SQL 언어를 OGC 필터 설명으로 변환해서) 마찬가지로 최선을 다할 것입니다.
+
+모든 텍스트 필드를 검색하려면 *anytext* 필드를 쿼리하면 됩니다. 하지만 정보가 복제되는 일을 피하기 위해 OGR 쪽에서 항상 NULL 컨텐츠로 반환한다는 사실을 기억하십시오.
+
+문제점
+------
+
+일부 서버가 EPSG 축 순서를, 특히 WGS84 측지 좌표의 위도/경도 순서를 지원하지 않습니다. 이런 경우 :decl_configoption:`GML_INVERT_AXIS_ORDER_IF_LAT_LONG` 환경설정 옵션을 NO로 지정해야 할 수도 있습니다.
+
+열기 옵션
+---------
 
 -  **URL**:
    CSW 서버 종단점(endpoint)을 가리키는 URL입니다. (연결 문자열에 이미 존재하는 경우 지정하지 않습니다.)
@@ -51,17 +63,13 @@ CSW 데이터소스를 열기 위한 최소한의 문법은 다음과 같습니�
 -  **MAX_RECORDS=value**:
    한 번에 가져올 레코드의 최대 개수를 지정합니다. 기본값은 500입니다. 서버가 더 낮은 값을 지원할 수도 있습니다.
 
-필터링
----------
+환경설정 옵션
+-------------
 
-이 드라이버는 :cpp:func:`OGRLayer::SetSpatialFilter` 함수에 설정된 모든 공간 필터를 서버로 포워딩할 것입니다. 가능한 경우 :cpp:func:`OGRLayer::SetAttributeFilter` 함수에 설정된 속성 필터에 대해서도 (OGR SQL 언어를 OGC 필터 설명으로 변환해서) 마찬가지로 최선을 다할 것입니다.
+다음 :ref:`환경설정 옵션 <configoptions>` 을 사용할 수 있습니다:
 
-모든 텍스트 필드를 검색하려면 *anytext* 필드를 쿼리하면 됩니다. 하지만 정보가 복제되는 일을 피하기 위해 OGR 쪽에서 항상 NULL 컨텐츠로 반환한다는 사실을 기억하십시오.
-
-문제점
-------
-
-일부 서버가 EPSG 축 순서를, 특히 WGS84 측지 좌표의 위도/경도 순서를 지원하지 않습니다. 이런 경우 GML_INVERT_AXIS_ORDER_IF_LAT_LONG 환경설정 옵션을 NO로 지정해야 할 수도 있습니다.
+-  :decl_configoption:`GML_INVERT_AXIS_ORDER_IF_LAT_LONG` =NO:
+   일부 서버가 EPSG 축 순서를, 특히 WGS84 측지 좌표의 위도/경도 순서를 지원하지 않습니다. 이런 경우 이 환경설정 옵션을 NO로 지정해야 할 수도 있습니다.
 
 예시
 --------

@@ -30,7 +30,7 @@ Currently the following one is supported :
 -  **version**\ =data_v1: To specify the API version to request.
 -  **api_key**\ =value: To specify the Planet API KEY. It is mandatory,
    unless it is supplied through the open option API_KEY, or the
-   configuration option PL_API_KEY.
+   configuration option :decl_configoption:`PL_API_KEY`.
 -  **follow_links**\ =YES/NO: Whether assets links should be followed
    for each scene (vector). Getting assets links require a HTTP request
    per scene, which might be costly when enumerating through a lot of
@@ -79,12 +79,12 @@ The following open options are available :
    fetched from the API and attached to the raster dataset. Defaults to
    YES.
 
-Configuration options
----------------------
+환경설정 옵션
+-------------
 
-The following configuration options are available :
+다음 :ref:`환경설정 옵션 <configoptions>` 을 사용할 수 있습니다:
 
--  **PL_API_KEY**\ =value: To specify the Planet API KEY.
+-  :decl_configoption:`PL_API_KEY` =value: To specify the Planet API KEY.
 
 Attributes
 ----------
@@ -116,7 +116,7 @@ Paging
 
 Features are retrieved from the server by chunks of 250 by default (and
 this is the maximum value accepted by the server). This number can be
-altered with the PLSCENES_PAGE_SIZE configuration option.
+altered with the :decl_configoption:`PLSCENES_PAGE_SIZE` configuration option.
 
 Vector layer (scene metadata) examples
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

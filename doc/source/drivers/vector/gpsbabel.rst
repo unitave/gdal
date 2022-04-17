@@ -54,7 +54,7 @@ PATH를 통해 GPSBabel 실행 파일에 접근할 수 있어야만 합니다.
 -  ozi
 -  igc
 
-USE_TEMPFILE 환경설정 옵션을 YES로 설정하면, 대용량 데이터를 읽어오는 경우 인메모리(in-memory)가 아니라 디스크 상에 임시 GPX 파일을 생성할 수 있습니다.
+:decl_configoption:`USE_TEMPFILE` 환경설정 옵션을 YES로 설정하면, 대용량 데이터를 읽어오는 경우 인메모리(in-memory)가 아니라 디스크 상에 임시 GPX 파일을 생성할 수 있습니다.
 
 쓰기 지원
 -------------
@@ -77,7 +77,7 @@ USE_TEMPFILE 환경설정 옵션을 YES로 설정하면, 대용량 데이터를 
 
 이 뿐만 아니라, 데이터셋 생성 옵션 GPSBABEL_DRIVER=gpsbabel_file_format[,gpsbabel_format_option]\* 을 지정해서 산출 데이터소스 이름을 그냥 파일명으로 전송할 수도 있습니다.
 
-USE_TEMPFILE 환경설정 옵션을 YES로 설정하면, 대용량 데이터를 작성하는 경우 인메모리(in-memory)가 아니라 디스크 상에 임시 GPX 파일을 생성할 수 있습니다.
+:decl_configoption:`USE_TEMPFILE` 환경설정 옵션을 YES로 설정하면, 대용량 데이터를 작성하는 경우 인메모리(in-memory)가 아니라 디스크 상에 임시 GPX 파일을 생성할 수 있습니다.
 
 예시
 ~~~~~~~~
@@ -102,3 +102,4 @@ See Also
 -  `GPSBabel 파일 포맷 <http://www.gpsbabel.org/capabilities.shtml>`_
 
 -  :ref:`GPX <vector.gpx>` 드라이버
+
