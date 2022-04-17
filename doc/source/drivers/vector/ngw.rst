@@ -42,9 +42,9 @@ NGW 데이터소스를 열 수 있는 최소한의 문법은 다음과 같습니
 
 ::
 
-   NGW:[NextGIS Web URL][/resource/][resource identifier]
+   NGW:[NextGIS 웹 URL][/resource/][resource identifier]
 
--  **NextGIS Web URL** 은 nextgis.com 클라우드 서비스를 (예를 들어 https://demo.nextgis.com 을) 가리키는 URL일 수도 있습니다. 또는 포트 번호와 추가 경로를 포함하는 (예를 들면 http://192.168.1.1:8000/test 같은) 다른 URL일 수도 있습니다.
+-  **NextGIS 웹 URL** 은 nextgis.com 클라우드 서비스를 (예를 들어 https://demo.nextgis.com 을) 가리키는 URL일 수도 있습니다. 또는 포트 번호와 추가 경로를 포함하는 (예를 들면 http://192.168.1.1:8000/test 같은) 다른 URL일 수도 있습니다.
 -  **resource** 는 리소스 식별자를 URL 나머지 부분과 구분하는 필수 키워드입니다.
 -  **resource identifier** 는 0 이상의 양의 숫자입니다. 리소스 그룹, 벡터, PostGIS 또는 래스터 레이어, 스타일일 수도 있습니다.
 
@@ -55,48 +55,35 @@ NGW 데이터소스를 열 수 있는 최소한의 문법은 다음과 같습니
 
 다음 :ref:`환경설정 옵션들 <configoptions>` 을 사용할 수 있습니다:
 
--  :decl_configoption:`NGW_USERPWD`: User name and password separated with colon.
-   Optional and can be set using open options.
--  :decl_configoption:`NGW_BATCH_SIZE`: Size of feature insert and update operations
-   cache before send to server. If batch size is -1 batch mode is
-   disabled. Delete operation will execute immediately.
--  :decl_configoption:`NGW_PAGE_SIZE`: If supported by server, fetch features from remote
-   server will use paging. The -1 value disables paging even it
-   supported by server.
--  :decl_configoption:`NGW_NATIVE_DATA`: Whether to store the json *extensions* key in
-   feature native data.
--  :decl_configoption:`NGW_JSON_DEPTH`: The depth of json response that can be parsed. If
-   depth is greater than this value, parse error occurs.
--  :decl_configoption:`NGW_EXTENSIONS`: Comma separated extensions list. Available values are 
-   `description` and `attachment`. This needed to fill native data.
+-  :decl_configoption:`NGW_USERPWD`:
+   쌍점(':')으로 구분된 사용자명과 비밀번호입니다. 선택적인 옵션으로 열기 옵션으로도 설정할 수 있습니다.
+-  :decl_configoption:`NGW_BATCH_SIZE`:
+   서버로 전송하기 전 객체 삽입 및 업데이터 작업 캐시의 용량입니다. 배치(batch) 용량을 -1로 설정하면 배치 모드를 비활성화합니다. 삭제 작업은 즉시 실행될 것입니다.
+-  :decl_configoption:`NGW_PAGE_SIZE`:
+   서버가 지원하는 경우, 페이지 작업을 통해 원격 서버로부터 객체를 가져올 것입니다. -1로 설정하면 서버가 지원하더라도 페이지 작업을 비활성화합니다.
+-  :decl_configoption:`NGW_NATIVE_DATA`:
+   객체 네이티브 데이터에 JSon *extensions* 키를 저장할지 여부를 선택합니다.
+-  :decl_configoption:`NGW_JSON_DEPTH`:
+   파싱할 수 있는 JSon 응답의 심도를 지정합니다. 심도가 이 옵션값을 초과하는 경우, 파싱 오류를 발생시킵니다.
+-  :decl_configoption:`NGW_EXTENSIONS`:
+   쉼표로 구분한 확장 사양 목록입니다. `description` 및 `attachment` 값을 사용할 수 있습니다. 네이티브 데이터를 채우기 위해 필요합니다.
 
-Authentication
+인증
 --------------
 
-Any operations (read, write, get metadata, change properties, etc.) may
-require an authenticated access. Authenticated access is obtained by
-specifying user name and password in open, create or configuration
-options.
+어떤 작업이든 (읽기, 쓰기, 메타데이터 가져오기, 속성 변경 등등) 인증된 접근을 요구할 수도 있습니다. 열기, 생성 및 환경설정 옵션으로 사용자명과 비밀번호를 지정하면 인증된 접근을 할 수 있습니다.
 
-Feature
+객체
 -------
 
-If the NATIVE_DATA open option is set to YES, the *extensions* json
-object will store as a serialized json object in the NativeData
-property of the OGRFeature object (and "application/json" in the
-NativeMediaType property). If writing OGRFeature has NativeMediaType property
-set to "application/json" and its NativeData property set to serialized json
-object the new NGW feature *extensions* json object will fill from this json
-object.
+NATIVE_DATA 열기 옵션을 YES로 설정한 경우, OGRFeature 객체의 NativeData 속성에 (그리고 NativeMediaType 속성의 "application/json"에) *extensions* JSon 객체를 직렬화 JSon 객체로 저장할 것입니다. 작성하는 OGRFeature의 NativeMediaType 속성이 "application/json"으로 설정되어 있고 NativeData 속성이 직렬화 JSon 객체로 설정되어 있다면, 해당 JSon 객체로부터 새 NGW 객체의 *extensions* JSon 객체를 채울 것입니다.
 
-Extensions json object structure see in `NextGIS Web API
-documentation <http://docs.nextgis.comu/docs_ngweb_dev/doc/developer/resource.html#feature>`__
+`NextGIS 웹 API 문서 <http://docs.nextgis.comu/docs_ngweb_dev/doc/developer/resource.html#feature>`_ 에서 확장 사양 JSon 객체 구조를 살펴볼 수 있습니다.
 
-Geometry
+도형
 --------
 
-NextGIS Web supports only one geometry column. Default spatial reference
-is Web Mercator (EPSG:3857). The following geometry types are available:
+NextGIS 웹은 단 하나의 도형 열만 지원합니다. 기본 공간 좌표계는 웹 메르카토르(EPSG:3857)입니다. 다음 도형 유형들을 사용할 수 있습니다:
 
 -  POINT
 -  LINESTRING
@@ -105,12 +92,12 @@ is Web Mercator (EPSG:3857). The following geometry types are available:
 -  MULTILINESTRING
 -  MULTIPOLYGON
 
-Geometry with Z value also supported.
+Z값을 가진 도형도 지원합니다.
 
-Field data types
+필드 데이터 유형
 ----------------
 
-NextWeb supports only following field types:
+NextGIS 웹은 다음 필드 유형들만 지원합니다:
 
 -  OFTInteger
 -  OFTInteger64
@@ -120,127 +107,86 @@ NextWeb supports only following field types:
 -  OFTTime
 -  OFTDateTime
 
-Paging
-------
+페이지 작업(paging)
+------------------
 
-Features can retrieved from NextGIS Web by chunks if supported by server
-(available since NextGIS Web 3.1). The chunk size can be altered with
-the :decl_configoption:`NGW_PAGE_SIZE` configuration option or PAGE_SIZE open option.
+서버가 지원하는 경우 NextGIS 웹으로부터 객체들을 덩어리로 가져올 수 있습니다. :decl_configoption:`NGW_PAGE_SIZE` 환경설정 옵션 또는 PAGE_SIZE 열기 옵션으로 이 덩어리 크기를 변경할 수 있습니다.
 
-Write support
+쓰기 지원
 -------------
 
-Datasource and layers creation and deletion is possible. Write support
-is only enabled when the datasource is opened in update mode and user
-has appropriate permissions. Vector and PostGIS layers insert and update operations
-are cached if BATCH_SIZE is greater 0. Delete operation executes
-immediately.
+데이터소스 및 레이어를 생성 및 삭제할 수 있습니다. 데이터소스를 업데이트 모드로 열고 사용자가 적절한 권한을 가지고 있는 경우에만 쓰기 지원이 활성화됩니다. BATCH_SIZE가 0보다 큰 경우에만 벡터 및 PostGIS 레이어 삽입과 업데이트 작업을 캐시에 저장합니다. 삭제 작업은 즉시 실행됩니다.
 
-Open options
+열기 옵션
 ------------
 
-The following open options are available:
+다음 열기 옵션들을 사용할 수 있습니다:
 
--  USERPWD - Username and password, separated by colon.
--  PAGE_SIZE=-1 - Limit feature count while fetching from server.
-   Default value is -1 - no limit.
--  BATCH_SIZE=-1 - Size of feature insert and update operations cache
-   before send to server. If batch size is -1 batch mode is disabled.
-   Default value is -1.
--  NATIVE_DATA=NO - Whether to store the json *extensions* key in
-   feature native data. Default value is NO.
--  JSON_DEPTH=32 - The depth of json response that can be parsed. If
-   depth is greater than this value, parse error occurs.
--  EXTENSIONS - Comma separated extensions list. Available values are 
-   `description` and `attachment`. This needed to fill native data.
+-  **USERPWD**: 쌍점으로 구분된 사용자명과 비밀번호입니다.
+-  **PAGE_SIZE=-1**: 서버로부터 가져오는 객체의 개수를 제한합니다. -1로 설정하면 무제한입니다.
+-  **BATCH_SIZE=-1**: 서버로 전송하기 전 객체 삽입 및 업데이터 작업 캐시의 용량입니다. 배치(batch) 용량을 -1로 설정하면 배치 모드를 비활성화합니다. 기본값은 -1입니다.
+-  **NATIVE_DATA=NO**: 객체 네이티브 데이터에 JSon *extensions* 키를 저장할지 여부를 선택합니다. 기본값은 NO입니다.
+-  **JSON_DEPTH=32**: 파싱할 수 있는 JSon 응답의 심도를 지정합니다. 심도가 이 옵션값을 초과하는 경우, 파싱 오류를 발생시킵니다.
+-  **EXTENSIONS**: 쉼표로 구분한 확장 사양 목록입니다. `description` 및 `attachment` 값을 사용할 수 있습니다. 네이티브 데이터를 채우기 위해 필요합니다.
 
-Dataset creation options
+데이터셋 생성 옵션
 ------------------------
 
-The following dataset/datasource creation options are available:
+다음 데이터셋/데이터소스 생성 옵션들을 사용할 수 있습니다:
 
--  KEY - Key value. Must be unique in whole NextGIS Web instance.
-   Optional.
--  DESCRIPTION - Resource description. Optional.
--  USERPWD - Username and password, separated by colon.
--  PAGE_SIZE=-1 - Limit feature count while fetching from server.
-   Default value is -1 - no limit.
--  BATCH_SIZE=-1 - Size of feature insert and update operations cache
-   before send to server. If batch size is -1 batch mode is disable.
-   Default value is -1.
--  NATIVE_DATA=NO - Whether to store the json *extensions* key in
-   feature native data. Default value is NO.
--  JSON_DEPTH=32 - The depth of json response that can be parsed. If
-   depth is greater than this value, parse error occurs.
--  EXTENSIONS - Comma separated extensions list. Available values are 
-   `description` and `attachment`. This needed to fill native data.
+-  **KEY**: 키 값입니다. 전체 NextGIS 웹 인스턴스에서 유일한 값이어야만 합니다. 선택 옵션입니다.
+-  **DESCRIPTION**: 리소스 설명입니다. 선택 옵션입니다.
+-  **USERPWD**: 쌍점으로 구분된 사용자명과 비밀번호입니다.
+-  **PAGE_SIZE=-1**: 서버로부터 가져오는 객체의 개수를 제한합니다. 기본값인 -1로 설정하면 무제한입니다.
+-  **BATCH_SIZE=-1**: 서버로 전송하기 전 객체 삽입 및 업데이터 작업 캐시의 용량입니다. 배치(batch) 용량을 -1로 설정하면 배치 모드를 비활성화합니다. 기본값은 -1입니다.
+-  **NATIVE_DATA=NO**: 객체 네이티브 데이터에 JSon *extensions* 키를 저장할지 여부를 선택합니다. 기본값은 NO입니다.
+-  **JSON_DEPTH=32**: 파싱할 수 있는 JSon 응답의 심도를 지정합니다. 심도가 이 옵션값을 초과하는 경우, 파싱 오류를 발생시킵니다.
+-  **EXTENSIONS**: 쉼표로 구분한 확장 사양 목록입니다. `description` 및 `attachment` 값을 사용할 수 있습니다. 네이티브 데이터를 채우기 위해 필요합니다.
 
-Layer creation options
+레이어 생성 옵션
 ----------------------
 
-The following layer creation options are available:
+다음 레이어 생성 옵션들을 사용할 수 있습니다:
 
--  OVERWRITE - Whether to overwrite an existing table with the layer
-   name to be created. The resource will delete and new one will
-   created. This leads that resource identifier will change. Defaults to
-   NO. Optional.
--  KEY - Key value. Must be unique in whole NextGIS Web instance.
-   Optional.
--  DESCRIPTION - Resource description. Optional.
+-  **OVERWRITE**: 생성할 레이어 이름을 가진 기존 테이블을 덮어쓸지 여부를 선택합니다. 리소스를 삭제하고 새 리소스를 생성할 것입니다. 리소스 식별자가 바뀌게 됩니다. 기본값은 NO입니다. 선택 옵션입니다.
+-  **KEY**: 키 값입니다. 전체 NextGIS 웹 인스턴스에서 유일한 값이어야만 합니다. 선택 옵션입니다.
+-  **DESCRIPTION**: 리소스 설명입니다. 선택 옵션입니다.
 
-Metadata
---------
+메타데이터
+----------
 
-NextGIS Web metadata are supported in datasource, vector, PostGIS,
-raster layers and styles. Metadata are stored at specific domain "NGW".
-NextGIS Web supported metadata are strings and numbers. Metadata keys
-with decimal numbers will have suffix **.d** and for real numbers -
-**.f**. To create new metadata item, add new key=value pair in NGW
-domain using the *SetMetadataItem* function and appropriate suffix. During
-transferring to NextGIS Web, suffix will be omitted. You must ensure
-that numbers correctly transform from string to number.
+데이터소스, 벡터, PostGIS, 래스터 레이어 및 스타일에서 NextGIS 웹 메타데이터를 지원합니다. 메타데이터는 특화 도메인 "NGW"에 저장됩니다. NextGIS 웹은 문자열 및 숫자형 메타데이터를 지원합니다. 십진수를 가진 메타데이터 키에는 **.d** 접미어가 붙고, 실수를 가진 키에는 **.f** 접미어가 붙습니다. 새로운 메타데이터 항목을 생성하려면, :cpp:func:`SetMetadataItem` 함수와 알맞은 접미어를 사용해서 NGW 도메인에 새로운 키=값 쌍을 추가하십시오. NextGIS 웹으로 전송하는 도중 접미어는 생략될 것입니다. 숫자가 문자열로부터 숫자로 정확하게 변환되는지 확인해야만 합니다.
 
-Resource description and key map to appropriate *description* and
-*keyname* metadata items in default domain. Changing those metadata
-items will cause an update of resource properties.
+리소스 설명 및 키는 기본 도메인에 있는 *description* 및 *keyname* 메타데이터 항목에 적절하게 매핑됩니다. 이 메타데이터 항목들을 변경하면 리소스 속성을 업데이트할 것입니다.
 
-Resource creation date, type and parent identifier map to appropriate
-read-only metadata items *creation_date*, *resource_type* and
-*parent_id* in default domain.
+리소스 생성 날짜, 유형 및 상위 식별자는 기본 도메인에 있는 읽기 전용 *creation_date*, *resource_type* 및 *parent_id* 메타데이터 항목에 적절하게 매핑됩니다.
 
-Vector layer field properties (alias, identifier, label field, grid
-visibility) map to layer metadata the following way:
+벡터 레이어의 필드 속성(별명, 식별자, 라벨 필드, 그리드 가시성)은 다음과 같이 레이어 메타데이터에 매핑됩니다:
 
--  field alias -> FIELD_{field number}_ALIAS (for example FIELD_0_ALIAS)
--  identifier -> FIELD_{field number}_ID (for example FIELD_0_ID)
--  label field -> FIELD_{field number}_LABEL_FIELD (for example
-   FIELD_0_LABEL_FIELD)
--  grid visibility -> FIELD_{field number}_GRID_VISIBILITY (for example
-   FIELD_0_GRID_VISIBILITY)
+-  필드 별명(alias) -> FIELD_{field number}_ALIAS (예: FIELD_0_ALIAS)
+-  식별자(identifier) -> FIELD_{field number}_ID (예: FIELD_0_ID)
+-  라벨 필드 -> FIELD_{field number}_LABEL_FIELD (예: FIELD_0_LABEL_FIELD)
+-  그리드 가시성 -> FIELD_{field number}_GRID_VISIBILITY (예: FIELD_0_GRID_VISIBILITY)
 
-Starting from GDAL 3.3 field alias can be set/get via `SetAlternativeName`
-and `GetAlternativeNameRef`.
+GDAL 3.3버전부터 :cpp:func:`SetAlternativeName` 및 :cpp:func:`GetAlternativeNameRef` 를 통해 필드 별명을 지정할 수/가져올 수 있습니다.
 
-Filters
+필터
 -------
 
-Vector and PostGIS layers support SetIgnoredFields method. When this method
-executes any cached features will be freed.
+벡터 및 PostGIS 레이어는 :cpp:func:`SetIgnoredFields` 메소드를 지원합니다. 이 메소드를 실행하는 경우 모든 캐시된 객체를 해제할 것입니다.
 
-Vector and PostGIS layers support SetAttributeFilter and
-SetSpatialFilter methods. The attribute filter will evaluate at server side
-if condition is one of following comparison operators:
+벡터 및 PostGIS 레이어는 :cpp:func:`OGRLayer::SetAttributeFilter` 및 :cpp:func:`OGRLayer::SetSpatialFilter` 메소드를 지원합니다. 조건이 다음 비교 연산자 가운데 하나인 경우 서버 쪽에서 속성 필터를 평가할 것입니다:
 
- - greater (>)
- - lower (<)
- - greater or equal (>=)
- - lower or equal (<=)
- - equal (=)
- - not equal (!=)
- - LIKE SQL statement (for strings compare)
- - ILIKE SQL statement (for strings compare)
+ - 초과 (>)
+ - 미만 (<)
+ - 이상 (>=)
+ - 이하 (<=)
+ - 등호 (=)
+ - 부등호 (!=)
+ - LIKE SQL 문 (문자열 비교 용)
+ - ILIKE SQL 문 (문자열 비교 용)
 
-Also only AND operator without brackets supported between comparison. For example,
+또한 비교 연산자 사이에는 괄호가 없는 AND 연산자만 지원합니다. 다음은 그 예시입니다:
 
 ::
 
@@ -250,76 +196,60 @@ Also only AND operator without brackets supported between comparison. For exampl
 
    FIELD_1 = 'Value 1' AND FIELD_2 > Value 2
 
-In other cases attribute filter will evaluate on client side.
+조건이 이런 비교 연산자 가운데 하나가 아닌 경우 클라이언트 쪽에서 속성 필터를 평가할 것입니다.
 
-You can set attribute filter using NextGIS Web native format. For
-example,
+NextGIS 웹 네이티브 포맷을 이용해서 속성 필터를 설정할 수 있습니다. 다음은 그 예시입니다:
 
 ::
 
    NGW:fld_FIELD_1=Value 1&fld_FIELD_2__gt=Value 2
 
-Don't forget to add 'NGW:' perefix to where clause and 'fld\_' prefix to
-field name.
+WHERE 절 앞에 'NGW:' 접두어를 그리고 필드명 앞에 'fld\_' 접두어를 붙이는 것을 잊지 마십시오.
 
-Dataset supports ExecuteSQL method. Only the following queries are
-supported:
+데이터셋이 :cpp:func:`OGRLayer::ExecuteSQL` 메소드를 지원하지만, 다음 쿼리들만 지원합니다:
 
--  DELLAYER: layer_name; - delete layer with layer_name.
--  DELETE FROM layer_name; - delete any features from layer with
-   layer_name.
--  DROP TABLE layer_name; - delete layer with layer_name.
--  ALTER TABLE src_layer RENAME TO dst_layer; - rename layer.
--  SELECT field_1,field_2 FROM src_layer WHERE field_1 = 'Value 1' AND
-   field_2 = 'Value 2';
+-  DELLAYER: layer_name; - layer_name으로 레이어를 삭제합니다.
+-  DELETE FROM layer_name; - layer_name 이름인 레이어로부터 모든 객체를 삭제합니다.
+-  DROP TABLE layer_name; - layer_name 이름인 레이어를 삭제합니다.
+-  ALTER TABLE src_layer RENAME TO dst_layer; - 레이어를 재명명합니다.
+-  SELECT field_1,field_2 FROM src_layer WHERE field_1 = 'Value 1' AND field_2 = 'Value 2'; - SELECT 문에 필드 목록 또는 별표('\*')를 지정할 수 있습니다. WHERE 절은 :cpp:func:`OGRLayer::SetAttributeFilter` 메소드의 입력물과 동일한 제한 사항이 적용됩니다.
 
-In SELECT statement field list or asterisk can be provided. The WHERE
-clause has same limitations as SetAttributeFilter method input.
-
-Examples
+예시
 --------
 
-Read datasource contents (1730 is resource group identifier):
+- 데이터소스 내용 읽어오기('1730'이 리소스 그룹 식별자입니다):
 
 ::
 
        ogrinfo -ro NGW:https://demo.nextgis.com/resource/1730
 
-Read layer details (`1730` is resource group identifier, `Parks` is vecror layer
-name):
+-  레이어 상세 정보 읽어오기('1730'이 리소스 그룹 식별자, 'Parks'가 벡터 레이어 이름입니다):
 
 ::
 
        ogrinfo -ro -so NGW:https://demo.nextgis.com/resource/1730 Parks
 
-Creating and populating a vector layer from a shapefile in existing resource
-group with identifier 1730. New vector layer name will be "some new name":
+-  식별자가 '1730'인 기존 리소스 그룹에 있는 shapefile로부터 벡터 레이어를 생성하고 채우기. 새 벡터 레이어는 "some new name"으로 명명될 것입니다:
 
 ::
 
        ogr2ogr -f NGW -nln "some new name" -update -doo "BATCH_SIZE=100" -t_srs EPSG:3857 "NGW:https://demo.nextgis.com/resource/1730" myshapefile.shp
 
 .. warning::
-   The `-update` key is mandatory, otherwise the destination datasource will
-   silently delete. The `-t_srs EPSG:3857` key is mandatory because vector
-   layers spatial reference in NextGIS Web can be only in EPSG:3857.
+   '-update' 키는 필수입니다. 이 키를 지정하지 않는 경우 대상 데이터소스를 그냥 삭제할 것입니다. NextGIS 웹이 지원하는 벡터 레이어의 공간 좌표계는 EPSG:3857뿐이기 때문에 '-t_srs EPSG:3857' 키도 필수입니다.
 
 .. note::
-   The `-doo "BATCH_SIZE=100"` key is recommended for speed up feature transferring.
+   객체 변환 작업의 속도를 향상시키기 위해 '-doo "BATCH_SIZE=100"' 키를 권장합니다.
 
-Creating and populating a vector layer from a shapefile in new resource
-group with name "new group" and parent identifier 1730. New vector layer name
-will be "some new name":
+-  이름이 "new group"이고 상위 식별자가 '1730'인 새 리소스 그룹에 있는 shapefile로부터 벡터 레이어를 생성하고 채우기. 새 벡터 레이어는 "some new name"으로 명명될 것입니다:
 
 ::
 
        ogr2ogr -f NGW -nln "Название на русском языке" -dsco "BATCH_SIZE=100" -t_srs EPSG:3857 "NGW:https://demo.nextgis.com/resource/1730/new group" myshapefile.shp
 
-See also
+참고
 --------
 
--  :ref:`Raster side of the driver <raster.ngw>`
--  `NextGIS Web
-   documentation <http://docs.nextgis.com/docs_ngweb/source/toc.html>`__
--  `NextGIS Web for
-   developers <http://docs.nextgis.com/docs_ngweb_dev/doc/toc.html>`__
+-  :ref:`NextGIS 래스터 <raster.ngw>` 드라이버
+-  `NextGIS 웹 문서 <http://docs.nextgis.com/docs_ngweb/source/toc.html>`_
+-  `개발자를 위한 NextGIS 웹 <http://docs.nextgis.com/docs_ngweb_dev/doc/toc.html>`_
