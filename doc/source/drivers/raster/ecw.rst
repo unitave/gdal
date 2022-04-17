@@ -103,7 +103,7 @@ ECW 메타데이터 도메인에 ECW 헤더에서 찾은 PROJ, DATUM 및 UNITS�
 
 지리변형 및 투영법도 SetGeoTransform() 및 SetProjection() 메소드로 수정할 수 있습니다. 투영법을 SetProjection()으로 설정하고 PROJ, DATUM 또는 UNITS를 SetMetadataItem()으로 설정한 경우, 후자의 값이 투영법 문자열로부터 작성된 값을 무시할 것입니다.
 
-`gdal_edit.py <gdal_edit.html>`_ 유틸리티의 -a_ullr, -a_srs 또는 -mo 스위치를 사용하면 이 모든 값들을 수정할 수 있습니다.
+:ref:`gdal_edit` 유틸리티의 -a_ullr, -a_srs 또는 -mo 스위치를 사용하면 이 모든 값들을 수정할 수 있습니다.
 
 예시:
 

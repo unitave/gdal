@@ -128,6 +128,9 @@ COG -- 클라우드 최적화 GeoTIFF 생성기
 
 .. _`OGC 2차원 타일 행렬 집합 표준`: http://docs.opengeospatial.org/is/17-083r2/17-083r2.html
 
+- **ZOOM_LEVEL=integer**: (GDAL 3.5 이상)
+  확대/축소 수준의 (가장 정밀하지 않는 확대/축소 수준이 0에서 시작하는) 번호입니다. TILING_SCHEME 옵션의 값이 CUSTOM이 아닌 경우에만 사용할 수 있습니다. 이 옵션을 설정하는 경우 ZOOM_LEVEL_STRATEGY를 무시합니다.
+
 - **ZOOM_LEVEL_STRATEGY=AUTO/LOWER/UPPER** (GDAL 3.2 이상): 확대/축소 수준을 결정할 전략을 선택합니다. TILING_SCHEME이 CUSTOM이 아닌 경우에만 사용합니다. LOWER는 내장되지 않은, 이론적으로 계산된 확대/축소 수준 바로 아래의 확대/축소 수준을 선택하고 서브샘플링 작업을 수행할 것입니다. UPPER는 그 반대로 바로 위의 확대/축소 수준을 선택하고 오버샘플링 작업을 수행할 것입니다. 기본값은 가장 가까운 확대/축소 수준을 선택하는 AUTO입니다.
 
 - **TARGET_SRS=string**: 입력 데이터셋을 또다른 공간 좌표계로 강제로 재투영합니다. WKT 문자열, EPSG:XXXX 코드 또는 PROJ 문자열을 지정할 수 있습니다.
