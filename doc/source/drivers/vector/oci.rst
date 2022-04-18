@@ -5,7 +5,7 @@
 
 .. shortname:: OCI
 
-.. build_dependencies:: OCI library
+.. build_dependencies:: OCI 라이브러리
 
 OCI 드라이버는 Oracle Spatial (8.1.7 이상 버전) 객체 관계형(object-relational) 포맷으로 된 데이터의 읽기 및 쓰기를 지원합니다. 오라클 Spatial 드라이버는 일반적으로 OGR로 빌드되지 않지만, 오라클 클라이언트 라이브러리를 사용할 수 있는 플랫폼 상에서는 OGR로 빌드될 수도 있습니다.
 
