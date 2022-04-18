@@ -32,29 +32,34 @@ NTF 객체는 언제나 영국 국가 그리드(British National Grid) 좌표계
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  Landline (및 Landline Plus):
+
    -  LANDLINE_POINT
    -  LANDLINE_LINE
    -  LANDLINE_NAME
 
 -  Panorama Contours:
+
    -  PANORAMA_POINT
    -  PANORAMA_CONTOUR
 
    HEIGHT 속성이 표고를 담고 있습니다.
 
 -  Strategi:
+
    -  STRATEGI_POINT
    -  STRATEGI_LINE
    -  STRATEGI_TEXT
    -  STRATEGI_NODE
 
 -  Meridian:
+
    -  MERIDIAN_POINT
    -  MERIDIAN_LINE
    -  MERIDIAN_TEXT
    -  MERIDIAN_NODE
 
 -  Boundaryline:
+
    -  BOUNDARYLINE_LINK
    -  BOUNDARYLINE_POLY
    -  BOUNDARYLINE_COLLECTIONS
@@ -63,28 +68,34 @@ NTF 객체는 언제나 영국 국가 그리드(British National Grid) 좌표계
    집합(collection)은 (읽어오는 동안 도형이 없는) 폴리곤 집합입니다. 이 상품으로부터만 폴리곤을 구성할 수 있습니다.
 
 -  BaseData.GB:
+
    -  BASEDATA_POINT
    -  BASEDATA_LINE
    -  BASEDATA_TEXT
    -  BASEDATA_NODE
 
 -  OSCAR Asset/Traffic:
+
    -  OSCAR_POINT
    -  OSCAR_LINE
    -  OSCAR_NODE
 
 -  OSCAR Network:
+
    -  OSCAR_NETWORK_POINT
    -  OSCAR_NETWORK_LINE
    -  OSCAR_NETWORK_NODE
 
 -  Address Point:
+
    -  ADDRESS_POINT
 
 -  Code Point:
+
    -  CODE_POINT
 
 -  Code Point Plus:
+
    -  CODE_POINT_PLUS
 
 전체 데이터셋도 FEAT_CODE 숫자를 객체 클래스 이름(FC_NAME)과 관계 맺어주는 순수 테이블을 담고 있는 FEATURE_CLASSES 레이어를 가질 것입니다. 이는 데이터셋에 있는 모든 상품에 적용됩니다. 몇몇 (Code Point 및 Address Point 같은) 레이어 유형은 객체 클래스를 포함하지 않습니다. 어떤 상품들은 파일에 정의되어 있지 않은 객체 클래스를 사용하기 때문에, FEATURE_CLASSES 레이어에 그런 객체 클래스들은 나타나지 않을 것입니다.
