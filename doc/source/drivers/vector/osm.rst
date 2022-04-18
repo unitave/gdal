@@ -117,7 +117,7 @@ For earlier versions, for large files, applications should set the
 :decl_configoption:`OGR_INTERLEAVED_READING` =YES configuration option to turn on a special
 reading mode where the following reading pattern must be used:
 
-::
+.. code-block:: cpp
 
        bool bHasLayersNonEmpty;
        do
