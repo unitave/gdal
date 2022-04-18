@@ -11,20 +11,9 @@ OCI 드라이버는 Oracle Spatial (8.1.7 이상 버전) 객체 관계형(object
 
 데이터베이스를 열 때, 데이터베이스 이름을 "OCI:userid/password@database_instance:table,table" 형식으로 지정해야 합니다. 테이블 목록은 선택 옵션입니다. 기본 로컬 데이터베이스 인스턴스에 접근하는 경우 database_instance 부분을 생략할 수도 있습니다.
 
+테이블 목록을 지정하지 않는 경우, OGR가 ALL_SDO_GEOM_METADATA 테이블에 나타나는 모든 테이블을 테이블 이름을 가진 레이어로 취급할 것입니다. 데이터소스 이름에 명확하게 목록화하지 않는 이상 ALL_SDO_GEOM_METADATA 테이블에 목록화되어 있지 않은 비공간 테이블 또는 공간 테이블에 접근할 수 없습니다. 원하는 레이어들이 모두 ALL_SDO_GEOM_METADATA 테이블에 존재하는 데이터베이스에서도 사용할 테이블만 목록화하는 것이 바람직할 수도 있습니다. 수많은 테이블을 가지고 있는 데이터베이스에서 초기화 시간을 크게 줄일 수 있기 때문입니다.
 
-If the list of tables is not provided, then all tables appearing in
-ALL_SDO_GEOM_METADATA will be treated by OGR as layers with the table
-names as the layer names. Non-spatial tables or spatial tables not
-listed in the ALL_SDO_GEOM_METADATA table are not accessible unless
-explicitly listed in the datasource name. Even in databases where all
-desired layers are in the ALL_SDO_GEOM_METADATA table, it may be
-desirable to list only the tables to be used as this can substantially
-reduce initialization time in databases with many tables.
-
-If the table has an integer column called OGR_FID it will be used as the
-feature id by OGR (and it will not appear as a regular attribute). When
-loading data into Oracle Spatial OGR will always create the OGR_FID
-field.
+테이블이 OGR_FID라는 정수형 열을 가지고 있는 경우 OGR가 객체ID로 사용할 것입니다. (그리고 이 열은 정규 속성으로 나타나지 않을 것입니다.) 오라클 Spatial로 데이터를 불러올 때 OGR는 항상 OGR_FID 필드를 생성할 것입니다.
 
 드라이버 케이퍼빌리티
 -------------------
