@@ -1,21 +1,16 @@
 .. _vector.oci:
 
-Oracle Spatial
+오라클 Spatial
 ==============
 
 .. shortname:: OCI
 
 .. build_dependencies:: OCI library
 
-This driver supports reading and writing data in Oracle Spatial (8.1.7
-or later) Object-Relational format. The Oracle Spatial driver is not
-normally built into OGR, but may be built in on platforms where the
-Oracle client libraries are available.
+OCI 드라이버는 Oracle Spatial (8.1.7 이상 버전) 객체 관계형(object-relational) 포맷으로 된 데이터의 읽기 및 쓰기를 지원합니다. 오라클 Spatial 드라이버는 일반적으로 OGR로 빌드되지 않지만, 오라클 클라이언트 라이브러리를 사용할 수 있는 플랫폼 상에서는 OGR로 빌드될 수도 있습니다.
 
-When opening a database, its name should be specified in the form
-"OCI:userid/password@database_instance:table,table". The list of tables
-is optional. The database_instance portion may be omitted when accessing
-the default local database instance.
+데이터베이스를 열 때, 데이터베이스 이름을 "OCI:userid/password@database_instance:table,table" 형식으로 지정해야 합니다. 테이블 목록은 선택 옵션입니다. 기본 로컬 데이터베이스 인스턴스에 접근하는 경우 database_instance 부분을 생략할 수도 있습니다.
+
 
 If the list of tables is not provided, then all tables appearing in
 ALL_SDO_GEOM_METADATA will be treated by OGR as layers with the table
@@ -31,185 +26,127 @@ feature id by OGR (and it will not appear as a regular attribute). When
 loading data into Oracle Spatial OGR will always create the OGR_FID
 field.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
 
 .. supports_georeferencing::
 
-SQL Issues
+SQL 문제점
 ----------
 
-By default, the Oracle driver passes SQL statements directly to Oracle
-rather than evaluating them internally when using the ExecuteSQL() call
-on the OGRDataSource, or the -sql command option to ogr2ogr. Attribute
-query expressions are also passed through to Oracle.
+OCI 드라이버는 OGRDataSource 상에 ExecuteSQL() 함수를 호출하거나 ogr2ogr 유틸리티에 '-sql' 명령어 옵션을 사용하는 경우, 내부적으로 SQL 문을 평가하기보다는 기본적으로 오라클에 SQL 문을 직접 전송합니다. 속성 쿼리 표현식도 오라클에 직접 전송합니다.
 
-As well two special commands are supported via the ExecuteSQL()
-interface. These are "**DELLAYER:<table_name>**" to delete a layer, and
-"**VALLAYER:<table_name>**" to apply the SDO_GEOM.VALIDATE_GEOMETRY()
-check to a layer. Internally these pseudo-commands are translated into
-more complex SQL commands for Oracle.
+ExecuteSQL() 인터페이스를 통해 특수 명령어 2개도 지원합니다. 레이어를 삭제하는 ``DELLAYER:<table_name>`` 와 레이어에 SDO_GEOM.VALIDATE_GEOMETRY() 검증을 적용하는 ``VALLAYER:<table_name>`` 입니다. 내부적으로 이 의사 명령어들을 오라클을 위한 좀 더 복잡한 SQL 명령어들로 변환합니다.
 
-It is also possible to request the driver to handle SQL commands with
-:ref:`OGR SQL <ogr_sql_dialect>` engine, by passing **"OGRSQL"**
-string to the ExecuteSQL() method, as name of the SQL dialect.
+ExecuteSQL() 메소드에 **"OGRSQL"** 문자열을 SQL 방언 이름으로 전송해서 OCI 드라이버가 SQL 문을 :ref:`OGR SQL <ogr_sql_dialect>` 엔진으로 처리하도록 요청할 수도 있습니다.
 
-Caveats
+주의할 점
 -------
 
--  The type recognition logic is currently somewhat impoverished. No
-   effort is made to preserve real width information for integer and
-   real fields.
--  Various types such as objects, and BLOBs in Oracle will be completely
-   ignored by OGR.
--  Currently the OGR transaction semantics are not properly mapped onto
-   transaction semantics in Oracle.
--  If an attribute called OGR_FID exists in the schema for tables being
-   read, it will be used as the FID. Random (FID based) reads on tables
-   without an identified (and indexed) FID field can be very slow. To
-   force use of a particular field name the :decl_configoption:`OCI_FID` 
-   configuration option (e.g. environment variable) can be set to the 
-   target field name.
--  Curved geometry types are converted to linestrings or linear rings in
-   six degree segments when reading. The driver has no support for
-   writing curved geometries.
--  There is no support for point cloud (SDO_PC), TIN (SDO_TIN) and
-   annotation text data types in Oracle Spatial.
--  It might be necessary to define the environment variable NLS_LANG to
-   "American_America.UTF8" to avoid issues with floating point numbers
-   being truncated to integer on non-English environments.
--  For developers: when running the driver under the memory error
-   detection tool Valgrind, specifying the database_instance, typically
-   to localhost, or with the TWO_TASK environment variable seems to be
-   compulsory, otherwise "TNS:permission denied" errors will be
-   reported)
+-  유형 인식 로직이 현재 다소 부족합니다. 정수형 및 실수형 필드의 실수 길이 정보를 보전하려 하지 않습니다.
 
-Creation Issues
+-  OGR가 오라클에 있는 객체 및 블랍(blob) 같은 다양한 유형을 완전히 무시할 것입니다.
+
+-  현재 OGR 트랜잭션 의미(semantics)가 오라클의 트랜잭션 의미로 제대로 매핑되지 않습니다.
+
+-  테이블을 읽어올 때 해당 테이블의 스키마에 OGR_FID라는 속성이 존재하는 경우, FID로 사용할 것입니다. 식별된 (그리고 색인화된) FID 필드 없이 테이블들을 (FID 기반으로) 임의로 읽어오는 것은 아주 느릴 수 있습니다. :decl_configoption:`OCI_FID` 환경설정 옵션을 (예를 들어 환경 변수를) 대상 필드명으로 설정하면 특정 필드명을 강제로 사용하게 할 수 있습니다.
+
+-  읽기 작업 시 만곡 도형 유형을 6도 단위로 구부러지는 선분들로 이루어진 라인스트링 또는 선형 고리로 변환합니다. 이 드라이버는 만곡 도형 쓰기를 지원하지 않습니다.
+
+-  오라클 Spatial은 점구름(SDO_PC), TIN(SDO_TIN) 그리고 주석 텍스트 데이터를 지원하지 않습니다.
+
+-  로케일이 영어가 아닌 환경에서 부동소수점형 숫자를 정수로 절단하는 문제를 막으려면 NLS_LANG 환경 변수를 "American_America.UTF8"로 정의해야 할 수도 있습니다.
+
+-  개발자에게: Valgrind 메모리 오류 탐지 도구를 켠 상태에서 이 드라이버를 실행하는 경우, database_instance를 일반적으로 "localhost"로 지정하거나 또는 TWO_TASK 환경 변수를 정의해야만 할 수도 있습니다. 그렇지 않으면 "TNS:permission denied" 오류를 리포트할 것입니다.
+
+생성 문제점
 ---------------
 
-The Oracle Spatial driver does not support creation of new datasets
-(database instances), but it does allow creation of new layers within an
-existing database.
+오라클 Spatial 드라이버는 새 데이터셋(데이터베이스 인스턴스) 생성을 지원하지 않지만, 기존 데이터베이스 안에 새 레이어를 생성할 수는 있습니다.
 
-Upon closing the OGRDataSource newly created layers will have a spatial
-index automatically built. At this point the USER_SDO_GEOM_METADATA
-table will also be updated with bounds for the table based on the
-features that have actually been written. One consequence of this is
-that once a layer has been loaded it is generally not possible to load
-additional features outside the original extents without manually
-modifying the DIMINFO information in USER_SDO_GEOM_METADATA and
-rebuilding the spatial index.
+OGRDataSource를 닫을 때, 새로 생성된 레이어가 자동 작성된 공간 색인을 가질 것입니다. 이 때 USER_SDO_GEOM_METADATA 테이블도 실제로 작성된 객체를 기반으로 하는 테이블의 경계로 업데이트할 것입니다. 이 습성의 결과 가운데 하나는 레이어를 불러오고 나면 일반적으로 USER_SDO_GEOM_METADATA에 있는 DIMINFO 정보를 직접 수정하거나 공간 색인을 재작성하지 않고서는 원본 범위 바깥에 있는 추가적인 객체를 불러오지 못 하게 된다는 것입니다.
 
-Layer Creation Options
-~~~~~~~~~~~~~~~~~~~~~~
+레이어 생성 옵션
+----------------
 
--  **OVERWRITE**: This may be "YES" to force an existing layer (=table)
-   of the same desired name to be destroyed before creating the
-   requested layer. The default value is "NO"
--  **TRUNCATE**: This may be "YES" to force the existing table to be
-   reused, but to first truncate all records in the table, preserving
-   indexes or dependencies. The default value is "NO".
--  **LAUNDER**: This may be "YES" to force new fields created on this
-   layer to have their field names "laundered" into a form more
-   compatible with Oracle. This converts to upper case and converts some
-   special characters like "-" and "#" to "_". The default value is
-   "NO".
--  **PRECISION**: This may be "YES" to force new fields created on this
-   layer to try and represent the width and precision information, if
-   available using NUMBER(width,precision) or VARCHAR2(width) types. If
-   "NO" then the types NUMBER, INTEGER and VARCHAR2 will be used
-   instead. The default is "YES".
--  **DIM**: This may be set to 2 or 3 to force the dimension of the
-   created layer. Prior to GDAL 2.2, 3 is used by default. Starting with
-   GDAL 2.2, the dimension of the layer geometry type is used by
-   default.
--  **SPATIAL_INDEX**: This may be set to FALSE to disable creation of a
-   spatial index when a layer load is complete. By default an index is
-   created if any of the layer features have valid geometries. The
-   default is "YES". Note: option was called INDEX in releases before
-   GDAL 2
--  **INDEX_PARAMETERS**: This may be set to pass creation parameters
-   when the spatial index is created. For instance setting
-   INDEX_PARAMETERS to SDO_RTR_PCTFREE=0 would cause the rtree index to
-   be created without any empty space. By default no parameters are
-   passed causing a default R-Tree spatial index to be created.
--  **ADD_LAYER_GTYPE**\ =YES/NO: This may be
-   set to NO to disable the constraints on the geometry type in the
-   spatial index, through the layer_gtype keyword in the PARAMETERS
-   clause of the CREATE INDEX. Layers of type MultiPoint,
-   MultiLineString or MultiPolygon will also accept single geometry type
-   (Point, LineString, Polygon). Defaults to YES.
--  **DIMINFO_X**: This may be set to xmin,xmax,xres values to control
-   the X dimension info written into the USER_SDO_GEOM_METADATA table.
-   By default extents are collected from the actual data written.
--  **DIMINFO_Y**: This may be set to ymin,ymax,yres values to control
-   the Y dimension info written into the USER_SDO_GEOM_METADATA table.
-   By default extents are collected from the actual data written.
--  **DIMINFO_Z**: This may be set to zmin,zmax,zres values to control
-   the Z dimension info written into the USER_SDO_GEOM_METADATA table.
-   By default fixed values of -100000,100000,0.002 are used for layers
-   with a third dimension.
--  **SRID**: By default this driver will attempt to find an existing row
-   in the MDSYS.CS_SRS table with a well known text coordinate system
-   exactly matching the one for this dataset. If one is not found, a new
-   row will be added to this table. The SRID creation option allows the
-   user to force use of an existing Oracle SRID item even it if does not
-   exactly match the WKT the driver expects.
--  **MULTI_LOAD**: If enabled new features will be created in groups of
-   100 per SQL INSERT command, instead of each feature being a separate
-   INSERT command. Having this enabled is the fastest way to load data
-   quickly. Multi-load mode is enabled by default, and may be forced off
-   for existing layers or for new layers by setting to NO. The number of
-   rows in each group is defined by MULTI_LOAD_COUNT. To load one row at
-   a time, set MULTI_LOAD to NO.
--  **MULTI_LOAD_COUNT**: Define the number of features on each ARRAY
-   INSERT command, instead of the default 100 item defined by
-   MULTI_LOAD. Since each array insert will commit a transaction, this
-   options shouldn't be combined with ogr2ogr "-gt N". Use "-gt
-   unlimited" preferably when using MULTI_LOAD_COUNT. The default is
-   100. If neither MULTI_LOAD nor MULTI_LOAD_COUNT are specified, then
-   the loading happens in groups of 100 rows.
--  **FIRST_ID**: Define the first numeric value of the id column on the
-   first rows. It's also work as a open option when used to append or
-   update an existing dataset.
--  **NO_LOGGING**: Define that the table and the geometry will be create
-   with nologging attributes.
--  **LOADER_FILE**: If this option is set, all feature information will
-   be written to a file suitable for use with SQL*Loader instead of
-   inserted directly in the database. The layer itself is still created
-   in the database immediately. The SQL*Loader support is experimental,
-   and generally MULTI_LOAD enabled mode should be used instead when
-   trying for optimal load performance.
--  **GEOMETRY_NAME**: By default OGR creates new tables with the
-   geometry column named ORA_GEOMETRY. If you wish to use a different
-   name, it can be supplied with the GEOMETRY_NAME layer creation
-   option.
+-  **OVERWRITE**:
+   요청한 레이어를 생성하기 전에 요청한 이름을 가진 기존 레이어를 강제로 삭제하고 싶다면 이 옵션을 YES로 설정할 수도 있습니다. 기본값은 NO입니다.
 
-Layer Open Options
-~~~~~~~~~~~~~~~~~~
+-  **TRUNCATE**:
+   기존 테이블을 강제로 재사용하게 하지만 먼저 색인 또는 의존성은 보전하면서 테이블에 있는 모든 레코드를 절단하게 하려면 이 옵션을 YES로 설정할 수도 있습니다. 기본값은 NO입니다.
 
--  **FIRST_ID**: See Layer Create Options comments on FIRST_ID.
--  **MULTI_LOAD**: See Layer Create Options comments on MULTI_LOAD.
--  **MULTI_LOAD_COUNT**: See Layer Create Options comments on
-   MULTI_LOAD_COUNT.
--  **WORKSPACE**: Define what user workspace to use.
+-  **LAUNDER**:
+   해당 레이어에 생성되는 새 필드의 이름을 오라클과 좀 더 호환되는 형식으로 강제 "세탁"하려면 이 옵션을 YES로 설정할 수도 있습니다. 이 옵션은 소문자를 대문자로 변환하고, "-" 및 "#" 같은 몇몇 특수 문자를 "_"로 변환합니다. 기본값은 NO입니다.
 
-Example
-~~~~~~~
+-  **PRECISION**:
+   해당 레이어에 생성되는 새 필드가 길이 및 정밀도 정보를 시도하고 사용할 수 있는 경우 NUMBER(길이, 정밀도) 또는 VARCHAR2(길이) 유형을 이용해서 표현하도록 강제하려면 이 옵션을 YES로 설정할 수도 있습니다. 이 옵션을 NO로 설정하면 NUMBER, INTEGER 및 VARCHAR2 유형을 대신 사용할 것입니다. 기본값은 YES입니다.
 
-Simple translation of a shapefile into Oracle. The table 'ABC' will be
-created with the features from abc.shp and attributes from abc.dbf.
+-  **DIM**:
+   생성되는 레이어의 차원을 2 또는 3으로 강제 설정하고 싶다면 이 옵션을 설정하면 됩니다. GDAL 2.2 이전 버전들에서는 기본값이 3이었습니다. GDAL 2.2버전부터, 레이어 도형 유형의 차원을 기본값으로 사용합니다.
+
+-  **SPATIAL_INDEX**:
+   레이어 불러오기가 끝났을 때 공간 색인을 자동 생성하지 않으려면 이 옵션을 FALSE로 설정할 수도 있습니다. 레이어 객체 가운데 하나라도 무결한 도형을 가지고 있을 경우 기본적으로 색인을 생성합니다. 기본값은 YES입니다.
+   주의: GDAL 버전 2 이전 배포판에서는 이 옵션의 이름이 INDEX였습니다.
+
+-  **INDEX_PARAMETERS**:
+   공간 색인을 생성했을 때 생성 파라미터를 전송하고 싶다면 이 옵션을 설정하면 됩니다. 예를 들어 이 옵션을 SDO_RTR_PCTFREE=0으로 설정하면 어떤 빈 공간도 없이 R 트리 색인을 생성할 것입니다. 기본적으로 기본 R 트리 색인을 생성하게 만드는 어떤 파라미터도 전송하지 않습니다.
+
+-  **ADD_LAYER_GTYPE=YES/NO**:
+   CREATE INDEX의 PARAMETERS 절에 있는 layer_gtype 키워드를 통해 공간 색인에 있는 도형 유형에 대한 제약 조건을 비활성화시키고 싶다면 이 옵션을 NO로 설정하면 됩니다. 멀티포인트, 멀티라인스트링 또는 멀티폴리곤 유형의 레이어가 (포인트, 라인스트링, 폴리곤 같은) 단일 도형 유형도 받아들이게 될 것입니다. 기본값은 YES입니다.
+
+-  **DIMINFO_X**:
+   USER_SDO_GEOM_METADATA 테이블에 작성되는 X 차원 정보를 제어하고 싶다면 이 옵션을 xmin,xmax,xres 값들로 설정하면 됩니다. 기본적으로 실제 작성되는 데이터로부터 범위를 수집합니다.
+
+-  **DIMINFO_Y**:
+   USER_SDO_GEOM_METADATA 테이블에 작성되는 Y 차원 정보를 제어하고 싶다면 이 옵션을 ymin,ymax,yres 값들로 설정하면 됩니다. 기본적으로 실제 작성되는 데이터로부터 범위를 수집합니다.
+
+-  **DIMINFO_Z**:
+   USER_SDO_GEOM_METADATA 테이블에 작성되는 Z 차원 정보를 제어하고 싶다면 이 옵션을 zmin,zmax,zres 값들로 설정하면 됩니다. 기본적으로 세 번째 차원을 가진 레이어의 경우 -100000,100000,0.002 고정값을 사용합니다.
+
+-  **SRID**:
+   이 드라이버는 기본적으로 MDSYS.CS_SRS 테이블에서 해당 데이터셋의 좌표계와 정확하게 일치하는 WKT 좌표계를 가진 기존 행을 찾으려 시도할 것입니다. 그런 행을 찾지 못 한 경우, 이 테이블에 새로운 행을 추가할 것입니다. SRID 생성 옵션은 기존 오라클 SRID 항목이 이 드라이버가 예상하는 WKT와 정확하게 일치하지 않더라도 사용자가 기존 오라클 SRID 항목을 강제로 사용할 수 있도록 해줍니다.
+
+-  **MULTI_LOAD**:
+   이 옵션을 활성화하면 각 객체를 개별 INSERT 명령어로 처리하는 대신 SQL INSERT 명령어 하나 당 새 객체들을 100개 단위의 그룹으로 처리할 것입니다. 이 옵션을 활성화하는 것은 데이터를 가장 빨리 불러올 수 있는 방법입니다. 다중 불러오기 모드는 기본적으로 활성화되어 있는데, NO로 설정해서 기존 레이어 또는 새 레이어에 대해 강제로 비활성화시킬 수 있습니다. 각 그룹의 행 개수는 MULTI_LOAD_COUNT 옵션으로 정의됩니다. 한 번에 행 하나씩 불러오려면 이 옵션을 NO로 설정하십시오.
+
+-  **MULTI_LOAD_COUNT**:
+   MULTI_LOAD 옵션이 정의하는 기본 100개 대신 각 ARRAY INSERT 명령어에 적용될 객체 개수를 정의합니다. 각 배열 삽입이 트랜잭션을 커밋할 것이기 때문에, 이 옵션과 ogr2ogr 유틸리티의 "-gt N" 스위치를 함께 사용해서는 안 됩니다. 이 옵션을 사용하는 경우 "-gt unlimited" 스위치를 쓰는 편이 좋습니다. 기본값은 100입니다. MULTI_LOAD 및 MULTI_LOAD_COUNT 둘 다 지정하지 않는 경우 100행씩 불러오게 됩니다.
+
+-  **FIRST_ID**:
+   첫 행에 있는 ID 열의 첫 번째 숫자값을 정의합니다. 기존 데이터셋에 추가하거나 기존 데이터셋을 업데이트하기 위해 사용하는 경우 열기 옵션으로도 작동합니다.
+
+-  **NO_LOGGING**:
+   로그 작성 방지 속성을 가진 테이블 및 도형을 생성하려면 이 옵션을 정의하십시오.
+
+-  **LOADER_FILE**:
+   이 옵션을 설정하면 모든 객체 정보를 직접 데이터베이스에 삽입하는 대신 SQL*Loader와 함께 사용하기 적합한 파일로 작성할 것입니다. 레이어 자체는 즉시 데이터베이스에 생성됩니다. SQL*Loader 지원은 실험적인 것으로, 최적화된 불러오기 성능을 원하는 경우 일반적으로 MULTI_LOAD 활성화 모드를 대신 사용해야 합니다.
+
+-  **GEOMETRY_NAME**:
+   OGR는 기본적으로 새 테이블을 ORA_GEOMETRY라는 도형 열과 함께 생성합니다. 다른 이름을 사용하고 싶다면 이 레이어 생성 옵션으로 지정할 수 있습니다.
+
+레이어 열기 옵션
+----------------
+
+-  **FIRST_ID**: FIRST_ID에 대한 레이어 생성 옵션 설명을 참조하십시오.
+
+-  **MULTI_LOAD**: MULTI_LOAD에 대한 레이어 생성 옵션 설명을 참조하십시오.
+
+-  **MULTI_LOAD_COUNT**: MULTI_LOAD_COUNT에 대한 레이어 생성 옵션 설명을 참조하십시오.
+
+-  **WORKSPACE**: 어떤 사용자 작업 공간(workspace)을 사용할지 정의합니다.
+
+예시
+----
+
+-  오라클로 shapefile을 단순 트랜잭션합니다. abc.shp 파일의 객체와 abc.dbf 파일의 속성으로 'ABC' 테이블을 생성할 것입니다:
 
 ::
 
    % ogr2ogr -f OCI OCI:warmerda/password@gdal800.dreadfest.com abc.shp
 
-This second example loads a political boundaries layer from VPF (via the
-:ref:`OGDI driver <vector.ogdi>`), and renames the layer from the cryptic
-OGDI layer name to something more sensible. If an existing table of the
-desired name exists it is overwritten.
+-  두 번째 예시는 (:ref:`OGDI <vector.ogdi>` 드라이버를 통해) VPF로부터 행정 구역을 불러와서 암호 같은 OGDI 레이어 이름을 좀 더 알기 쉬운 이름으로 재명명합니다. 원하는 이름을 가진 기존 테이블이 존재하는 경우 덮어씁니다:
 
 ::
 
@@ -217,16 +154,14 @@ desired name exists it is overwritten.
            gltp:/vrf/usr4/mpp1/v0eur/vmaplv0/eurnasia \
            -lco OVERWRITE=yes -nln polbndl_bnd 'polbndl@bnd(*)_line'
 
-This example shows using ogrinfo to evaluate an SQL query statement
-within Oracle. More sophisticated Oracle Spatial specific queries may
-also be used via the -sql commandline switch to ogrinfo.
+-  다음 예시는 ogrinfo 유틸리티를 이용해서 오라클 내에서 SQL 쿼리 선언문을 평가하는 방법을 보여줍니다. ogrinfo 유틸리티에 '-sql' 명령줄 스위치를 지정해서 좀 더 복잡한 오라클 Spatial 특화 쿼리도 사용할 수 있습니다:
 
 ::
 
    ogrinfo -ro OCI:warmerda/password -sql "SELECT pop_1994 from canada where province_name = 'Alberta'"
 
-Credits
-~~~~~~~
+감사의 말
+---------
 
-I would like to thank `SRC, LLC <http://www.extendthereach.com/>`__ for
-its financial support of the development of this driver.
+이 드라이버는 `SRC, LLC <http://www.extendthereach.com/>`_ 의 재정 지원으로 개발되었습니다.
+

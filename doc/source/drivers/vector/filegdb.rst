@@ -59,8 +59,10 @@ SELECT 문을 제외하고, FileGDB SDK API의 SQL 엔진을 통해 SQL 문을 �
 다음 메소드를 통해 최상위 요소로서의 또는 객체 데이터셋 내부에 있는 테이블 및 객체 클래스들의 계층 구조를 탐색할 수 있습니다:
 
    -  :cpp:func:`GDALDataset::GetRootGroup`
-   -  :cpp:func:`GDALGroup::GetGroupNames`, :cpp:func:`GDALGroup::OpenGroup`
-   -  :cpp:func:`GDALGroup::GetVectorLayerNames` 및 :cpp:func:`GDALGroup::OpenVectorLayer`
+   -  :cpp:func:`GDALGroup::GetGroupNames`
+   -  :cpp:func:`GDALGroup::OpenGroup`
+   -  :cpp:func:`GDALGroup::GetVectorLayerNames`
+   -  :cpp:func:`GDALGroup::OpenVectorLayer`
 
 트랜잭션 지원
 -------------------

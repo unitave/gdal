@@ -1,6 +1,6 @@
 .. _vector.oapif:
 
-OGC API - Features
+OGC API - 피처
 ==================
 
 .. versionadded:: 2.3
@@ -9,64 +9,61 @@ OGC API - Features
 
 .. build_dependencies:: libcurl
 
-This driver can connect to a OGC API - Features service. It assumes that the
-service supports OpenAPI 3.0/JSON/GeoJSON encoding for respectively API
-description, feature collection metadata and feature collection data.
+OAPIF 드라이버는 OGC API - 피처(OGC API - Features) 서비스에 접속할 수 있습니다. 이 드라이버는 서비스가 각각 API 설명, 객체 집합(feature collection) 메타데이터 그리고 객체 집합 데이터를 위한 OpenAPI 3.0, JSON 그리고 GeoJSON 인코딩을 지원한다고 가정합니다.
 
 .. note::
 
-    In versions prior to GDAL 3.1, this driver was called the WFS3 driver, and
-    only supported draft versions of the specification.
+    GDAL 3.1 이전 버전들에서는 이 드라이버를 WFS3 드라이버라고 했으며 서비스 사양의 초안 버전들만 지원했습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
-Dataset name syntax
+데이터셋 이름 문법
 -------------------
 
-The syntax to open a OGC API - Features datasource is :
-*OAPIF:http://path/to/OAPIF/endpoint*
+OGC API - 피처 데이터소스를 열기 위한 문법은 다음과 같습니다:
 
-where endpoint is the landing page or a the path to collections/{id}.
+::
 
-Layer schema
+   OAPIF:http://path/to/OAPIF/endpoint
+
+이때 'endpoint'는 랜딩 페이지 또는 'collections/{id}'를 가리키는 경로입니다.
+
+레이어 스키마
 ------------
 
-OGR needs a fixed schema per layer, but OGC API - Features Core doesn't impose
-fixed schema. So the driver will retrieve the first page of features (10
-features) and establish a schema from this.
+OGR는 레이어별 고정 스키마를 필요로 하지만 OGC API - 피처 코어는 고정 스키마를 요구하지 않습니다. 따라서 이 드라이버는 객체들의 첫 페이지를 (객체 10개를) 가져와서 스키마를 확립할 것입니다.
 
-Filtering
+필터링
 ---------
 
-The driver will forward any spatial filter set with SetSpatialFilter()
-to the server. In OGC API - Features Core, only a subset of attributes allowed by
-the server can be queried for equalities, potentially combined with a
-AND logical operator. More complex requests will be partly or completely
-evaluated on client-side.
+이 드라이버는 :cpp:func:`OGRLayer::SetSpatialFilter` 함수에 설정된 모든 공간 필터를 서버로 포워딩할 것입니다. OGC API - 피처 코어에서는 서버가 허용하는 속성 부분 집합만 잠재적인 AND 논리 연산자와 함께 쿼리할 수 있습니다. 더 복잡한 요청은 부분적으로 또는 완전히 클라이언트 쪽에서 평가될 것입니다.
 
-Rectangular spatial filtering is forward to the server as well.
+직사각형 공간 필터도 서버로 포워딩합니다.
 
-Open options
+열기 옵션
 ------------
 
-The following options are available:
+다음과 같은 열기 옵션들을 사용할 수 있습니다:
 
--  **URL**\ =url: URL to the OGC API - Features server landing page, or to a given collection.
-   Required when using the "OAPIF:" string as the connection string.
--  **PAGE_SIZE**\ =integer: Number of features to retrieve per request.
-   Defaults to 10. Minimum is 1, maximum 10000.
--  **USERPWD**: May be supplied with *userid:password* to pass a userid
-   and password to the remote server.
--  **IGNORE_SCHEMA**\ = YES/NO. (GDAL >= 3.1) Set to YES to ignore the XML
-   Schema or JSON schema that may be offered by the server.
+-  **URL=url**:
+   OGC API - 피처 서버 랜딩 페이지 또는 지정한 집합을 가리키는 URL입니다. "OAPIF:" 문자열을 연결 문자열로 사용하는 경우 필수입니다.
 
-Examples
+-  **PAGE_SIZE=integer**:
+   요청 당 가져올 객체의 개수입니다. 기본값은 10입니다. 최소 1개에서 최대 10,000개까지 지정할 수 있습니다.
+
+-  **USERPWD**:
+   원격 서버에 사용자 ID와 비밀번호를 전송하기 위해 *userid:password* 를 지정할 수도 있습니다.
+
+-  **IGNORE_SCHEMA=YES/NO**: (GDAL 3.1 이상 버전)
+   서버가 제공할 수도 있는 XML 스키마 또는 JSon 스키마를 무시하려면 YES로 설정하십시오.
+
+예시
 --------
 
--  Listing the types of a OGC API - Features server :
+-  OGC API - 피처 서버의 유형들을 목록화하기:
 
    ::
 
@@ -78,7 +75,7 @@ Examples
       2: gebaeudebauwerk (Multi Polygon)
       3: verwaltungseinheit (Multi Polygon)
 
--  Listing the summary information of a OGC API - Features layer :
+-  OGC API - 피처 레이어의 요약 정보를 목록화하기:
 
    ::
 
@@ -116,7 +113,7 @@ Examples
       lagebeztxt: String (0.0)
       tntxt: String (0.0)
 
--  Filtering on a property (depending on if the server exposes filtering capabilities of the properties, part or totally of the filter might be evaluated on client side)
+-  속성에 대해 필터링하기(서버가 필터링 기능을 지원하느냐에 따라 달라질 수 있습니다. 필터는 부분적으로 또는 완전히 클라이언트 쪽에서 평가될 것입니다.):
 
    ::
 
@@ -144,7 +141,7 @@ Examples
 
       [...]
 
--  Spatial filtering
+-  공간에 대해 필터링하기
 
    ::
 
@@ -171,9 +168,10 @@ Examples
         MULTIPOLYGON (((8.768521 51.494915,8.768535 51.494882,8.768569 51.494908,8.768563 51.494925,8.768521 51.494915)))
       [...]
 
-See Also
+참고
 --------
 
--  `"OGC API - Features - Part 1: Core" Standard
-   <http://docs.opengeospatial.org/is/17-069r3/17-069r3.html>`__
--  :ref:`WFS (1.0,1.1,2.0) driver documentation <vector.wfs>`
+-  `"OGC API - 피처 - 1부: 코어" 표준 <http://docs.opengeospatial.org/is/17-069r3/17-069r3.html>`_
+
+-  :ref:`WFS (1.0, 1.1, 2.0) <vector.wfs>` 드라이버
+

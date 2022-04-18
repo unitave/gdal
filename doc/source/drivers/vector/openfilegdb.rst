@@ -7,125 +7,108 @@ ESRI File Geodatabase (OpenFileGDB)
 
 .. built_in_by_default::
 
-The OpenFileGDB driver provides read access to vector layers of File
-Geodatabases (.gdb directories) created by ArcGIS 9 and above. The
-dataset name must be the directory/folder name, and it must end with the
-.gdb extension.
+OpenFileGDB 드라이버는 ArcGIS 9 이상 버전이 생성한 File Geodatabase(.gdb 디렉터리)의 벡터 레이어에 읽기 접근을 지원합니다. 데이터셋 이름은 디렉터리/폴더 이름이어야만 하며, .gdb 확장자로 끝나야만 합니다.
 
-It can also read directly zipped .gdb directories (with .gdb.zip
-extension), provided they contain a .gdb directory at their first level.
+이 드라이버는 ZIP 압축 파일 안에 .gdb 디렉터리가 최상위 수준에 있다면 (확장자가 .gdb.zip인) ZIP 압축된 .gdb 디렉터리도 직접 읽어올 수 있습니다.
 
-A specific .gdbtable file (including "system" tables) can also be opened
-directly.
+("system" 테이블을 포함하는) 특화 .gdbtable 파일도 직접 열 수 있습니다.
 
-Curve in geometries are supported with GDAL >= 2.2.
+GDAL 2.2버전부터 도형 안에 있는 곡선도 읽기를 지원합니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
 .. supports_virtualio::
 
-Spatial filtering
+공간 필터링
 -----------------
 
-Since GDAL 3.2, the driver can use the native .spx spatial indices for
-spatial filtering.
+GDAL 3.2버전부터, 이 드라이버는 공간 필터링 작업에 네이티브 .spx 공간 색인을 사용할 수 있습니다.
 
-In earlier versions, it uses the minimum bounding rectangle included
-at the beginning of the geometry blobs to speed up spatial filtering. By
-default, it also builds on the fly a in-memory spatial index during
-the first sequential read of a layer. Following spatial filtering
-operations on that layer will then benefit from that spatial index. The
-building of this in-memory spatial index can be disabled by setting the
-:decl_configoption:`OPENFILEGDB_IN_MEMORY_SPI` configuration option to NO.
+이전 버전들에서는 공간 필터링의 속도를 올리기 위해 도형 블랍(blob) 시작 부분에 포함된 최소 경계 직사각형을 사용합니다. 기본적으로 레이어의 첫 번째 순차 읽기 도중에 인메모리(in-memory) 공간 색인을 실시간(on the fly)으로 작성하기도 합니다. 그 다음 해당 레이어에 대한 공간 필터링 작업을 하는 경우 이 공간 색인의 혜택을 받을 것입니다. :decl_configoption:`OPENFILEGDB_IN_MEMORY_SPI` 환경설정 옵션을 NO로 설정하면 이 인메모리 공간 색인 작성을 비활성화시킬 수 있습니다.
 
-SQL support
+SQL 지원
 -----------
 
-SQL statements are run through the OGR SQL engine. When attribute
-indexes (.atx files) exist, the driver will use them to speed up WHERE
-clauses or SetAttributeFilter() calls.
+OGR SQL 엔진을 통해 SQL 문을 실행합니다. 속성 색인(.atx 파일)이 존재하는 경우, 이 드라이버는 속성 색인을 사용해서 WHERE 절 또는 SetAttributeFilter() 호출의 속도를 높일 것입니다.
 
-Special SQL requests
+특수 SQL 요청
 ~~~~~~~~~~~~~~~~~~~~
 
-"GetLayerDefinition a_layer_name" and "GetLayerMetadata a_layer_name"
-can be used as special SQL requests to get respectively the definition
-and metadata of a FileGDB table as XML content (only available in
-Geodatabases created with ArcGIS 10 or above)
+"GetLayerDefinition a_layer_name" 및 "GetLayerMetadata a_layer_name"을 특수 SQL 요청으로 이용해서 각각 FileGDB 테이블의 정의 및 메타데이터를 XML 콘텐츠로 가져올 수 있습니다. (ArcGIS 10 이상 버전이 생성한 File Geodatabase에만 사용할 수 있습니다.)
 
-Dataset open options
+데이터셋 열기 옵션
 --------------------
 
--  **LIST_ALL_TABLES**\ =YES/NO: This may be "YES" to force all tables,
-   including system and internal tables (such as the GDB_* tables) to be listed (since GDAL 3.4)
+-  **LIST_ALL_TABLES=YES/NO**: (GDAL 3.4 이상 버전)
+   (GDB_* 테이블 같은) 시스템 및 내부 테이블을 포함하는 모든 테이블을 강제로 목록화하려면 이 옵션을 YES로 설정할 수도 있습니다.
 
-Field domains
+필드 도메인
 -------------
 
 .. versionadded:: 3.3
 
-Coded and range field domains are supported.
+인코딩된 그리고 범위가 지정된 필드 도메인을 지원합니다.
 
-Hiearchical organization
+계층 구조
 ------------------------
 
 .. versionadded:: 3.4
 
-The hiearchical organization of tables and feature classes as top-level
-element or within a feature dataset can be explored using the methods
-:cpp:func:`GDALDataset::GetRootGroup`,
-:cpp:func:`GDALGroup::GetGroupNames`, :cpp:func:`GDALGroup::OpenGroup`,
-:cpp:func:`GDALGroup::GetVectorLayerNames` and :cpp:func:`GDALGroup::OpenVectorLayer`
+다음 메소드를 통해 최상위 요소로서의 또는 객체 데이터셋 내부에 있는 테이블 및 객체 클래스들의 계층 구조를 탐색할 수 있습니다:
 
-Comparison with the FileGDB driver
+   -  :cpp:func:`GDALDataset::GetRootGroup`
+   -  :cpp:func:`GDALGroup::GetGroupNames`
+   -  :cpp:func:`GDALGroup::OpenGroup`
+   -  :cpp:func:`GDALGroup::GetVectorLayerNames`
+   -  :cpp:func:`GDALGroup::OpenVectorLayer`
+
+FileGDB 드라이버와의 비교
 ----------------------------------
 
-(Comparison done with a FileGDB driver using FileGDB API SDK 1.4)
+(FileGDB API SDK 1.4버전을 이용해서 FileGDB 드라이버와 비교했습니다.)
 
-Advantages of the OpenFileGDB driver:
+OpenFileGDB 드라이버의 장점:
 
--  Can read ArcGIS 9.X Geodatabases, and not only 10 or above.
--  Can open layers with any spatial reference system.
--  Thread-safe (i.e. datasources can be processed in parallel).
--  Uses the VSI Virtual File API, enabling the user to read a
-   Geodatabase in a ZIP file or stored on a HTTP server.
--  Faster on databases with a big number of fields.
--  Does not depend on a third-party library.
--  Robust against corrupted Geodatabase files.
+-  ArcGIS 10 이상 버전만이 아니라 ArcGIS 9.x Geodatabase도 읽어올 수 있습니다.
+-  어떤 공간 좌표계를 사용하는 레이어라도 열 수 있습니다.
+-  스레드 안전(thread safety) (예: 데이터소스들을 병렬로 처리할 수 있습니다.)
+-  VSI 가상 파일 API를 이용하기 때문에, 사용자가 ZIP 파일로 된 또는 HTTP 서버에 저장된 Geodatabase를 읽어올 수 있습니다.
+-  수많은 필드를 가진 데이터베이스 상에서 작업 속도가 더 빠릅니다.
+-  제 3자 라이브러리에 의존하지 않습니다.
+-  오류가 발생한 Geodatabase 파일에 강합니다.
 
-Drawbacks of the OpenFileGDB driver:
+OpenFileGDB 드라이버의 단점:
 
--  Read-only.
--  Cannot read data from compressed data in CDF format (Compressed Data
-   Format).
+-  읽기 전용입니다.
+-  CDF(Compressed Data Format)로 압축된 데이터로부터 데이터를 읽어오지 못 합니다.
 
-Examples
+예시
 --------
 
--  Read layer from FileGDB and load into PostGIS:
+-  FileGDB로부터 레이어를 읽어와서 PostGIS로 불러오기:
 
    ::
 
       ogr2ogr -overwrite -f "PostgreSQL" PG:"host=myhost user=myuser dbname=mydb password=mypass" "C:\somefolder\BigFileGDB.gdb" "MyFeatureClass"
 
--  Get detailed info for FileGDB:
+-  FileGDB 상세 정보를 가져오기:
 
    ::
 
       ogrinfo -al "C:\somefolder\MyGDB.gdb"
 
--  Get detailed info for a zipped FileGDB:
+-  ZIP 압축된 FileGDB 상세 정보를 가져오기:
 
    ::
 
       ogrinfo -al "C:\somefolder\MyGDB.gdb.zip"
 
-Links
+링크
 -----
 
--  :ref:`FileGDB driver <vector.filegdb>`, relying on the FileGDB API SDK
--  Reverse-engineered specification of the `FileGDB
-   format <https://github.com/rouault/dump_gdbtable/wiki/FGDB-Spec>`__
+-  FileGDB API SDK에 의존하는 :ref:`FileGDB <vector.filegdb>` 드라이버
+-  `FileGDB 포맷을 리버스 엔지니어링한 사양 <https://github.com/rouault/dump_gdbtable/wiki/FGDB-Spec>`_
+

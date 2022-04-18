@@ -1,48 +1,41 @@
 .. _vector.ods:
 
-ODS - Open Document Spreadsheet
+ODS - 오픈도큐먼트 스프레드시트
 ===============================
 
 .. shortname:: ODS
 
 .. build_dependencies:: libexpat
 
-This driver can read, write and update spreadsheets in Open Document
-Spreadsheet format, used by applications like OpenOffice / LibreOffice /
-KSpread / etc...
+ODS(Open Document Spreadsheet) 드라이버는 오픈오피스, 리브레오피스, Calligra Sheets 등등 같은 응용 프로그램이 사용하는 오픈도큐먼트 스프레드시트 포맷으로 된 스프레드시트를 읽고, 쓰고, 업데이트할 수 있습니다.
 
-The driver is only available if GDAL/OGR is compiled against the Expat
-library.
+GDAL/OGR가 Expat 라이브러리를 대상으로 컴파일된 경우에만 이 드라이버를 사용할 수 있습니다.
 
-Each sheet is presented as a OGR layer. No geometry support is available
-directly (but you may use the OGR VRT capabilities for that).
+각 시트를 OGR 레이어로 나타냅니다. 어떤 도형도 직접 지원하지 않습니다. (하지만 도형 지원을 위해 OGR VRT 케이퍼빌리티를 사용할 수도 있습니다.)
 
-Note 1 : spreadsheets with passwords are not supported.
+주의 1: 비밀번호를 가진 스프레드시트는 지원하지 않습니다.
 
-Note 2 : when updating an existing document, all existing styles,
-formatting, formulas and other concepts (charts, drawings, macros, ...)
-not understood by OGR will be lost : the document is re-written from
-scratch from the OGR data model.
+주의 2: 기존 문서를 업데이트하는 경우, OGR가 이해하지 못 하는 기존의 모든 스타일, 서식, 공식 및 기타 (도표, 그림, 매크로 등등) 개념들이 사라질 것입니다. OGR 데이터 모델로부터 문서를 처음부터 재작성합니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
 
 .. supports_virtualio::
 
-Configuration options
+환경설정 옵션
 ---------------------
 
-The following :ref:`configuration options <configoptions>` are 
-available:
+다음 :ref:`환경설정 옵션들 <configoptions>` 을 사용할 수 있습니다:
 
--  :decl_configoption:`OGR_ODS_HEADERS` = FORCE / DISABLE / AUTO : By default, the driver
-   will read the first lines of each sheet to detect if the first line
-   might be the name of columns. If set to FORCE, the driver will
-   consider the first line will be taken as the header line. If set to
-   DISABLE, it will be considered as the first feature. Otherwise
-   auto-detection will occur.
--  :decl_configoption:`OGR_ODS_FIELD_TYPES` = STRING / AUTO : By default, the driver will try
-   to detect the data type of fields. If set to STRING, all fields will
-   be of String type.
+-  :decl_configoption:`OGR_ODS_HEADERS` = FORCE/DISABLE/AUTO:
+   이 드라이버는 기본적으로 첫 줄이 열 이름일 수도 있는지 탐지하기 위해 각 시트의 첫 줄을 읽어올 것입니다.
+   이 옵션을 FORCE로 설정하면, 드라이버가 첫 줄을 헤더 줄로 간주할 것입니다.
+   DISABLE로 설정하면, 첫 줄을 첫 번째 객체로 간주할 것입니다.
+   기본값인 AUTO로 설정하면, 자동으로 탐지할 것입니다.
+
+-  :decl_configoption:`OGR_ODS_FIELD_TYPES` =STRING/AUTO:
+   이 드라이버는 기본적으로 필드의 데이터 유형을 탐지하려 시도할 것입니다.
+   이 옵션을 STRING으로 설정하면, 모든 필드가 문자열 유형이 될 것입니다.
+   
