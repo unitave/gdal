@@ -1,217 +1,148 @@
 .. _vector.ntf:
 
-UK .NTF
-=======
+영국 .NTF
+=========
 
 .. shortname:: UK .NTF
 
 .. built_in_by_default::
 
-The National Transfer Format, mostly used by the UK Ordnance Survey, is
-supported for read access.
+영국 육지 측량부(UK Ordnance Survey)에서 주로 사용되는 NTF(National Transfer Format) 파일에 읽기 접근을 지원합니다.
 
-This driver treats a directory as a dataset and attempts to merge all
-the .NTF files in the directory, producing a layer for each type of
-feature (but generally not for each source file). Thus a directory
-containing several Landline files will have three layers
-(LANDLINE_POINT, LANDLINE_LINE and LANDLINE_NAME) regardless of the
-number of landline files.
+이 드라이버는 디렉터리를 데이터셋으로 취급하고, (일반적으로 각 소스 파일별이 아니라) 각 객체 유형별로 레이어 하나씩을 생성해서 디렉터리 안에 있는 모든 .NTF 파일들을 병합하려 시도합니다. 따라서 Landline 파일을 여러 개 담고 있는 디렉터리의 경우, Landline 파일의 개수와 상관없이 레이어를 3개 (LANDLINE_POINT, LANDLINE_LINE 및 LANDLINE_NAME) 가지게 될 것입니다.
 
-NTF features are always returned with the British National Grid
-coordinate system. This may be inappropriate for NTF files written by
-organizations other than the UK Ordnance Survey.
+NTF 객체는 언제나 영국 국가 그리드(British National Grid) 좌표계로 반환됩니다. 영국 육지 측량부가 아닌 다른 조직이 NTF 파일을 작성하는 경우 이 좌표계가 어울리지 않을 수도 있습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
 .. supports_virtualio::
 
-See Also
+참고
 --------
 
--  `General UK NTF
-   Information <https://web.archive.org/web/20130730111701/http://home.gdal.org/projects/ntf/index.html>`__
+-  `영국 NTF 일반 정보 <https://web.archive.org/web/20130730111701/http://home.gdal.org/projects/ntf/index.html>`_
 
-Implementation Notes
+구현 노트
 --------------------
 
-Products (and Layers) Supported
+지원 상품(및 레이어)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-::
+-  Landline (및 Landline Plus):
+   -  LANDLINE_POINT
+   -  LANDLINE_LINE
+   -  LANDLINE_NAME
 
-   Landline (and Landline Plus):
-       LANDLINE_POINT
-       LANDLINE_LINE
-       LANDLINE_NAME
+-  Panorama Contours:
+   -  PANORAMA_POINT
+   -  PANORAMA_CONTOUR
 
-   Panorama Contours:
-       PANORAMA_POINT
-       PANORAMA_CONTOUR
+   HEIGHT 속성이 표고를 담고 있습니다.
 
-       HEIGHT attribute holds elevation.
+-  Strategi:
+   -  STRATEGI_POINT
+   -  STRATEGI_LINE
+   -  STRATEGI_TEXT
+   -  STRATEGI_NODE
 
-   Strategi:
-       STRATEGI_POINT
-       STRATEGI_LINE
-       STRATEGI_TEXT
-       STRATEGI_NODE
+-  Meridian:
+   -  MERIDIAN_POINT
+   -  MERIDIAN_LINE
+   -  MERIDIAN_TEXT
+   -  MERIDIAN_NODE
 
-   Meridian:
-       MERIDIAN_POINT
-       MERIDIAN_LINE
-       MERIDIAN_TEXT
-       MERIDIAN_NODE
+-  Boundaryline:
+   -  BOUNDARYLINE_LINK
+   -  BOUNDARYLINE_POLY
+   -  BOUNDARYLINE_COLLECTIONS
 
-   Boundaryline:
-       BOUNDARYLINE_LINK
-       BOUNDARYLINE_POLY
-       BOUNDARYLINE_COLLECTIONS
+   _POLY 레이어는 진짜 폴리곤을 형성할 수 있게 해주는 "links to links"를 가지고 있습니다. (그렇지 않다면 _POLY 레이어는 도형 용 시드 포인트만 가집니다.)
+   집합(collection)은 (읽어오는 동안 도형이 없는) 폴리곤 집합입니다. 이 상품으로부터만 폴리곤을 구성할 수 있습니다.
 
-       The _POLY layer has links to links allowing true polygons to
-           be formed (otherwise the _POLY's only have a seed point for geometry.
-       The collections are collections of polygons (also without geometry
-       as read).  This is the only product from which polygons can be
-       constructed.
+-  BaseData.GB:
+   -  BASEDATA_POINT
+   -  BASEDATA_LINE
+   -  BASEDATA_TEXT
+   -  BASEDATA_NODE
 
-   BaseData.GB:
-       BASEDATA_POINT
-       BASEDATA_LINE
-       BASEDATA_TEXT
-       BASEDATA_NODE
+-  OSCAR Asset/Traffic:
+   -  OSCAR_POINT
+   -  OSCAR_LINE
+   -  OSCAR_NODE
 
-   OSCAR Asset/Traffic:
-       OSCAR_POINT
-       OSCAR_LINE
-       OSCAR_NODE
+-  OSCAR Network:
+   -  OSCAR_NETWORK_POINT
+   -  OSCAR_NETWORK_LINE
+   -  OSCAR_NETWORK_NODE
 
-   OSCAR Network:
-       OSCAR_NETWORK_POINT
-       OSCAR_NETWORK_LINE
-       OSCAR_NETWORK_NODE
+-  Address Point:
+   -  ADDRESS_POINT
 
-   Address Point:
-       ADDRESS_POINT
+-  Code Point:
+   -  CODE_POINT
 
-   Code Point:
-       CODE_POINT
+-  Code Point Plus:
+   -  CODE_POINT_PLUS
 
-   Code Point Plus:
-       CODE_POINT_PLUS
+전체 데이터셋도 FEAT_CODE 숫자를 객체 클래스 이름(FC_NAME)과 관계 맺어주는 순수 테이블을 담고 있는 FEATURE_CLASSES 레이어를 가질 것입니다. 이는 데이터셋에 있는 모든 상품에 적용됩니다. 몇몇 (Code Point 및 Address Point 같은) 레이어 유형은 객체 클래스를 포함하지 않습니다. 어떤 상품들은 파일에 정의되어 있지 않은 객체 클래스를 사용하기 때문에, FEATURE_CLASSES 레이어에 그런 객체 클래스들은 나타나지 않을 것입니다.
 
-The dataset as a whole will also have a FEATURE_CLASSES layer containing
-a pure table relating FEAT_CODE numbers with feature class names
-(FC_NAME). This applies to all products in the dataset. A few layer
-types (such as the Code Point, and Address Point products) don't include
-feature classes. Some products use features classes that are not defined
-in the file, and so they will not appear in the FEATURE_CLASSES layer.
-
-Product Schemas
+상품 스키마
 ~~~~~~~~~~~~~~~
 
-The approach taken in this reader is to treat one file, or a directory
-of files as a single dataset. All files in the dataset are scanned on
-open. For each particular product (listed above) a set of layers are
-created; however, these layers may be extracted from several files of
-the same product.
+이 판독기는 파일 하나, 또는 파일들을 담은 디렉터리 하나를 단일 데이터셋 하나로 취급하는 접근법을 사용합니다. 데이터셋을 열 때 데이터셋 안에 있는 모든 파일을 스캔합니다. (앞 목록의) 각 특정 상품별로 레이어 집합을 생성하지만, 동일 상품의 파일 여러 개로부터 이런 레이어들을 추출할 수도 있습니다.
 
-The layers are based on a low level feature type in the NTF file, but
-will generally contain features of many different feature codes
-(FEAT_CODE attribute). Different features within a given layer may have
-a variety of attributes in the file; however, the schema is established
-based on the union of all attributes possible within features of a
-particular type (i.e. POINT) of that product family (i.e. OSCAR
-Network).
+이 레이어들은 NTF 파일의 저수준 객체 유형을 기반으로 하지만, 일반적으로 서로 다른 많은 객체 코드(FEAT_CODE 속성)를 담을 것입니다. 해당 레이어 안에 있는 서로 다른 객체들은 파일 안에 다양한 속성들을 가질 수도 있습니다. 하지만 해당 상품군(예: OSCAR Network)의 특정 유형(예: POINT) 객체 내에 있을 수 있는 모든 속성을 통합한 것을 기반으로 스키마를 확립합니다.
 
-If an NTF product is read that doesn't match one of the known schema's
-it will go through a different generic handler which has only layers of
-type GENERIC_POINT and GENERIC_LINE. The features only have a FEAT_CODE
-attribute.
+알려진 스키마들 가운데 하나와 일치하지 않는 NTF 상품을 읽어오는 경우, GENERIC_POINT 및 GENERIC_LINE 유형의 레이어만 가지고 있는 다른 일반 처리기(handler)를 통해 읽어올 것입니다. 이때 객체는 FEAT_CODE 속성만 가집니다.
 
-Details of what layers of what products have what attributes can be
-found in the NTFFileReader::EstablishLayers() method at the end of
-ntf_estlayers.cpp. This file also contains all the product specific
-translation code.
+ntf_estlayers.cpp 모듈의 마지막에 있는 NTFFileReader::EstablishLayers() 메소드로 어떤 상품의 어떤 레이어가 어떤 속성을 가지고 있는지에 관한 상세 정보를 찾아볼 수 있습니다. 이 파일은 모든 상품의 특화 변환 코드도 담고 있습니다.
 
-Special Attributes
+특수 속성
 ~~~~~~~~~~~~~~~~~~
 
-::
+-  FEAT_CODE:
+   정수형 일반 객체 코드로, FEATURE_CLASSES 레이어/테이블에서 이름을 검색하는 데 사용할 수 있습니다.
 
-   FEAT_CODE: General feature code integer, can be used to lookup a name in the
-              FEATURE_CLASSES layer/table.
+-  TEXT_ID/POINT_ID/LINE_ID/NAME_ID/COLL_ID/POLY_ID/GEOM_ID:
+   각각 알맞은 유형의 객체 용 유일 식별자입니다.
 
-   TEXT_ID/POINT_ID/LINE_ID/NAME_ID/COLL_ID/POLY_ID/GEOM_ID:
-             Unique identifier for a feature of the appropriate type.
+-  TILE_REF:
+   (FEATURE_CLASSES를 제외한) 모든 레이어가 해당 객체가 나온 파일(타일)을 가리키는 TILE_REF 속성을 담고 있습니다. 대체로 ID 번호는 타일 내부에서만 유일한 값이기 때문에, TILE_REF를 사용해서 동일 파일로부터 나온 객체들  안에서의 ID 링크를 제약할 수 있습니다.
 
-   TILE_REF: All layers (except FEATURE_CLASSES) contain a TILE_REF attribute
-             which indicates which tile (file) the features came from.  Generally
-             speaking the id numbers are only unique within the tile and so
-             the TILE_REF can be used restrict id links within features from
-             the same file.
+-  FONT/TEXT_HT/DIG_POSTN/ORIENT:
+   글꼴, 텍스트 높이, 디지타이즈 작업 위치, 그리고 텍스트 또는 이름 객체의 방향에 관한 상세 정보입니다. 단위 및 이 코드들의 의미를 이해하려면 운영 체제별 상품 지침서를 읽어보십시오.
 
-   FONT/TEXT_HT/DIG_POSTN/ORIENT:
-       Detailed information on the font, text height, digitizing position,
-           and orientation of text or name objects.  Review the OS product
-           manuals to understand the units, and meaning of these codes.
+-  GEOM_ID_OF_POINT:
+   _NODE 객체의 경우 이 속성이 해당 노드와 대응하는 포인트 레이어 객체의 POINT_ID를 정의합니다. 대체로 노드는 스스로 도형을 담고 있지 않습니다. 노드의 위치를 확립하려면 노드가 포인트와 관계를 맺고 있어야만 합니다.
 
-   GEOM_ID_OF_POINT:
-       For _NODE features this defines the POINT_ID of the point layer object
-           to which this node corresponds.  Generally speaking the nodes don't
-           carry a geometry of their own.  The node must be related to a point
-           to establish its position.
+-  GEOM_ID_OF_LINK:
+   어떤 노드에서 끝나거나 시작하는 _LINK 또는 _LINE 객체의 목록입니다. 네트워크 분석을 위해 라인 객체들의 연결성을 확립하는 경우 일반적으로 노드와 이 속성 필드의 값만 사용합니다. 이 속성이 대상 객체의 LINE_ID가 아니라 GEOM_ID와 관계를 맺고 있어야만 한다는 사실을 기억하십시오.
 
-   GEOM_ID_OF_LINK:
-       A _list_ of _LINK or _LINE features to end/start at a node.  Nodes,
-           and this field are generally only of value when establishing
-           connectivity of line features for network analysis.   Note that this
-           should be related to the target features GEOM_ID, not its LINE_ID.
+   BOUNDARYLINE_POLY 레이어에서는 이 속성이 폴리곤의 경계를 형성하는 라인들의 GEOM_ID를 담고 있습니다.
 
-           On the BOUNDARYLINE_POLY layer this attribute contains the GEOM_IDs
-           of the lines which form the edge of the polygon.
+-  POLY_ID:
+   BOUNDARYLINE_COLLECTIONS 레이어에서 지정된 집합과 관련된 BOUNDARYLINE_POLY 레이어로부터 나온 POLY_ID의 목록입니다.
 
-   POLY_ID:
-       A list of POLY_ID's from the BOUNDARYLINE_POLY layer associated with
-           a given collection in the BOUNDARYLINE_COLLECTIONS layer.
-
-Generic Products
+일반 상품
 ~~~~~~~~~~~~~~~~
 
-In situations where a file is not identified as being part of an
-existing known product it will be treated generically. In this case the
-entire dataset is scanned to establish what features have what
-attributes. Because of this, opening a generic dataset can be much
-slower than opening a recognised dataset. Based on this scan a list of
-generic features (layers) are defined from the following set:
+기존에 알려진 상품의 일부로서 식별되지 않는 파일이 존재하는 경우, 일반 상품(generic product)으로 취급할 것입니다. 이 경우 데이터셋 전체를 스캔해서 어떤 객체가 어떤 속성을 가지고 있는지 확인합니다. 이 때문에 일반 데이터셋을 여는 작업은 식별된 데이터셋을 여는 작업보다 훨씬 느릴 수 있습니다. 이 스캔 작업을 기반으로 다음 객체 목록으로부터 일반 객체(레이어) 목록을 정의합니다:
 
-::
+-  GENERIC_POINT
+-  GENERIC_LINE
+-  GENERIC_NAME
+-  GENERIC_TEXT
+-  GENERIC_POLY
+-  GENERIC_NODE
+-  GENERIC_COLLECTION
 
-    GENERIC_POINT
-    GENERIC_LINE
-    GENERIC_NAME
-    GENERIC_TEXT
-    GENERIC_POLY
-    GENERIC_NODE
-    GENERIC_COLLECTION
+ntf_generic.cpp 모듈이 일반 상품을 우선적으로 처리하는 반면 ntf_estlayers.cpp 모듈은 특정 상품을 처리합니다.
 
-Generic products are primarily handled by the ntf_generic.cpp module
-whereas specific products are handled in ntf_estlayers.cpp.
+육지 측량부의 상품이 아닌 일부 (OSNI 데이터셋) 데이터 상품이 영국 육지 측량부의 일반적인 순서를 따르지 않는 레코드 그룹을 가지고 있기 때문에, 3수준 이상의 일반 상품의 경우 편의적인 레코드 순서에 의존하기보다 일반 상품이 가지고 있는 모든 레코드를 캐시로 불러와서 캐시 안에서 ID 참조로 레코드 그룹을 구성해야 합니다. ntffilereader.cpp 모듈의 마지막 가까이에 있는 NTFFileReader의 "색인 작업" 기능으로 이를 달성할 수 있습니다. 이 때문에 일반 데이터셋에 접근하는 인메모리 색인 작업은 알려진 데이터 상품에 접근하는 것보다 메모리를 훨씬 더 많이 사용할 수 있지만, 1수준 및 2수준 일반 상품의 경우 인메모리 색인 작업이 필요없습니다.
 
-Because some data products (OSNI datasets) not from the Ordnance Survey
-were found to have record groups in unusual orders compared to what the
-UK Ordnance Survey does, it was found necessary to cache all the records
-of level 3 and higher generic products, and construct record groups by
-id reference from within this cache rather than depending on convenient
-record orderings. This is accomplished by the NTFFileReader "indexing"
-capability near the bottom of ntffilereader.cpp. Because of this in
-memory indexing accessing generic datasets can be much more memory
-intensive than accessing known data products, though it isn't necessary
-for generic level 1 and 2 products.
+ntfdump.cpp 모듈에서 선보인 대로, OGRNTFDataSource::SetOptionsList() 메소드를 이용해서 FORCE_GENERIC 옵션을 ON으로 설정하면 알려진 상품을 강제로 일반 상품으로 취급하게 할 수 있습니다.
+OGR_NTF_OPTIONS 환경 변수를 "FORCE_GENERIC=ON"으로 설정해서 OGR 응용 프로그램 외부에서도 이를 달성할 수 있습니다.
 
-It is possible to force a known product to be treated as generic by
-setting the FORCE_GENERIC option to "ON" using
-OGRNTFDataSource::SetOptionsList() as is demonstrated in ntfdump.cpp.
-This may also be accomplished from outside OGR applications by setting
-the OGR_NTF_OPTIONS environment variable to "FORCE_GENERIC=ON".
