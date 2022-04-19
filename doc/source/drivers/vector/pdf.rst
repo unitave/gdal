@@ -54,14 +54,14 @@ table:
    :header-rows: 1
    :widths: 10 60 30
 
-   * - Tool
-     - Supported attributes
-     - Example
+   * - 도구
+     - 지원 속성
+     - 예시
    * - PEN
-     - color (c); width (w); dash pattern (p)
+     - 색상(c); 굵기(w); 점선 패턴(p)
      - PEN(c:#FF0000,w:5px)
    * - BRUSH
-     - foreground color (fc)
+     - 전경색(fc)
      - BRUSH(fc:#0000FF)
    * - LABEL
      - 
