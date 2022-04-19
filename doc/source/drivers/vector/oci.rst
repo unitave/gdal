@@ -129,7 +129,7 @@ OGRDataSource를 닫을 때, 새로 생성된 레이어가 자동 작성된 공�
 예시
 ----
 
--  오라클로 shapefile을 단순 변환합니다. abc.shp 파일의 객체와 abc.dbf 파일의 속성으로 'ABC' 테이블을 생성할 것입니다:
+-  shapefile을 오라클로 단순 변환합니다. abc.shp 파일의 객체와 abc.dbf 파일의 속성으로 'ABC' 테이블을 생성할 것입니다:
 
 ::
 
