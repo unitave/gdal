@@ -1,13 +1,13 @@
 .. _vector.filegdb:
 
-ESRI File Geodatabase (FileGDB)
+ESRI 파일 지리 데이터베이스 (FileGDB)
 ===============================
 
 .. shortname:: FileGDB
 
 .. build_dependencies:: FileGDB API library
 
-FileGDB 드라이버는 ArcGIS 10 이상 버전이 생성한 File Geodatabase(.gdb 디렉터리)의 벡터 레이어에 읽기 및 쓰기 접근을 지원합니다. 데이터셋 이름은 디렉터리/폴더 이름이어야만 하며, .gdb 확장자로 끝나야만 합니다.
+FileGDB 드라이버는 ArcGIS 10 이상 버전이 생성한 파일 지리 데이터베이스(.gdb 디렉터리)의 벡터 레이어에 읽기 및 쓰기 접근을 지원합니다. 데이터셋 이름은 디렉터리/폴더 이름이어야만 하며, .gdb 확장자로 끝나야만 합니다.
 
 .. note::
    
@@ -108,7 +108,7 @@ FileGDB SDK API는 사용자가 지정한 FID를 가진 객체를 생성하지 �
    ArcMap 10.0 및 OGR 기본값은 투영 좌표계의 경우 XYTOLERANCE가 0.001m(또는 이와 동일한 다른 단위의 값)이고, 지리 좌표계의 경우 0.000000008983153°입니다.
 
 -  **XORIGIN, YORIGIN, ZORIGIN, XYSCALE, ZSCALE**:
-   이 파라미터들은 File Geodatabase 내부의 `좌표 정밀도 그리드 <http://help.arcgis.com/en/sdk/10.0/java_ao_adf/conceptualhelp/engine/index.html#//00010000037m000000>`_ 를 제어합니다. 그리드의 크기는 원점과 척도로 결정됩니다. 원점은 기준 그리드 포인트의 공간 위치를 정의합니다. 척도는 해상도와 반비례합니다. 따라서, 원점의 위치가 0이고 모든 축에서 해상도가 0.001인 그리드를 얻으려면 모든 원점을 0으로 설정하고 모든 척도를 1000으로 설정해야 할 것입니다.
+   이 파라미터들은 파일 지리 데이터베이스 내부의 `좌표 정밀도 그리드 <http://help.arcgis.com/en/sdk/10.0/java_ao_adf/conceptualhelp/engine/index.html#//00010000037m000000>`_ 를 제어합니다. 그리드의 크기는 원점과 척도로 결정됩니다. 원점은 기준 그리드 포인트의 공간 위치를 정의합니다. 척도는 해상도와 반비례합니다. 따라서, 원점의 위치가 0이고 모든 축에서 해상도가 0.001인 그리드를 얻으려면 모든 원점을 0으로 설정하고 모든 척도를 1000으로 설정해야 할 것입니다.
 
    *중요*: ``(xmin=XORIGIN, ymin=YORIGIN, xmax=(XORIGIN + 9E+15 / XYSCALE), ymax=(YORIGIN + 9E+15 / XYSCALE))`` 으로 지정된 도메인은 객체 클래스에 가능한 모든 좌표값을 포함시켜야 합니다. 이 도메인 바깥에 위치하는 좌표를 가진 객체를 추가하는 경우, 공간 색인 작업, 객체 선택, 그리고 데이터 탐색 시 ArcGIS에서 오류가 발생할 것입니다.
 
@@ -173,7 +173,7 @@ FileGDB SDK API는 사용자가 지정한 FID를 가진 객체를 생성하지 �
 링크
 -----
 
--  `ESRI File Geodatabase API 페이지 <https://github.com/Esri/file-geodatabase-api/>`_
+-  `ESRI 파일 지리 데이터베이스(File Geodatabase) API 페이지 <https://github.com/Esri/file-geodatabase-api/>`_
 
 -  제 3자 라이브러리/SDK에 의존하지 않는 :ref:`OpenFileGDB <vector.openfilegdb>` 드라이버
 

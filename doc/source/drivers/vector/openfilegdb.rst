@@ -1,13 +1,13 @@
 .. _vector.openfilegdb:
 
-ESRI File Geodatabase (OpenFileGDB)
+ESRI 파일 지리 데이터베이스 (OpenFileGDB)
 ===================================
 
 .. shortname:: OpenFileGDB
 
 .. built_in_by_default::
 
-OpenFileGDB 드라이버는 ArcGIS 9 이상 버전이 생성한 File Geodatabase(.gdb 디렉터리)의 벡터 레이어에 읽기 접근을 지원합니다. 데이터셋 이름은 디렉터리/폴더 이름이어야만 하며, .gdb 확장자로 끝나야만 합니다.
+OpenFileGDB 드라이버는 ArcGIS 9 이상 버전이 생성한 파일 지리 데이터베이스(.gdb 디렉터리)의 벡터 레이어에 읽기 접근을 지원합니다. 데이터셋 이름은 디렉터리/폴더 이름이어야만 하며, .gdb 확장자로 끝나야만 합니다.
 
 이 드라이버는 ZIP 압축 파일 안에 .gdb 디렉터리가 최상위 수준에 있다면 (확장자가 .gdb.zip인) ZIP 압축된 .gdb 디렉터리도 직접 읽어올 수 있습니다.
 
@@ -37,7 +37,7 @@ OGR SQL 엔진을 통해 SQL 문을 실행합니다. 속성 색인(.atx 파일)�
 특수 SQL 요청
 ~~~~~~~~~~~~~~~~~~~~
 
-"GetLayerDefinition a_layer_name" 및 "GetLayerMetadata a_layer_name"을 특수 SQL 요청으로 이용해서 각각 FileGDB 테이블의 정의 및 메타데이터를 XML 콘텐츠로 가져올 수 있습니다. (ArcGIS 10 이상 버전이 생성한 File Geodatabase에만 사용할 수 있습니다.)
+"GetLayerDefinition a_layer_name" 및 "GetLayerMetadata a_layer_name"을 특수 SQL 요청으로 이용해서 각각 FileGDB 테이블의 정의 및 메타데이터를 XML 콘텐츠로 가져올 수 있습니다. (ArcGIS 10 이상 버전이 생성한 파일 지리 데이터베이스에만 사용할 수 있습니다.)
 
 데이터셋 열기 옵션
 --------------------
@@ -72,13 +72,13 @@ FileGDB 드라이버와의 비교
 
 OpenFileGDB 드라이버의 장점:
 
--  ArcGIS 10 이상 버전만이 아니라 ArcGIS 9.x Geodatabase도 읽어올 수 있습니다.
+-  ArcGIS 10 이상 버전만이 아니라 ArcGIS 9.x 지리 데이터베이스도 읽어올 수 있습니다.
 -  어떤 공간 좌표계를 사용하는 레이어라도 열 수 있습니다.
 -  스레드 안전(thread safety) (예: 데이터소스들을 병렬로 처리할 수 있습니다.)
--  VSI 가상 파일 API를 이용하기 때문에, 사용자가 ZIP 파일로 된 또는 HTTP 서버에 저장된 Geodatabase를 읽어올 수 있습니다.
+-  VSI 가상 파일 API를 이용하기 때문에, 사용자가 ZIP 파일로 된 또는 HTTP 서버에 저장된 지리 데이터베이스를 읽어올 수 있습니다.
 -  수많은 필드를 가진 데이터베이스 상에서 작업 속도가 더 빠릅니다.
 -  제 3자 라이브러리에 의존하지 않습니다.
--  오류가 발생한 Geodatabase 파일에 강합니다.
+-  오류가 발생한 지리 데이터베이스 파일에 강합니다.
 
 OpenFileGDB 드라이버의 단점:
 
