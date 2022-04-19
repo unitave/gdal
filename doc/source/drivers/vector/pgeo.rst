@@ -95,9 +95,9 @@ Prerequisites
    :bash:`ogrinfo sample.mdb` works fine.
 
 
-(On Ubuntu : sudo apt-get install unixodbc libmdbodbc)
+(On Ubuntu : :bash:`sudo apt-get install unixodbc libmdbodbc`)
 
-(On Debian : sudo apt-get install unixodbc odbc-mdbtools)
+(On Debian : :bash:`sudo apt-get install unixodbc odbc-mdbtools`)
 
 Configuration
 ~~~~~~~~~~~~~
