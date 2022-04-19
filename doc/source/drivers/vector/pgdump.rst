@@ -1,25 +1,21 @@
 .. _vector.pgdump:
 
-PostgreSQL SQL Dump
+PostgreSQL SQL 덤프
 ===================
 
 .. shortname:: PGDump
 
 .. built_in_by_default::
 
-This write-only driver implements support for generating a SQL dump file
-that can later be injected into a live PostgreSQL instance. It supports
-PostgreSQL extended with the `PostGIS <http://postgis.net/>`__
-geometries.
+이 쓰기 전용 드라이버는 나중에 활성화된 PostgreSQL 인스턴스로 인젝션할 수 있는 SQL 덤프 파일의 생성 지원을 구현합니다. 이 드라이버는 `PostGIS <http://postgis.net/>`_ 도형으로 확장된 PostgreSQL을 지원합니다.
 
-This driver is very similar to the PostGIS shp2pgsql utility.
+이 드라이버는 PostGIS shp2pgsql 유틸리티와 매우 유사합니다.
 
-Most creation options are shared with the regular PostgreSQL driver.
+PGDump 드라이버는 정규 PostgreSQL 드라이버와 생성 옵션 대부분을 공유합니다.
 
-The PGDump driver supports creating tables with
-multiple PostGIS geometry columns (following :ref:`rfc-41`)
+PGDump 드라이버는 PostGIS 도형 열을 여러 개 가진 테이블을 (:ref:`rfc-41` 에 따라) 생성할 수 있습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
@@ -28,140 +24,122 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Creation options
+생성 옵션
 ----------------
 
-Dataset Creation Options
+데이터셋 생성 옵션
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
--  **LINEFORMAT**: By default files are created with the line
-   termination conventions of the local platform (CR/LF on win32 or LF
-   on all other systems). This may be overridden through use of the
-   LINEFORMAT layer creation option which may have a value of **CRLF**
-   (DOS format) or **LF** (Unix format).
+-  **LINEFORMAT**:
+   기본적으로 파일을 생성할 때 로컬 플랫폼의 새줄 문자 규범으로 (win32에서는 CR/LF로 또는 다른 모든 시스템에서는 LF로) 생성합니다. **CRLF** (도스 서식) 또는 **LF** (유닉스 서식) 값을 가질 수 있는 LINEFORMAT 레이어 생성 옵션을 이용하면 이 기본 습성을 대체할 수 있습니다.
 
-Layer Creation Options
+레이어 생성 옵션
 ~~~~~~~~~~~~~~~~~~~~~~
 
--  **GEOM_TYPE**: The GEOM_TYPE layer creation option can be set to one
-   of "geometry" or "geography" (PostGIS >= 1.5) to force the type of
-   geometry used for a table. "geometry" is the default value.
--  **LAUNDER**: This may be "YES" to force new fields created on this
-   layer to have their field names "laundered" into a form more
-   compatible with PostgreSQL. This converts to lower case and converts
-   some special characters like "-" and "#" to "_". If "NO" exact names
-   are preserved. The default value is "YES". If enabled the table
-   (layer) name will also be laundered.
--  **PRECISION**: This may be "YES" to force new fields created on this
-   layer to try and represent the width and precision information, if
-   available using NUMERIC(width,precision) or CHAR(width) types. If
-   "NO" then the types FLOAT8, INTEGER and VARCHAR will be used instead.
-   The default is "YES".
--  **DIM={2,3,XYM,XYZM}**: Control the dimension of the layer. Important
-   to set to 2 for 2D layers with PostGIS 1.0+ as it has constraints on
-   the geometry dimension during loading.
--  **GEOMETRY_NAME**: Set name of geometry column in new table. If
-   omitted it defaults to *wkb_geometry* for GEOM_TYPE=geometry, or
-   *the_geog* for GEOM_TYPE=geography.
--  **SCHEMA**: Set name of schema for new table. Using the same layer
-   name in different schemas is supported, but not in the public schema
-   and others.
--  **CREATE_SCHEMA**: To be used in combination with
-   SCHEMA. Set to ON by default so that the CREATE SCHEMA instruction is
-   emitted. Turn to OFF to prevent CREATE SCHEMA from being emitted.
--  **SPATIAL_INDEX**\ =NONE/GIST/SPGIST/BRIN (starting with GDAL 2.4) or
-   YES/NO for earlier versions and backward compatibility: Set to GIST
-   (GDAL >=2.4, or YES for earlier versions) by default. Creates a
-   spatial index (GiST) on the geometry column to speed up queries (Has
-   effect only when PostGIS is available). Set to NONE (GDAL >= 2.4, or
-   FALSE for earlier versions) to disable. BRIN is only available with
-   PostgreSQL >= 9.4 and PostGIS >= 2.3. SPGIST is only available with
-   PostgreSQL >= 11 and PostGIS >= 2.5
--  **TEMPORARY**: Set to OFF by default. Creates a temporary table
-   instead of a permanent one.
--  **UNLOGGED**: Set to OFF by default. Whether to
-   create the table as a unlogged one. Unlogged tables are only
-   supported since PostgreSQL 9.1, and GiST indexes used for spatial
-   indexing since PostgreSQL 9.3.
--  **WRITE_EWKT_GEOM**: Set to OFF by default. Turn to ON to write EWKT
-   geometries instead of HEX geometries. This option will have no effect
-   if PG_USE_COPY environment variable is to YES.
--  **CREATE_TABLE**: Set to ON by default so that tables are recreated
-   if necessary. Turn to OFF to disable this and use existing table
-   structure.
--  **DROP_TABLE**\ =ON/OFF/IF_EXISTS: Defaults to IF_EXISTS. Set to ON so that
-   tables are destroyed before being recreated. Set to OFF to prevent
-   DROP TABLE from being emitted. Set to IF_EXISTS
-   in order DROP TABLE IF EXISTS to be emitted (needs PostgreSQL >= 8.2)
--  **SRID**: Set the SRID of the geometry. Defaults to -1, unless a SRS
-   is associated with the layer. In the case, if the EPSG code is
-   mentioned, it will be used as the SRID. (Note: the spatial_ref_sys
-   table must be correctly populated with the specified SRID)
--  **NONE_AS_UNKNOWN**: Can be set to TRUE to force
-   non-spatial layers (wkbNone) to be created as spatial tables of type
-   GEOMETRY (wkbUnknown).
-   Defaults to NO, in which case a regular table is created and not
-   recorded in the PostGIS geometry_columns table.
--  **FID**: Name of the FID column to create. Defaults
-   to 'ogc_fid'.
--  **FID64**: This may be "TRUE" to create a FID column
-   that can support 64 bit identifiers. The default value is "FALSE".
--  **EXTRACT_SCHEMA_FROM_LAYER_NAME**: Can be set to
-   NO to avoid considering the dot character as the separator between
-   the schema and the table name. Defaults to YES.
--  **COLUMN_TYPES**: A list of strings of format
-   field_name=pg_field_type (separated by comma) that should be use when
-   CreateField() is invoked on them. This will override the default
-   choice that OGR would have made. This can for example be used to
-   create a column of type
-   `HSTORE <http://www.postgresql.org/docs/9.0/static/hstore.html>`__.
--  **POSTGIS_VERSION**: Defaults to 2.2 starting with GDAL 3.2 (1.5 previously)
-   Possible values: 1.5, 2.0 or 2.2.
-   PostGIS 2.0 encodes differently non-linear geometry types.
-   And 2.2 brings special handling for POINT EMPTY geometries.
--  **DESCRIPTION** (From GDAL 2.1) Description string to put in the
-   pg_description system table. The description can also be written with
-   SetMetadataItem("DESCRIPTION", description_string). Descriptions are
-   preserved by default by ogr2ogr, unless the -nomd option is used.
+-  **GEOM_TYPE**:
+   "geometry" 또는 (PostGIS 1.5버전부터) "geography" 가운데 하나로 설정해서 테이블의 도형 유형을 강제할 수 있습니다. 기본값은 "geometry"입니다.
 
-Environment variables
+-  **LAUNDER**:
+   해당 레이어에 생성되는 새 필드의 이름을 PostgreSQL과 좀 더 호환되는 형식으로 강제 "세탁"하려면 이 옵션을 YES로 설정할 수도 있습니다. 이 옵션은 대문자를 소문자로 변환하고, "-" 및 "#" 같은 몇몇 특수 문자를 "_"로 변환합니다. NO로 설정하면 이름을 그대로 보전합니다. 기본값은 YES입니다. 이 옵션을 활성화하면 테이블(레이어) 이름도 세탁할 것입니다.
+
+-  **PRECISION**:
+   해당 레이어에 생성되는 새 필드가 -- 사용할 수 있는 경우 NUMERIC(길이, 정밀도) 또는 CHAR(길이) 유형을 사용해서 -- 길이 및 정밀도 정보를 시도하고 표현하게 하려면 이 옵션을 YES로 설정할 수도 있습니다. NO로 설정하면 그 대신 FLOAT8, INTEGER 및 VARCHAR 유형을 사용할 것입니다. 기본값은 YES입니다.
+
+-  **DIM={2,3,XYM,XYZM}**:
+   레이어의 차원을 제어합니다. PostGIS 1.0 이상 버전에서 데이터를 불러오는 도중 도형 차원에 제약 조건이 적용되기 때문에, 2차원 레이어의 경우 이 옵션을 2로 설정하는 것이 중요합니다.
+
+-  **GEOMETRY_NAME**:
+   새 테이블의 도형 열 이름을 설정합니다. 지정하지 않으면 GEOM_TYPE=geometry인 경우 *wkb_geometry* 를, GEOM_TYPE=geography인 경우 *the_geog* 를 기본값으로 사용합니다.
+
+-  **SCHEMA**:
+   새 테이블에 대한 스키마의 이름을 설정합니다. 서로 다른 스키마에 동일한 레이어 이름을 사용할 수 있지만, 공개(public) 스키마 및 기타 스키마에서는 사용할 수 없습니다.
+
+-  **CREATE_SCHEMA**:
+   SCHEMA 옵션과 함께 사용해야 합니다. CREATE SCHEMA 지침을 전송하도록 기본값은 ON입니다. OFF로 설정하면 CREATE SCHEMA 지침을 전송하지 않습니다.
+
+-  **SPATIAL_INDEX**\ = (GDAL 2.4버전부터) NONE/GIST/SPGIST/BRIN 또는 (이전 버전들 및 하위 호환성을 위해) YES/NO:
+   기본값은 GIST(GDAL 2.4 이상 버전, 이전 버전들의 경우 YES)입니다.
+   GIST로 설정하면 쿼리 속도를 높이기 위해 도형 열에 공간 색인(GiST)을 생성합니다. (PostGIS를 사용할 수 있는 경우에만 영향을 미칩니다.)
+   NONE(GDAL 2.4 이상 버전, 이전 버전들의 경우 FALSE)로 설정하면 공간 색인 생성을 비활성화시킵니다.
+   BRIN은 PostgreSQL 9.4버전 이상 그리고 PostGIS 2.3버전 이상인 경우에만 사용할 수 있습니다.
+   SPGIST는 PostgreSQL 11버전 이상 그리고 PostGIS 2.5버전 이상인 경우에만 사용할 수 있습니다.
+
+-  **TEMPORARY**:
+   기본값은 OFF입니다. 영구적인 테이블 대신 임시 테이블을 생성합니다.
+
+-  **UNLOGGED**:
+   기본값은 OFF입니다. 테이블을 로그 작성 방지 속성을 가진 테이블로 생성할지 여부를 선택합니다. PostgreSQL 9.1버전부터 로그 작성 방지 속성을 가진 테이블을 지원하고, GiST 색인은 PostgreSQL 9.3버전부터 공간 색인 작업에 사용됩니다.
+
+-  **WRITE_EWKT_GEOM**:
+   기본값은 OFF입니다. ON으로 설정하면 HEX 도형 대신 EWKT 도형을 작성합니다. PG_USE_COPY 환경 변수가 YES로 설정된 경우 이 옵션은 아무 영향도 미치지 않을 것입니다.
+
+-  **CREATE_TABLE**:
+   필요한 경우 테이블을 재생성하도록 기본값은 ON입니다. OFF로 설정하면 테이블 재생성을 비활성화시키고 기존 테이블 구조를 사용합니다.
+
+-  **DROP_TABLE**\ =ON/OFF/IF_EXISTS:
+   기본값은 IF_EXISTS입니다.
+   ON으로 설정하면 테이블을 재생성하기 전에 삭제합니다.
+   OFF로 설정하면 DROP TABLE을 전송하지 않습니다.
+   IF_EXISTS로 설정하면 DROP TABLE IF EXISTS를 전송합니다. (PostgreSQL 8.2 이상 버전 필요)
+
+-  **SRID**:
+   도형의 SRID를 설정합니다. 공간 좌표계가 레이어와 연관되어 있지 않는 이상 기본값은 -1입니다. 공간 좌표계가 레이어와 연관되어 있는 경우, EPSG 코드가 언급되었다면 해당 EPSG 코드를 SRID로 사용할 것입니다. (주의: spatial_ref_sys 테이블을 지정한 SRID로 정확하게 채워야만 합니다.)
+
+-  **NONE_AS_UNKNOWN**:
+   TRUE로 설정하면 비공간 레이어(wkbNone)를 GEOMETRY 유형의 공간 테이블(wkbUnknown)로 강제 생성할 수 있습니다.
+   기본값은 NO로, 이 경우 정규 테이블을 생성하는데 PostGIS geometry_columns 테이블에 기록하지 않습니다.
+
+-  **FID**:
+   생성할 FID 열의 이름을 지정합니다. 기본값은 'ogr_fid'입니다.
+
+-  **FID64**:
+   64비트 길이의 ID를 지원할 수 있는 FID 열을 생성하려면 TRUE로 설정할 수도 있습니다. 기본값은 FALSE입니다.
+
+-  **EXTRACT_SCHEMA_FROM_LAYER_NAME**:
+   스키마와 테이블 이름 사이의 점('.') 문자를 구분자로 간주하지 않으려면 NO로 설정하면 됩니다. 기본값은 YES입니다.
+
+-  **COLUMN_TYPES**:
+   ``CreateField()`` 메소드가 호출되었을 때 사용해야 할 'field_name=pg_field_type' 서식을 쉼표로 구분한 문자열 목록입니다. 이 옵션은 OGR가 선택했을 기본 유형을 대체합니다. 예를 들면 `HSTORE <http://www.postgresql.org/docs/9.0/static/hstore.html>`_ 유형의 열을 생성하는 데 이 옵션을 사용할 수 있습니다.
+
+-  **POSTGIS_VERSION**:
+   GDAL 3.2버전부터 기본값은 2.2입니다. (이전 버전들에서는 1.5였습니다.) 1.5, 2.0 또는 2.2 가운데 하나로 설정할 수 있습니다. PostGIS 2.0버전은 비선형 도형 유형을 다르게 인코딩합니다. 그리고 2.2버전은 POINT EMPTY 도형에 대한 특수 처리 방식을 도입했습니다.
+
+-  **DESCRIPTION**: (GDAL 2.1버전부터)
+   pg_description 시스템 테이블에 들어갈 설명 문자열입니다. ``SetMetadataItem("DESCRIPTION", description_string)`` 메소드로도 설명을 작성할 수 있습니다. ogr2ogr 유틸리티는 '-nomd' 옵션을 사용하지 않는 이상 기본적으로 설명을 보전합니다.
+
+환경 변수
 ~~~~~~~~~~~~~~~~~~~~~
 
--  **PG_USE_COPY**: This may be "YES" for using COPY for inserting data
-   to Postgresql. COPY is significantly faster than INSERT.
+-  **PG_USE_COPY**:
+   PostgreSQL에 데이터를 삽입할 때 COPY를 사용하려면 이 옵션을 YES로 설정할 수도 있습니다. COPY가 INSERT보다 훨씬 더 빠릅니다.
 
-VSI Virtual File System API support
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+VSI 가상 파일 시스템 API 지원
+-----------------------------------
 
-The driver supports rwriting to files managed by VSI Virtual File System
-API, which include "regular" files, as well as files in the /vsizip/,
-/vsigzip/ domains.
+이 드라이버는 VSI 가상 파일 시스템 API가 관리하는 파일의 쓰기를 지원합니다. VSI 가상 파일 시스템 API가 관리하는 파일에는 "정규" 파일은 물론 /vsizip/ , /vsigzip/ 도메인에 있는 파일도 포함됩니다.
 
-Writing to /dev/stdout or /vsistdout/ is also supported.
+/dev/stdout 또는 /vsistdout/ 에 쓰기도 지원합니다.
 
-Example
-~~~~~~~
+예시
+----
 
--  Simple translation of a shapefile into PostgreSQL into a file
-   abc.sql. The table 'abc' will be created with the features from
-   abc.shp and attributes from abc.dbf. The SRID is specified.
-   PG_USE_COPY is set to YES to improve the performance.
+-  abc.sql 파일에 shapefile을 PostgreSQL로 단순 변환합니다. abc.shp 파일의 객체와 abc.dbf 파일의 속성으로 'abc' 테이블을 생성할 것입니다. SRID를 지정합니다. 성능을 향상시키기 위해 PG_USE_COPY 환경 변수를 YES로 설정합니다:
 
    ::
 
       ogr2ogr --config PG_USE_COPY YES -f PGDump abc.sql abc.shp -lco SRID=32631
 
--  Pipe the output of the PGDump driver into the psql utility.
+-  PGDump 드라이버의 산출물을 psql 유틸리티로 넘깁니다:
 
    ::
 
       ogr2ogr --config PG_USE_COPY YES -f PGDump /vsistdout/ abc.shp | psql -d my_dbname -f -
 
-See Also
-~~~~~~~~
+참고
+----
 
--  :ref:`OGR PostgreSQL driver Page <vector.pg>`
--  `PostgreSQL Home Page <http://www.postgresql.org/>`__
--  `PostGIS <http://postgis.net/>`__
--  `PostGIS / OGR Wiki Examples
-   Page <http://trac.osgeo.org/postgis/wiki/UsersWikiOGR>`__
+-  :ref:`OGR PostgreSQL <vector.pg>` 드라이버
+-  `PostgreSQL 홈페이지 <http://www.postgresql.org/>`_
+-  `PostGIS <http://postgis.net/>`_
+-  `PostGIS / OGR 위키 예제 페이지 <http://trac.osgeo.org/postgis/wiki/UsersWikiOGR>`_
+
