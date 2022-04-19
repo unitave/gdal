@@ -123,7 +123,7 @@ VSI 가상 파일 시스템 API 지원
 예시
 ----
 
--  abc.sql 파일에 shapefile을 PostgreSQL로 단순 변환합니다. abc.shp 파일의 객체와 abc.dbf 파일의 속성으로 'abc' 테이블을 생성할 것입니다. SRID를 지정합니다. 성능을 향상시키기 위해 PG_USE_COPY 환경 변수를 YES로 설정합니다:
+-  shapefile을 PostgreSQL로 인젝션할 수 있는 abc.sql 덤프 파일로 단순 변환합니다. abc.shp 파일의 객체와 abc.dbf 파일의 속성으로 'abc' 테이블을 생성할 것입니다. SRID를 지정합니다. 성능을 향상시키기 위해 PG_USE_COPY 환경 변수를 YES로 설정합니다:
 
    ::
 
