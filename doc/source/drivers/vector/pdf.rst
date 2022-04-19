@@ -1,17 +1,16 @@
 .. _vector.pdf:
 
 ================================================================================
-PDF -- Geospatial PDF
+PDF -- 지리공간 PDF
 ================================================================================
 
 .. shortname:: PDF
 
-.. build_dependencies:: none for write support, Poppler/PoDoFo/PDFium for read support
+.. build_dependencies:: 쓰기 지원의 경우 없음, 읽기 지원의 경우 Poppler/PoDoFo/PDFium
 
-Refer to the :ref:`PDF raster <raster.pdf>` documentation page for common
-documentation of the raster and vector sides of the driver.
+PDF 드라이버의 래스터 및 벡터 공통 문서는 :ref:`PDF 래스터 <raster.pdf>` 문서 페이지를 참조하십시오.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
@@ -20,35 +19,25 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Vector support
+벡터 지원
 --------------
 
-This driver can read and write geospatial PDF
-with vector features. Vector read support requires linking to one of the
-above mentioned dependent libraries, but write support does not. The
-driver can read vector features encoded according to PDF's logical
-structure facilities (as described by "§10.6 - Logical Structure" of PDF
-spec), or retrieve only vector geometries for other vector PDF files.
+이 드라이버는 벡터 객체를 가진 지리공간(geospatial) PDF 파일을 읽고 쓸 수 있습니다. 벡터 읽기 지원을 사용하려면 앞에서 언급한 의존 라이브라리 가운데 하나와 링크해야 하지만, 쓰기 지원은 그럴 필요가 없습니다. 이 드라이버는 (PDF 사양의 "§10.6 - 논리 구조"에서 설명하는) PDF의 논리 구조 기능에 따라 인코딩된 벡터 객체를 읽어올 수 있고, 또는 다른 벡터 PDF 파일에서 벡터 도형만 가져올 수 있습니다.
 
-If there is no such logical structure, the driver will not try to
-interpret the vector content of the PDF, unless you defined the
-:decl_configoption:`OGR_PDF_READ_NON_STRUCTURED` configuration option to YES.
+이런 논리 구조가 존재하지 않는 경우, 사용자가 :decl_configoption:`OGR_PDF_READ_NON_STRUCTURED` 환경설정 옵션을 YES로 설정하지 않는 이상 이 드라이버는 PDF의 벡터 콘텐츠를 해석하려 시도하지 않을 것입니다.
 
-Feature style support
+객체 스타일 지원
 ---------------------
 
-For write support, the driver has partial support for the style
-information attached to features, encoded according to the
-:ref:`ogr_feature_style`.
+쓰기 지원의 경우, 이 드라이버는 :ref:`ogr_feature_style` 에 따라 인코딩되어 피처에 추가된 스타일 정보를 부분적으로 지원합니다.
 
-The following tools are recognized:
+다음 도구들을 인식합니다:
 
--  For points, LABEL and SYMBOL.
--  For lines, PEN.
--  For polygons, PEN and BRUSH.
+-  포인트의 경우: LABEL 및 SYMBOL
+-  라인의 경우: PEN
+-  폴리곤의 경우: PEN 및 BRUSH
 
-The supported attributes for each tool are summed up in the following
-table:
+다음 표에 각 도구에 대해 지원하는 속성을 요약했습니다:
 
 .. list-table::
    :header-rows: 1
@@ -58,53 +47,58 @@ table:
      - 지원 속성
      - 예시
    * - PEN
-     - 색상(c); 굵기(w); 점선 패턴(p)
+     - 
+         -  색상(c)
+         -  굵기(w)
+         -  점선 패턴(p)
+
      - PEN(c:#FF0000,w:5px)
    * - BRUSH
-     - 전경색(fc)
+     - 
+         -  전경색(fc)
+
      - BRUSH(fc:#0000FF)
    * - LABEL
      - 
          -  GDAL 2.3.0 이상 버전:
 
-            -  텍스트(t), limited to ASCII strings
-            -  font name (f), see note below
-            -  font size (s)
-            -  bold (bo)
-            -  italic (it)
-            -  text color (c)
-            -  x and y offsets (dx, dy)
-            -  angle (a)
-            -  anchor point (p), values 1 through 9
-            -  stretch (w)
+            -  텍스트(t), 아스키 문자열 전용
+            -  글꼴 이름(f), 아래 내용 참조
+            -  글꼴 크기(s)
+            -  볼드체(bo)
+            -  이탤릭체(it)
+            -  텍스트 색상(c)
+            -  x 및 y 오프셋(dx, dy)
+            -  각도(a)
+            -  기준점(p), 1에서 9까지의 값
+            -  늘이기(w)
 
          -  GDAL 2.2.x 이하 버전:
 
-            -  text (t), limited to ASCII strings
-            -  font size (s)
-            -  text color (c)
-            -  x and y offsets (dx, dy)
-            -  angle (a)
+            -  텍스트(t), 아스키 문자열 전용
+            -  글꼴 크기(s)
+            -  텍스트 색상(c)
+            -  x 및 y 오프셋(dx, dy)
+            -  각도(a)
 
      - LABEL(c:#000000,t:"Hello World!",s:5g)
    * - SYMBOL
-     - id (ogr-sym-0 to ogr-sym-9, and filenames for raster symbols); color (c); size (s)
+     - 
+         -  ID(id), ogr-sym-0에서 ogr-sym-9까지, 그리고 래스터 심볼의 경우 파일명
+         -  색상(c)
+         -  크기(s)
+
      - | SYMBOL(c:#00FF00,id:"ogr- sym-3",s:10)
        | SYMBOL(c:#00000080,id:"a_symbol.png")
 
-Alpha values are supported for colors to control the opacity. If not
-specified, for BRUSH, it is set at 50% opaque.
+불투명도를 제어하기 위해 색상의 알파값을 지원합니다. BRUSH에 알파값을 지정하지 않는 경우, 50% 불투명으로 설정됩니다.
 
-For SYMBOL with a bitmap name, only the alpha value of the color
-specified with 'c' is taken into account.
+비트맵 파일 이름을 가진 SYMBOL의 경우, 'c'로 지정된 색상의 알파값만 연산에 넣습니다.
 
-A font name starting with "Times" or containing the string "Serif" (case
-sensitive) will be treated as Times. A font name starting with "Courier"
-or containing the string "Mono" (case sensitive) will be treated as
-Courier. All other font names will be treated as Helvetica.
+"Times"로 시작하는 글꼴 이름 또는 "Serif"(대소문자 구분) 문자열을 담고 있는 글꼴 이름을 Times 글꼴로 취급할 것입니다. "Courier"로 시작하는 글꼴 이름 또는 "Mono"(대소문자 구분) 문자열을 담고 있는 글꼴 이름을 Courier 글꼴로 취급할 것입니다. 다른 모든 글꼴 이름은 Helvetica 글꼴로 취급할 것입니다.
 
-See Also
+참고
 --------
 
--  :ref:`PDF raster <raster.pdf>` documentation page
+-  :ref:`PDF 래스터 <raster.pdf>` 드라이버
 -  :ref:`ogr_feature_style`
