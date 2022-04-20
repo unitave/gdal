@@ -26,6 +26,7 @@
    :maxdepth: 1
 
    amigocloud
+   arrow
    ao
    arcgen
    avcbin
@@ -90,6 +91,7 @@
    ogdi
    openfilegdb
    osm
+   parquet
    pdf
    pds
    pgdump

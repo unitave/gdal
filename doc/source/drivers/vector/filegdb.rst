@@ -44,6 +44,8 @@ SELECT 문을 제외하고, FileGDB SDK API의 SQL 엔진을 통해 SQL 문을 �
 
 "GetLayerDefinition a_layer_name" 및 "GetLayerMetadata a_layer_name"을 특수 SQL 요청으로 이용해서 각각 FileGDB 테이블의 정의 및 메타데이터를 XML 콘텐츠로 가져올 수 있습니다.
 
+GDAL 3.5버전부터, 데이터베이스 치밀화(compaction)를 요구하는 "REPACK" 특수 SQL 요청을 전송할 수 있습니다.
+
 필드 도메인
 -------------
 

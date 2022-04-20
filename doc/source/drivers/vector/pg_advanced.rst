@@ -1,144 +1,76 @@
 .. _vector.pg_advanced:
 
-PostgreSQL / PostGIS - Advanced Driver Information
+PostgreSQL / PostGIS - 고급 드라이버 정보
 ==================================================
 
-The information collected in that page deal with advanced topics, not
-found in the :ref:`OGR PostgreSQL driver Information <vector.pg>` page.
+이 페이지에 수집된 정보는 :ref:`OGR PostgreSQL 드라이버 정보 <vector.pg>` 페이지에서 찾을 수 없는 고급 주제들을 다루고 있습니다.
 
-Connection options related to schemas and tables
+스키마 및 테이블 관련 연결 옵션
 ------------------------------------------------
 
-The database opening should be significantly
-faster than in previous versions, so using tables= or schemas= options
-will not bring further noticeable speed-ups.
+이전 버전들보다 데이터베이스를 여는 속도가 훨씬 빨라졌을 것이기 때문에, 'tables=' 또는 'schemas=' 옵션을 사용해도 속도가 크게 향상되지는 않을 것입니다.
 
-The set of tables to be scanned can be
-overridden by specifying
-*tables=[schema.]table[(geom_column_name)][,[schema2.]table2[(geom_column_name2)],...]*
-within the connection string. If the parameter is found, the driver
-skips enumeration of the tables as described in the next paragraph.
+연결 문자열 안에 ``tables=[schema.]table[(geom_column_name)][,[schema2.]table2[(geom_column_name2)],...]`` 을 지정하면 스캔할 테이블 집합을 대체할 수 있습니다. 이 파라미터가 존재하는 경우, 드라이버는 다음 절에 서술된 테이블 목록을 건너뜁니다.
 
-It is possible to restrict the schemas that
-will be scanned while establishing the list of tables. This can be done
-by specifying *schemas=schema_name[,schema_name2]* within the connection
-string. This can also be a way of speeding up the connection to a
-PostgreSQL database if there are a lot of schemas. Note that if only one
-schema is listed, it will also be made automatically the active schema
-(and the schema name will not prefix the layer name). Otherwise, the
-active schema is still 'public', unless otherwise specified by the
-*active_schema=* option.
+테이블 목록을 확립하는 동안 스캔하게 될 스키마를 제약할 수도 있습니다. 연결 문자열 안에 ``schemas=schema_name[,schema_name2]`` 를 지정하면 됩니다. 스키마가 아주 많이 있는 경우 이렇게 하면 PostgreSQL 데이터베이스에 연결하는 속도가 더 빨라질 수도 있습니다. 스키마 목록에 스키마 하나만 지정하면, 해당 스키마를 자동적으로 활성 스키마로 사용할 것입니다. (그리고 스키마 이름을 레이어 이름 앞에 접두어로 붙이지 않을 것입니다.) 스키마를 여러 개 지정하는 경우, 'active_schema=' 옵션으로 달리 지정하지 않는 이상 활성 스키마는 계속 'public'입니다.
 
-The active schema ('public' being the default)
-can be overridden by specifying *active_schema=schema_name* within the
-connection string. The active schema is the schema where tables are
-created or looked for when their name is not explicitly prefixed by a
-schema name. Note that this does not restrict the tables that will be
-listed (see *schemas=* option above). When getting the list of tables,
-the name of the tables within that active schema will not be prefixed by
-the schema name. For example, if you have a table 'foo' within the
-public schema, and a table 'foo' within the 'bar_schema' schema, and
-that you specify active_schema=bar_schema, 2 layers will be listed :
-'foo' (implicitly within 'bar_schema') and 'public.foo'.
+연결 문자열 안에 ``active_schema=schema_name`` 을 지정하면 (기본값이 'public'인) 활성 스키마를 대체할 수 있습니다. 활성 스키마란 테이블 이름 앞에 스키마 이름이 명확하게 접두어로 붙지 않아도 테이블 생성 또는 검색 대상이 되는 스키마를 말합니다. 기본 활성 스키마를 대체하더라도 목록화될 테이블을 제약하지 않는다는 사실을 기억하십시오. (앞의 'schemas=' 옵션을 참조하십시오.) 테이블 목록을 가져올 때, 이 활성 스키마 안에 있는 테이블 이름 앞에 스키마 이름이 접두어로 붙지 않을 것입니다. 예를 들어 공개 스키마 안에 'foo' 테이블이 있고 'bar_schema' 안에도 'foo' 테이블이 있는데 'active_schema=bar_schema'를 지정한 경우, ('bar_schema' 안에 있다는 사실을 암시하는) 'foo' 레이어와 'public.foo' 레이어 2개가 목록화될 것입니다.
 
-Multiple geometry columns
+다중 도형 열
 -------------------------
 
-The PostgreSQL driver supports accessing
-tables with multiple PostGIS geometry columns.
+PostgreSQL 드라이버는 PostGIS 도형 열을 여러 개 가지고 있는 테이블에 접근을 지원합니다.
 
-OGR supports reading, updating, creating tables with multiple
-PostGIS geometry columns (following :ref:`rfc-41`)
-For such a table, a single OGR layer will be reported with as many
-geometry fields as there are geometry columns in the table.
+OGR는 (:ref:`rfc-41` 에 따라) PostGIS 도형 열을 여러 개 가진 테이블의 읽기, 업데이트, 생성을 지원합니다. 이런 테이블의 경우, 도형 필드를 테이블에 있는 도형 열의 개수만큼 가진 단일 OGR 레이어를 리포트할 것입니다.
 
-For backward compatibility, it is also possible to query a layer with
-GetLayerByName() with a name formatted like 'foo(bar)' where 'foo' is a
-table and 'bar' a geometry column.
+하위 호환성을 위해 GetLayerByName() 메소드를 'foo(bar)' 같은 서식으로 된 이름으로 호출해서 레이어를 쿼리할 수도 있습니다. 이때 'foo'가 테이블 이름이고 'bar'는 도형 열 이름입니다.
 
-Layers
+레이어
 ------
 
-Even when PostGIS is enabled, if the user
-defines the environment variable
+PostGIS가 활성화되었더라도, 사용자가 다음 환경 변수를 정의하면
 
 ::
 
    PG_LIST_ALL_TABLES=YES
 
-(and does not specify tables=), all regular user tables and named views
-will be treated as layers. However, tables with multiple geometry column
-will only be reported once in that mode. So this variable is mainly
-useful when PostGIS is enabled to find out tables with no spatial data,
-or views without an entry in *geometry_columns* table.
+(그리고 'tables=' 를 지정하지 않으면) 정규 사용자 테이블 및 명명된 뷰를 모두 레이어로 취급할 것입니다. 하지만, 도형 열 여러 개를 가진 테이블은 오직 이 모드에서만 리포트될 것입니다. 즉 주로 공간 데이터를 가지지 않은 테이블 또는 'geometry_columns' 테이블에 항목이 없는 뷰를 찾기 위해 PostGIS를 활성화시킨 경우 이 환경 변수가 유용합니다.
 
-In any case, all user tables can be queried explicitly with
-GetLayerByName()
+어떤 경우든, GetLayerByName() 메소드로 모든 사용자 테이블을 명확하게 쿼리할 수 있습니다.
 
-Regular (non-spatial) tables can be accessed, and will return features
-with attributes, but not geometry. If the table has a "wkb_geometry"
-field, it will be treated as a spatial table. The type of the field is
-inspected to determine how to read it. It can be a PostGIS **geometry**
-field, which is assumed to come back in OGC WKT, or type BYTEA or OID in
-which case it is used as a source of OGC WKB geometry.
+정규 (비공간) 테이블에 접근할 수 있고, 속성을 가진 객체를 반환하지만 도형은 반환하지 않을 것입니다. 해당 테이블이 "wkb_geometry" 필드를 가지고 있는 경우 공간 테이블로 취급할 것입니다. 필드를 어떻게 읽어올지 결정하기 위해 필드 유형을 조사합니다. OGC WKT 형식으로 다시 반환될 것으로 간주되는 PostGIS **geometry** 필드일 수도 있고, 또는 BYTEA 또는 OID 필드 유형일 수도 있는데 이 경우 OGC WKB 도형의 소스로 사용합니다.
 
-Tables inherited from spatial tables are
-supported.
+공간 테이블을 상속받은 테이블을 지원합니다.
 
-If there is an "ogc_fid" field, it will be used to set the feature id of
-the features, and not treated as a regular field.
+"ogc_fid" 필드가 존재하는 경우 객체의 FID를 설정하는 데 사용하고 정규 필드로 취급하지는 않을 것입니다.
 
-The layer name may be of the form "schema.table". The schema must exist,
-and the user needs to have write permissions for the target and the
-public schema.
+레이어 이름이 "schema.table" 형식일 수도 있습니다. 이때 해당 스키마는 반드시 존재해야만 하고, 사용자가 대상 및 공개 스키마에 대한 쓰기 권한을 가지고 있어야 합니다.
 
-If the user defines the environment variable
+사용자가 다음 환경 변수를 정의하면
 
 ::
 
    PG_SKIP_VIEWS=YES
 
-(and does not specify tables=), only the regular user tables will be
-treated as layers. The default action is to include the views. This
-variable is particularly useful when you want to copy the data into
-another format while avoiding the redundant data from the views.
+(그리고 'tables=' 를 지정하지 않으면) 정규 사용자 테이블만 레이어로 취급할 것입니다. 기본 습성은 뷰를 포함시키는 것입니다. 뷰로부터 불필요한 데이터를 가져오지 않으면서 데이터를 다른 포맷으로 복사하려는 경우 이 환경 변수가 특히 유용합니다.
 
-Named views
+명명된 뷰
 -----------
 
-When PostGIS is enabled for the accessed database, named views are
-supported, provided that there is an entry in the *geometry_columns*
-tables. But, note that the AddGeometryColumn() SQL function doesn't
-accept adding an entry for a view (only for regular tables). So, that
-must usually be done by hand with a SQL statement like :
+접속한 데이터베이스에 대해 PostGIS가 활성화되었다면, 'geometry_columns' 테이블에 해당 뷰 항목이 있다는 가정 하에 명명된 뷰를 지원합니다. 하지만 AddGeometryColumn() SQL 함수가 뷰에 대한 항목을 추가하는 것을 허용하지 않는다는 사실을 기억하십시오. (정규 테이블 항목만 받아들입니다.) 따라서, 일반적으로 다음과 같은 SQL 선언문으로 직접 추가해줘야만 합니다:
 
 ::
 
    "INSERT INTO geometry_columns VALUES ( '', 'public', 'name_of_my_view', 'name_of_geometry_column', 2, 4326, 'POINT');"
 
-It is also possible to use named views without
-inserting a row in the geometry_columns table. For that, you need to
-explicitly specify the name of the view in the "tables=" option of the
-connection string. See above. The drawback is that OGR will not be able
-to report a valid SRS and figure out the right geometry type.
+명명된 뷰를 'geometry_columns' 테이블에 행을 삽입하지 않고 사용할 수도 있습니다. 이렇게 하려면, 연결 문자열의 "tables=" 옵션에 뷰 이름을 명확하게 지정해야 합니다. 첫 단락을 참조하십시오. 이 방법의 단점은 OGR가 무결한 공간 좌표계를 리포트할 수 없고 알맞은 도형 유형을 판단하지 못 할 것이라는 점입니다.
 
-Retrieving FID of newly inserted feature
+새로 삽입된 객체의 FID 가져오기
 ----------------------------------------
 
-The FID of
-a feature (i.e. usually the value of the OGC_FID column for the feature)
-inserted into a table with CreateFeature(), in non-copy mode, will be
-retrieved from the database and can be obtained with GetFID(). One
-side-effect of this new behavior is that you must be careful if you
-re-use the same feature object in a loop that makes insertions. After
-the first iteration, the FID will be set to a non-null value, so at the
-second iteration, CreateFeature() will try to insert the new feature
-with the FID of the previous feature, which will fail as you cannot
-insert 2 features with same FID. So in that case you must explicitly
-reset the FID before calling CreateFeature(), or use a fresh feature
-object.
+복사 모드 이외의 모드에서, CreateFeature() 메소드로 테이블에 삽입되는 (예를 들면 일반적으로 객체의 OGC_FID 열의 값인) 객체의 FID를 데이터베이스로부터 가져오는데 이때 GetFID() 메소드로 FID를 얻을 수 있습니다. 이 새로운 습성의 부작용 가운데 한 가지는 삽입을 만드는 루프에서 동일한 피처 객체를 재사용하는 경우 주의해야만 한다는 것입니다. 첫 번째 반복 이후, FID가 NULL이 아닌 값으로 설정되기 때문에 두 번째 반복 시 CreateFeature() 메소드가 이전 객체의 FID로 새 객체를 삽입하려 시도할 것입니다. 이 경우 동일한 FID를 가진 객체를 2개 삽입할 수 없기 때문에 실패할 것입니다. 따라서 이 경우 CreateFeature() 메소드를 호출하기 전에 FID를 명확하게 리셋하거나 또는 전과 다른 피처 객체를 사용해야만 합니다.
 
-Snippet example in Python :
+다음은 이런 경우의 파이썬 코드 조각 예시입니다:
 
 ::
 
@@ -148,7 +80,7 @@ Snippet example in Python :
            lyr.CreateFeature(feat)
            print('The feature has been assigned FID %d' % feat.GetFID())
 
-or :
+또는:
 
 ::
 
@@ -157,41 +89,20 @@ or :
            lyr.CreateFeature(feat)
            print('The feature has been assigned FID %d' % feat.GetFID())
 
-Old GDAL behavior can be obtained by setting the configuration
-option :decl_configoption:`OGR_PG_RETRIEVE_FID` to FALSE.
+:decl_configoption:`OGR_PG_RETRIEVE_FID` 환경설정 옵션을 FALSE로 설정하면 예전의 GDAL 습성을 부활시킬 수 있습니다.
 
-Issues with transactions
+트랜잭션 문제점
 ------------------------
 
-Efficient sequential reading in PostgreSQL requires to be done within a
-transaction (technically this is a CURSOR WITHOUT HOLD). So the PG
-driver will implicitly open such a transaction if none is currently
-opened as soon as a feature is retrieved. This transaction will be
-released if ResetReading() is called (provided that no other layer is
-still being read).
+PostgreSQL에서 순차 읽기를 효율적으로 하려면 트랜잭션 안에서 해야 합니다. (기술적으로 따지면 "CURSOR WITHOUT HOLD"입니다.) 즉 객체를 가져왔을 때 열려 있는 트랜잭션이 없는 경우 PostgreSQL 드라이버가 암묵적으로 순차 읽기를 위한 트랜잭션을 열 것입니다. (다른 레이어를 계속 읽어오는 중이 아니라는 가정 하에) 이 트랜잭션은 ResetReading() 메소드를 호출하면 해제될 것입니다.
 
-If within such an implicit transaction, an explicit dataset level
-StartTransaction() is issued, the PG driver will use a SAVEPOINT to
-emulate properly the transaction behavior while making the active
-cursor on the read layer still opened.
+이런 암묵적인 트랜잭션 안에서 데이터셋 수준 StartTransaction() 메소드가 명확하게 호출되는 경우, PostgreSQL 드라이버는 읽어오는 레이어 상에 활성 커서를 계속 열어놓은 채 트랜잭션 습성을 제대로 모방하기 위해 "SAVEPOINT"를 사용할 것입니다.
 
-If an explicit transaction is opened with dataset level
-StartTransaction() before reading a layer, this transaction will be used
-for the cursor that iterates over the layer. When explicitly committing
-or rolling back the transaction, the cursor will become invalid, and
-ResetReading() should be issued again to restart reading from the
-beginning.
+레이어를 읽어오기 전에 데이터셋 수준 StartTransaction()으로 트랜잭션을 명확하게 열었다면, 이 트랜잭션을 이용해서 레이어에 커서를 반복할 것입니다. 트랜잭션을 명확하게 커밋하거나 롤백하는 경우, 커서가 무결하지 않게 될 것입니다. 이때 ResetReading()을 다시 호출해서 처음부터 읽기를 다시 시작해야 합니다.
 
-As calling SetAttributeFilter() or SetSpatialFilter() implies an
-implicit ResetReading(), they have the same effect as ResetReading().
-That is to say, while an implicit transaction is in progress, the
-transaction will be committed (if no other layer is being read), and a
-new one will be started again at the next GetNextFeature() call. On the
-contrary, if they are called within an explicit transaction, the
-transaction is maintained.
+SetAttributeFilter() 또는 SetSpatialFilter() 메소드를 호출한다는 것은 암묵적으로 ResetReading()을 호출한다는 의미이기 때문에, 이 메소드들도 ResetReading()과 동일한 영향을 미칩니다. 다시 말해서 암묵적인 트랜잭션이 진행 중일 때 SetAttributeFilter() 또는 SetSpatialFilter() 메소드를 호출하면 (다른 레이어를 읽어오는 중이 아닌 경우) 트랜잭션을 커밋하고 다음 GetNextFeature() 호출 시 새 트랜잭션을 다시 시작할 것입니다. 그 반대로 명확한 트랜잭션 안에서 SetAttributeFilter() 또는 SetSpatialFilter() 메소드를 호출하는 경우 트랜잭션을 유지합니다.
 
-With the above rules, the below examples show the SQL instructions that
-are run when using the OGR API in different scenarios.
+앞의 이런 규칙을 따라, 다음 예시들은 서로 다른 시나리오 상에서 OGR API를 사용할 때 실행되는 SQL 지침을 보여줍니다:
 
 ::
 
@@ -283,82 +194,64 @@ are run when using the OGR API in different scenarios.
    lyr1->ResetReading()               CLOSE cur1
                                       COMMIT (implicit)
 
-Note: in reality, the PG drivers fetches 500 features at once. The FETCH
-1 is for clarity of the explanation.
+주의: 실제로는 PostgreSQL 드라이버가 객체 500개를 한 번에 가져옵니다. 'FETCH 1'은 설명을 분명하게 하기 위한 것입니다.
 
-Advanced Examples
+고급 예시
 -----------------
 
--  This example shows using ogrinfo to list only the layers specified by
-   the *tables=* options.
+-  이 예시는 ogrinfo를 사용해서 'tables=' 옵션으로 지정한 레이어들만 목록화하는 방법을 보여줍니다:
 
    ::
 
       ogrinfo -ro PG:'dbname=warmerda tables=table1,table2'
 
--  This example shows using ogrinfo to query a table 'foo' with multiple
-   geometry columns ('geom1' and 'geom2').
+-  이 예시는 ogrinfo를 사용해서 도형 열을 여러 개 ('geom1'과 'geom2') 가진 'foo' 테이블을 쿼리하는 방법을 보여줍니다:
 
    ::
 
       ogrinfo -ro -al PG:dbname=warmerda 'foo(geom2)'
 
--  This example show how to list only the layers inside the schema
-   apt200810 and apt200812. The layer names will be prefixed by the name
-   of the schema they belong to.
+-  이 예시는 'apt200810' 및 'apt200812' 스키마 안에 있는 레이어만 목록화하는 방법을 보여줍니다. 레이어 이름 앞에 레이어가 속해 있는 스키마 이름이 접두어로 붙을 것입니다:
 
    ::
 
       ogrinfo -ro PG:'dbname=warmerda schemas=apt200810,apt200812'
 
--  This example shows using ogrinfo to list only the layers inside the
-   schema named apt200810. Note that the layer names will not be
-   prefixed by apt200810 as only one schema is listed.
+-  이 예시는 ogrinfo를 사용해서 'apt200810'이라는 스키마 안에 있는 레이어만 목록화하는 방법을 보여줍니다. 스키마 하나만 지정했기 때문에 레이어 이름 앞에 접두어 'apt200810'이 붙지 않을 것이라는 사실을 기억하십시오:
 
    ::
 
       ogrinfo -ro PG:'dbname=warmerda schemas=apt200810'
 
--  This example shows how to convert a set of shapefiles inside the
-   apt200810 directory into an existing Postgres schema apt200810. In
-   that example, we could have use the schemas= option instead.
+-  이 예시는 apt200810 디렉터리 안에 있는 shapefile 집합을 기존 PostgreSQL 스키마 'apt200810'으로 변환하는 방법을 보여줍니다. 이 명령어에서 'schemas=' 옵션을 대신 사용해도 됩니다:
 
    ::
 
       ogr2ogr -f PostgreSQL "PG:dbname=warmerda active_schema=apt200810" apt200810
 
--  This example shows how to convert all the tables inside the schema
-   apt200810 as a set of shapefiles inside the apt200810 directory. Note
-   that the layer names will not be prefixed by apt200810 as only one
-   schema is listed 
+-  이 예시는 'apt200810' 스키마 안에 있는 모든 테이블을 apt200810 디렉터리 안에 shapefile 집합으로 변환하는 방법을 보여줍니다. 스키마 하나만 지정했기 때문에 레이어 이름 앞에 접두어 'apt200810'이 붙지 않을 것이라는 사실을 기억하십시오:
 
    ::
 
       ogr2ogr apt200810 PG:'dbname=warmerda schemas=apt200810'
 
--  This example shows how to overwrite an existing table in an existing
-   schema. Note the use of -nln to specify the qualified layer name.
+-  이 예시는 기존 스키마에 있는 기존 테이블을 덮어쓰는 방법을 보여줍니다. 조건에 맞는 레이어 이름을 지정하기 위해 '-nln' 옵션을 사용한다는 사실을 기억하십시오:
 
    ::
 
       ogr2ogr -overwrite -f PostgreSQL "PG:dbname=warmerda" mytable.shp mytable -nln myschema.mytable
 
-   Note that using -lco SCHEMA=mytable instead of -nln would not have
-   worked in that case (see
-   `#2821 <http://trac.osgeo.org/gdal/ticket/2821>`__ for more details).
+   이 경우 '-nln' 대신 '-lco SCHEMA=mytable'을 사용하면 작동하지 않을 것입니다.
+   (자세한 내용은 `#2821 <http://trac.osgeo.org/gdal/ticket/2821>`_ 을 참조하십시오.)
 
-   If you need to overwrite many tables located in a schema at once, the
-   -nln option is not the more appropriate, so it might be more
-   convenient to use the active_schema connection string.
-   The following example will overwrite, if necessary, all
-   the PostgreSQL tables corresponding to a set of shapefiles inside the
-   apt200810 directory :
+   스키마에 있는 테이블 여러 개를 한 번에 덮어써야 하는 경우, '-nln' 옵션은 더 이상 적합하지 않습니다. 이 경우 연결 문자열 안에 'active_schema='를 사용하는 편이 더 쉬울 수도 있습니다. 다음 예시는 필요한 경우 apt200810 디렉터리 안에 있는 shapefile 집합과 대응하는 모든 PostgreSQL 테이블을 덮어쓸 것입니다:
 
    ::
 
       ogr2ogr -overwrite -f PostgreSQL "PG:dbname=warmerda active_schema=apt200810" apt200810
 
-See Also
+참고
 --------
 
--  :ref:`OGR PostgreSQL driver Information <vector.pg>`
+-  :ref:`OGR PostgreSQL 드라이버 정보 <vector.pg>`
+
