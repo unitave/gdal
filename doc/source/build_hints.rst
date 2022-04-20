@@ -178,6 +178,16 @@ Conda-Forge 의존성을 사용하는 윈도우 빌드에서는 다음 패키지
     Armadillo를 사용할지 여부를 제어합니다. Armadillo가 검색되는 경우 기본값은 ON입니다.
 
 
+Arrow
+*****
+
+:ref:`vector.arrow` 및 :ref:`vector.parquet` 드라이버는 `아파치 애로우 C++ <https://github.com/apache/arrow/tree/master/cpp>` 라이브러리를 요구합니다. ``CMAKE_PREFIX_PATH`` 변수에 설치 접두어를 지정하십시오.
+
+.. option:: GDAL_USE_ARROW=ON/OFF
+
+    애로우를 사용할지 여부를 제어합니다. 애로우가 존재하는 경우 기본값은 ON입니다.
+
+
 Blosc
 *****
 
@@ -1293,6 +1303,16 @@ Oracle
 .. option:: GDAL_USE_ORACLE=ON/OFF
 
     오라클을 사용할지 여부를 제어합니다. 오라클이 검색되는 경우 기본값은 ON입니다.
+
+
+Parquet
+*******
+
+:ref:`vector.parquet` 드라이버는 `아파치 애로우 C++ <https://github.com/apache/arrow/tree/master/cpp>` 라이브러리의 Parquet 구성 요소를 요구합니다. ``CMAKE_PREFIX_PATH`` 변수에 설치 접두어를 지정하십시오.
+
+.. option:: GDAL_USE_PARQUET=ON/OFF
+
+    Parquet을 사용할지 여부를 제어합니다. Parquet이 존재하는 경우 기본값은 ON입니다.
 
 
 PCRE2
