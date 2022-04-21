@@ -141,178 +141,142 @@ OGR는 2차원 세라핀(Selafin/Seraphin) 파일 읽기를 지원합니다. 세
 세라핀 데이터소스의 레이어
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The Selafin driver accepts only Selafin files as data sources.
+세라핀 드라이버는 데이터소스로 세라핀 파일만 입력받습니다.
 
-Each Selafin file can hold one or several time steps. All the time steps
-are read by the driver and two layers are generated for each time step:
+각 세라핀 파일은 하나 이상의 시계열 단계를 담을 수 있습니다. 드라이버가 모든 시계열 단계를 읽어와서 각 시계열별로 레이어 2개를 생성합니다:
 
--  one layer with the nodes (points) and their attributes: its name is
-   the base name of the data source, followed by "_p" (for Points);
--  one layer with the elements (polygons) and their attributes
-   calculated as the averages of the values of the attributes of their
-   vertices: its name is the base name of the data source, followed by
-   "_e" (for Elements).
+-  노드(포인트) 및 그 속성을 가진 레이어:
+   이 레이어의 이름은 데이터소스의 기본명 뒤에 (포인트라는 의미의) "_p"를 붙인 것입니다.
 
-Finally, either the number of the time step, or the calculated date of
-the time step (based on the starting date and the number of seconds
-elapsed), is added to the name. A data source in a file called Results
-may therefore be read as several layers:
+-  요소(폴리곤) 및 해당 요소의 꼭짓점들의 속성값들을 평균 낸 속성을 가진 레이어:
+   이 레이어의 이름은 데이터소스의 기본명 뒤에 (요소(element)라는 의미의) "_e"를 붙인 것입니다.
 
--  ``Results_p2014_05_01_20_00_00``, meaning that the layers holds the
-   attributes for the nodes and that the results hold for the time step
-   at 8:00 PM, on May 1st, 2014;
--  ``Results_e2014_05_01_20_00_00``, meaning that the layers holds the
-   attributes for the elements and that the results hold for the time
-   step at 8:00 PM, on May 1st, 2014;
--  ``Results_p2014_05_01_20_15_00``, meaning that the layers holds the
-   attributes for the elements and that the results hold for the time
-   step at 8:15 PM, on May 1st, 2014;
+마지막으로, 시계열 단계의 개수 또는 (시작일과 경과된 초 단위 시간을 기반으로) 계산된 날짜를 레이어 이름에 추가합니다. 따라서 Results라는 파일에 있는 데이터소스를 레이어 여러 개로 읽어올 수도 있습니다:
+
+-  ``Results_p2014_05_01_20_00_00``:
+   이 레이어가 노드 및 노드 속성을 담고 있으며 Results 파일이 2014년 5월 1일 오후 8시 시계열 단위에 대한 결과물을 담고 있다는 의미입니다.
+
+-  ``Results_e2014_05_01_20_00_00``:
+   이 레이어가 요소 및 요소 속성을 담고 있으며 Results 파일이 2014년 5월 1일 오후 8시 시계열 단위에 대한 결과물을 담고 있다는 의미입니다.
+
+-  ``Results_p2014_05_01_20_15_00``:
+   이 레이어가 노드 및 노드 속성을 담고 있으며 Results 파일이 2014년 5월 1일 오후 8시 15분 시계열 단위에 대한 결과물을 담고 있다는 의미입니다.
+
 -  ...
 
 레이어에 대한 제약 사항
 ~~~~~~~~~~~~~~~~~~~~~
 
-Because of the `format of the Selafin file <#format>`_, the layers in a
-single Selafin datasource are not independent from each other. Changing
-one layer will most certainly have side effects on all other layers. The
-driver updates all the layers to match the constraints:
+`세라핀 파일의 포맷 <#format>`_ 때문에, 단일 세라핀 데이터소스에 있는 레이어들은 상호 간에 독립적일 수 없습니다. 레이어 하나를 변경하면 거의 확실하게 다른 모든 레이어에도 부작용이 일어날 것입니다. 이 드라이버가 다음과 같은 제약 사항을 만족시키기 위해 모든 레이어를 업데이트하기 때문입니다:
 
--  All the point layers have the same number of features. When a feature
-   is added or removed in one layer, it is also added or removed in all
-   other layers.
--  Features in different point layers share the same geometry. When the
-   position of one point is changed, it is also changed in all other
-   layers.
--  All the element layers have the same number of features. When a
-   feature is added or removed in one layer, it is also added or removed
-   in all other layers.
--  All the polygons in element layers have the same number of vertices.
-   The number of vertices is fixed when the first feature is added to an
-   element layer, and can not be changed afterwards without recreating
-   the datasource from scratch.
--  Features in different element layers share the same geometry. When an
-   element is added or removed in one layer, it is also added or removed
-   in all other layers.
--  Every vertex of every feature in an element layer has a corresponding
-   point feature in the point layers. When an element feature is added,
-   if its vertices do not exist yet, they are created in the point
-   layers.
--  Points and elements layers only support attributes of type "REAL".
-   The format of real numbers (width and precision) can not be changed.
+-  모든 노드 레이어가 동일한 개수의 객체를 가집니다. 레이어 하나에 객체를 추가하거나 제거하면, 다른 모든 레이어에도 추가하거나 제거합니다.
+
+-  서로 다른 노드 레이어에 있는 객체가 동일한 도형을 공유합니다. 포인트 하나의 위치를 변경하면, 다른 모든 레이어에서도 변경됩니다.
+
+-  모든 요소 레이어가 동일한 개수의 객체를 가집니다. 레이어 하나에 객체를 추가하거나 제거하면, 다른 모든 레이어에도 추가하거나 제거합니다.
+
+-  요소 레이어에 있는 모든 폴리곤이 동일한 개수의 꼭짓점을 가집니다. 요소 레이어에 첫 번째 객체를 추가할 때 꼭짓점 개수가 고정되며, 처음부터 데이터소스를 재생성하지 않는 이상 이후에 변경할 수 없습니다.
+
+-  서로 다른 요소 레이어에 있는 객체가 동일한 도형을 공유합니다. 레이어 하나에 요소를 추가하거나 제거하면, 다른 모든 레이어에도 추가하거나 제거합니다.
+
+-  요소 레이어에 있는 모든 객체의 모든 꼭짓점이 대응하는 노드 레이어의 포인트 객체를 가집니다. 요소 객체를 추가할 때 그 꼭짓점이 아직 존재하지 않는 경우, 노드 레이어에 대응하는 포인트를 생성합니다.
+
+-  노드 및 요소 레이어는 "REAL" 유형 속성만 지원합니다. 실수형 숫자의 (길이 및 정밀도) 서식을 변경할 수 없습니다.
 
 레이어 필터링 사양
 -----------------------------
 
-As a single Selafin files may hold millions of layers, and the user is
-generally interested in only a few of them, the driver supports
-syntactic sugar to filter the layers before they are read.
+세라핀 파일 하나가 레이어 수백만 개를 담고 있을 수도 있는데 사용자는 일반적으로 그 중 몇 개에만 관심이 있기 때문에, 이 드라이버는 레이어를 읽어오기 전에 레이어를 필터링할 수 있는 당의 구문(syntactic sugar)을 지원합니다. 당의 구문이란 문법적으로는 동일하면서도 사람이 읽고 쓰기 쉽게 해주는 구문을 말합니다.
 
-When the datasource is specified, it may be followed immediately by a
-*layer filtering specification.*, as in ``Results[0:10]``. The effects
-of the layer filtering specification is to indicate which time steps
-shall be loaded from all Selafin files.
+데이터소스를 지정할 때, ``Results[0:10]`` 처럼 데이터소스 바로 뒤에 *레이어 필터링 사양* 이 올 수도 있습니다. 레이어 필터링 사양의 효과는 모든 세라핀 파일로부터 어떤 시계열 단계를 불러올 것인지를 지시하는 것입니다.
 
-The layer filtering specification is a comma-separated sequence of range
-specifications, delimited by square brackets and maybe preceded by the
-character 'e' or 'p'. The effect of characters 'e' and 'p' is to select
-respectively either only elements or only nodes. If no character is
-added, both nodes and elements are selected. Each range specification
-is:
+레이어 필터링 사양은 쉼표로 구분된 지정 범위의 순열(sequence)로, 지정 범위를 대괄호로 감싸고 앞에 'e' 또는 'p' 문자가 붙을 수도 있습니다. 이 'e' 또는 'p' 문자는 각각 요소만 또는 노드만 선택하도록 하는 역할입니다. 아무 문자도 붙지 않는 경우 노드와 요소 둘 다 선택합니다. 각 지정 범위는:
 
--  either a single number, representing one single time step (whose
-   numbers start with 0),
--  or a set of two numbers separated by a colon: in that case, all the
-   time steps between and including those two numbers are selected; if
-   the first number is missing, the range starts from the beginning of
-   the file (first time step); if the second number is missing, the
-   range goes to the end of the file (last time step);
+-  단일 시계열 단계 1개를 표현하는 (0애서 시작하는) 숫자 하나이거나,
 
-Numbers can also be negative. In this case, they are counted from the
-end of the file, -1 being the last time step.
+-  또는 쌍점으로 구분된 숫자 2개 집합입니다:
+   이 경우, 이 두 숫자를 포함해서 그 사이에 있는 모든 시계열 단계를 선택합니다. 첫 번째 숫자가 생략되었다면 범위가 파일의 시작(첫 번째 시계열 단계)부터 시작합니다. 두 번째 숫자가 생략되었다면 범위가 파일의 마지막(마지막 시계열 단계)까지 포함합니다.
 
-Some examples of layer filtering specifications:
+음의 숫자도 사용할 수 있습니다. 이 경우, 마지막 시계열을 -1로 보고 파일의 마지막부터 셉니다.
 
-============ =================================================================================
-[0]          First time step only, but return both points and elements
-[e:9]        First 10 time steps only, and only layers with elements
-[p-4:]       Last 4 time steps only, and only layers with nodes
-[3,10,-2:-1] 4\ :sup:`th`, 11\ :sup:`th`, and last two time steps, for both nodes and elements
-============ =================================================================================
+다음은 레이어 필터링 사양의 예시입니다:
+
+.. list-table:: Examples of layer filtering specifications
+   :header-rows: 0
+   
+   * - [0]
+     - 첫 번째 시계열 단계만, 노드 및 요소 둘 다 반환
+   * - [e:9]
+     - 처음 시계열 단계 10개만, 요소를 가진 레이어만 반환
+   * - [p-4:]
+     - 마지막 시계열 단계 4개만, 노드를 가진 레이어만 반환
+   * - [3,10,-2:-1]
+     - 4번째, 11번째, 그리고 마지막 2개의 시계열 단계, 노드 및 요소 둘 다 반환
 
 데이터소스 생성 옵션
 ---------------------------
 
-Datasource creation options can be specified with the "``-dsco``" flag
-in ogr2ogr.
+ogr2ogr 유틸리에 ``-dsco`` 옵션을 사용하면 데이터셋 생성 옵션을 지정할 수 있습니다:
 
-TITLE
-   Title of the datasource, stored in the Selafin file. The title must
-   not hold more than 72 characters. If it is longer, it will be
-   truncated to fit in the file.
-DATE
-   Starting date of the simulation. Each layer in a Selafin file is
-   characterized by a date, counted in seconds since a reference date.
-   This option allows providing the reference date. The format of this
-   field must be YYYY-MM-DD_hh:mm:ss. The format does not mention the
-   time zone.
+-  **TITLE**:
+   세라핀 파일에 저장되는 데이터소스의 제목입니다. 이 제목의 길이는 문자 72개를 넘어서는 안 됩니다. 72개보다 긴 경우, 파일에 맞추기 위해 절단될 것입니다.
 
-An example of datasource creation option is:
-``-dsco TITLE="My simulation" -dsco DATE=2014-05-01_10:00:00``.
+-  **DATE**:
+   시뮬레이션의 시작일입니다. 세라핀 파일에 있는 각 레이어는 기준일로부터 초 단위로 셈하는 날짜로 구별됩니다. 이 옵션으로 그 기준일을 지정할 수 있습니다. 이 옵션값의 서식은 'YYYY-MM-DD_hh:mm:ss'이어야만 합니다. 이 서식은 시간대를 언급하지 않습니다.
+
+다음은 데이터소스 생성 옵션의 예시입니다:
+
+::
+
+   -dsco TITLE="My simulation" -dsco DATE=2014-05-01_10:00:00
 
 레이어 생성 옵션
 ----------------------
 
-Layer creation options can be specified with the "``-lco``" flag in
-ogr2ogr.
+ogr2ogr 유틸리에 ``-lco`` 옵션을 사용하면 레이어 생성 옵션을 지정할 수 있습니다:
 
-DATE
-   Date of the time step relative to the starting date of the simulation
-   (see `Datasource creation options <#DCO>`_). This is a single
-   floating-point value giving the number of seconds since the starting
-   date.
+-  **DATE**:
+   시뮬레이션 시작일에 상대적인 시계열 단계의 날짜입니다. (데이터소스 생성 옵션을 참조하십시오.) 이 옵션의 값은 시작일로부터 지난 시간을 초 단위로 지정하는 부동소수점형 값입니다.
 
-An example of datasource creation option is: ``-lco DATE=24000``.
+다음은 레이어 생성 옵션의 예시입니다:
+
+::
+
+   -lco DATE=24000
 
 세라핀 데이터소스의 생성 및 업데이트에 관한 메모
 ---------------------------------------------------------------
 
-The driver supports creating and writing to Selafin datasources, but
-there are some caveats when doing so.
+이 드라이버는 세라핀 데이터소스의 생성 및 쓰기를 지원하지만, 이 때 주의해야 할 점이 몇 가지 있습니다.
 
-When a new datasource is created, it does not contain any layer, feature
-or attribute.
+새 데이터소스를 생성하는 경우, 데이터소스가 어떤 레이어, 객체 또는 속성도 담고 있지 않습니다.
 
-When a new layer is created, it automatically inherits the same number
-of features and attributes as the other layers of the same type (points
-or elements) already in the datasource. The features inherit the same
-geometry as their corresponding ones in other layers. The attributes are
-set to 0. If there was no layer in the datasource yet, the new layer is
-created with no feature and attribute.In any case, when a new layer is
-created, two layers are actually added: one for points and one for
-elements.
+새 레이어를 생성하는 경우, 데이터소스에 있는 기존 (노드 또는 요소) 동일 유형의 다른 레이어와 동일한 객체 및 속성 개수를 자동적으로 상속받습니다. 객체는 다른 레이어의 대응하는 객체와 동일한 도형을 상속받습니다. 속성은 0으로 설정됩니다. 아직 데이터소스에 아무 레이어도 없다면 객체와 속성이 없는 새 레이어를 생성합니다. 어떤 경우에도 새 레이어를 생성할 때 실제로는 노드 및 요소 레이어 2개를 추가합니다.
 
-New features and attributes can be added to the layers or removed. The
-behavior depends on the type of layer (points or elements). The
-following table explains the behavior of the driver in the different
-cases.
+레이어에 새 객체 및 속성을 추가하거나 제거할 수 있습니다. 그 습성은 레이어 유형에 따라 (노드인지 요소인지에 따라) 달라집니다. 다음 표는 서로 다른 사용례에서의 드라이버 습성을 설명합니다:
 
-================================== ========================================================================================================================================================================================= ======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
-Operation                          Points layers                                                                                                                                                                             Element layers
-================================== ========================================================================================================================================================================================= ======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
-Change the geometry of a feature   The coordinates of the point are changed in the current layer and all other layers in the datasource.                                                                                     The coordinates of all the vertices of the element are changed in the current layer and all other layers in the datasource. It is not possible to change the number of vertices. The order of the vertices matters.
-Change the attributes of a feature The attributes of the point are changed in the current layer only.                                                                                                                        No effect.
-Add a new feature                  A new point is added at the end of the list of features, for this layer and all other layers. Its attributes are set to the values of the new feature.                                    The operation is only allowed if the new feature has the same number of vertices as the other features in the layer. The vertices are checked to see if they currently exist in the set of points. A vertex is considered equal to a point if its distance is less than some maximum distance, approximately equal to 1/1000\ :sup:`th` of the average distance between two points in the points layers. When a corresponding point is found, it is used as a vertex for the element. If no point is found, a new is created in all associated layers.
-Delete a feature                   The point is removed from the current layer and all point layers in the datasource. All elements using this point as a vertex are also removed from all element layers in the datasource. The element is removed from the current layer and all element layers in the datasource.
-================================== ========================================================================================================================================================================================= ======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+.. list-table:: The behavior of the Selafin driver
+   :header-rows: 1
+   
+   * - 작업
+     - 노드 레이어
+     - 요소 레이어
+   * - 객체의 도형 변경
+     - 현재 레이어와 데이터소스에 있는 다른 모든 레이어에서 노드의 좌표를 변경합니다.
+     - 현재 레이어와 데이터소스에 있는 다른 모든 레이어에서 요소의 모든 꼭짓점의 좌표를 변경합니다. 꼭짓점 개수를 변경할 수는 없습니다. 꼭짓점 순서가 중요합니다.
+   * - 객체의 속성 변경
+     - 현재 레이어에 있는 노드의 속성만 변경합니다.
+     - 영향을 미치지 않습니다.
+   * - 새 객체 추가
+     - 현재 레이어와 다른 모든 레이어에서 객체 목록의 마지막에 새 노드를 추가합니다. 새 노드의 속성을 새 객체의 값으로 설정합니다.
+     - 새 객체의 꼭짓점 개수가 현재 레이어에 있는 다른 객체들과 동일한 경우에만 이 작업을 할 수 있습니다. 꼭짓점이 현재 노드 집합에 존재하는지 확인합니다. 꼭짓점과 노드 사이의 거리가 노드 레이어에 있는 두 노드 사이의 평균 거리의 약 1/1,000인 최대 오차 허용 거리 미만인 경우 해당 꼭짓점과 노드가 동등하다고 간주합니다. 대응하는 노드를 찾았다면, 그 노드를 요소의 꼭짓점으로 사용합니다. 대응하는 노드를 찾지 못 한 경우, 모든 관련 레이어에 새 노드를 생성합니다.
+   * - 객체 삭제
+     - 현재 레이어와 데이터소스에 있는 다른 모든 레이어에서 노드를 제거합니다. 데이터소스에 있는 모든 요소 레이어로부터 이 노드를 꼭짓점으로 사용하는 모든 요소도 제거합니다.
+     - 현재 레이어와 데이터소스에 있는 다른 모든 레이어에서 요소를 제거합니다.
 
-Typically, this implementation of operations is exactly what you'll
-expect. For example, ogr2ogr can be used to reproject the file without
-changing the inner link between points and elements.
+일반적으로, 이런 구현된 작업 습성이 딱 사용자가 예상할 습성입니다. 예를 들어 ogr2ogr 유틸리티를 사용해서 노드와 요소 사이의 내부 링크를 변경하지 않고 파일을 재투영할 수 있습니다.
 
-It should be noted that update operations on Selafin datasources are
-very slow. This is because the format does no allow for quick insertions
-or deletion of features and the file must be recreated for each
-operation.
+세라핀 데이터소스를 업데이트하는 작업은 아주 느리다는 사실을 기억해야 할 것입니다. 이 포맷에서 객체의 빠른 삽입 또는 삭제를 할 수 없고 각 작업마다 반드시 파일을 재생성해야만 하기 때문입니다.
 
 VSI 가상 파일 시스템 API 지원
 -----------------------------------
@@ -322,9 +286,5 @@ VSI 가상 파일 시스템 API 지원
 기타 메모
 -----------
 
-There is no SRS specification in the Selafin standard. The
-implementation of SRS is an addition of the driver and stores the SRS in
-an unused data field in the file. Future software using the Selafin
-standard may use this field and break the SRS specification. In this
-case, Selafin files will still be readable by the driver, but their
-writing will overwrite a value which may have another purpose.
+세라핀 표준에는 공간 좌표계 사양이 없습니다. 공간 좌표계 구현은 드라이버에 추가된 사양으로 파일에서 사용되지 않는 데이터 필드에 공간 좌표계를 저장합니다. 향후 세라핀 표준을 이용하는 소프트웨어가 이 필드를 이용하게 되어 공간 좌표계 사양을 망가트릴 수도 있습니다. 이 경우, 드라이버가 그래도 세라핀 파일을 읽어올 수는 있지만 세라핀 파일을 작성하는 경우 다른 목적을 가지고 있을 수도 있는 값을 덮어쓰게 될 것입니다.
+
