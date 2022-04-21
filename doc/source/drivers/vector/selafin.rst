@@ -1,35 +1,19 @@
 .. _vector.selafin:
 
-Selafin files
+세라핀 파일
 =============
 
 .. shortname:: Selafin
 
 .. built_in_by_default::
 
-OGR supports reading from 2D Selafin/Seraphin files. Selafin/Seraphin is
-the generic output and input format of geographical files in the
-open-source `Telemac hydraulic model <http://www.opentelemac.org>`__.
-The file format is suited to the description of numerical attributes for
-a set of point features at different time steps. Those features usually
-correspond to the nodes in a finite-element model. The file also holds a
-connectivity table which describes the elements formed by those nodes
-and which can also be read by the driver.
+OGR는 2차원 세라핀(Selafin/Seraphin) 파일 읽기를 지원합니다. 세라핀은 오픈 소스 `텔레맥 수리 모델(Telemac hydraulic model) <http://www.opentelemac.org>`_ 에서 쓰이는 지리 파일의 일반 산출 및 입력 포맷입니다. 이 파일 포맷은 서로 다른 시계열 단계에 있는 포인트 객체 집합의 숫자형 속성을 설명하는 데 적합합니다. 이 포인트 객체는 보통 유한 요소 모델(finite-element model)에 있는 노드에 대응합니다. 이 파일은 이런 노드들이 형성하는 요소들을 설명하는 연결성(connectivity) 테이블도 가지고 있는데, 세라핀 드라이버는 이 테이블도 읽을 수 있습니다.
 
-The driver supports the use of VSI virtual files as Selafin datasources.
+세라핀 드라이버는 VSI 가상 파일을 세라핀 데이터소스로 사용할 수 있습니다.
 
-The driver offers full read-write support on Selafin files. However, due
-to the particular nature of Selafin files where element (polygon)
-features and node (point) features are closely related, writing on
-Selafin layers can lead to counter-intuitive results. In a general way,
-writing on any layer of a Selafin data-source will cause side effects on
-all the other layers. Also, it is very important **not to open the same
-datasource more than once in update mode**. Having two processes write
-at the same time on a single datasource can lead to irreversible data
-corruption. The driver issues a warning each time a datasource is opened
-in update mode.
+이 드라이버는 세라핀 파일에 대한 완전한 읽기 및 쓰기를 지원합니다. 하지만, 요소(폴리곤) 객체와 노드(포인트) 객체가 밀접하게 관련되어 있는 세라핀 파일의 특수한 성질 때문에 세라핀 레이어 상에 작성 작업을 하는 것이 직관에 반대되는 결과로 이어질 수 있습니다. 일반적으로, 세라핀 데이터소스의 어떤 한 레이어에 작성 작업을 하면 다른 모든 레이어에도 부작용을 일으킬 것입니다. 또한, **업데이트 모드에서 동일한 레이어를 한 번 이상 열지 말아야 합니다**. 단일 데이터소스에 쓰기 작업 2개를 동시에 처리하는 것이 복구 불가능한 데이터 오류로 이어질 수 있기 때문입니다. 이 드라이버는 데이터소스를 업데이트 모드로 열 때마다 경고를 발합니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_create::
@@ -38,190 +22,123 @@ Driver capabilities
 
 .. supports_virtualio::
 
-Magic bytes
+매직 넘버
 -----------
 
-There is no generic extension to Selafin files. The adequate format is
-tested by looking at a dozen of magic bytes at the beginning of the
-file:
+세라핀 파일은 일반 확장자를 가지고 있지 않습니다. 파일 시작 부분에 있는 12개의 매직 넘버(magic byte)로 세라핀 포맷이 맞는지 테스트합니다:
 
--  The first four bytes of the file should contain the values (in
-   hexadecimal): 00 00 00 50. This actually indicates the start of a
-   string of length 80 in the file.
--  At position 84 in the file, the eight next bytes should read (in
-   hexadecimal): 00 00 00 50 00 00 00 04.
+-  파일의 처음 4바이트가 00 00 00 50 (16진법) 값들을 담고 있어야 합니다. 이 값들은 실제로 파일에 있는 80바이트 길이의 문자열의 시작을 의미합니다.
+-  파일의 84바이트 위치부터, 00 00 00 50 00 00 00 04 (16진법) 값들이 읽혀야 합니다.
 
-Files which match those two criteria are considered to be Selafin files
-and the driver will report it has opened them successfully.
+이 드라이버는 이 두 가지 조건을 만족하는 파일을 세라핀 파일로 간주하고 성공적으로 열었다고 리포트할 것입니다.
 
-Format
+포맷
 ------
 
-Selafin format is designed to hold data structures in a portable and
-compact way, and to allow efficient random access to the data. To this
-purpose, Selafin files are binary files with a generic structure.
+세라핀 포맷은 포터블하고 컴팩트한 방식으로 데이터 구조를 담도록, 그리고 데이터에 효율적인 임의 접근이 가능하도록 설계되었습니다. 세라핀 파일은 이런 목적을 위한 일반 구조를 가진 바이너리 파일입니다.
 
-Elements
+요소
 ~~~~~~~~
 
-Selafin files are made of the juxtaposition of elements. Elements have
-one of the following types:
+세라핀 파일은 요소들의 병렬 배치(juxtaposition)로 이루어져 있습니다. 요소 유형은 다음 가운데 하나입니다:
 
--  integer,
--  string,
--  floating point values,
--  arrays of integers,
--  arrays of floating point values.
+-  정수형
+-  문자열
+-  부동소수점형
+-  정수값 배열
+-  부동소수점값 배열
 
-+-----------------------+-----------------------+-----------------------+
-| Element               | Internal              | Comments              |
-|                       | representation        |                       |
-+=======================+=======================+=======================+
-| Integer               | a b c d               | Integers are stored   |
-|                       |                       | on 4 bytes in         |
-|                       |                       | big-endian format     |
-|                       |                       | (most significant     |
-|                       |                       | byte first). The      |
-|                       |                       | value of the integer  |
-|                       |                       | is                    |
-|                       |                       | 2\ :sup:`24`.a+2\ :su |
-|                       |                       | p:`16`.b+2\ :sup:`8`. |
-|                       |                       | c+d.                  |
-+-----------------------+-----------------------+-----------------------+
-| Floating point        | a b c d               | Floating point values |
-|                       |                       | are stored on 4 bytes |
-|                       |                       | in IEEE 754 format    |
-|                       |                       | and under big-endian  |
-|                       |                       | convention (most      |
-|                       |                       | significant byte      |
-|                       |                       | first). Endianness is |
-|                       |                       | detected at run time  |
-|                       |                       | only once when the    |
-|                       |                       | first floating point  |
-|                       |                       | value is read.        |
-+-----------------------+-----------------------+-----------------------+
-| String                | Length 1 2 ... Length | Strings are stored in |
-|                       |                       | three parts:          |
-|                       |                       |                       |
-|                       |                       | -  an integer holding |
-|                       |                       |    the length (in     |
-|                       |                       |    characters) of the |
-|                       |                       |    string, over 4     |
-|                       |                       |    bytes;             |
-|                       |                       | -  the sequence of    |
-|                       |                       |    characters of the  |
-|                       |                       |    string, each       |
-|                       |                       |    character on one   |
-|                       |                       |    byte;              |
-|                       |                       | -  the same integer   |
-|                       |                       |    with the length of |
-|                       |                       |    the string         |
-|                       |                       |    repeated           |
-+-----------------------+-----------------------+-----------------------+
-| Array of integers     | Length 1 2 ... Length | Arrays of integers    |
-|                       |                       | are stored in three   |
-|                       |                       | parts:                |
-|                       |                       |                       |
-|                       |                       | -  an integer holding |
-|                       |                       |    the length (in     |
-|                       |                       |    bytes, thus 4      |
-|                       |                       |    times the number   |
-|                       |                       |    of elements) of    |
-|                       |                       |    the array, over 4  |
-|                       |                       |    bytes;             |
-|                       |                       | -  the sequence of    |
-|                       |                       |    integers in the    |
-|                       |                       |    array, each        |
-|                       |                       |    integer on 4 bytes |
-|                       |                       |    as described       |
-|                       |                       |    earlier;           |
-|                       |                       | -  the same integer   |
-|                       |                       |    with the length of |
-|                       |                       |    the array repeated |
-+-----------------------+-----------------------+-----------------------+
-| Array of floating     | Length 1 2 ... Length | Arrays of floating    |
-| point values          |                       | point values are      |
-|                       |                       | stored in three       |
-|                       |                       | parts:                |
-|                       |                       |                       |
-|                       |                       | -  an integer holding |
-|                       |                       |    the length (in     |
-|                       |                       |    bytes, thus 4      |
-|                       |                       |    times the number   |
-|                       |                       |    of elements) of    |
-|                       |                       |    the array, over 4  |
-|                       |                       |    bytes;             |
-|                       |                       | -  the sequence of    |
-|                       |                       |    floating point     |
-|                       |                       |    values in the      |
-|                       |                       |    array, each one on |
-|                       |                       |    4 bytes as         |
-|                       |                       |    described earlier; |
-|                       |                       | -  the same integer   |
-|                       |                       |    with the length of |
-|                       |                       |    the array repeated |
-+-----------------------+-----------------------+-----------------------+
+.. list-table:: Selafin Element Types
+   :header-rows: 1
+   
+   * - 요소
+     - 내부 표현
+     - 비고
+   * - Integer
+     - a b c d
+     - 정수형은 빅 엔디언 (최상위 바이트 우선) 서식의 4바이트로 저장됩니다. 정수값은 '2\ :sup:`24`.a+2\ :sup:`16`.b+2\ :sup:`8`.c+d'입니다.
+   * - Floating point
+     - a b c d
+     - 부동소수점형은 빅 엔디언 규범(최상위 바이트 우선) 아래 IEEE 754 서식의 4바이트로 저장됩니다. 런타임에서 첫 번째 부동소수점형 값을 읽을 때 엔디언 여부를 탐지합니다.
+   * - String
+     - Length 1 2 ... Length
+     - 문자열은 세 부분으로 저장됩니다:
 
-Full structure
+         -  문자열의 (문자 단위) 길이를 담고 있는 정수, 4바이트
+         -  문자열에 있는 문자들의 순열, 문자 당 1바이트
+         -  문자열의 길이를 담고 있는 정수의 반복
+
+   * - Array of integers
+     - Length 1 2 ... Length
+     - 정수값 배열은 세 부분으로 저장됩니다:
+
+         -  배열의 (바이트 단위, 즉 요소 개수의 4배) 길이를 담고 있는 정수, 4바이트
+         -  배열에 있는 정수들의 순열, 앞에서 설명한 대로 정수 당 4바이트
+         -  배열의 길이를 담고 있는 정수의 반복
+
+   * - Array of floating point values
+     - Length 1 2 ... Length
+     - 부동소수점값 배열은 세 부분으로 저장됩니다:
+
+         -  배열의 (바이트 단위, 즉 요소 개수의 4배) 길이를 담고 있는 정수, 4바이트
+         -  배열에 있는 부동소수점형 숫자들의 순열, 앞에서 설명한 대로 부동소수점형 숫자 당 4바이트
+         -  배열의 길이를 담고 있는 정수의 반복
+
+전체 구조
 ~~~~~~~~~~~~~~
 
-The header of a Selafin file holds the following elements in that exact
-order:
+세라핀 파일의 헤더는 다음 요소들을 정확히 다음 순서대로 담고 있습니다:
 
--  a *string* of 80 characters with the title of the study; the last 8
-   characters shall be "SERAPHIN" or "SERAFIN" or "SERAFIND";
--  an *array of integers* of exactly 2 elements, the first one being the
-   number of variables (attributes) *nVar*, and the second is ignored;
--  *nVar strings* with the names of the variables, each one with length
-   32;
--  an *array of integers* of exactly 10 elements:
+-  연구 제목을 담은 문자 80개 길이의 *문자열*:
+   마지막 문자 8개는 "SERAPHIN" 또는 "SERAFIN" 또는 "SERAFIND" 가운데 하나여야 합니다.
 
-   -  the third element is the x-coordinate of the origin of the model;
-   -  the fourth element is the y-coordinate of the origin of the model;
-   -  the tenth element *isDate* indicates if the date of the model has
-      to be read (see later);
-   -  in addition, the second element being unused by hydraulic software
-      at the moment, it is used by the driver to store the spatial
-      reference system of the datasource, in the form of a single
-      integer with the EPSG number of the projection;
+-  요소를 딱 2개 가진 *정수값 배열*:
+   첫 번째 요소는 변수(속성) *nVar* 의 개수이고, 두 번째 요소는 무시합니다.
 
--  if *isDate*\ =1, an *array of integers* of exactly 6 elements, with
-   the starting date of the model (year, month, day, hour, minute,
-   second);
--  an *array of integers* of exactly 4 elements:
+-  변수의 이름을 담은 *nVar 문자열*:
+   각 문자열의 길이는 문자 32개입니다.
 
-   -  the first element is the number of elements *nElements*,
-   -  the second element is the number of points *nPoints*,
-   -  the third element is the number of points per
-      element\ *nPointsPerElement*,
-   -  the fourth element must be 1;
+-  요소를 딱 10개 가진 *정수값 배열*:
 
--  an *array of integers* of exactly *nElements*nPointsPerElement*
-   elements, with each successive set of *nPointsPerElement* being the
-   list of the number of the points (number starting with 1)
-   constituting an element;
--  an *array of integers* of exactly *nPoints* elements ignored by the
-   driver (the elements shall be 0 for inner points and another value
-   for the border points where a limit condition is applied);
--  an *array of floating point values* of exactly *nPoints* elements
-   with the x-coordinates of the points;
--  an *array of floating point values* of exactly *nPoints* elements
-   with the y-coordinates of the points;
+   -  세 번째 요소가 모델 원점(origin)의 X 좌표입니다.
+   -  네 번째 요소가 모델 원점의 Y 좌표입니다.
+   -  열 번째 요소가 모델의 날짜를 읽어와야 하는지를 나타내는 *isDate* 입니다. (다음 항목 참조)
+   -  덧붙여, 현재 수리 소프트웨어는 두 번째 요소를 사용하지 않지만, 이 드라이버가 데이터소스의 공간 좌표계를 투영법의 EPSG 번호를 의미하는 단일 정수 형식으로 저장하기 위해 사용합니다.
 
-The rest of the file actually holds the data for each successive time
-step. A time step contains the following elements:
+-  *isDate*\ =1인 경우, 요소를 딱 6개 가진 *정수값 배열*:
+   모델의 시작일(연, 월, 일, 시, 분, 초)을 담고 있습니다.
 
--  a *array of floating point values* of exactly 1 element, being the
-   date of the time step relative to the starting date of the simulation
-   (usually in seconds);
--  *nVar array of floating point values*, each with exactly *nPoints*
-   elements, with the values of each attribute for each point at the
-   current time step.
+-  요소를 딱 4개 가진 *정수값 배열*.:
 
-Mapping between file and layers
+   -  첫 번째 요소가 *nElements* 요소의 개수입니다.
+   -  두 번째 요소가 *nPoints* 포인트의 개수입니다.
+   -  세 번째 요소가 *nPointsPerElement* 요소 당 포인트의 개수입니다.
+   -  네 번째 요소는 반드시 1이어야만 합니다.
+
+-  요소를 딱 *nElements*nPointsPerElement* 개 가진 *정수값 배열*:
+   연속하는 *nPointsPerElement* 집합은 각각 요소를 구성하는 포인트의 (1에서 시작하는) 개수 목록입니다.
+
+-  요소를 딱 *nPoints* 개 가진 *정수값 배열*:
+   드라이버가 무시합니다. (요소는 내부 포인트에 대해 0이어야 하고 제한 조건이 적용되는 경계 포인트에 대해서는 또다른 값이어야 합니다.)
+
+-  요소를 딱 *nPoints* 개 가진 *부동소수점값 배열*:
+   포인트의 X 좌표를 담고 있습니다.
+
+-  요소를 딱 *nPoints* 개 가진 *부동소수점값 배열*:
+   포인트의 Y 좌표를 담고 있습니다.
+
+파일의 나머지 부분은 이어지는 각 시계열 단계의 실제 데이터를 담고 있습니다. 시계열 단계는 다음과 같은 요소들을 담고 있습니다:
+
+-  요소를 딱 1개 가진 *부동소수점값 배열*:
+   시뮬레이션의 시작일에 상대적인 시계열 단계의 날짜입니다. (보통 초 단위입니다.)
+
+-  배열의 각 항목이 딱 *nPoints* 개의 요소를 가진 *부동소수점값 nVar 배열*:
+   현재 시계열 단계에 있는 각 포인트의 각 속성값을 담고 있습니다.
+
+파일과 레이어 사이의 매핑
 -------------------------------
 
-Layers in a Selafin datasource
+세라핀 데이터소스의 레이어
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The Selafin driver accepts only Selafin files as data sources.
@@ -252,10 +169,10 @@ may therefore be read as several layers:
    step at 8:15 PM, on May 1st, 2014;
 -  ...
 
-Constraints on layers
+레이어에 대한 제약 사항
 ~~~~~~~~~~~~~~~~~~~~~
 
-Because of the `format of the Selafin file <#format>`__, the layers in a
+Because of the `format of the Selafin file <#format>`_, the layers in a
 single Selafin datasource are not independent from each other. Changing
 one layer will most certainly have side effects on all other layers. The
 driver updates all the layers to match the constraints:
@@ -283,7 +200,7 @@ driver updates all the layers to match the constraints:
 -  Points and elements layers only support attributes of type "REAL".
    The format of real numbers (width and precision) can not be changed.
 
-Layer filtering specification
+레이어 필터링 사양
 -----------------------------
 
 As a single Selafin files may hold millions of layers, and the user is
@@ -322,7 +239,7 @@ Some examples of layer filtering specifications:
 [3,10,-2:-1] 4\ :sup:`th`, 11\ :sup:`th`, and last two time steps, for both nodes and elements
 ============ =================================================================================
 
-Datasource creation options
+데이터소스 생성 옵션
 ---------------------------
 
 Datasource creation options can be specified with the "``-dsco``" flag
@@ -342,7 +259,7 @@ DATE
 An example of datasource creation option is:
 ``-dsco TITLE="My simulation" -dsco DATE=2014-05-01_10:00:00``.
 
-Layer creation options
+레이어 생성 옵션
 ----------------------
 
 Layer creation options can be specified with the "``-lco``" flag in
@@ -350,13 +267,13 @@ ogr2ogr.
 
 DATE
    Date of the time step relative to the starting date of the simulation
-   (see `Datasource creation options <#DCO>`__). This is a single
+   (see `Datasource creation options <#DCO>`_). This is a single
    floating-point value giving the number of seconds since the starting
    date.
 
 An example of datasource creation option is: ``-lco DATE=24000``.
 
-Notes about the creation and the update of a Selafin datasource
+세라핀 데이터소스의 생성 및 업데이트에 관한 메모
 ---------------------------------------------------------------
 
 The driver supports creating and writing to Selafin datasources, but
@@ -397,15 +314,12 @@ very slow. This is because the format does no allow for quick insertions
 or deletion of features and the file must be recreated for each
 operation.
 
-VSI Virtual File System API support
+VSI 가상 파일 시스템 API 지원
 -----------------------------------
 
-The driver supports reading and writing to files managed by VSI Virtual
-File System API, which include "regular" files, as well as files in the
-/vsizip/ (read-write) , /vsigzip/ (read-only) , /vsicurl/ (read-only)
-domains.
+이 드라이버는 VSI 가상 파일 시스템 API가 관리하는 파일의 읽기 및 쓰기를 지원합니다. VSI 가상 파일 시스템 API가 관리하는 파일에는 "정규" 파일은 물론 /vsizip/ (읽기-쓰기) , /vsigzip/ (읽기 전용) , /vsicurl/ (읽기 전용) 도메인에 있는 파일도 포함됩니다.
 
-Other notes
+기타 메모
 -----------
 
 There is no SRS specification in the Selafin standard. The
