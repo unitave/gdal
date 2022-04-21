@@ -7,38 +7,30 @@ SDTS
 
 .. built_in_by_default::
 
-SDTS TVP (Topological Vector Profile) and Point Profile datasets are
-supported for read access. Each primary attribute, node (point), line
-and polygon module is treated as a distinct layer.
+SDTS(Spatial Data Transfer Standard) 드라이버는 SDTS TVP(Topological Vector Profile) 및 포인트 프로파일(Point Profile) 데이터셋에 읽기 접근을 지원합니다. 주요 속성, 노드(포인트), 라인 및 폴리곤 모듈을 각각 개별 레이어로 취급합니다.
 
-To select an SDTS transfer, the name of the catalog file should be used.
-For instance ``TR01CATD.DDF`` where the first four characters are all
-that typically varies.
+SDTS 변환(transfer)을 선택하려면, 예를 들어 ``TR01CATD.DDF`` 같은 카탈로그 파일 이름을 사용해야 합니다. 이때 처음 4개의 문자는 계속 달라집니다.
 
-SDTS coordinate system information is properly supported for most
-coordinate systems defined in SDTS.
+SDTS에 정의된 대부분의 좌표계의 경우 SDTS 좌표계 정보를 제대로 지원합니다.
 
-There is no update or creation support in the SDTS driver.
+SDTS 드라이버는 업데이트 또는 생성을 지원하지 않습니다.
 
-Note that in TVP datasets the polygon geometry is formed from the
-geometry in the line modules. Primary attribute module attributes should
-be properly attached to their related node, line or polygon features,
-but can be accessed separately as their own layers.
+TVP 데이터셋에서 라인 모듈에 있는 도형으로부터 폴리곤 도형을 형성한다는 사실을 기억하십시오. 주요 속성 모듈의 속성이 관련 노드, 라인, 또는 폴리곤 객체에 알맞게 추가되어야 하지만, 각 유형의 레이어로 개별적으로 접근할 수도 있습니다.
 
-This driver has no support for raster (DEM) SDTS datasets.
+이 드라이버는 래스터(DEM) SDTS 데이터셋을 지원하지 않습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
 .. supports_virtualio::
 
-See Also
+참고
 --------
 
--  `SDTS Abstraction
-   Library <https://web.archive.org/web/20130730111701/http://home.gdal.org/projects/sdts/index.html>`__: The base
-   library used to implement this driver.
--  `http://mcmcweb.er.usgs.gov/sdts <http://mcmcweb.er.usgs.gov/sdts/>`__:
-   Main USGS SDTS web page.
+-  `SDTS 추상 라이브러리 <https://web.archive.org/web/20130730111701/http://home.gdal.org/projects/sdts/index.html>`_:
+   이 드라이버를 구현하기 위해 사용된 기반 라이브러리입니다.
+-  `http://mcmcweb.er.usgs.gov/sdts <http://mcmcweb.er.usgs.gov/sdts/>`_:
+   USGS SDTS 웹페이지입니다.
+
