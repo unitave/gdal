@@ -7,228 +7,192 @@ IHO S-57 (ENC)
 
 .. built_in_by_default::
 
-International Hydrographic Organisation (IHO) S-57 Electronic Navigation
-Charts (ENC) datasets are supported for read access.
+S57 드라이버는 IHO(International Hydrographic Organisation) S-57 ENC(Electronic Navigation Charts) 데이터셋에 읽기 접근을 지원합니다.
 
-The S-57 driver module produces features for all S-57 features in the
-S-57 file, and associated updates. S-57 (ENC) files normally have the
-extension ".000".
+S57 드라이버 모듈은 S-57 파일에 있는 모든 S-57 피처를 위한 객체 및 관련 업데이트를 생성합니다. S-57 (ENC) 파일의 확장자는 보통 ".000"입니다.
 
-S-57 feature objects are translated into features. S-57 geometry objects
-are automatically collected and formed into geometries on the features.
+이 드라이버는 S-57 피처 객체(feature object)를 객체(feature)로 변환합니다. S-57 도형 객체(geometry object)를 자동으로 수집해서 객체(feature) 상의 도형으로 만듭니다.
 
-The S-57 reader depends on having two supporting files,
-s57objectclasses.csv, and s57attributes.csv available at runtime in
-order to translate features in an object class specific manner. These
-should be in the directory pointed to by the environment variable
-S57_CSV, or in the current working directory.
+S-57 판독기는 피처를 객체 클래스(object class) 특화 방식으로 변환하기 위해 런타임에서 s57objectclasses.csv 및 s57attributes.csv 지원 파일 2개를 가지고 있어야 합니다. 이 파일들은 S57_CSV 환경 변수가 가리키는 디렉터리 또는 현재 작업 중인 디렉터리에 있어야 합니다.
 
-S-57 update files contain information on how to update a distributed
-S-57 base data file. The base files normally have the extension .000
-while the update files have extensions like .001, .002 and so on. The
-S-57 reader will normally read and apply all updates files to the in
-memory version of the base file on the fly. The feature data provided to
-the application therefore includes all the updates.
+S-57 업데이트 파일은 배포된 S-57 기반 데이터 파일을 업데이트 하는 방법에 대한 정보를 담고 있습니다. 기반 파일의 확장자가 보통 ".000"인 반면 업데이트 파일의 확장자는 ".001", ".002", ... 입니다. S-57 판독기는 일반적으로 모든 업데이트 파일을 읽어와서 기저 파일의 인메모리 버전에 실시간(on the fly)으로 적용할 것입니다. 즉 응용 프로그램에 입력되는 객체 데이터는 모든 업데이트를 포함합니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
 .. supports_virtualio::
 
-Feature Translation
+피처 변환
 -------------------
 
-Normally all features read from S-57 are assigned to a layer based on
-the name of the object class (OBJL) to which they belong. For instance,
-with an OBJL value of 2, the feature is an "Airport / airfield" and has
-a short name of "AIRARE" which is used as the layer name. A typical S-57
-transfer will have in excess of 100 layers.
+일반적으로 S-57로부터 읽어온 모든 피처를 피처가 속해 있는 객체 클래스(OBJL)의 이름을 기반으로 하는 레이어에 할당합니다. 예를 들어, OBJL 값이 2인 경우 해당 피처의 객체 클래스는 "Airport / airfield"로 단축명이 "AIRARE"인데, 이 단축명을 레이어 이름으로 사용합니다. S-57 전송은 일반적으로 100개 이상의 레이어를 전송합니다.
 
-Each feature type has a predefined set of attributes as defined by the
-S-57 standard. For instance, the airport (AIRARE) object class can have
-the AIRARE, CATAIR, CONDTN, CONVIS, NOBJNM, OBJNAM, STATUS, INFORM,
-NINFOM, NTXTDS, PICREP, SCAMAX, SCAMIN, TXTDSC, RECDAT, RECIND, SORDAT,
-and SORIND attributes. These short names can be related to longer, more
-meaningful names using an S-57 object/attribute catalog such as the S-57
-standard document itself, or the catalog files (s57attributes.csv, and
-s57objectclasses.csv). Such a catalog can also be used to establish all
-the available object classes, and their attributes.
+각 피처 유형은 S-57 표준이 정의한 대로 사전 정의된 속성 집합을 가집니다. 예를 들어 공항(AIRARE) 객체 클래스는 AIRARE, CATAIR, CONDTN, CONVIS, NOBJNM, OBJNAM, STATUS, INFORM, NINFOM, NTXTDS, PICREP, SCAMAX, SCAMIN, TXTDSC, RECDAT, RECIND, SORDAT 및 SORIND 속성을 가질 수 있습니다. S-57 표준 문서 자체 또는 카탈로그 파일(s57attributes.csv 및 s57objectclasses.csv) 같은 S-57 객체/속성 카탈로그를 이용해서 이 단축명들을 더 길고 알기 쉬운 이름과 관련지을 수 있습니다. 또 카탈로그를 사용해서 사용할 수 있는 모든 객체 클래스와 그 속성을 확립할 수도 있습니다.
 
-The following are some common attributes, including generic attributes
-which appear on all feature, regardless of object class. is turned on.
+다음은 객체 클래스에 상관없이 모든 피처에 나타나는 일반 속성들을 포함하는 일부 공통 속성들입니다. 해당 속성이 모든 피처에 나타나는지 일부 피처에만 나타나는지도 표시했습니다.
 
-::
+.. list-table:: S-57 Attribute Definitions
+   :header-rows: 1
+   
+   * - 속성명
+     - 설명
+     - 정의된 피처
+   * - GRUP
+     - 그룹 번호
+     - 모든 피처
+   * - OBJL
+     - 객체 수준 코드. 이 숫자는 피처의 객체 클래스를 의미합니다.
+     - 모든 피처
+   * - RVER
+     - 레코드 버전
+     - 
+   * - AGEN
+     - 숫자형 기관 코드. 예: 캐나다 수로청(Canadian Hydrographic Service) = 50
+     - 모든 피처
+   * - FIDN
+     - 피처 식별 번호
+     - 모든 피처
+   * - FIDS
+     - 피처 식별 하위 구분(subdivision)
+     - 모든 피처
+   * - INFORM
+     - 정보 제공 텍스트
+     - 일부 피처
+   * - NINFOM
+     - 국가별 공용어(national language)로 된 정보 제공 텍스트
+     - 일부 피처
+   * - OBJNAM
+     - 객체(object) 이름
+     - 일부 피처
+   * - NOBJNM
+     - 국가별 공용어(national language)로 된 객체(object) 이름
+     - 일부 피처
+   * - SCAMAX
+     - 표시 용 최대 축척
+     - 일부 피처
+   * - SCAMIN
+     - 표시 용 최소 축척
+     - 일부 피처
+   * - SORDAT
+     - 소스 취득일
+     - 일부 피처
 
-     Attribute Name  Description                            Defined On
-     --------------  -----------                            ----------
+LNAM_REFS 제어 옵션을 ON으로 설정하는 경우 다음 속성들도 나타납니다:
 
-     GRUP            Group number.                          All features
+.. list-table:: S-57 Attribute Definitions with LNAM_REFS=ON
+   :header-rows: 1
+   
+   * - 속성명
+     - 설명
+     - 정의된 피처
+   * - LNAM
+     - 긴 이름. S-57 파일 안에서 해당 피처를 유일하게 식별하는 데 쓰이는 AGEN, FIDN 및 FIDS의 인코딩입니다.
+     - 모든 피처
+   * - LNAM_REFS
+     - 관련된 피처들의 긴 이름 목록
+     - 모든 피처
+   * - FFPT_RIND
+     - 각 LNAM_REFS 관계에 대한 관계성 표시자
+     - 모든 피처
 
-     OBJL            Object label code.  This number        All features
-                     indicates the object class of the
-                     feature.
-
-     RVER            Record version.
-
-     AGEN            Numeric agency code, such as 50 for    All features
-                     the Canadian Hydrographic Service.
-
-     FIDN            Feature identification number.         All features
-
-     FIDS            Feature identification subdivision.    All features
-
-     INFORM          Informational text.                    Some features
-
-     NINFOM          Informational text in national         Some features
-                     language.
-
-     OBJNAM          Object name                            Some features
-
-     NOBJNM          Object name in national                Some features
-                     language.
-
-     SCAMAX          Maximum scale for display              Some features
-
-     SCAMIN          Minimum scale for display              Some features
-
-     SORDAT          Source date                            Some features
-
-The following are present if LNAM_REFS is enabled:
-
-::
-
-     LNAM            Long name.  An encoding of AGEN,       All features
-                     FIDN and FIDS used to uniquely
-                     identify this features within an
-                     S-57 file.
-
-     LNAM_REFS       List of long names of related features All Features
-
-     FFPT_RIND       Relationship indicators for each of    All Features
-                     the LNAM_REFS relationships.
-
-
-DSID layer
+DSID 레이어
 ----------
 
-Dataset wide fields, such as DSID (Data Set Identification), DSSI
-(Data Set Structure Information) and DSPM (Data Set Parameter) are exposed
-in a layer ``DSID`` which has a single feature.
-See paragraph 7.3.1 "Data set general information record structure" of
-`IHO S-57 Edition 3.1 standard (main)`_
+단일 피처 하나를 가지고 있는 ``DSID`` 레이어에 DSID(Data Set Identification), DSSI(Data Set Structure Information) 및 DSPM(Data Set Parameter) 같은 데이터셋 범위 필드들을 노출시킵니다.
+`IHO S-57 3.1판 표준 (본편)`_ 의 7.3.1 "데이터셋 일반 정보 레코드 구조"를 참조하십시오.
 
-Soundings
+수심 측정
 ---------
 
-Depth soundings are handled somewhat specially in S-57 format, in order
-to efficiently represent the many available data points. In S-57 one
-sounding feature can have many sounding points. The S-57 reader splits
-each of these out into its own feature type \`SOUNDG' feature with an
-s57_type of \`s57_point3d'. All the soundings from a single feature
-record will have the same AGEN, FIDN, FIDS and LNAM value.
+S-57 포맷에서는 사용할 수 있는 수많은 데이터 포인트를 효율적으로 표현하기 위해 수심 측정(depth sounding)을 약간 특수하게 처리합니다. S-57에서는 수심 측정 피처 하나가 많은 수심 측정 포인트를 가질 수 있습니다. S-57 판독기는 이 포인트들을 각각 S-57 유형의 's57_point3d'을 가진 자체 'SOUNDG' 유형의 피처로 분할합니다. 단일 피처 레코드 하나로부터 나온 수심 측정들은 모두 동일한 AGEN, FIDN, FIDS 및 LNAM 값을 가질 것입니다.
 
-S57 Control Options
+S-57 제어 옵션
 -------------------
 
-There are several control options which can be used to alter the
-behavior of the S-57 reader. Users can set these by appending them in
-the OGR_S57_OPTIONS environment variable.
+S-57 판독기의 습성을 변경하는 데 사용할 수 있는 제어 옵션이 여러 개 있습니다. 사용자는 OGR_S57_OPTIONS 환경 변수에 이 옵션들을 추가해서 설정할 수 있습니다.
 
-They can also be specified independently as open options to the driver.
+드라이버에 이 옵션들을 열기 옵션으로 독립적으로 지정할 수도 있습니다.
 
--  **UPDATES**\ =APPLY/IGNORE: Should update files be incorporated into
-   the base data on the fly. Default is APPLY.
--  **SPLIT_MULTIPOINT**\ =ON/OFF: Should multipoint soundings be split
-   into many single point sounding features. Multipoint geometries are
-   not well handle by many formats, so it can be convenient to split
-   single sounding features with many points into many single point
-   features. Default is OFF.
--  **ADD_SOUNDG_DEPTH**\ =ON/OFF: Should a DEPTH attribute be added on
-   SOUNDG features and assign the depth of the sounding. This should
-   only be enabled with SPLIT_MULTIPOINT is also enabled. Default is
-   OFF.
--  **RETURN_PRIMITIVES**\ =ON/OFF: Should all the low level geometry
-   primitives be returned as special IsolatedNode, ConnectedNode, Edge
-   and Face layers. Default is OFF.
--  **PRESERVE_EMPTY_NUMBERS**\ =ON/OFF: If enabled, numeric attributes
-   assigned an empty string as a value will be preserved as a special
-   numeric value. This option should not generally be needed, but may be
-   useful when translated S-57 to S-57 losslessly. Default is OFF.
--  **LNAM_REFS**\ =ON/OFF: Should LNAM and LNAM_REFS fields be attached
-   to features capturing the feature to feature relationships in the
-   FFPT group of the S-57 file. Default is OFF.
--  **RETURN_LINKAGES**\ =ON/OFF: Should additional attributes relating
-   features to their underlying geometric primitives be attached. These
-   are the values of the FSPT group, and are primarily needed when doing
-   S-57 to S-57 translations. Default is OFF.
--  **RECODE_BY_DSSI**\ =ON/OFF: Should attribute values be
-   recoded to UTF-8 from the character encoding specified in the S57
-   DSSI record. Default is ON starting with GDAL 3.4.1.
--  **LIST_AS_STRING**\ =ON/OFF: (GDAL >= 3.2) Whether attributes tagged as list in S57
-   dictionaries should be reported as a String field, instead of a StringList.
-   Default is OFF. Before GDAL 3.2, the behavior was equivalent to setting
-   this option to ON.
+-  **UPDATES=APPLY/IGNORE**:
+   업데이트 파일을 기반 데이터로 실시간 통합시켜야 할지를 지정합니다. 기본값은 APPLY입니다.
 
-Example:
+-  **SPLIT_MULTIPOINT=ON/OFF**:
+   수심 측정 멀티포인트를 수심 측정 단일 포인트 피처 여러 개로 분할시켜야 할지를 선택합니다. 많은 포맷들이 멀티포인트 도형을 제대로 처리하지 못 하기 때문에, 포인트 여러 개를 가진 단일 수심 측정 피처를 단일 포인트 피처 여러 개로 분할하는 것이 편리할 수 있습니다. 기본값은 OFF입니다.
+
+-  **ADD_SOUNDG_DEPTH=ON/OFF**:
+   SOUNDG 피처에 DEPTH 속성을 추가하고 수심 측정의 깊이를 할당해야 할지를 선택합니다. SPLIT_MULTIPOINT 옵션도 ON으로 설정한 경우에만 이 옵션을 ON으로 설정할 수 있습니다. 기본값은 OFF입니다.
+
+-  **RETURN_PRIMITIVES=ON/OFF**:
+   모든 저수준 도형 프리미티브(geometry primitive)를 특수 IsolatedNode, ConnectedNode, Edge 및 Face 레이어로 반환해야 할지를 선택합니다. 기본값은 OFF입니다.
+
+-  **PRESERVE_EMPTY_NUMBERS=ON/OFF**:
+   이 옵션을 ON으로 설정하면, 비어 있는 문자열을 값으로 할당한 숫자형 속성을 특수 숫자값으로 보전할 것입니다. 일반적으로 필요한 옵션은 아니지만, S-57를 S-57로 무손실 변환하는 경우 유용할 수도 있습니다. 기본값은 OFF입니다.
+
+-  **LNAM_REFS=ON/OFF**:
+   피처에 LNAM 및 LNAM_REFS 필드를 추가해서 S-57 파일의 FFPT 그룹에 있는 "feature to feature" 관계를 수집해야 할지 여부를 선택합니다. 기본값은 OFF입니다.
+
+-  **RETURN_LINKAGES=ON/OFF**:
+   피처를 자신의 기저 도형 프리미티브와 관련짓는 추가 속성을 추가해야 할지를 선택합니다. 이 추가 속성은 FSPT 그룹의 값으로, 주로 S-57를 S-57로 변환하는 경우 필요합니다. 기본값은 OFF입니다.
+
+-  **RECODE_BY_DSSI=ON/OFF**:
+   속성값을 S-57 DSSI 레코드에 지정된 문자 인코딩으로부터 UTF-8로 기록해야 할지를 선택합니다. GDAL 3.4.1버전부터 기본값은 ON입니다.
+
+-  **LIST_AS_STRING=ON/OFF**: (GDAL 3.2 이상 버전)
+   S-57 딕셔너리에 목록으로 태그된 속성을 StringList 유형이 아니라 String 유형 필드로 리포트해야 할지를 선택합니다. 기본값은 OFF입니다. GDAL 3.2 이전 버전들에서는, 기본 습성이 이 옵션을 ON으로 설정하는 것과 동일했습니다.
+
+예시:
 
 ::
 
    set OGR_S57_OPTIONS = "RETURN_PRIMITIVES=ON,RETURN_LINKAGES=ON,LNAM_REFS=ON"
 
-S-57 Export
+S-57 내보내기
 -----------
 
-Preliminary S-57 export capability is intended only for specialized use, and is
-not properly documented at this time. Setting the following options is a minimum
-required to support S-57 to S-57 conversion via OGR.
+예비 S-57 내보내기 기능은 특수한 사용례만을 위한 것으로, 현재 제대로 문서화되지 않았습니다. OGR를 통해 S-57를 S-57로 변환하는 작업을 지원하기 위한 최소 요구 사항은 다음 옵션들을 설정하는 것입니다.
 
 ::
 
    set OGR_S57_OPTIONS = "RETURN_PRIMITIVES=ON,RETURN_LINKAGES=ON,LNAM_REFS=ON"
 
-The following dataset creation options are supported to supply basic
-information for the S-57 data set descriptive records (DSID and DSPM,
-see the S-57 standard for a more detailed description):
+S-57 데이터셋 설명 레코드 (DSID 및 DSPM) 용 기본 정보를 제공하기 위해 다음과 같은 데이터셋 생성 옵션들을 지원합니다(더 자세한 설명은 S-57 표준을 참고하십시오):
 
--  **S57_EXPP**: Exchange purpose. Default is 1.
--  **S57_INTU**: Intended usage. Default is 4.
--  **S57_EDTN**: Edition number. Default is 2.
--  **S57_UPDN**: Update number. Default is 0.
--  **S57_UADT**: Update application date. Default is 20030801.
--  **S57_ISDT**: Issue date. Default is 20030801.
--  **S57_STED**: Edition number of S-57. Default is 03.1.
--  **S57_AGEN**: Producing agency. Default is 540.
--  **S57_COMT**: Comment.
--  **S57_AALL**: Lexical level used for the ATTF fields. Default is 0.
-   (GDAL >= 2.4)
--  **S57_NALL**: Lexical level used for the NATF fields. Default is 0.
-   (GDAL >= 2.4)
--  **S57_NOMR**: Number of meta records (objects with acronym starting
-   with "M\_"). Default is 0.
--  **S57_NOGR**: Number of geo records. Default is 0.
--  **S57_NOLR**: Number of collection records. Default is 0.
--  **S57_NOIN**: Number of isolated node records. Default is 0.
--  **S57_NOCN**: Number of connected node records. Default is 0.
--  **S57_NOED**: Number of edge records. Default is 0.
--  **S57_HDAT**: Horizontal geodetic datum. Default is 2.
--  **S57_VDAT**: Vertical datum. Default is 17.
--  **S57_SDAT**: Sounding datum. Default is 23.
--  **S57_CSCL**: Compilation scale of data (1:X). Default is 52000.
--  **S57_COMF**: Floating-point to integer multiplication factor for
-   coordinate values. Default is 10000000. (GDAL >= 2.4)
--  **S57_SOMF**: Floating point to integer multiplication factor for 3-D
-   (sounding) values. Default is 10. (GDAL >= 2.4)
+-  **S57_EXPP**: 정보 교환 목적. 기본값은 1입니다.
+-  **S57_INTU**: 의도 사용례. 기본값은 4입니다.
+-  **S57_EDTN**: 판(edition) 번호. 기본값은 2입니다.
+-  **S57_UPDN**: 업데이트 번호. 기본값은 0입니다.
+-  **S57_UADT**: 응용 프로그램 업데이트 날짜. 기본값은 20030801입니다.
+-  **S57_ISDT**: 발행일. 기본값은 20030801입니다.
+-  **S57_STED**: S-57의 판 번호. 기본값은 03.1입니다.
+-  **S57_AGEN**: 생산 기관. 기본값은 540입니다.
+-  **S57_COMT**: 주석.
+-  **S57_AALL**: ATTF 필드에 사용되는 어휘 수준(lexical level)입니다. 기본값은 0입니다. (GDAL 2.4 이상 버전)
+-  **S57_NALL**: Lexical level used for the NATF fields. 기본값은 0입니다. (GDAL 2.4 이상 버전)
+-  **S57_NOMR**: 메타 레코드("M\_"으로 시작하는 머리글자를 가진 객체)의 개수. 기본값은 0입니다.
+-  **S57_NOGR**: 지리 레코드의 개수. 기본값은 0입니다.
+-  **S57_NOLR**: 선택 집합(collection) 레코드의 개수. 기본값은 0입니다.
+-  **S57_NOIN**: 고립된 노드 레코드의 개수. 기본값은 0입니다.
+-  **S57_NOCN**: 연결된 노드 레코드의 개수. 기본값은 0입니다.
+-  **S57_NOED**: 경계 레코드의 개수. 기본값은 0입니다.
+-  **S57_HDAT**: 수평 측지 원점(datum). 기본값은 2입니다.
+-  **S57_VDAT**: 수직 원점. 기본값은 17입니다.
+-  **S57_SDAT**: 수심 측정 원점. 기본값은 23입니다.
+-  **S57_CSCL**: 데이터의 컴파일 척도(1:X). 기본값은 52000입니다.
+-  **S57_COMF**: 부동소수점형 좌표값을 정수형 좌표값으로 변환하는 곱셈 인자입니다. 기본값은 10000000입니다. (GDAL 2.4 이상 버전)
+-  **S57_SOMF**: 부동소수점형 3차원 (수심 측정) 값을 정수형 3차원 (수심 측정) 값으로 변환하는 곱셈 인자입니다. 기본값은 10입니다. (GDAL 2.4 이상 버전)
 
-See Also
+
+참고
 --------
 
--  `S-57 Online Object/Attribute Catalog <http://www.s-57.com/>`__
--  `Frank's S-57 Page (at
-   archive.org) <https://web.archive.org/web/20130730111701/http://home.gdal.org/projects/s57/index.html>`__:
-   Links to other resources, and sample datasets.
--  `IHO S-57 Edition 3.1 standard (main)`_
--  `S-57 Appendix B <https://iho.int/uploads/user/pubs/standards/s-57/20ApB1.pdf>`__
+-  `S-57 온라인 객체/속성 카탈로그 <http://www.s-57.com/>`_
 
-.. _`IHO S-57 Edition 3.1 standard (main)`: https://web.archive.org/web/20190330184049/http://www.iho.int/iho_pubs/standard/S-57Ed3.1/31Main.pdf
+-  `프랑크(Frank)의 S-57 페이지 (archive.org) <https://web.archive.org/web/20130730111701/http://home.gdal.org/projects/s57/index.html>`_: 다른 리소스들을 가리키는 링크 및 샘플 데이터셋을 찾을 수 있습니다.
+
+-  `IHO S-57 3.1판 표준 (본편)`_
+
+-  `S-57 부록 B <https://iho.int/uploads/user/pubs/standards/s-57/20ApB1.pdf>`_
+
+.. _`IHO S-57 3.1판 표준 (본편)`: https://web.archive.org/web/20190330184049/http://www.iho.int/iho_pubs/standard/S-57Ed3.1/31Main.pdf
