@@ -355,7 +355,7 @@ SQLite 데이터베이스 생성 시 :decl_configoption:`OGR_SQLITE_SYNCHRONOUS`
 -------
 
 -  OGR SQLite 드라이버는 `DM 솔루션 그룹 <http://www.dmsolutions.ca/>`_ 및 `GoMOOS <http://www.gomoos.org/>`_ 의 지원으로 개발되었습니다.
--  A. 푸리에리(A. Furieri)가 `이탈리아 토스카나 주 <http://www.regione.toscana.it/>`_ 의 재정 지원을 받아 완전한 SpatiaLite 지원을 구현했습니다.
+-  \A. 푸리에리(A. Furieri)가 `이탈리아 토스카나 주 <http://www.regione.toscana.it/>`_ 의 재정 지원을 받아 완전한 SpatiaLite 지원을 구현했습니다.
 
 링크
 -----
