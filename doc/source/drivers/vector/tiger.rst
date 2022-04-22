@@ -1,36 +1,19 @@
 .. _vector.tiger:
 
-U.S. Census TIGER/Line
-======================
+미국 인구 조사국 TIGER/Line
+===========================
 
 .. shortname:: TIGER
 
 .. built_in_by_default::
 
-TIGER/Line file sets are support for read access.
+TIGER 드라이버는 TIGER/Line 파일 세트에 읽기 접근을 지원합니다.
 
-TIGER/Line files are a digital database of geographic features, such as
-roads, railroads, rivers, lakes, political boundaries, census
-statistical boundaries, etc. covering the entire United States. The data
-base contains information about these features such as their location in
-latitude and longitude, the name, the type of feature, address ranges
-for most streets, the geographic relationship to other features, and
-other related information. They are the public product created from the
-Census Bureau's TIGER (Topologically Integrated Geographic Encoding and
-Referencing) data base of geographic information. TIGER was developed at
-the Census Bureau to support the mapping and related geographic
-activities required by the decennial census and sample survey programs.
+TIGER/Line 파일은 미국 전역을 커버하는 도로, 철도, 하천, 호수, 행정 구역, 인구 조사 통계 구역 등등 같은 지리 객체의 디지털 데이터베이스입니다. 이 데이터베이스는 이런 객체들의 위도/경도 위치, 이름, 유형, 도로 대부분에 대한 주소 범위, 다른 객체와의 지리적 관계성, 그리고 기타 관련 정보를 담고 있습니다. TIGER/Line 파일은 미국 인구 조사국의 TIGER(Topologically Integrated Geographic Encoding and Referencing) 지리 정보 데이터베이스로부터 생성된 공공 제품입니다. 미국 인구 조사국이 10년 단위 인구 조사 및 표본 설문조사 프로그램에 필요한 매핑 및 관련 지리 활동을 지원하기 위해 TIGER를 개발했습니다.
 
-Note that the TIGER/Line product does not include census demographic
-statistics. Those are sold by the Census Bureau in a separate format
-(not directly supported by FME), but those statistics do relate back to
-census blocks in TIGER/Line files.
+TIGER/Line 제품이 인구 조사 통계를 포함하지 않는다는 사실을 기억하십시오. 인구 통계는 미국 인구 조사국이 (FME(Feature Manipulation Engine)가 직접 지원하지 않는) 개별 포맷으로 판매하고 있는데, 해당 통계는 TIGER/Line 파일에 있는 인구 조사 블록과 다시 연결됩니다.
 
-To open a TIGER/Line dataset, select the directory containing one or
-more sets of data files. The regions are counties, or county
-equivalents. Each county consists of a series of files with a common
-basename, and different extensions. For instance, county 1 in state 26
-(Michigan) consists of the following file set in Tiger98.
+TIGER/Line 데이터셋을 열려면, 데이터 파일 세트를 하나 이상 담고 있는 디렉터리를 선택하십시오. 지역(region)은 군(county) 또는 그에 상응하는 단위입니다. 각 군은 공통 기본명을 가졌지만 확장자가 다른 일련의 파일로 이루어져 있습니다. 예를 들어 26번 주(state; 미시건)에 있는 1번 군은 Tiger98에서 다음과 같은 파일 세트로 이루어져 있습니다:
 
 ::
 
@@ -52,194 +35,125 @@ basename, and different extensions. For instance, county 1 in state 26
    TGR26001.RTS
    TGR26001.RTZ
 
-The TIGER/Line coordinate system is hardcoded to NAD83 lat/long degrees.
-This should be appropriate for all recent years of TIGER/Line
-production.
+TIGER/Line 좌표계는 NAD83 위도/경도 도(degree)로 하드코딩되어 있습니다. 최근 몇 년 동안의 모든 TIGER/Line 제품에 이 좌표계가 적절할 것입니다.
 
-There is no update or creation support in the TIGER/Line driver.
+TIGER 드라이버는 업데이트 또는 생성을 지원하지 않습니다.
 
-The reader was implemented for TIGER/Line 1998 files, but some effort
-has gone into ensuring compatibility with 1992, 1995, 1997, 1999, 2000,
-2002, 2003 and 2004 TIGER/Line products as well. The 2005 products have
-also been reported to work fine. It is believe that any TIGER/Line
-product from the 1990's should work with the reader, with the possible
-loss of some version specific information.
+TIGER/Line 판독기는 TIGER/Line 1998 파일에 대해 구현되었지만, 1992, 1995, 1997, 1999, 2000, 2002, 2003 및 2004년 TIGER/Line 제품도 호환되도록 약간의 노력을 기울였습니다. 2005년 제품도 잘 작동한다고 보고되었습니다. 이 판독기가 1990년대부터의 모든 TIGER/Line 제품을 읽을 수 있다고 믿어지지만, 일부 버전 특화 정보를 잃을 수도 있습니다.
 
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
 
 .. supports_georeferencing::
 
 .. supports_virtualio::
 
-Feature Representation
+객체 표현
 ----------------------
 
-With a few exceptions, a feature is created for each record of a
-TIGER/Line data file. Each file (i.e. .RT1, .RTA) is translated to an
-appropriate OGR feature type, with attribute names matching those in the
-TIGER/Line product manual.
+몇몇 예외를 제외하면, TIGER/Line 데이터 파일의 각 레코드 당 객체 하나를 생성합니다. 각 (예: .RT1, .RTA) 파일은 TIGER/Line 제품 지침서에 있는 속성명과 일치하는 속성명을 가진 알맞은 OGR 객체 유형으로 변환됩니다.
 
-The TIGER/Line RT (record type), and VERSION attributes are generally
-discarded, but the MODULE attribute is added to each feature. The MODULE
-attribute contains the basename (eg. TGR26001) of the county module from
-which the feature originated. For some keys (such as LAND, POLYID, and
-CENID) this MODULE attribute is needed to make the key unique when the
-dataset (directory) consists of more than one county of data.
+TIGER/Line RT(Record Type) 및 VERSION 속성은 일반적으로 폐기하지만, MODULE 속성은 각 객체에 추가합니다. MODULE 속성은 객체가 생성된 군(county) 모듈의 기반명을 (예: TGR26001) 담고 있습니다. 데이터셋(디렉터리)이 하나 이상의 데이터 군(county)으로 이루어진 경우 이 MODULE 속성이 (LAND, POLYID, 그리고 CENID 같은) 몇몇 키를 유일 키로 만들어야 합니다.
 
-Following is a list of feature types, and their relationship to the
-TIGER/Line product.
+다음 단락부터 객체 유형 및 해당 객체 유형의 TIGER/Line 제품과의 관계를 설명합니다.
 
 CompleteChain
 ^^^^^^^^^^^^^
 
-A CompleteChain is a polyline with an associated TLID (TIGER/Line ID).
-The CompleteChain features are established from a type 1 record
-(Complete Chain Basic Data Record), and if available it is associated
-type 3 record (Complete Chain Geographic Entity Codes). As well, any
-type 2 records (Complete Chain Shape Coordinates) available are used to
-fill in intermediate shape points on the arc. The TLID is the primary
-key, and is unique within the entire national TIGER/Line coverage.
+CompleteChain은 관련 TLID(TIGER/Line ID)를 가진 폴리라인입니다. CompleteChain 객체는 1번 유형 레코드(Complete Chain Basic Data Record)로부터 확립되는데, 사용할 수 있는 경우 3번 유형 레코드(Complete Chain Geographic Entity Codes)와 연결됩니다. 또, 사용할 수 있는 모든 2번 유형 레코드(Complete Chain Shape Coordinates)를 사용해서 원호 상에 중간 도형(intermediate shape) 포인트를 채웁니다. TLID는 기본 키이며, 전국 TIGER/Line 커버리지 안에서 유일합니다.
 
-These features always have a line geometry.
+이 객체는 항상 라인 도형을 가집니다.
 
 AltName
 ^^^^^^^
+이 객체는 4번 유형 레코드(Index to Alternate Feature Identifiers)로부터 파생되며, FeatureIds 객체로 개별적으로 보관되는 1개에서 4개까지의 대체 객체 이름 번호(FEAT 속성)와 연결됩니다. 표준 판독기 파이프라인은 FeatureIds 객체에서 나온 이름을 ALT_FEDIRS{}, ALT_FEDIRP{}, ALT_FENAME{} 및 ALT_FETYPE{} 배열 속성에 추가합니다. ALT_FENAME{}은 AltName 객체 상에서 TLID와 관련된 객체 이름들의 목록입니다.
 
-These features are derived from the type 4 record (Index to Alternate
-Feature Identifiers), and relate a TLID to 1 to 4 alternate feature name
-numbers (the FEAT attribute) which are kept separately as FeatureIds
-features. The standard reader pipeline attaches the names from the
-FeatureIds features as array attributes ALT_FEDIRS{}, ALT_FEDIRP{},
-ALT_FENAME{} and ALT_FETYPE{}. The ALT_FENAME{} is a list of feature
-names associated with the TLID on the AltName feature.
+어떤 TLID의 경우 AltName 레코드가 0개, 1개 또는 그 이상 존재할 수도 있으며 각 AltName 레코드는 1개에서 4개까지의 대체 이름을 담을 수 있다는 사실을 기억하십시오. AltName 객체를 활용해서 대체 이름을 CompleteChains와 연결하는 것은 여전히 매우 어렵기 때문에, 향후 TIGER/Line 파일용 표준 판독기 파이프라인이 업그레이드되어 대체 이름을 단순화시킬 것이라고 예상하고 있습니다.
 
-Note that zero, one or more AltName records may exist for a given TLID,
-and each AltName record can contain between one and four alternate
-names. Because it is still very difficult to utilize AltName features to
-relate altername names to CompleteChains, it is anticipated that the
-standard reader pipeline for TIGER/Line files will be upgraded in the
-future, resulting in a simplification of alternate names.
-
-These features have no associated geometry.
+이 객체는 관련 도형을 가지고 있지 않습니다.
 
 FeatureIds
 ^^^^^^^^^^
 
-These features are derived from type 5 (Complete Chain Feature
-Identifiers) records. Each feature contains a feature name (FENAME), and
-it is associated feature id code (FEAT). The FEAT attribute is the
-primary key, and is unique within the county module. FeatureIds have a
-one to many relationship with AltName features, and KeyFeatures
-features.
+이 객체는 5번 유형 레코드(Complete Chain Feature Identifiers)로부터 파생됩니다. 각 객체는 객체 이름(FENAME)을 담고 있으며 객체 ID 코드(FEAT)와 연결됩니다. FEAT 속성은 기본 키이며, 군 모듈 안에서 유일합니다. FeatureIds는 AltName 및 KeyFeatures 객체들과 일대다 관계입니다.
 
-These features have no associated geometry.
+이 객체는 관련 도형을 가지고 있지 않습니다.
 
 ZipCodes
 ^^^^^^^^
 
-These features are derived from type 6 (Additional Address Range and ZIP
-Code Data) records. These features are intended to augment the ZIP Code
-information kept directly on CompleteChain features, and there is a many
-to one relationship between ZipCodes features and CompleteChain
-features.
+이 객체는 6번 유형 레코드(Additional Address Range and ZIP Code Data)로부터 파생됩니다. 이 객체의 목적은 CompleteChain 객체 상에 직접 보관된 우편번호 정보를 보완하는 것으로, ZipCodes 객체와 CompleteChain 객체는 다대일 관계입니다.
 
-These features have no associated geometry.
+이 객체는 관련 도형을 가지고 있지 않습니다.
 
 Landmarks
 ^^^^^^^^^
 
-These features are derived from type 7 (Landmark Features) records. They
-relate to point, or area landmarks. For area landmarks there is a one to
-one relationship with an AreaLandmark record. The LAND attribute is the
-primary key, and is unique within the county module.
+이 객체는 7번 유형 레코드(Landmark Features)로부터 파생됩니다. 이 객체는 포인트 또는 영역 랜드마크와 연결됩니다. 영역 랜드마크의 경우 AreaLandmark 레코드와 일대일 관계입니다. LAND 속성은 기본 키이며, 군 모듈 안에서 유일합니다.
 
-These features may have an associated point geometry. Landmarks
-associated with polygons will not have the polygon geometry attached. It
-would need to be collected (via the AreaLandmark feature) from a Polygon
-feature.
+이 객체와 연결된 포인트 도형이 있을 수도 있습니다. 폴리곤과 연결된 랜드마크에는 폴리곤 도형을 추가하지 않을 것입니다. 폴리곤 도형을 추가하려면 (AreaLandmark 객체를 통해) Polygon 객체로부터 수집해야 할 것입니다.
 
 AreaLandmarks
 ^^^^^^^^^^^^^
 
-These features are derived from type 8 (Polygons Linked to Area
-Landmarks) records. Each associates a Landmark feature (attribute LAND)
-with a Polygon feature (attribute POLYID). This feature has a many to
-many relationship with Polygon features.
+이 객체는 8번 유형 레코드(Polygons Linked to Area Landmarks)로부터 파생됩니다. 각 객체가 Polygon 객체(POLYID 속성)을 가진 Landmarks 객체(LAND 속성)와 연결됩니다. 이 객체는 Polygon 객체와 다대다 관계입니다.
 
-These features have no associated geometry.
+이 객체는 관련 도형을 가지고 있지 않습니다.
 
 KeyFeatures
 ^^^^^^^^^^^
 
-These features are derived from type 9 (Polygon Geographic Entity Codes)
-records. They may be associated with a FeatureIds feature (via the FEAT
-attribute), and a Polygon feature (via the POLYID attribute).
+이 객체는 9번 유형 레코드(Key Geographic Location Features)로부터 파생됩니다. 이 객체는 (FEAT 속성을 통해) FeatureIds 객체와 그리고 (POLYID 속성을 통해) Polygon 객체와 연결될 수도 있습니다.
 
-These features have no associated geometry.
+이 객체는 관련 도형을 가지고 있지 않습니다.
 
 Polygon
 ^^^^^^^
 
-These features are derived from type A (Polygon Geographic Entity Codes)
-records and if available the related type S (Polygon Additional
-Geographic Entity Codes) records. The POLYID attribute is the primary
-key, uniquely identifying a polygon within a county module.
+이 객체는 A 유형 레코드(Polygon Geographic Entity Codes) 및 사용할 수 있는 경우 S 유형 레코드(Polygon Additional
+Geographic Entity Codes)로부터 파생됩니다. POLYID 속성은 기본 키이며, 군 모듈 안에서 폴리곤을 유일하게 식별합니다.
 
-These features do not have any geometry associated with them as read by
-the OGR TIGER driver. It needs to be externally related using the
-PolyChainLink. The gdal/pymod/samples/tigerpoly.py script may be used to
-read a TIGER dataset and extract the polygon layer **with geometry** as
-a shapefile.
+OGR TIGER 드라이버가 읽어오는 대로 이 객체는 관련 도형을 가지고 있지 않습니다. PolyChainLink를 이용해서 외부적으로 연결해야 합니다. gdal.py, pymod.py, samples.py, tigerpoly.py 스크립트를 이용해서 TIGER 데이터셋을 읽어와 **도형을 가진** 폴리곤 레이어를 shapefile로 추출할 수도 있습니다.
 
 EntityNames
 ^^^^^^^^^^^
+이 객체는 C 유형 레코드(Geographic Entity Names)로부터 파생됩니다.
 
-These features are derived from type C (Geographic Entity Names)
-records.
-
-These features have no associated geometry.
+이 객체는 관련 도형을 가지고 있지 않습니다.
 
 IDHistory
 ^^^^^^^^^
 
-These features are derived from type H (TIGER/Line ID History) records.
-They can be used to trace the splitting, merging, creation and deletion
-of CompleteChain features.
+이 객체는 H 유형 레코드(TIGER/Line ID History)로부터 파생됩니다. 이 객체를 이용해서 CompleteChain 객체의 분할, 병합, 생성 및 삭제 작업 이력을 추적할 수 있습니다.
 
-These features have no associated geometry.
+이 객체는 관련 도형을 가지고 있지 않습니다.
 
 PolyChainLink
 ^^^^^^^^^^^^^
 
-These features are derived from type I (Link Between Complete Chains and
-Polygons) records. They are normally all consumed by the standard reader
-pipeline while attaching CompleteChain geometries to Polygon features to
-establish their polygon geometries. PolyChainLink features have a many
-to one relationship with Polygon features, and a one to one relationship
-with CompleteChain features.
+이 객체는 I 유형 레코드(Link Between Complete Chains and Polygons)로부터 파생됩니다. CompleteChain의 폴리곤 도형을 확립하기 위해 Polygon 객체에 CompleteChain 도형을 추가하는 동안 표준 판독기 파이프라인이 이 객체를 사용합니다. PolyChainLink 객체와 Polygon 객체는 다대일 관계이며, PolyChainLink 객체와 CompleteChain 객체는 일대일 관계입니다.
 
-These features have no associated geometry.
+이 객체는 관련 도형을 가지고 있지 않습니다.
 
 PIP
 ^^^
 
-These features are derived from type P (Polygon Internal Point) records.
-They relate to a Polygon feature via the POLYID attribute, and can be
-used to establish an internal point for Polygon features.
+이 객체는 P 유형 레코드(Polygon Internal Point)로부터 파생됩니다. 이 객체는 POLYID 속성을 통해 Polygon 객체와 연결되며, Polygon 객체에 대한 내부 포인트를 확립하는 데 사용할 수 있습니다.
 
-These features have a point geometry.
+이 객체는 포인트 도형을 가집니다.
 
 ZipPlus4
 ^^^^^^^^
 
-These features are derived from type Z (ZIP+4 Codes) records. ZipPlus4
-features have a many to one relationship with CompleteChain features.
+이 객체는 Z 유형 레코드(ZIP+4 Codes)로부터 파생됩니다. ZipPlus4 객체는 CompleteChain 객체와 다대일 관계입니다.
 
-These features have no associated geometry.
+이 객체는 관련 도형을 가지고 있지 않습니다.
 
-See Also
+참고
 --------
 
-http://www.census.gov/geo/www/tiger/: More information on the TIGER/Line
-file format, and data product can be found on this U.S. Census web page.
+-  `TIGER 데이터 상품 가이드 <https://www.census.gov/programs-surveys/geography/guidance/tiger-data-products-guide.html>`_:
+   이 미국 인구 조사국 웹페이지에서 TIGER/Line 파일 포맷과 데이터 상품에 관한 자세한 정보를 찾아볼 수 있습니다.
+
+- `2000년 TIGER/Line 파일 기술 문서 <https://www2.census.gov/geo/tiger/tigerua/ua2ktgr.pdf>`_
+

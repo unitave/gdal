@@ -1,503 +1,82 @@
-.. _vector.sqlite:
+.. _vector.vfk:
 
-SQLite / Spatialite RDBMS
-=========================
+VFK - 체코 지적 정보 교환 데이터 포맷
+==========================================
 
-.. shortname:: SQLite
+.. shortname:: VFK
 
-.. build_dependencies:: libsqlite3 or libspatialite
+.. build_dependencies:: libsqlite3
 
-OGR optionally supports spatial and non-spatial tables stored in SQLite
-3.x database files. SQLite is a "light weight" single file based RDBMS
-engine with fairly complete SQL semantics and respectable performance.
+이 드라이버는 VFK 파일, 그러니까 **체코 지적(地籍) 정보 교환 데이터 포맷** 읽기를 지원합니다. VFK 파일은 레이어를 0개 이상 가진 데이터소스로 인식됩니다.
 
-The driver can handle "regular" SQLite databases, as well as Spatialite
-databases (spatial enabled SQLite databases). The type of an existing
-database can be checked from the SQLITE debug info value "OGR style
-SQLite DB found/ SpatiaLite DB found/SpatiaLite v4 DB found" obtained by
-running ``ogrinfo db.sqlite --debug on``
+이 드라이버는 GDAL을 **SQLite 지원과 함께 빌드한 경우에만** 컴파일됩니다.
 
-Starting with GDAL 2.2, the SQLite driver can also read databases with
-:ref:`RasterLite2 raster coverages <raster.rasterlite2>`.
+점은 wkbPoint로, 선 및 경계는 wkbLineString으로 그리고 면은 wkbPolygon으로 표현됩니다. wkbMulti\* 객체는 사용하지 않습니다. 레이어 하나에 객체 유형을 혼합할 수 없습니다.
 
-The SQLite database is essentially typeless, but the SQLite driver will
-attempt to classify attributes field as text, integer or floating point
-based on the contents of the first record in a table. Datetime field types
-are also handled.
-
-Starting with GDAL 2.2, the "JSonStringList", "JSonIntegerList",
-"JSonInteger64List" and "JSonRealList" SQLite declaration types are used
-to map the corresponding OGR StringList, IntegerList, Integer64List and
-RealList types. The field values are then encoded as JSon arrays, with
-proper CSV escaping.
-
-SQLite databases often do not work well over NFS, or some other
-networked file system protocols due to the poor support for locking. It
-is safest to operate only on SQLite files on a physical disk of the
-local system.
-
-SQLite is an optionally compiled in driver. It is not compiled in by
-default.
-
-By default, SQL statements are passed directly to the SQLite database
-engine. It's also possible to request the driver to handle SQL commands
-with :ref:`OGR SQL <ogr_sql_dialect>` engine, by passing **"OGRSQL"** string
-to the ExecuteSQL() method, as name of the SQL dialect.
-
-The :decl_configoption:`OGR_SQLITE_SYNCHRONOUS` configuration option
-has been added. When set to OFF, this issues a 'PRAGMA synchronous =
-OFF' command to the SQLite database. This has the advantage of
-speeding-up some write operations (e.g. on EXT4 filesystems), but at the
-expense of data safety w.r.t system/OS crashes. So use it carefully in
-production environments and read the SQLite `related
-documentation <http://www.sqlite.org/pragma.html#pragma_synchronous>`__.
-
-Any SQLite
-`pragma <http://www.sqlite.org/pragma.html>`__ can be specified with the
-:decl_configoption:`OGR_SQLITE_PRAGMA` configuration option. The syntax is
-``OGR_SQLITE_PRAGMA = "pragma_name=pragma_value[,pragma_name2=pragma_value2]*"``.
-
-Driver capabilities
+드라이버 케이퍼빌리티
 -------------------
-
-.. supports_create::
 
 .. supports_georeferencing::
 
 .. supports_virtualio::
 
-"Regular" SQLite databases
---------------------------
+열기 옵션
+------------
 
-The driver looks for a geometry_columns table laid out as defined
-loosely according to OGC Simple Features standards, particularly as
-defined in `FDO RFC 16 <http://trac.osgeo.org/fdo/wiki/FDORfc16>`__. If
-found it is used to map tables to layers.
+GDAL 2.3버전부터, (일반적으로 ogrinfo 또는 ogr2ogr의 ``-oo name=value`` 파라미터를 사용해서) 다음과 같은 열기 옵션들을 지정할 수 있습니다:
 
-If geometry_columns is not found, each table is treated as a layer.
-Layers with a WKT_GEOMETRY field will be treated as spatial tables, and
-the WKT_GEOMETRY column will be read as Well Known Text geometry.
+-  **SUPPRESS_GEOMETRY=YES/NO**: (기본값은 NO)
+   이 옵션을 YES로 설정하면 도형 분해(resolve)를 건너뜁니다. 모든 레이어가 도형 유형을 가지고 있지 않다고 인식할 것입니다. 사용자가 속성에만 관심이 있는 경우 가장 유용합니다. 도형을 억제하면 드라이버가 입력 VFK 데이터를 읽어올 때 상당한 성능 향상을 볼 수 있다는 사실을 기억하십시오.
 
-If geometry_columns is found, it will be used to lookup spatial
-reference systems in the spatial_ref_sys table.
+-  **FILE_FIELD=YES/NO**: (기본값은 NO)
+   이 옵션을 YES로 설정하면 모든 레이어에 소스 VFK 파일의 이름을 담고 있는 새 *VFK_FILENAME* 필드를 추가할 것입니다.
 
-While the SQLite driver supports reading spatial data from records,
-there is no support for spatial indexing, so spatial queries will tend
-to be slow (use Spatialite for that). Attributes queries may be fast,
-especially if indexes are built for appropriate attribute columns using
-the "CREATE INDEX ON ( )" SQL command.
+환경설정 옵션
+~~~~~~~~~~~~~
 
-The driver also supports reading and writing the
-following non-linear geometry types :CIRCULARSTRING, COMPOUNDCURVE,
-CURVEPOLYGON, MULTICURVE and MULTISURFACE. Note: this is not true for
-Spatialite databases, since those geometry types are not supported by
-current Spatialite versions.
+다음 :ref:`환경설정 옵션들 <configoptions>` 을 사용할 수 있습니다:
 
-Tables with multiple geometry columns
--------------------------------------
+이 드라이버는 VFK 데이터를 읽어올 때 SQLite를 백엔드 데이터베이스로 사용합니다. 기본적으로, 입력 VFK 파일의 디렉터리에 SQLite 데이터베이스를 ('.db' 파일 확장자로) 생성합니다. 사용자가 데이터베이스 이름을 :decl_configoption:`OGR_VFK_DB_NAME` 환경설정 옵션으로 정의할 수 있습니다. :decl_configoption:`OGR_VFK_DB_OVERWRITE` 환경설정 옵션을 YES로 설정하면 드라이버가 기존 SQLite 데이터베이스를 덮어써서 새로 생성된 데이터베이스에 입력 VFK 파일로부터 읽어온 데이터를 저장합니다. :decl_configoption:`OGR_VFK_DB_DELETE` 환경설정 옵션을 YES로 설정하면, 데이터소스를 닫을 때 드라이버가 백엔드 SQLite 데이터베이스를 삭제합니다.
 
-Layers with multiple geometry columns can be
-created, modified or read, following new API described in :ref:`rfc-41`
+분해된 도형도 SQLite 데이터베이스에 저장됩니다. 즉 VFK 데이터로부터 SQLite 데이터베이스를 작성한 다음에야 도형을 분해한다는 뜻입니다. 도형은 WKB 포맷으로 저장됩니다. 이때 GDAL을 SpatiaLite 지원과 함께 빌드해야 할 필요는 없다는 사실을 기억하십시오. :decl_configoption:`OGR_VFK_DB_SPATIAL` 환경설정 옵션을 NO로 지정하는 경우 데이터베이스에 도형을 저장하지 않습니다. 이 경우 데이터베이스로부터 데이터를 읽어올 때 도형을 실시간(on-the-fly)으로 분해합니다.
 
-REGEXP operator
----------------
-
-By default, the REGEXP operator has no implementation in SQLite. With
-OGRbuilt against the PCRE library, the REGEXP operator is
-available in SQL statements run by OGR.
-
-Using the SpatiaLite library (Spatial extension for SQLite)
------------------------------------------------------------
-
-The SQLite driver can read and write SpatiaLite databases. Creating or
-updating a spatialite database requires explicit linking against
-SpatiaLite library (version >= 2.3.1). Explicit linking against
-SpatiaLite library also provides access to functions provided by this
-library, such as spatial indexes, spatial functions, etc...
-
-A few examples :
-
-::
-
-   # Duplicate the sample database provided with SpatiaLite
-   ogr2ogr -f SQLite testspatialite.sqlite test-2.3.sqlite  -dsco SPATIALITE=YES
-
-   # Make a request with a spatial filter. Will work faster if spatial index has
-   # been created and explicit linking against SpatiaLite library.
-   ogrinfo testspatialite.sqlite Towns -spat 754000 4692000 770000 4924000
-
-Opening with 'VirtualShape:'
-----------------------------
-
-(Require Spatialite support)
-
-It is possible to open on-the-fly a shapefile as a VirtualShape with
-Spatialite. The syntax to use for the datasource is
-"VirtualShape:/path/to/shapefile.shp" (the shapefile must be a "real"
-file).
-
-This gives the capability to use the spatial operations of Spatialite
-(note that spatial indexes on virtual tables are not available).
-
-The SQLite SQL dialect
-----------------------
-
-The SQLite SQL engine can be used to run SQL
-queries on any OGR datasource if using the :ref:`sql_sqlite_dialect`.
-
-The VirtualOGR SQLite extension
--------------------------------
-
-The GDAL/OGR library can be loaded as a `SQLite
-extension <http://www.sqlite.org/lang_corefunc.html#load_extension>`__.
-The extension is loaded with the load_extension(gdal_library_name) SQL
-function, where gdal_library_name is typically libgdal.so on Unix/Linux,
-gdal110.dll on Windows, etc..
-
-After the extension is loaded, a virtual table, corresponding to a OGR
-layer, can be created with one of the following SQL statement :
-
-::
-
-   CREATE VIRTUAL TABLE table_name USING VirtualOGR(datasource_name);
-   CREATE VIRTUAL TABLE table_name USING VirtualOGR(datasource_name, update_mode);
-   CREATE VIRTUAL TABLE table_name USING VirtualOGR(datasource_name, update_mode, layer_name);
-   CREATE VIRTUAL TABLE table_name USING VirtualOGR(datasource_name, update_mode, layer_name, expose_ogr_style);
-
-where :
-
--  *datasource_name* is the connection string to any OGR datasource.
--  *update_mode* = 0 for read-only mode (default value) or 1 for update
-   mode.
--  *layer_name* = the name of a layer of the opened datasource.
--  *expose_ogr_style* = 0 to prevent the OGR_STYLE special from being
-   displayed (default value) or 1 to expose it.
-
-Note: *layer_name* does not need to be specified if the datasource has
-only one single layer.
-
-From the sqlite3 console, a typical use case is :
-
-::
-
-   sqlite> SELECT load_extension('libgdal.so');
-
-   sqlite> SELECT load_extension('mod_spatialite.so');
-
-   sqlite> CREATE VIRTUAL TABLE poly USING VirtualOGR('poly.shp');
-
-   sqlite> SELECT *, ST_Area(GEOMETRY) FROM POLY;
-   215229.266|168.0|35043411||215229.265625
-   247328.172|179.0|35043423||247328.171875
-   261752.781|171.0|35043414||261752.78125
-   547597.188|173.0|35043416||547597.2109375
-   15775.758|172.0|35043415||15775.7578125
-   101429.977|169.0|35043412||101429.9765625
-   268597.625|166.0|35043409||268597.625
-   1634833.375|158.0|35043369||1634833.390625
-   596610.313|165.0|35043408||596610.3359375
-   5268.813|170.0|35043413||5268.8125
-
-Alternatively, you can use the
-*ogr_datasource_load_layers(datasource_name[, update_mode[, prefix]])*
-function to automatically load all the layers of a datasource.
-
-::
-
-   sqlite> SELECT load_extension('libgdal.so');
-
-   sqlite> SELECT load_extension('mod_spatialite.so');
-
-   sqlite> SELECT ogr_datasource_load_layers('poly.shp');
-   1
-   sqlite> SELECT * FROM sqlite_master;
-   table|poly|poly|0|CREATE VIRTUAL TABLE "poly" USING VirtualOGR('poly.shp', 0, 'poly')
-
-Refer to the :ref:`sql_sqlite_dialect` for an
-overview of the capabilities of VirtualOGR tables.
-
-Creation Issues
----------------
-
-The SQLite driver supports creating new SQLite database files, or adding
-tables to existing ones.
-
-Transaction support
-~~~~~~~~~~~~~~~~~~~
-
-The driver implements transactions at the database level, per :ref:`rfc-54`
-
-Dataset open options
-~~~~~~~~~~~~~~~~~~~~
-
--  **LIST_ALL_TABLES**\ =YES/NO: This may be "YES" to force all tables,
-   including non-spatial ones, to be listed.
--  **LIST_VIRTUAL_OGR**\ =YES/NO: This may be "YES" to force VirtualOGR
-   virtual tables to be listed. This should only be enabled on trusted
-   datasources to avoid potential safety issues.
--  **PRELUDE_STATEMENTS**\ =string (GDAL >= 3.2). SQL statement(s) to
-   send on the SQLite3 connection before any other ones. In
-   case of several statements, they must be separated with the
-   semi-column (;) sign. This option may be useful
-   to `attach another database <https://www.sqlite.org/lang_attach.html>`__
-   to the current one and issue cross-database requests.
-
-   .. note::
-        The other database must be of a type recognized by this driver, so
-        its geometry blobs are properly recognized (so typically not a GeoPackage one)
-
-Database creation options
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
--  **METADATA=YES/NO**: This can be used to avoid creating the
-   geometry_columns and spatial_ref_sys tables in a new database. By
-   default these metadata tables are created when a new database is
-   created.
-
--  | **SPATIALITE=YES/NO**: Create the
-     SpatiaLite flavor of the metadata tables, which are a bit differ
-     from the metadata used by this OGR driver and from OGC
-     specifications. Implies **METADATA=YES**.
-   | Please note: OGR must be linked against
-     *libspatialite* in order to support insert/write on SpatiaLite; if
-     not, *read-only* mode is enforced.
-   | Attempting to perform any insert/write on SpatiaLite skipping the
-     appropriate library support simply produces broken (corrupted)
-     DB-files.
-   | Important notice: when the underlying *libspatialite* is v.2.3.1
-     (or any previous version) any Geometry will be casted to 2D [XY],
-     because earlier versions of this library are simply able to support
-     2D [XY] dimensions. Version 2.4.0 (or any subsequent) is required
-     in order to support 2.5D [XYZ].
-
--  | **INIT_WITH_EPSG=YES/NO**: Insert the
-     content of the EPSG CSV files into the spatial_ref_sys table.
-     Defaults to NO for regular SQLite databases.
-   | Please note: if **SPATIALITE=YES** and the underlying
-     *libspatialite* is v2.4 or v3.X, **INIT_WITH_EPSG** is ignored;
-     those library versions will unconditionally load the EPSG dataset
-     into the spatial_ref_sys table when creating a new DB
-     (*self-initialization*). Starting with libspatialite 4.0,
-     INIT_WITH_EPSG defaults to YES, but can be set to NO.
-
-Layer creation options
+내부 작업 및 성능 조정
 ~~~~~~~~~~~~~~~~~~~~~~
 
--  **FORMAT=WKB/WKT/SPATIALITE**: Controls the format used for the
-   geometry column. By default WKB (Well Known Binary) is used. This is
-   generally more space and processing efficient, but harder to inspect
-   or use in simple applications than WKT (Well Known Text). SpatiaLite
-   extension uses its own binary format to store geometries and you can
-   choose it as well. It will be selected automatically when SpatiaLite
-   database is opened or created with **SPATIALITE=YES** option.
-   SPATIALITE value is available.
+백엔드 SQLite 데이터베이스가 이미 존재하는 경우 드라이버가 입력 데이터소스로 지정된 입력 VFK 파일이 아니라 데이터베이스로부터 직접 객체를 읽어옵니다. 이 경우 드라이버가 객체를 읽어올 때 상당한 성능 향상을 볼 수 있습니다.
 
--  **GEOMETRY_NAME**: By default OGR creates
-   new tables with the geometry column named GEOMETRY (or WKT_GEOMETRY
-   if FORMAT=WKT). If you wish to use a different name, it can be
-   supplied with the GEOMETRY_NAME layer creation option.
+이 드라이버는 백엔드 SQLite 데이터베이스를 작성할 때 기본적으로 VFK 파일로부터 모든 데이터 블록을 읽어옵니다. :decl_configoption:`OGR_VFK_DB_READ_ALL_BLOCKS` 환경설정 옵션을 NO로 설정한 경우, 드라이버가 사용자가 요청한 데이터 블록만 읽어옵니다. 사용자가 VFK 데이터의 일부분만 처리하려는 경우 이 옵션이 유용할 수 있습니다.
 
--  **LAUNDER=YES/NO**: Controls whether layer and field names will be
-   laundered for easier use in SQLite. Laundered names will be converted
-   to lower case and some special characters(' - #) will be changed to
-   underscores. Default to YES.
+데이터소스 이름
+---------------
 
--  **SPATIAL_INDEX=YES/NO**: If the database
-   is of the SpatiaLite flavor, and if OGR is linked against
-   libspatialite, this option can be used to control if a spatial index
-   must be created. Default to YES.
+데이터소스 이름은 VFK 파일을 가리키는 전체 경로입니다.
 
--  **COMPRESS_GEOM=YES/NO**: If the format of
-   the geometry BLOB is of the SpatiaLite flavor, this option can be
-   used to control if the compressed format for geometries (LINESTRINGs,
-   POLYGONs) must be used. This format is understood by Spatialite v2.4
-   (or any subsequent version). Default to NO. Note: when updating an
-   existing Spatialite DB, the :decl_configoption:`COMPRESS_GEOM` 
-   configuration option can be set to produce similar results for 
-   appended/overwritten features.
+이 드라이버는 VSI 가상 파일 시스템 API가 관리하는 파일의 읽기 및 쓰기를 지원합니다. VSI 가상 파일 시스템 API가 관리하는 파일에는 "정규" 파일은 물론 /vsizip/ , /vsigzip/ , /vsicurl/ 읽기 전용 도메인에 있는 파일도 포함됩니다.
 
--  **SRID=srid**: Used to force the SRID
-   number of the SRS associated with the layer. When this option isn't
-   specified and that a SRS is associated with the layer, a search is
-   made in the spatial_ref_sys to find a match for the SRS, and, if
-   there is no match, a new entry is inserted for the SRS in the
-   spatial_ref_sys table. When the SRID option is specified, this search
-   (and the eventual insertion of a new entry) will not be done : the
-   specified SRID is used as such.
+GDAL 2.2버전부터 백엔드 SQLite 데이터베이스를 가리키는 전체 경로도 데이터소스 이름으로 사용할 수 있습니다. 기본적으로, 이런 데이터소스를 SQLite 드라이버로 읽어옵니다. :decl_configoption:`OGR_VFK_DB_READ` 환경설정 옵션을 YES로 설정하면 이런 데이터소스를 대신 VFK 드라이버로 엽니다.
 
--  **COMPRESS_COLUMNS=column_name1[,column_name2, ...]**:
-   A list of (String) columns that must be compressed with
-   ZLib DEFLATE algorithm. This might be beneficial for databases that
-   have big string blobs. However, use with care, since the value of
-   such columns will be seen as compressed binary content with other
-   SQLite utilities (or previous OGR versions). With OGR, when
-   inserting, modifying or querying compressed columns,
-   compression/decompression is done transparently. However, such
-   columns cannot be (easily) queried with an attribute filter or WHERE
-   clause. Note: in table definition, such columns have the
-   "VARCHAR_deflate" declaration type.
+레이어 이름
+-----------
 
--  **FID=fid_name**: Name of the FID column to create.
-   Defaults to OGC_FID.
+VFK 데이터 블록을 레이어 이름으로 사용합니다.
 
--  **STRICT=YES/NO**: (SQLite >= 3.37 and GDAL >= 3.35). Defaults to NO.
-   Whether the table should be created as a `strict table <https://sqlite.org/stricttables.html>`__,
-   that is strong column type checking. This normally has little influence when
-   operating only through OGR, since it has typed columns, but can help to
-   strengthen database integrity when the database might be edited by external
-   tools.
-   Note that databases that contain STRICT tables can only be read by SQLite >= 3.37.
-   The set of column data types supported in STRICT mode is: Integer, Integer64, Real,
-   String, DateTime, Date and Time. The COMPRESS_COLUMNS option is ignored in
-   strict mode.
-
-Configuration options
----------------------
-
-The following :ref:`configuration options <configoptions>` are 
-available:
-
-- :decl_configoption:`SQLITE_LIST_ALL_TABLES` =YES/NO: Set to "YES" to list 
-  all tables (not just the tables listed in the geometry_columns table). This 
-  can also be done using the LIST_ALL_TABLES open option. Default is NO.
-
-- :decl_configoption:`OGR_SQLITE_LIST_VIRTUAL_OGR` =YES/NO* Set to "YES" to 
-  list VirtualOGR layers. Defaults to "NO" as there might be some security 
-  implications if a user is provided with a file and doesn't know that there 
-  are virtual OGR tables in it.
-
-- :decl_configoption:`OGR_SQLITE_JOURNAL` can be used to set the journal mode 
-  of the SQLite file, see also 
-  https://www.sqlite.org/pragma.html#pragma_journal_mode.
-
-- :decl_configoption:`OGR_SQLITE_CACHE`: see 
-  :ref:`Performance hints <target_drivers_vector_sqlite_performance_hints>`.
-
-- :decl_configoption:`OGR_SQLITE_SYNCHRONOUS`: see 
-  :ref:`Performance hints <target_drivers_vector_sqlite_performance_hints>`.
-
-- :decl_configoption:`OGR_SQLITE_LOAD_EXTENSIONS` =extension1,...,extensionN,ENABLE_SQL_LOAD_EXTENSION:
-  (GDAL >= 3.5.0). Comma separated list of names of shared libraries containing
-  extensions to load at database opening.
-  If a file cannot be loaded directly, attempts are made to load with various
-  operating-system specific extensions added. So
-  for example, if "samplelib" cannot be loaded, then names like "samplelib.so"
-  or "samplelib.dylib" or "samplelib.dll" might be tried also.
-  The special value ``ENABLE_SQL_LOAD_EXTENSION`` can be used to enable the use of
-  the SQL ``load_extension()`` function, which is normally disabled in standard
-  builds of sqlite3.
-  Loading extensions as a potential security impact if they are untrusted.
-
-- :decl_configoption:`OGR_SQLITE_PRAGMA`: with this option any SQLite
-  `pragma <http://www.sqlite.org/pragma.html>`__ can be specified. The syntax is
-  ``OGR_SQLITE_PRAGMA = "pragma_name=pragma_value[,pragma_name2=pragma_value2]*"``.
-
-- :decl_configoption:`SQLITE_USE_OGR_VFS` =YES enables extra buffering/caching 
-  by the GDAL/OGR I/O layer and can speed up I/O. More information 
-  :ref:`here <target_user_virtual_file_systems_file_caching>`.
-  Be aware that no file locking will occur if this option is activated, so 
-  concurrent edits may lead to database corruption.
-
-.. _target_drivers_vector_sqlite_performance_hints:
-
-Performance hints
------------------
-
-SQLite is a Transactional DBMS; while many INSERT statements are
-executed in close sequence, BEGIN TRANSACTION and COMMIT TRANSACTION
-statements have to be invoked appropriately (with the
-OGR_L_StartTransaction() / OGR_L_CommitTransaction()) in order to get
-optimal performance. By default, if no transaction is explicitly
-started, SQLite will autocommit on every statement, which will be slow.
-If using ogr2ogr, its default behavior is to COMMIT a transaction every
-20000 inserted rows. The **-gt** argument allows explicitly setting the
-number of rows for each transaction. Increasing to **-gt 65536** or more
-ensures optimal performance while populating some table containing many
-hundredth thousand or million rows.
-
-SQLite usually has a very minimal memory foot-print; just about 20MB of
-RAM are reserved to store the internal Page Cache [merely 2000 pages].
-This value too may well be inappropriate under many circumstances, most
-notably when accessing some really huge DB-file containing many tables
-related to a corresponding Spatial Index. Explicitly setting a much more
-generously dimensioned internal Page Cache may often help to get a
-noticeably better performance. You can
-explicitly set the internal Page Cache size using the configuration
-option :decl_configoption:`OGR_SQLITE_CACHE` *value* [*value* being 
-measured in MB]; if your HW has enough available RAM, defining a Cache 
-size as big as 512MB (or even 1024MB) may sometimes help a lot in order 
-to get better performance.
-
-Setting the :decl_configoption:`OGR_SQLITE_SYNCHRONOUS` configuration 
-option to *OFF* might also increase performance when creating SQLite 
-databases (although at the expense of integrity in case of 
-interruption/crash ).
-
-If many source files will be collected into the same Spatialite table,
-it can be much faster to initialize the table without a spatial index by
-using -lco SPATIAL_INDEX=NO and to create spatial index with a separate
-command after all the data are appended. Spatial index can be created
-with ogrinfo command
-
-::
-
-   ogr2ogr -f SQLite -dsco SPATIALITE=YES db.sqlite first.shp -nln the_table -lco SPATIAL_INDEX=NO
-   ogr2ogr -append db.sqlite second.shp -nln the_table
-   ...
-   ogr2ogr -append db.sqlite last.shp -nln the_table
-   ogrinfo db.sqlite -sql "SELECT CreateSpatialIndex('the_table','GEOMETRY')"
-
-If a database has gone through editing operations, it might be useful to
-run a `VACUUM <https://sqlite.org/lang_vacuum.html>`__ query to compact
-and optimize it.
-
-::
-
-   ogrinfo db.sqlite -sql "VACUUM"
-
-
-Example
+필터
 -------
 
-- Convert a non-spatial SQLite table into a GeoPackage:
+속성 필터
+~~~~~~~~~
 
-.. code-block::
+내부 SQL 엔진을 이용해서 표현식을 평가합니다. 속성 필터를 설정하고 나면 평가가 끝납니다.
 
-  ogr2ogr \
-    -f "GPKG" output.gpkg \
-    input.sqlite \
-    -sql \
-    "SELECT
-       *,
-       MakePoint(longitude, latitude, 4326) AS geometry
-     FROM
-       my_table" \
-    -nln "location" \
-    -s_srs "EPSG:4326"
+공간 필터
+~~~~~~~~~
+위상 구조 안에 저장된 객체의 경계 상자를 이용해서 객체가 현재 공간 필터를 만족시키는지 평가합니다. 공간 필터를 설정하고 나면 평가가 끝납니다.
 
-- Perform a join between 2 SQLite/Spatialite databases:
+참고
+----
 
-.. code-block::
-
-    ogrinfo my_spatial.db \
-        -sql "SELECT poly.id, other.foo FROM poly JOIN other_schema.other USING (id)" \
-        -oo PRELUDE_STATEMENTS="ATTACH DATABASE 'other.db' AS other_schema"
-
-Credits
--------
-
--  Development of the OGR SQLite driver was supported by `DM Solutions
-   Group <http://www.dmsolutions.ca/>`__ and
-   `GoMOOS <http://www.gomoos.org/>`__.
--  Full support for SpatiaLite was contributed by A.Furieri, with
-   funding from `Regione Toscana <http://www.regione.toscana.it/>`__
-
-Links
------
-
--  `http://www.sqlite.org <http://www.sqlite.org/>`__: Main SQLite page.
--  https://www.gaia-gis.it/fossil/libspatialite/index: SpatiaLite extension to SQLite.
--  `FDO RFC 16 <http://trac.osgeo.org/fdo/wiki/FDORfc16>`__: FDO
-   Provider for SQLite
--  :ref:`RasterLite2 driver <raster.rasterlite2>`
+-  `OGR VFK 드라이버 구현 문제점 <http://geo.fsv.cvut.cz/~landa/publications/2010/gis-ostrava-2010/paper/landa-ogr-vfk.pdf>`_
+-  `VFK 포맷 용 오픈 소스 도구 <http://freegis.fsv.cvut.cz/gwiki/VFK>`_ (체코어)
+-  `체코 지적 정보 교환 데이터 포맷 문서 <http://www.cuzk.cz/Dokument.aspx?PRARESKOD=998&MENUID=0&AKCE=DOC:10-VF_ISKNTEXT>`_ (체코어)
 
