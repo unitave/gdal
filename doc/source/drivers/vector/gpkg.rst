@@ -197,14 +197,14 @@ Spatialite 4.3버전부터, CastAutomagic이 더 이상 필요하지 않습니�
   https://www.sqlite.org/pragma.html#pragma_journal_mode 도 읽어보십시오.
 
 -  :decl_configoption:`OGR_SQLITE_CACHE`:
-   :ref:`성능 힌트 <target_drivers_vector_gpkg_performance_hints>` 를 읽어보십시오.
+   :ref:`성능 힌트 <target_drivers_vector_gpkg_performance_hints>` 를 참조하십시오.
 
--  :decl_configoption:`OGR_SQLITE_SYNCHRONOUS`: see 
-   :ref:`성능 힌트 <target_drivers_vector_gpkg_performance_hints>` 를 읽어보십시오.
+-  :decl_configoption:`OGR_SQLITE_SYNCHRONOUS`:
+   :ref:`성능 힌트 <target_drivers_vector_gpkg_performance_hints>` 를 참조하십시오.
 
 -  :decl_configoption:`OGR_SQLITE_LOAD_EXTENSIONS` =extension1,...,extensionN,ENABLE_SQL_LOAD_EXTENSION: (GDAL 3.5.0 이상 버전)
-   데이터베이스를 열 때 불러올 확장 사양을 담고 있는 공유 라이브러리들의 이름을 쉼표로 구분한 목록을 지정합니다. 파일을 직접 불러올 수 없는 경우, 다양한 운영 체제 특화 확장 사양을 추가하려 시도할 것입니다. 즉 예를 들어 "samplelib"을 불러오지 못 하는 경우 "samplelib.so" 또는 "samplelib.dylib" 또는 "samplelib.dll" 같은 이름들도 시도할 수 있습니다.
-   특수값 ``ENABLE_SQL_LOAD_EXTENSION`` 을 이용해서 SQL ``load_extension()`` 함수를 이용할 수 있습니다. 이 함수는 SQLite 3버전 표준 빌드에서 일반적으로 비활성화되어 있습니다.
+   데이터베이스를 열 때 불러올 확장 사양을 담고 있는 공유 라이브러리들의 이름을 쉼표로 구분한 목록을 지정합니다. 파일을 직접 불러올 수 없는 경우, 다양한 운영 체제 특화 확장 사양을 추가로 불러오려 시도할 것입니다. 즉 예를 들어 "samplelib"을 불러오지 못 하는 경우 "samplelib.so" 또는 "samplelib.dylib" 또는 "samplelib.dll" 같은 이름들을 시도할 수도 있습니다.
+   특수값 ``ENABLE_SQL_LOAD_EXTENSION`` 을 이용해서 SQL ``load_extension()`` 함수를 이용할 수 있습니다. 이 함수는 SQLite3 표준 빌드에서 일반적으로 비활성화되어 있습니다.
    확장 사양을 신뢰할 수 없는 경우 확장 사양을 불러오는 것이 잠재적인 보안 위협이 될 수 있습니다.
 
 -  :decl_configoption:`OGR_SQLITE_PRAGMA`:
@@ -218,7 +218,7 @@ Spatialite 4.3버전부터, CastAutomagic이 더 이상 필요하지 않습니�
    이 드라이버는 파일 생성 또는 수정 시 지오패키지의 ``last_change`` 타임스탬프를 업데이트합니다. 재현 가능성(reproducibility)을 위해 일관된 바이너리 산출물이 필요한 경우, 이 전체 수준 환경설정 옵션을 설정하면 타임스탬프를 특정값으로 강제할 수 있습니다. 이 옵션을 설정할 때 지오패키지 표준이 -- 예를 들면 `1.2버전 <https://www.geopackage.org/spec120/#r15>`_ 이 -- 요구하는 특정한 시간 서식을 따르도록 주의하십시오.
 
 -  :decl_configoption:`SQLITE_USE_OGR_VFS`:
-   이 옵션을 YES로 설정하면 GDAL/OGR I/O 레이어가 추가적인 버퍼/캐시 작업을 사용할 수 있고, I/O 속도도 향상시킬 수 있습니다. 더 자세한 정보는 :ref:`여기 <target_user_virtual_file_systems_file_caching>` 를 참조하십시오.
+   이 옵션을 YES로 설정하면 GDAL/OGR I/O 레이어가 추가적인 버퍼/캐시 작업을 사용할 수 있고, I/O 속도도 향상시킬 수 있습니다. 더 자세한 정보는 :ref:`성능 힌트 <target_user_virtual_file_systems_file_caching>` 를 참조하십시오.
    이 옵션을 활성화한 경우 어떤 파일도 잠그지 않기 때문에 동시 편집 시 데이터베이스에 오류가 발생할 수도 있다는 사실을 주의하십시오.
 
 메타데이터
