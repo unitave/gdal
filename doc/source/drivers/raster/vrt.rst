@@ -84,7 +84,7 @@ VRTDataset이 가지고 있을 수 있는 하위 요소들은 다음과 같습�
     </GCPList>
 
 - **Metadata**:
-  이 요소는 VRTDataset 전체, 또는 VRTRasterBand와 관련된 메타데이터 이름/값 쌍들의 목록을 담고 있습니다. 이 요소는 <MDI>(metadata item) 하위 요소를 가지고 있는데, 이 하위 요소는 "key" 속성과 값을 데이터로 가지고 있습니다. Metadata 요소는 여러 번 반복될 수 있는데 이 경우 반드시 메타데이터 도메인의 이름을 나타내는 "domain" 속성과 함께 쓰여야만 합니다.
+  이 요소는 VRTDataset 전체, 또는 VRTRasterBand와 관련된 메타데이터 이름/값 쌍들의 목록을 담고 있습니다. 이 요소는 <MDI>(metadata item) 하위 요소를 가지고 있는데, 이 하위 요소는 "key" 속성과 그 값을 데이터로 가지고 있습니다. Metadata 요소는 여러 번 반복될 수 있는데 이 경우 반드시 메타데이터 도메인의 이름을 나타내는 "domain" 속성과 함께 쓰여야만 합니다.
 
 .. code-block:: xml
 
