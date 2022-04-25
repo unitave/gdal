@@ -1,59 +1,59 @@
 .. _raster_data_model:
 
 ================================================================================
-Raster Data Model
+래스터 데이터 모델
 ================================================================================
 
-This document attempts to describe the GDAL data model. That is the types of information that a GDAL data store can contain, and their semantics.
+이 문서에서는 GDAL 데이터 모델을 설명하려 합니다. GDAL 데이터 저장소가 담을 수 있는 정보의 유형 및 그 의미를 서술합니다.
 
-Dataset
+데이터셋
 -------
 
-A dataset (represented by the :cpp:class:`GDALDataset` class) is an assembly of related raster bands and some information common to them all. In particular the dataset has a concept of the raster size (in pixels and lines) that applies to all the bands. The dataset is also responsible for the georeferencing transform and coordinate system definition of all bands. The dataset itself can also have associated metadata, a list of name/value pairs in string form.
+(:cpp:class:`GDALDataset` 클래스가 표현하는) 데이터셋이란 연결된 래스터 밴드들과 모든 밴드에 공통된 몇몇 정보의 조합입니다. 특히 데이터셋은 모든 밴드에 적용되는 (픽셀 및 줄 단위의) 래스터 크기라는 개념을 가집니다. 데이터셋은 모든 밴드의 지리 참조 변환(georeferencing transform) 및 좌표계 정보도 담고 있습니다. 데이터셋 자체도 문자열 형식으로 된 이름/값 쌍들의 목록인 관련 메타데이터를 가질 수 있습니다.
 
-Note that the GDAL dataset, and raster band data model is loosely based on the OpenGIS Grid Coverages specification.
+GDAL 데이터셋 그리고 래스터 밴드 데이터 모델은 오픈GIS 그리드 커버리지(OpenGIS Grid Coverages) 사양에 느슨하게 기반을 두고 있다는 사실을 기억하십시오.
 
-Coordinate System
+좌표계
 -----------------
-Dataset coordinate systems are represented as OpenGIS Well Known Text strings. This can contain:
+데이터셋 좌표계는 오픈GIS WKT(Well Known Text) 문자열로 표현됩니다. 이 WKT는 다음 정보를 담을 수 있습니다:
 
-- An overall coordinate system name.
-- A geographic coordinate system name.
-- A datum identifier.
-- An ellipsoid name, semi-major axis, and inverse flattening.
-- A prime meridian name and offset from Greenwich.
-- A projection method type (i.e. Transverse Mercator).
-- A list of projection parameters (i.e. central_meridian).
-- A units name, and conversion factor to meters or radians.
-- Names and ordering for the axes.
-- Codes for most of the above in terms of predefined coordinate systems from authorities such as EPSG.
+- 전체 좌표계 이름
+- 지리 좌표계 이름
+- 원점(datum) 식별자
+- 타원체 이름, 장반경(semi-major) 축, 역평탄화(inverse flattening)
+- 본초자오선(prime meridian) 이름 및 그리니치로부터의 오프셋
+- 투영 메소드 유형 (예: 횡축 메르카토르)
+- 투영 파라미터 목록 (예: central_meridian)
+- 단위 이름 및 미터 또는 라디안에 대한 변환 인자
+- 축의 이름 및 순서
+- EPSG 같은 기관에서 사전 정의한 좌표계라는 측면에서 앞의 대부분에 대한 코드
 
-For more information on OpenGIS WKT coordinate system definitions, and mechanisms to manipulate them, refer to the osr_tutorial document and/or the OGRSpatialReference class documentation.
+오픈GIS WKT 좌표계 정의 및 좌표계 정의를 조정하기 위한 메커니즘에 관한 정보를 더 자세히 알고 싶다면 osr_tutorial.dox 문서 파일 그리고/또는 :cpp:class:`OGRSpatialReference` 클래스 문서를 참조하십시오.
 
-The coordinate system returned by :cpp:func:`GDALDataset::GetProjectionRef` describes the georeferenced coordinates implied by the affine georeferencing transform returned by :cpp:func:`GDALDataset::GetGeoTransform`. The coordinate system returned by :cpp:func:`GDALDataset::GetGCPProjection` describes the georeferenced coordinates of the GCPs returned by :cpp:func:`GDALDataset::GetGCPs`.
+:cpp:func:`GDALDataset::GetProjectionRef` 함수가 반환하는 좌표계는 :cpp:func:`GDALDataset::GetGeoTransform` 함수가 반환하는 아핀 지리참조 변환(affine georeferencing transform)이 암시하는 지리참조된 좌표를 서술합니다. :cpp:func:`GDALDataset::GetGCPProjection` 함수가 반환하는 좌표계는 :cpp:func:`GDALDataset::GetGCPs` 함수가 반환하는 GCP들의 지리참조된 좌표를 서술합니다.
 
-Note that a returned coordinate system strings of "" indicates nothing is known about the georeferencing coordinate system.
+반환된 좌표계 문자열이 ""인 경우 (비어 있는 경우) 해당 지리참조 좌표계에 관해 아는 것이 하나도 없다는 의미입니다.
 
-Affine GeoTransform
+아핀 지리변환
 -------------------
 
-GDAL datasets have two ways of describing the relationship between raster positions (in pixel/line coordinates) and georeferenced coordinates. The first, and most commonly used is the affine transform (the other is GCPs).
+GDAL 데이터셋은 (픽셀/줄 좌표 단위) 래스터 위치와 지리참조된 좌표 사이의 관계를 두 가지 방식으로 서술합니다. 첫 번째, 가장 흔히 사용되는 방식이 아핀 변환(affine transform)입니다. (두 번째는 GCP로 서술하는 방식입니다.)
 
-The affine transform consists of six coefficients returned by :cpp:func:`GDALDataset::GetGeoTransform` which map pixel/line coordinates into georeferenced space using the following relationship:
+아핀 변환은 :cpp:func:`GDALDataset::GetGeoTransform` 함수가 반환하는 계수(coefficient) 6개로 이루어져 있습니다. 이 계수들이 다음과 같은 관계를 이용해서 픽셀/줄 좌표를 지리참조된 공간으로 매핑합니다:
 
 ::
 
     Xgeo = GT(0) + Xpixel*GT(1) + Yline*GT(2)
     Ygeo = GT(3) + Xpixel*GT(4) + Yline*GT(5)
 
-In case of north up images, the GT(2) and GT(4) coefficients are zero, and the GT(1) is pixel width, and GT(5) is pixel height. The (GT(0),GT(3)) position is the top left corner of the top left pixel of the raster.
+북쪽이 위인 이미지의 경우, GT(2) 및 GT(4) 계수가 0이고 GT(1)이 픽셀 너비, GT(5)가 픽셀 높이입니다. (GT(0),GT(3)) 위치가 래스터의 좌상단 픽셀의 좌상단 모서리 위치입니다.
 
-Note that the pixel/line coordinates in the above are from (0.0,0.0) at the top left corner of the top left pixel to (width_in_pixels,height_in_pixels) at the bottom right corner of the bottom right pixel. The pixel/line location of the center of the top left pixel would therefore be (0.5,0.5).
+이때 픽셀/줄 좌표가 좌상단 픽셀의 좌상단 모서리 (0.0,0.0)에서 시작해서 우하단 픽셀의 우하단 모서리 (width_in_pixels,height_in_pixels)에서 끝난다는 사실을 기억하십시오. 즉 좌상단 픽셀의 중심의 픽셀/줄 위치는 (0.5,0.5)일 것이라는 의미입니다.
 
-GCPs
+GCP
 ----
 
-A dataset can have a set of control points relating one or more positions on the raster to georeferenced coordinates. All GCPs share a georeferencing coordinate system (returned by :cpp:func:`GDALDataset::GetGCPProjection`). Each GCP (represented as the GDAL_GCP class) contains the following:
+데이터셋은 래스터 상에 있는 하나 이상의 위치를 지리참조된 좌표와 연결하는 기준점(control point) 집합을 가질 수 있습니다. 모든 GCP(Ground Control Point)는 (:cpp:func:`GDALDataset::GetGCPProjection` 함수가 반환하는) 같은 지리참조 좌표계를 공유합니다. (:cpp:class:`GDAL_GCP` 클래스로 표현되는) 각 GCP는 다음 내용을 담고 있습니다:
 
 ::
 
@@ -68,34 +68,39 @@ A dataset can have a set of control points relating one or more positions on the
         double      dfGCPZ;
     } GDAL_GCP;
 
-The pszId string is intended to be a unique (and often, but not always numerical) identifier for the GCP within the set of GCPs on this dataset. The pszInfo is usually an empty string, but can contain any user defined text associated with the GCP. Potentially this can also contain machine parsable information on GCP status though that isn't done at this time.
+'pszId' 문자열은 해당 데이터셋 상에 있는 GCP 집합 안에서 특정 GCP를 유일하게 식별하는 (숫자형인 경우가 많지만 아닐 수도 있는) 식별자로 사용됩니다. 'pszInfo'는 보통 빈 문자열이지만, GCP 관련 사용자 정의 텍스트를 담을 수 있습니다. 머신 파싱이 가능한 GCP 관련 정보를 담을 수 있는 가능성도 있지만 현재로서는 구현되지 않았습니다.
 
-The (Pixel,Line) position is the GCP location on the raster. The (X,Y,Z) position is the associated georeferenced location with the Z often being zero.
+래스터 상에서의 GCP 위치는 (픽셀,줄) 위치입니다. 관련 지리참조 위치는 Z가 0인 경우가 많은 (X,Y,Z) 위치입니다.
 
-The GDAL data model does not imply a transformation mechanism that must be generated from the GCPs ... this is left to the application. However 1st to 5th order polynomials are common.
+GDAL 데이터 모델은 GCP로부터 생성되어야만 하는 변환 메커니즘을 제안하지 않습니다. 이는 응용 프로그램의 몫입니다. 하지만 1차 ~ 5차 다항식은 공통됩니다.
 
-Normally a dataset will contain either an affine geotransform, GCPs or neither. It is uncommon to have both, and it is undefined which is authoritative.
+일반적으로 데이터셋이 아핀 지리변환과 GCP 가운데 하나를 담거나 또는 둘 다 담지 않을 것입니다. 둘 다 담고 있는 경우는 드물며, 어느 쪽을 우선할지에 대해서 정의된 바가 없습니다.
 
-Metadata
+메타데이터
 --------
 
-GDAL metadata is auxiliary format and application specific textual data kept as a list of name/value pairs. The names are required to be well behaved tokens (no spaces, or odd characters). The values can be of any length, and contain anything except an embedded null (ASCII zero).
+GDAL 메타데이터는 보조 포맷으로 응용 프로그램 특화 텍스트 유형 데이터를 이름/값 쌍들의 목록으로 보관합니다. 이름은 올바르게 작동하는 (공백 또는 특이한 문자가 없는) 토큰이어야 합니다. 값의 길이에 제한은 없으며, 값은 내장 NULL(아스키 0)을 제외한 어떤 내용이든 담을 수 있습니다.
 
-The metadata handling system is not well tuned to handling very large bodies of metadata. Handling of more than 100K of metadata for a dataset is likely to lead to performance degradation.
+메타데이터 처리 시스템은 대용량 메타데이터를 잘 처리할 수 있도록 조정되지 않았습니다. 데이터셋에서 10만 개를 넘어서는 메타데이터를 처리하는 경우 성능 저하가 일어나게 될 가능성이 높습니다.
 
-Some formats will support generic (user defined) metadata, while other format drivers will map specific format fields to metadata names. For instance the TIFF driver returns a few information tags as metadata including the date/time field which is returned as:
+일부 포맷은 일반 (사용자 정의) 메타데이터를 지원하는 반면, 다른 포맷 드라이버들은 메타데이터 이름에 특정 포맷 필드를 매핑할 것입니다. 예를 들어 TIFF 드라이버는 몇몇 정보 태그들을 날짜&시간 유형 필드를 포함하는 메타데이터로 반환하는데, 날짜&시간 유형 필드를 다음과 같이 반환합니다:
 
 ::
 
     TIFFTAG_DATETIME=1999:05:11 11:29:56
 
-Metadata is split into named groups called domains, with the default domain having no name (NULL or ""). Some specific domains exist for special purposes. Note that currently there is no way to enumerate all the domains available for a given object, but applications can "test" for any domains they know how to interpret.
+메타데이터를 도메인이라는 명명된 그룹들로 분할합니다. 기본 도메인은 이름이 없습니다. (NULL 또는 ""입니다.) 몇몇 특수 목적을 위한 특화 도메인이 존재합니다. 현재 지정한 객체에 사용할 수 있는 모든 도메인을 나열할 수는 없지만, 응용 프로그램이 해석 방법을 알고 있는 모든 도메인을 "테스트"할 수는 있다는 사실을 기억하십시오.
 
-The following metadata items have well defined semantics in the default domain:
+기본 도메인에 있는 다음 메타데이터 항목들은 잘 정의된 의미를 가지고 있습니다:
 
-- AREA_OR_POINT: May be either "Area" (the default) or "Point". Indicates whether a pixel value should be assumed to represent a sampling over the region of the pixel or a point sample at the center of the pixel. This is not intended to influence interpretation of georeferencing which remains area oriented.
-- NODATA_VALUES: The value is a list of space separated pixel values matching the number of bands in the dataset that can be collectively used to identify pixels that are nodata in the dataset. With this style of nodata a pixel is considered nodata in all bands if and only if all bands match the corresponding value in the NODATA_VALUES tuple. This metadata is not widely honoured by GDAL drivers, algorithms or utilities at this time.
-- MATRIX_REPRESENTATION: This value, used for Polarimetric SAR datasets, contains the matrix representation that this data is provided in. The following are acceptable values:
+- AREA_OR_POINT:
+  "Area" (기본값) 또는 "Point" 가운데 하나가 될 수 있습니다. 픽셀 값이 픽셀 영역의 샘플링을 표현하는 것으로 간주해야 할지 또는 픽셀 중심에 있는 포인트 샘플을 표현하는 것으로 간주해야 할지를 나타냅니다. 이 항목의 목적은 영역 지향으로 유지되는 지리 참조 작업의 해석에 영향을 미치려는 것이 아닙니다.
+
+- NODATA_VALUES:
+  이 항목의 값은 데이터셋에서 NODATA인 픽셀을 식별하기 위해 공통으로 사용할 수 있는, 공백으로 구분된 데이터셋의 밴드 개수만큼의 픽셀값들의 목록입니다. 이런 스타일의 NODATA를 사용하면 모든 밴드가 NODATA_VALUES 튜플(tuple)의 대응하는 값과 일치하는 경우에만 모든 밴드에서 픽셀을 NODATA로 간주합니다. 현재 GDAL 드라이버, 알고리즘 또는 유틸리티가 이 메타데이터를 널리 준수하지는 않습니다.
+
+- MATRIX_REPRESENTATION:
+  편광 SAR 데이터셋에 쓰이는 이 값은 해당 데이터가 제공된 행렬 표현을 담고 있습니다. 다음 값들 가운데 하나로 정의할 수 있습니다:
 
     * SCATTERING
     * SYMMETRIZED_SCATTERING
@@ -105,23 +110,29 @@ The following metadata items have well defined semantics in the default domain:
     * SYMMETRIZED_COHERENCY
     * KENNAUGH
     * SYMMETRIZED_KENNAUGH
-- POLARIMETRIC_INTERP: This metadata item is defined for Raster Bands for polarimetric SAR data. This indicates which entry in the specified matrix representation of the data this band represents. For a dataset provided as a scattering matrix, for example, acceptable values for this metadata item are HH, HV, VH, VV. When the dataset is a covariance matrix, for example, this metadata item will be one of Covariance_11, Covariance_22, Covariance_33, Covariance_12, Covariance_13, Covariance_23 (since the matrix itself is a hermitian matrix, that is all the data that is required to describe the matrix).
-- METADATATYPE: If IMAGERY Domain present, the item consist the reader which processed the metadata. Now present such readers:
 
-    * DG: DigitalGlobe imagery metadata
-    * GE: GeoEye (or formally SpaceImaging) imagery metadata
-    * OV: OrbView imagery metadata
-    * DIMAP: Pleiades imagery metadata
-    * MSP: Resurs DK-1 imagery metadata
-    * ODL: Landsat imagery metadata
-- CACHE_PATH: A cache directory path. Now this metadata item sets only by WMS driver. This is useful when dataset deletes with cached data or when external program need to put tiles in cache for some area of interest.
+- POLARIMETRIC_INTERP:
+  편광 SAR 데이터셋의 래스터 밴드에 대해 이 메타데이터 항목을 정의합니다. 이 항목은 이 밴드가 데이터의 지정 행렬 표현에 있는 어떤 항목을 표현하는지 나타냅니다. 예를 들면 데이터셋을 산란 행렬(scattering matrix)으로 제공하는 경우, 이 메타데이터 항목을 HH, HV, VH, VV 가운데 하나로 정의할 수 있습니다. 데이터셋을 공분산 행렬(covariance matrix)으로 제공하는 경우 이 메타데이터 항목을 Covariance_11, Covariance_22, Covariance_33, Covariance_12, Covariance_13, Covariance_23 가운데 하나로 정의할 수 있습니다. (행렬 자체가 에르미트 행렬(hermitian matrix)이기 때문에, 이 행렬을 설명하는 데 필요한 데이터는 이게 전부입니다.)
 
-SUBDATASETS Domain
+- METADATATYPE:
+  IMAGERY 도메인이 존재하는 경우, 이 항목이 메타데이터를 처리하는 판독기를 구성합니다. 다음과 같은 판독기들이 존재합니다:
+
+    * DG: DigitalGlobe 영상 메타데이터
+    * GE: GeoEye (또는 공식적으로 SpaceImaging) 영상 메타데이터
+    * OV: OrbView 영상 메타데이터
+    * DIMAP: 플레이아데스(Pleiades) 영상 메타데이터
+    * MSP: Resurs DK-1 영상 메타데이터
+    * ODL: 랜드샛(Landsat) 영상 메타데이터
+
+- CACHE_PATH:
+  캐시 디렉터리 경로입니다. 현재 WMS 드라이버만 이 메타데이터 항목을 설정합니다. 데이터셋이 캐시된 데이터를 삭제하거나 또는 외부 프로그램이 캐시에 관심 영역에 대한 타일을 넣어야 하는 경우 이 항목이 유용합니다.
+
+SUBDATASETS 도메인
 ++++++++++++++++++
 
-The SUBDATASETS domain holds a list of child datasets. Normally this is used to provide pointers to a list of images stored within a single multi image file.
+SUBDATASETS 도메인은 하위 데이터셋 목록을 담습니다. 이 도메인은 일반적으로 단일 다중 이미지 파일 안에 저장된 이미지 목록을 가리키는 포인터를 제공하는 데 사용됩니다.
 
-For example, an NITF with two images might have the following subdataset list.
+예를 들어, 이미지 2개를 가진 NITF는 다음과 같은 하위 데이터셋 목록을 가질 수도 있습니다:
 
 ::
 
@@ -130,115 +141,159 @@ For example, an NITF with two images might have the following subdataset list.
   SUBDATASET_2_NAME=NITF_IM:1:multi_1b.ntf
   SUBDATASET_2_DESC=Image 2 of multi_1b.ntf
 
-The value of the _NAME is the string that can be passed to :cpp:func:`GDALOpen` to access the file. The _DESC value is intended to be a more user friendly string that can be displayed to the user in a selector.
+"_NAME"의 값은 파일에 접근하기 위해 :cpp:func:`GDALOpen` 함수에 전송할 수 있는 문자열입니다. "_DESC" 값은 선택기 안에서 사용자에게 표시될 수 있는 좀 더 사용자 친화적인 문자열입니다.
 
-Drivers which support subdatasets advertise the ``DMD_SUBDATASETS`` capability. This information is reported when the --format and --formats options are passed to the command line utilities.
+하위 데이터셋을 지원하는 드라이버들은 ``DMD_SUBDATASETS`` 케이퍼빌리티를 가지고 있습니다. 명령줄 유틸리티에 '--format' 및 '--formats' 옵션을 전송하는 경우 이 정보를 리포트합니다.
 
-Currently, drivers which support subdatasets are: ADRG, ECRGTOC, GEORASTER, GTiff, HDF4, HDF5, netCDF, NITF, NTv2, OGDI, PDF, PostGISRaster, Rasterlite, RPFTOC, RS2, TileDB, WCS, and WMS.
+현재 ADRG, ECRGTOC, GEORASTER, GTiff, HDF4, HDF5, netCDF, NITF, NTv2, OGDI, PDF, PostGISRaster, Rasterlite, RPFTOC, RS2, TileDB, WCS, 그리고 WMS 드라이버가 하위 데이터셋을 지원합니다.
 
-IMAGE_STRUCTURE Domain
+IMAGE_STRUCTURE 도메인
 ++++++++++++++++++++++
 
-Metadata in the default domain is intended to be related to the image, and not particularly related to the way the image is stored on disk. That is, it is suitable for copying with the dataset when it is copied to a new format. Some information of interest is closely tied to a particular file format and storage mechanism. In order to prevent this getting copied along with datasets it is placed in a special domain called IMAGE_STRUCTURE that should not normally be copied to new formats.
+기본 도메인에 있는 메타데이터는 이미지와 연결되며, 디스크 상에 이미지를 저장하는 방식과는 딱히 관련이 없습니다. 즉 데이터셋을 새 포맷으로 복사하는 경우 데이터셋과 함께 메타데이터를 복사하기에 적합하다는 뜻입니다. 몇몇 관심 정보는 특정 파일 포맷 및 저장 메커니즘과 밀접하게 연결되어 있습니다. 이런 메타데이터가 데이터셋과 함께 복사되는 일을 막으려면 일반적으로 새 포맷으로 복사되지 말아야 할 IMAGE_STRUCTURE라는 특수 도메인에 이런 메타데이터를 저장해야 합니다.
 
-Currently the following items are defined by :ref:`rfc-14` as having specific semantics in the IMAGE_STRUCTURE domain.
+현재 :ref:`rfc-14` 가 다음 항목들이 IMAGE_STRUCTURE 도메인에서 특정 의미를 가진다고 정의합니다:
 
-- COMPRESSION: The compression type used for this dataset or band. There is no fixed catalog of compression type names, but where a given format includes a COMPRESSION creation option, the same list of values should be used here as there.
-- NBITS: The actual number of bits used for this band, or the bands of this dataset. Normally only present when the number of bits is non-standard for the datatype, such as when a 1 bit TIFF is represented through GDAL as GDT_Byte.
-- INTERLEAVE: This only applies on datasets, and the value should be one of PIXEL, LINE or BAND. It can be used as a data access hint.
-- PIXELTYPE: This may appear on a GDT_Byte band (or the corresponding dataset) and have the value SIGNEDBYTE to indicate the unsigned byte values between 128 and 255 should be interpreted as being values between -128 and -1 for applications that recognise the SIGNEDBYTE type.
+- COMPRESSION:
+  해당 데이터셋 또는 밴드에 사용되는 압축 유형입니다. 압축 유형 이름들을 고정한 카탈로그는 없지만, 지정 포맷이 COMPRESSION 생성 옵션을 포함하는 경우 해당 옵션에서 사용할 수 있는 값들의 목록을 이 메타데이터 항목에도 정의할 수 있을 것입니다.
 
-RPC Domain
+- NBITS:
+  해당 밴드 또는 해당 데이터셋의 밴드들에 사용되는 비트의 실제 개수입니다. 일반적으로 해당 데이터 유형의 표준이 아닌 비트 개수인 경우에만 이 항목이 존재합니다. 예를 들면 GDAL은 1비트 TIFF를 GDT_Byte으로 표현합니다.
+
+- INTERLEAVE:
+  이 메타데이터 항목은 데이터셋에만 적용되며, 그 값은 PIXEL, LINE 또는 BAND 가운데 하나여야 합니다. 데이터 접근에 관한 힌트로 사용될 수 있습니다.
+
+- PIXELTYPE:
+  이 항목은 GDT_Byte 밴드에 (또는 대응하는 데이터셋에) 나타날 수도 있습니다. SIGNEDBYTE 유형을 인식하는 응용 프로그램의 경우 128에서 255 사이의 부호 없는 바이트 값을 나타내기 위한 SIGNEDBYTE를 -128에서 -1 사이의 값인 것으로 해석해야 합니다.
+
+RPC 도메인
 ++++++++++
 
-The RPC metadata domain holds metadata describing the Rational Polynomial Coefficient geometry model for the image if present. This geometry model can be used to transform between pixel/line and georeferenced locations. The items defining the model are:
+RPC 메타데이터 도메인은 그런 이미지가 존재하는 경우 이미지의 유리 다항식 계수(Rational Polynomial Coefficient) 도형 모델을 설명하는 메타데이터를 담습니다. 이 도형 모델을 이용해서 픽셀/줄 위치와 지리참조된 위치를 서로 변환할 수 있습니다. 다음 메타데이터 항목들이 이 모델을 정의합니다:
 
-- ERR_BIAS: Error - Bias. The RMS bias error in meters per horizontal axis of all points in the image (-1.0 if unknown)
-- ERR_RAND: Error - Random. RMS random error in meters per horizontal axis of each point in the image (-1.0 if unknown)
-- LINE_OFF: Line Offset
-- SAMP_OFF: Sample Offset
-- LAT_OFF: Geodetic Latitude Offset
-- LONG_OFF: Geodetic Longitude Offset
-- HEIGHT_OFF: Geodetic Height Offset
-- LINE_SCALE: Line Scale
-- SAMP_SCALE: Sample Scale
-- LAT_SCALE: Geodetic Latitude Scale
-- LONG_SCALE: Geodetic Longitude Scale
-- HEIGHT_SCALE: Geodetic Height Scale
-- LINE_NUM_COEFF (1-20): Line Numerator Coefficients. Twenty coefficients for the polynomial in the Numerator of the rn equation. (space separated)
-- LINE_DEN_COEFF (1-20): Line Denominator Coefficients. Twenty coefficients for the polynomial in the Denominator of the rn equation. (space separated)
-- SAMP_NUM_COEFF (1-20): Sample Numerator Coefficients. Twenty coefficients for the polynomial in the Numerator of the cn equation. (space separated)
-- SAMP_DEN_COEFF (1-20): Sample Denominator Coefficients. Twenty coefficients for the polynomial in the Denominator of the cn equation. (space separated)
+- ERR_BIAS:
+  오류 - 편향. 이미지에 있는 모든 포인트의 수평 축 당 미터 단위 RMS 편향 오류입니다. (알지 못 하는 경우 -1.0입니다.)
 
-These fields are directly derived from the document prospective GeoTIFF RPC document (http://geotiff.maptools.org/rpc_prop.html) which in turn is closely modeled on the NITF RPC00B definition.
+- ERR_RAND:
+  오류 - 임의. 이미지에 있는 모든 포인트의 수평 축 당 미터 단위 RMS 임의 오류입니다. (알지 못 하는 경우 -1.0입니다.)
 
-The line and pixel offset expressed with LINE_OFF and SAMP_OFF are with respect to the center of the pixel.
+- LINE_OFF: 줄 오프셋
 
-IMAGERY Domain (remote sensing)
+- SAMP_OFF: 샘플 오프셋
+
+- LAT_OFF: 측지 위도 오프셋
+
+- LONG_OFF: 측지 경도 오프셋
+
+- HEIGHT_OFF: 측지 고도 오프셋
+
+- LINE_SCALE: 줄 척도
+
+- SAMP_SCALE: 샘플 척도
+
+- LAT_SCALE: 측지 위도 척도
+
+- LONG_SCALE: 측저 경도 척도
+
+- HEIGHT_SCALE: 측지 고도 척도
+
+- LINE_NUM_COEFF (1-20):
+  줄 분자 계수입니다. Rn 방정식의 분자에 있는 다항식을 위한 계수 20개를 공백으로 구분해서 정의합니다.
+
+- LINE_DEN_COEFF (1-20):
+  줄 분모 계수입니다. Rn 방정식의 분모에 있는 다항식을 위한 계수 20개를 공백으로 구분해서 정의합니다.
+
+- SAMP_NUM_COEFF (1-20):
+  샘플 분자 계수입니다. CN 방정식의 분자에 있는 다항식을 위한 계수 20개를 공백으로 구분해서 정의합니다.
+
+- SAMP_DEN_COEFF (1-20):
+  샘플 분모 계수입니다. CN 방정식의 분모에 있는 다항식을 위한 계수 20개를 공백으로 구분해서 정의합니다.
+
+`GeoTIFF RPC <http://geotiff.maptools.org/rpc_prop.html>`_ 전망 문서로부터 이 필드들을 직접 파생시켜 NITF RPC00B 정의에 따라 밀접하게 모델링합니다.
+
+LINE_OFF 및 SAMP_OFF로 표현한 줄 오프셋 및 픽셀 오프셋은 픽셀 중심에 상대적입니다.
+
+IMAGERY 도메인 (원격 탐사)
 +++++++++++++++++++++++++++++++
 
-For satellite or aerial imagery the IMAGERY Domain may be present. It depends on the existence of special metadata files near the image file. The files at the same directory with image file tested by the set of metadata readers, if files can be processed by the metadata reader, it fill the IMAGERY Domain with the following items:
+위성 영상 또는 항공 사진의 경우 IMAGERY 도메인이 존재할 수도 있습니다. 이미지 파일 옆에 특수 메타데이터 파일이 존재하느냐에 따라 다릅니다. 메타데이터 판독기 집합이 메타데이터 판독기가 이미지 파일과 같은 디렉터리에 있는 해당 파일을 처리할 수 있는지 테스트합니다. 테스트가 성공했다면 다음 항목들로 IMAGERY 도메인을 채웁니다:
 
-- SATELLITEID: A satellite or scanner name
-- CLOUDCOVER: Cloud coverage. The value between 0 - 100 or 999 if not available
-- ACQUISITIONDATETIME: The image acquisition date time in UTC
+- SATELLITEID: 위성 또는 스캐너 이름
 
-xml: Domains
+- CLOUDCOVER: 구름 커버리지. 0에서 100 사이의 값이며, 사용할 수 없는 경우 999로 정의합니다.
+
+- ACQUISITIONDATETIME: UTC(협정 세계시) 단위 이미지 촬영 날짜&시간입니다.
+
+xml: 도메인
 ++++++++++++
 
-Any domain name prefixed with "xml:" is not normal name/value metadata. It is a single XML document stored in one big string.
+도메인 이름 앞에 "xml:" 접두어가 붙은 모든 도메인은 일반적인 이름/값 쌍 메타데이터가 아닙니다. 한 줄의 긴 문자열로 저장된 단일 XML 문서입니다.
 
-Raster Band
+래스터 밴드
 -----------
 
-A raster band is represented in GDAL with the :cpp:class:`GDALRasterBand` class. It represents a single raster band/channel/layer. It does not necessarily represent a whole image. For instance, a 24bit RGB image would normally be represented as a dataset with three bands, one for red, one for green and one for blue.
+래스터 밴드는 GDAL에서 :cpp:class:`GDALRasterBand` 클래스로 표현됩니다. 이 클래스는 단일 래스터 밴드/채널/레이어를 표현합니다. 반드시 전체 이미지를 표현하지는 않습니다. 예를 들면 24비트 RGB 이미지는 일반적으로 적색, 녹색, 청색 3개의 밴드를 가진 데이터셋으로 표현될 것입니다.
 
-A raster band has the following properties:
+래스터 밴드는 다음과 같은 속성들을 가집니다:
 
-- A width and height in pixels and lines. This is the same as that defined for the dataset, if this is a full resolution band.
-- A datatype (GDALDataType). One of Byte, UInt16, Int16, UInt32, Int32, Float32, Float64, and the complex types CInt16, CInt32, CFloat32, and CFloat64.
-- A block size. This is a preferred (efficient) access chunk size. For tiled images this will be one tile. For scanline oriented images this will normally be one scanline.
-- A list of name/value pair metadata in the same format as the dataset, but of information that is potentially specific to this band.
-- An optional description string.
-- An optional single nodata pixel value (see also NODATA_VALUES metadata on the dataset for multi-band style nodata values).
-- An optional nodata mask band marking pixels as nodata or in some cases transparency as discussed in RFC 15: Band Masks and documented in GDALRasterBand::GetMaskBand().
-- An optional list of category names (effectively class names in a thematic image).
-- An optional minimum and maximum value.
-- Optional statistics stored in metadata:
+- 픽셀 및 줄의 너비와 높이. 해당 밴드가 전체 해상도 밴드인 경우 데이터셋에 정의된 속성과 동일합니다.
 
-    * STATISTICS_MEAN: mean
-    * STATISTICS_MINIMUM: minimum
-    * STATISTICS_MAXIMUM: maximum
-    * STATISTICS_STDDEV: standard deviation
-    * STATISTICS_APPROXIMATE: only present if GDAL has computed approximate statistics
-    * STATISTICS_VALID_PERCENT: percentage of valid (not nodata) pixel
+- 데이터 유형(GDALDataType). Byte, UInt16, Int16, UInt32, Int32, UInt64, Int64, Float32, Float64, 그리고 복소수 유형인 CInt16, CInt32, CFloat32 및 CFloat64 가운데 하나로 정의할 수 있습니다.
 
-- An optional offset and scale for transforming raster values into meaning full values (i.e. translate height to meters).
-- An optional raster unit name. For instance, this might indicate linear units for elevation data.
-- A color interpretation for the band. This is one of:
+  GDAL 3.5버전에서 UInt64 및 Int64 데이터 유형이 추가되었습니다. 픽셀값을 읽고 쓰는 것 이외의 지원은 제한됩니다. 일부 알고리즘이 (왜곡 알고리즘의 경우) 내부적으로 64비트 부동소수점형을 사용할 수도 있고, (GetMinimum(), GetMaximum() 등등의 경우) 일부 메소드가 더블형 값만 반환할 수도 있으며, (오버뷰, RasterIO 리샘플링의 경우) 32비트 부동소수점형을 반환할 수도 있습니다. 따라서 정확한 값들을 보전하는 범위가 [0, 2^53]이 될 수 있습니다. (또는 32비트 부동소수점형의 경우 범위가 더 좁을 수도 있습니다.)
 
-    * GCI_Undefined: the default, nothing is known.
-    * GCI_GrayIndex: this is an independent gray-scale image
-    * GCI_PaletteIndex: this raster acts as an index into a color table
-    * GCI_RedBand: this raster is the red portion of an RGB or RGBA image
-    * GCI_GreenBand: this raster is the green portion of an RGB or RGBA image
-    * GCI_BlueBand: this raster is the blue portion of an RGB or RGBA image
-    * GCI_AlphaBand: this raster is the alpha portion of an RGBA image
-    * GCI_HueBand: this raster is the hue of an HLS image
-    * GCI_SaturationBand: this raster is the saturation of an HLS image
-    * GCI_LightnessBand: this raster is the hue of an HLS image
-    * GCI_CyanBand: this band is the cyan portion of a CMY or CMYK image
-    * GCI_MagentaBand: this band is the magenta portion of a CMY or CMYK image
-    * GCI_YellowBand: this band is the yellow portion of a CMY or CMYK image
-    * GCI_BlackBand: this band is the black portion of a CMYK image.
+- 블록 크기. 선호되는 (효율적인) 접근 덩어리(chunk) 크기입니다. 타일화 이미지의 경우 블록 크기가 타일 하나일 것입니다. 스캔라인 지향 이미지의 경우 일반적으로 스캔라인 한 줄일 것입니다.
 
-- A color table, described in more detail later.
-- Knowledge of reduced resolution overviews (pyramids) if available.
+- 데이터셋과 동일한 형식으로 된 이름/값 쌍 메타데이터 목록. 그러나 담고 있는 정보는 해당 밴드에 특화된 정보일 수도 있습니다.
 
-Color Table
+- 선택적인 설명 문자열.
+
+- 선택적인 단일 NODATA 픽셀값. (다중 밴드 스타일 NODATA 값에 대해서는 데이터셋 수준 NODATA_VALUES 메타데이터를 참조하십시오.)
+
+- 픽셀을 NODATA로 표시하는 선택적인 NODATA 마스크 밴드 또는 어떤 경우 :cpp:func:`GDALRasterBand::GetMaskBand` 함수에 문서화되어 있고 :ref:`rfc-15` 에서 논의하는 투명도.
+
+- 선택적인 카테고리 이름 목록. (사실상 테마별 이미지에 있는 클래스명입니다.)
+
+- 선택적인 최소값 및 최대값.
+
+- 메타데이터에 저장된 선택적인 통계:
+
+    * STATISTICS_MEAN: 평균
+    * STATISTICS_MINIMUM: 최소
+    * STATISTICS_MAXIMUM: 최대
+    * STATISTICS_STDDEV: 표준 편차
+    * STATISTICS_APPROXIMATE: GDAL이 근사치 통계를 계산하는 경우에만 존재합니다.
+    * STATISTICS_VALID_PERCENT: 무결한 (NODATA가 아닌) 픽셀의 백분율
+
+- 래스터 값을 의미 있는 값으로 (예: 높이를 미터로) 변환하기 위한 선택적인 오프셋 및 척도.
+
+- 선택적인 래스터 단위 이름. 예를 들면 표고 데이터 용 선형 단위를 나타낼 수도 있습니다.
+
+- 밴드 용 색상 해석. 다음 가운데 하나로 정의할 수 있습니다:
+
+    * GCI_Undefined: 기본값으로, 아무것도 알려지지 않았다는 의미입니다.
+    * GCI_GrayIndex: 독립형 회색조 이미지입니다.
+    * GCI_PaletteIndex: 이 래스터는 색상표의 색인 역할입니다.
+    * GCI_RedBand: 이 래스터는 RGB 또는 RGBA 이미지의 적색 부분입니다.
+    * GCI_GreenBand: 이 래스터는 RGB 또는 RGBA 이미지의 녹색 부분입니다.
+    * GCI_BlueBand: 이 래스터는 RGB 또는 RGBA 이미지의 청색 부분입니다.
+    * GCI_AlphaBand: 이 래스터는 RGBA 이미지의 알파 부분입니다.
+    * GCI_HueBand: 이 래스터는 HLS 이미지의 색상(hue)입니다.
+    * GCI_LightnessBand: 이 래스터는 HLS 이미지의 명도(lightness)입니다.
+    * GCI_SaturationBand: 이 래스터는 HLS 이미지의 채도(saturation)입니다.
+    * GCI_CyanBand: 이 밴드는 CMY 또는 CMYK 이미지의 시안(cyan) 부분입니다.
+    * GCI_MagentaBand: 이 밴드는 CMY 또는 CMYK 이미지의 마젠타(magenta) 부분입니다.
+    * GCI_YellowBand: 이 밴드는 CMY 또는 CMYK 이미지의 옐로(yellow) 부분입니다.
+    * GCI_BlackBand: 이 밴드는 CMYK 이미지의 블랙(black) 부분입니다.
+
+- 색상표(color table). 다음 단락에서 자세히 설명합니다.
+
+- 피라미드를 사용할 수 있는 경우 감소 해상도 오버뷰들(피라미드)의 정보
+
+색상표
 -----------
 
-A color table consists of zero or more color entries described in C by the following structure:
+C 언어에서 설명하는 색상 항목 0개 이상으로 이루어진 색상표는 다음과 같은 구조를 따릅니다:
 
 ::
 
@@ -257,20 +312,24 @@ A color table consists of zero or more color entries described in C by the follo
         short      c4;
     } GDALColorEntry;
 
-The color table also has a palette interpretation value (GDALPaletteInterp) which is one of the following values, and indicates how the c1/c2/c3/c4 values of a color entry should be interpreted.
+색상표는 다음 값들 가운데 하나인 색상 목록(palette) 해석값도 가집니다. 이 해석값은 색상 항목의 c1/c2/c3/c4 값들을 어떻게 해석해야 할지를 나타냅니다.
 
-- GPI_Gray: Use c1 as gray scale value.
-- GPI_RGB: Use c1 as red, c2 as green, c3 as blue and c4 as alpha.
-- GPI_CMYK: Use c1 as cyan, c2 as magenta, c3 as yellow and c4 as black.
-- GPI_HLS: Use c1 as hue, c2 as lightness, and c3 as saturation.
+- GPI_Gray: c1을 회색조 값으로 사용합니다.
 
-To associate a color with a raster pixel, the pixel value is used as a subscript into the color table. That means that the colors are always applied starting at zero and ascending. There is no provision for indicating a pre-scaling mechanism before looking up in the color table.
+- GPI_RGB: c1을 적색, c2를 녹색, c3를 청색, 그리고 c4를 알파로 사용합니다.
 
-Overviews
+- GPI_CMYK: c1을 시안, c2를 마젠타, c3을 옐로우, 그리고 c4를 블랙으로 사용합니다.
+
+- GPI_HLS: c1을 색상, c2를 명도, 그리고 c3을 채도로 사용합니다.
+
+색상을 래스터 픽셀과 관련시키려면, 픽셀값을 색상표 아래 붙이는 하위 스크립트로 사용해야 합니다. 즉 색상이 언제나 0에서부터 시작해서 증가하는 방향으로 적용된다는 뜻입니다. 색상표를 검색하기 전에 사전 크기 조정 메커니즘을 나타내기 위한 규정은 없습니다.
+
+오버뷰
 ---------
 
-A band may have zero or more overviews. Each overview is represented as a "free standing" :cpp:class:`GDALRasterBand`. The size (in pixels and lines) of the overview will be different than the underlying raster, but the geographic region covered by overviews is the same as the full resolution band.
+밴드는 0개 이상의 오버뷰를 가질 수도 있습니다. 각 오버뷰는 "단독형(free standing)" :cpp:class:`GDALRasterBand` 클래스로 표현됩니다. 오버뷰의 (픽셀 및 줄 단위) 크기는 기저 래스터 크기와 다르지만, 오버뷰가 커버하는 지리 영역은 전체 해상도 밴드가 커버하는 영역과 동일합니다.
 
-The overviews are used to display reduced resolution overviews more quickly than could be done by reading all the full resolution data and downsampling.
+오버뷰를 사용하면 감소 해상도 오버뷰를 전체 해상도 데이터를 전부 읽어와서 다운샘플링하는 것보다 더 빨리 표시합니다.
 
-Bands also have a HasArbitraryOverviews property which is TRUE if the raster can be read at any resolution efficiently but with no distinct overview levels. This applies to some FFT encoded images, or images pulled through gateways where downsampling can be done efficiently at the remote point.
+래스터를 어떤 해상도에서도 효율적으로 읽어올 수 있지만 래스터에 명확한 오버뷰 수준이 없는 경우, 밴드가 값이 TRUE인 HasArbitraryOverviews 속성도 가집니다. 일부 FFT 인코딩 이미지, 또는 다운샘플링을 효율적으로 수행할 수 있는 게이트웨이를 통해 원격 지점에서 가져온 이미지에 적용됩니다.
+
