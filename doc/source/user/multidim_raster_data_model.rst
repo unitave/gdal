@@ -1,132 +1,96 @@
 .. _multidim_raster_data_model:
 
 ================================================================================
-Multidimensional Raster Data Model
+다중차원 래스터 데이터 모델
 ================================================================================
 
-This document attempts to describe the GDAL multidimensional data model,
-that has been added in GDAL 3.1. That is
-the types of information that a GDAL multidimensional dataset can contain, and their semantics.
+이 문서에서는 GDAL 3.1버전에서 추가된 GDAL 다중차원 데이터 모델을 설명하려 합니다. GDAL 다중차원 데이터 저장소가 담을 수 있는 정보의 유형 및 그 의미를 서술합니다.
 
-The multidimensional raster API is a generalization of the traditional
-:ref:`raster_data_model`, to address 3D, 4D or
-higher dimension datasets. Currently, it is
-limited to basic read/write API, and is not that much plugged into other higher
-level utilities.
+다중차원 래스터 API는 3차원, 4차원 또는 그 이상의 차원 데이터셋을 처리하기 위해 전통적인 :ref:`raster_data_model` 을 일반화한 것입니다. 현재 기본적인 읽기/쓰기 API로 제한되어 있으며, 다른 고급 수준 유틸리티의 플러그인으로 제대로 구현되지 않았습니다.
 
-It is strongly inspired from the netCDF and HDF5 API and data models.
-See `HDF5 format and data model <https://portal.opengeospatial.org/files/81716>`_.
+이 모델은 netCDF 및 HDF5의 API와 데이터 모델로부터 크게 영향을 받았습니다. `HDF5 포맷 및 데이터 모델 <https://portal.opengeospatial.org/files/81716>`_ 을 참조하십시오.
 
-A :cpp:class:`GDALDataset` with multidimensional content contains a root
-:cpp:class:`GDALGroup`.
+다중차원 콘텐츠를 가진 :cpp:class:`GDALDataset` 클래스는 루트 :cpp:class:`GDALGroup` 클래스를 담고 있습니다.
 
-Group
+그룹
 -----
 
-A :cpp:class:`GDALGroup` (modelling a `HDF5 Group <https://portal.opengeospatial.org/files/81716#_hdf5_group>`_)
-is a named container of GDALAttribute, GDALMDArray or
-other GDALGroup. Hence GDALGroup can describe a hierarchy of objects.
+(`HDF5 그룹 <https://portal.opengeospatial.org/files/81716#_hdf5_group>`_ 을 모델링한) :cpp:class:`GDALGroup` 클래스는 GDALAttribute, GDALMDArray 또는 다른 GDALGroup의 명명 컨테이너입니다. 즉 GDALGroup이 객체의 계층(hierarchy)을 서술할 수 있습니다.
 
-Attribute
+속성
 ---------
 
-A :cpp:class:`GDALAttribute` (modelling a `HDF5 Attribute <https://portal.opengeospatial.org/files/81716#_hdf5_attribute>`_)
-has a name and a value, and is typically used to describe a metadata item.
-The value can be (for the HDF5 format) in the general case a multidimensional array
-of "any" type (in most cases, this will be a single value of string or numeric type)
+(`HDF5 속성 <https://portal.opengeospatial.org/files/81716#_hdf5_attribute>`_ 을 모델링한) :cpp:class:`GDALAttribute` 클래스는 이름과 값을 가지며, 일반적으로 메타데이터 항목을 서술하는 데 쓰입니다. (HDF5 포맷의 경우) 이 값은 일반적으로 "모든" 유형의 다중차원 배열이 될 수 있습니다. (대부분의 경우, 문자열 또는 숫자 유형의 단일값일 것입니다.)
 
-Multidimensional array
+다중차원 배열
 ----------------------
 
-A :cpp:class:`GDALMDArray` (modelling a `HDF5 Dataset <https://portal.opengeospatial.org/files/81716#_hdf5_dataset>`_)
-has a name, a multidimensional array, references a number of GDALDimension, and
-has a list of GDALAttribute.
+(`HDF5 데이터셋 <https://portal.opengeospatial.org/files/81716#_hdf5_dataset>`_ 을 모델링한) :cpp:class:`GDALMDArray` 클래스는 이름, 다중차원 배열 및 GDALAttribute 목록을 가지며 GDALDimension 여러 개를 참조합니다.
 
-Most drivers use the row-major convention for dimensions: that is, when considering
-that the array elements are stored consecutively in memory, the first dimension
-is the slowest varying one (in a 2D image, the row), and the last dimension the
-fastest varying one (in a 2D image, the column). That convention is the default
-convention used for NumPy arrays, the MEM driver and the HDF5 and netCDF APIs.
-The GDAL API is mostly agnostic
-about that convention, except when passing a NULL array as the *stride* parameter
-for the :cpp:func:`GDALAbstractMDArray::Read` and  :cpp:func:`GDALAbstractMDArray::Write` methods.
-You can refer to `NumPy documentation about multidimensional array indexing order issues <https://docs.scipy.org/doc/numpy/reference/internals.html#multidimensional-array-indexing-order-issues>`_
+대부분의 드라이버는 차원에 행 우선(row-major) 규범을 사용합니다. 다시 말하자면 메모리에 배열 요소들을 연속해서 저장한다고 할 때, 첫 번째 차원이 가장 느린 가변 차원(2차원 이미지에서의 행)이고 마지막 차원이 가장 빠른 가변 차원(2차원 이미지에서의 열)이라는 뜻입니다. 이 규범이 NumPy 배열, MEM 드라이버와 HDF5 및 netCDF API에 사용되는 기본 규범입니다. :cpp:func:`GDALAbstractMDArray::Read` 및 :cpp:func:`GDALAbstractMDArray::Write` 메소드에 NULL 배열을 'stride' 파라미터로 전송하는 경우를 제외하고, 대부분의 경우 GDAL API는 이 규범을 이해하지 못 하더라도 기능을 수행할 수 있습니다. 
+`다중차원 배열 색인 작업 순서 문제점에 관한 NumPy 문서 <https://docs.scipy.org/doc/numpy/reference/internals.html#multidimensional-array-indexing-order-issues>`_ 를 참조하십시오.
 
-a GDALMDArray has also optional properties:
+GDALMDArray는 선택적인 속성도 가지고 있습니다:
 
-    - Coordinate reference system: :cpp:class:`OGRSpatialReference`
-    - No data value:
-    - Unit
-    - Offset, such that unscaled_value = offset + scale * raw_value
-    - Scale, such that unscaled_value = offset + scale * raw_value
+    - 좌표계: :cpp:class:`OGRSpatialReference`
+    - NODATA 값
+    - 단위
+    - 오프셋: ``unscaled_value = offset + scale * raw_value``
+    - 척도: ``unscaled_value = offset + scale * raw_value``
 
-Number of operations can be applied on an array to get modified views of it:
-:cpp:func:`GDALMDArray::Transpose()`, :cpp:func:`GDALMDArray::GetView()`, etc.
+배열에 :cpp:func:`GDALMDArray::Transpose()`, :cpp:func:`GDALMDArray::GetView()` 등등의 여러 작업을 적용해서 배열의 수정된 뷰를 얻을 수 있습니다.
 
-The :cpp:func:`GDALMDArray::Cache()` method can be used to cache the value of
-a view array into a sidecar file.
+:cpp:func:`GDALMDArray::Cache()` 메소드를 사용해서 사이드카 파일에 뷰 배열의 값을 캐시할 수 있습니다.
 
-Dimension
+차원
 ---------
 
-A :cpp:class:`GDALDimension` describes a dimension / axis used to index multidimensional arrays.
-It has the following properties:
+:cpp:class:`GDALDimension` 클래스는 다중차원 배열을 색인하기 위해 사용되는 차원/축을 서술합니다. 이 클래스는 다음 속성들을 가집니다:
 
-  - a name
-  - a size, that is the number of values that can be indexed along
-    the dimension
-  - a type, which is a string giving the nature of the dimension.
-    Predefined values are: HORIZONTAL_X, HORIZONTAL_Y, VERTICAL, TEMPORAL, PARAMETRIC
-    Other values might be used. Empty value means unknown.
-  - a direction. Predefined values are:
-    EAST, WEST, SOUTH, NORTH, UP, DOWN, FUTURE, PAST
-    Other values might be used. Empty value means unknown.
-  - a reference to a GDALMDArray variable, typically
-    one-dimensional, describing the values taken by the dimension.
-    For a georeferenced GDALMDArray and its X dimension, this will be typically
-    the values of the easting/longitude for each grid point.
+  - 이름
 
-Data Type
+  - 크기:
+    차원을 따라 색인할 수 있는 값의 개수입니다.
+
+  - 유형:
+    차원의 본질을 나타내는 문자열로, HORIZONTAL_X, HORIZONTAL_Y, VERTICAL, TEMPORAL, 그리고 PARAMETRIC 값이 사전 정의되어 있습니다. 다른 값을 사용할 수도 있습니다. 비어 있는 값은 알 수 없다는 의미입니다.
+
+  - 방향:
+    EAST, WEST, SOUTH, NORTH, UP, DOWN, FUTURE, 그리고 PAST 값이 사전 정의되어 있습니다. 다른 값을 사용할 수도 있습니다. 비어 있는 값은 알 수 없다는 의미입니다.
+
+  - 참조:
+    차원이 취하는 값을 설명하는, 일반적으로 1차원인 GDALMDArray를 가리킵니다. 지리참조된 GDALMDArray와 그 X 차원의 경우, 일반적으로 각 그리드 포인트에 대한 편동/경도의 값일 것입니다.
+
+데이터 유형
 ---------
 
-A :cpp:class:`GDALExtendedDataType` (modelling a
-`HDF5 datatype <https://portal.opengeospatial.org/files/81716#_hdf5_datatype>`_)
-describes the type taken by an individual value of
-a GDALAttribute or GDALMDArray. Its class can be NUMERIC,
-STRING or COMPOUND. For NUMERIC, the existing :cpp:enum:`GDALDataType` enumerated
-values are supported. For COMPOUND, the data type is a list of members, each
-member being described by a name, a offset in byte in the compound structure and
-a GDALExtendedDataType.
+(`HDF5 데이터 유형 <https://portal.opengeospatial.org/files/81716#_hdf5_datatype>`_ 을 모델링한) :cpp:class:`GDALExtendedDataType` 클래스는 GDALAttribute 또는 GDALMDArray의 개별 값이 취하는 유형을 서술합니다. NUMERIC, STRING 또는 COMPOUND 클래스 가운데 하나일 수 있습니다.
+NUMERIC 클래스의 경우, 기존 :cpp:enum:`GDALDataType` 값들의 목록을 지원합니다.
+COMPOUND 클래스의 데이터 유형은 복합 구조(compound structure) 및 GDALExtendedDataType에 있는 바이트 단위 오프셋인 각 멤버를 이름으로 설명하는 멤버 목록입니다.
 
 .. note::
 
-   The HDF5 modelisation allows for more complex datatypes.
+   HDF5 모델화는 더 복잡한 데이터 유형을 사용할 수 있게 해줍니다.
 
 .. note::
 
-    HDF5 does not have native data types for complex values whereas
-    GDALDataType does. So a driver may decide to expose a GDT\_Cxxxx datatype
-    from a HDF5 Compound data type representing a complex value.
+   HDF5는 복소수형 값에 대한 네이티브 데이터 유형을 가지고 있지 않은 반면 GDALDataType은 가지고 있습니다. 따라서 드라이버가 복소수 값을 표현하는 HDF5 복합 데이터 유형으로부터 GDT\_Cxxxx 데이터유형을 노출시키도록 결정할 수도 있습니다.
 
-Differences with the GDAL 2D raster data model
+GDAL 2차원 래스터 데이터 모델과의 차이점
 ----------------------------------------------
 
-- The concept of GDALRasterBand is no longer used for multidimensional.
-  This can be modelled as either different GDALMDArray, or using a compound
-  data type.
+- 다중차원 데이터에 대해 GDALRasterBand 개념을 더 이상 사용하지 않습니다. 다른 GDALMDArray로 모델링하거나, 또는 복합 데이터 유형을 사용해서 모델링할 수 있습니다.
 
-Bridges between GDAL 2D classic raster data model and multidimensional data model
+전통적인 GDAL 2차원 래스터 데이터 모델과 다중차원 데이터 모델 사이의 가교
 ---------------------------------------------------------------------------------
 
-The :cpp:func:`GDALRasterBand::AsMDArray` and :cpp:func:`GDALMDArray::AsClassicDataset`
-can be used to respectively convert a raster band to a MD array or a 2D dataset
-to a MD array.
+:cpp:func:`GDALRasterBand::AsMDArray` 및 :cpp:func:`GDALMDArray::AsClassicDataset` 함수를 사용해서 각각 래스터 밴드를 다중차원 배열로 또는 2차원 데이터셋을 다중차원 배열로 변환할 수 있습니다.
 
-Applications
+응용 프로그램
 ---------------------------------------------------------------------------------
 
-The following applications can be used to inspect and manipulate multidimensional
-datasets:
+다음 응용 프로그램들을 사용해서 다중차원 데이터셋을 조사하고 조정할 수 있습니다:
 
 - :ref:`gdalmdiminfo`
 - :ref:`gdalmdimtranslate`
+
