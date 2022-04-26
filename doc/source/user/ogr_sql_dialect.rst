@@ -594,10 +594,17 @@ ALTER TABLE
 
 The following OGR SQL ALTER TABLE commands can be used.
 
--"ALTER TABLE tablename ADD [COLUMN] columnname columntype" to add a new field. Supported if the layer declares the OLCCreateField capability.
--"ALTER TABLE tablename RENAME [COLUMN] oldcolumnname TO newcolumnname" to rename an existing field. Supported if the layer declares the OLCAlterFieldDefn capability.
--"ALTER TABLE tablename ALTER [COLUMN] columnname TYPE columntype" to change the type of an existing field. Supported if the layer declares the OLCAlterFieldDefn capability.
--"ALTER TABLE tablename DROP [COLUMN] columnname" to delete an existing field. Supported if the layer declares the OLCDeleteField capability.
+- ::
+
+      ALTER TABLE tablename ADD [COLUMN] columnname columntype
+
+새 필드를 추가합니다. 레이어가 OLCCreateField 케이퍼빌리티를 선언하는 경우 지원합니다.
+
+- "ALTER TABLE tablename RENAME [COLUMN] oldcolumnname TO newcolumnname" to rename an existing field. Supported if the layer declares the OLCAlterFieldDefn capability.
+
+- "ALTER TABLE tablename ALTER [COLUMN] columnname TYPE columntype" to change the type of an existing field. Supported if the layer declares the OLCAlterFieldDefn capability.
+
+- "ALTER TABLE tablename DROP [COLUMN] columnname" to delete an existing field. Supported if the layer declares the OLCDeleteField capability.
 
 The columntype value follows the syntax of the types supported by the CAST operator described above.
 
