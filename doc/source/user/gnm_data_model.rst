@@ -1,61 +1,74 @@
 .. _gnm_data_model:
 
 ================================================================================
-Geographic Networks Data Model
+지리 네트워크 데이터 모델
 ================================================================================
 
-This document is intended to describe the purpose and the structure of Geographic Network Model classes. GNM is the part of GDAL and provides the methods of creating, managing and analysing geographical networks.
+이 문서에서는 지리 네트워크 모델(Geographic Network Model) 클래스의 목적과 구조를 설명하려 합니다. GNM은 GDAL의 일부로서 지리 네트워크를 생성, 관리 및 분석할 수 있는 방법을 제공합니다.
 
-The key purpose of GNM classes:
-- To provide an abstraction for different existed network formats, like GDAL (previously OGR) provides one for spatial vector formats;
-- To provide a network functionality to those spatial formats which does not have it at all.
+GNM 클래스의 주요 목적은 다음과 같습니다:
 
-General concept
+- GDAL이 (예전에는 OGR가) 공간 벡터 포맷에 대해 제공하는 것과 같이, 서로 다른 기존 네트워크 포맷에 대한 추상 개념을 제공합니다.
+
+- 네트워크 기능을 하나도 가지고 있지 않은 공간 포맷에 네트워크 기능을 제공합니다.
+
+일반 개념
 ---------------
 
-Any real-world network can be represented as a set of vector data, which can be itself represented in GDAL as a GDALDataset. In GNM this data consists of two parts. Network's topology (graph), network's metadata (name/description), set of special feature identifiers, etc. belong to the "network part", while the common for GDAL layers, features, geometries belong to the "spatial/attribute part". In order to work with the datasets of different formats the following classes were designed in GNM.
+현실에 존재하는 모든 네트워크를 벡터 데이터 집합으로 표현할 수 있습니다. GDAL에서 이 벡터 데이터 집합은 GDALDatase으로 표현됩니다. GNM에서 이 데이터는 두 부분으로 이루어져 있습니다. 네트워크의 위상(그래프), 네트워크의 메타데이터(이름/설명), 공간 객체 식별자 등등은 "네트워크 부분"에 속하고, 레이어, 객체, 도형 같은 GDAL 공통 요소들은 "공간/속성 부분"에 속해 있습니다. 서로 다른 포맷들의 데이터셋을 작업하기 위해 GNM에는 다음 클래스들이 설계되었습니다.
 
-Network
+네트워크
 +++++++
 
-:cpp:class:`GNMNetwork` represents an abstract network. The network data and spatial/attribute data in a dataset of some format in fact can be not separable (just additional layers/fields/tags), while the concrete implementation of GNMNetwork "knows" which data from the whole dataset refers to "network part" and is able to operate it. GNMNetwork allows user the following:
+:cpp:class:`GNMNetwork` 클래스는 추상 개념 네트워크를 표현합니다. 몇몇 포맷의 데이터셋에 있는 네트워크 데이터 및 공간/속성 데이터는 사실상 구분할 수 없는 반면 (추가적인 레이어/필드/태그일 뿐입니다) GNMNetwork의 구체적인 구현은 전체 데이터셋의 어떤 데이터가 "네트워크 부분"을 참조하는지 "알고" 있으며 이를 작업할 수 있습니다. GNMNetwork는 사용자가 다음과 같은 작업을 할 수 있게 해줍니다:
 
--Setting/unsetting connections. These generic methods of building the network topology (automatically and manually) receive the identifiers of features being connected in a common way, while the concrete implementation knows where and how to store and build the topology;
--Reading connections. The generic methods return the connections in the common way;
--Adding/removing layers/features. When the feature or layer is being added to the network some actions can be initiated (weights change in a graph, cascade changes in connected features). Concrete GNMNetwork describes how it is done.
--Defining network's business logic or behavior. It can be expressed in network rules or constraints/restrictions. Expected that each rule can be set from a string and each concrete GNMNetwork will transform it to the internal look.
+- 연결을 설정/설정 해제할 수 있습니다. 네트워크 위상을 (자동적으로 그리고 수동으로 직접) 작성하는 일반 방법들은 공통적인 방식으로 연결되어 있는 객체 식별자를 받아오는 반면, GNMNetwork의 구체적인 구현은 위상을 어디에 그리고 어떻게 저장하고 작성할지를 알고 있습니다.
 
-Format
+- 연결을 읽어올 수 있습니다. 일반 방법들은 공통적인 방식으로 연결을 반환합니다.
+
+- 레이어/객체를 추가하고 제거할 수 있습니다. 네트워크에 객체 또는 레이어를 추가하는 경우 몇몇 액션을 (그래프에서 가중치 변경, 연결된 객체에서 순차(cascade) 변경) 시작할 수 있습니다. GNMNetwork의 구체적인 구현은 이 액션들이 어떻게 수행되는지 서술합니다.
+
+- 네트워크의 비즈니스 로직(business logic) 및 습성을 정의할 수 있습니다. 이를 네트워크 규칙 또는 제약 규칙/제약 조건으로 표현할 수 있습니다. 문자열로부터 각 규칙을 설정할 수 있으며 GNMNetwork의 구체적인 구현은 이를 내부 형식(internal look)으로 변환할 것으로 예상됩니다.
+
+포맷
 ++++++
 
-GNMNetwork inherits GDALDataset and looks like OGRDatasource with additional functionality. There are a set of GDAL drivers for networks. The generic network implementation in GDAL provides additional functionality like rules, virtual edges and vertices. Also, while editing the feature the network control the network rules and other specific, and can deny saving edits. The other network drivers (pgRouting, OSRM, GraphHopper, etc.) should provide the basic functionality via the GNMNetwork class.
+GNMNetwork는 GDALDataset을 상속받으며, 추가 기능을 가진 OGRDatasource처럼 보입니다. 네트워크 용 GDAL 드라이버들의 집합이 있습니다. GDAL의 일반 네트워크 구현은 규칙, 가상 경계 및 꼭짓점 같은 추가 기능을 제공합니다. 또한 객체를 편집하는 동안 네트워크가 네트워크 규칙 및 기타 사양을 제어하기 때문에 편집 내용을 저장하는 것을 거부할 수도 있습니다. (pgRouting, OSRM, GraphHopper 같은) 다른 네트워크 드라이버들은 GNMNetwork 클래스를 통해 기본 기능을 제공할 것입니다.
 
-Network formats
+네트워크 포맷
 ---------------
 
-To add a ``native`` support of the existed network format (like PostGIS pgRouting, Oracle Spatial Networks, topology in GML, etc.) to GNM the developer should implement the corresponding GNMDriver-GNMNetwork interface. But there is also a capability to use the ``generic`` network format, which is already implemented in GNM as a special class. It can be extremely useful when there is a need to create and use a network in the format that initially does not have its "network part" (like ESRI Shapefile) directly.
+GNM이 (PostGIS pgRouting, 오라클 Spatial Networks, GML 포맷으로 된 위상 등등) 기존 네트워크 포맷을 "네이티브(native)"하게 지원하게 하려면 개발자가 각 네트워크 포맷에 대응하는 GNMDriver-GNMNetwork 인터페이스를 구현해야 합니다. 하지만 이미 GNM에 특수 클래스로 구현된 "일반(generic)" 네트워크 포맷을 사용할 수 있는 케이퍼빌리티도 있습니다. 초기에 (ESRI Shapefile처럼) 자신의 "네트워크 부분"을 직접 가지고 있지 않은 포맷으로 된 네트워크를 생성하고 사용해야 하는 경우 이 일반 네트워크 포맷이 매우 유용할 수 있습니다.
 
 GNMGenericNetwork
 +++++++++++++++++
 
-:cpp:class:`GNMGenericNetwork` is a concrete implementation of the GNMNetwork. GNMGenericNetwork intends to support the most GDALDataset drivers (depends on the corresponding driver capabilities). Technically the network format abstraction is achieved with the help of GDAL abstraction: datasets and layers approach. GNMGdalNetwork aggregates a GDALDataset instance where the "network part" is represented as a set of "system layers" (wkbNone geometry, specific attribute fields) and the spatial/attribute data is regarded as the set of "class layers" or "classes" (layers with geometries and attributes, as usual). The "network part" is created and maintained by GNMGenericNetwork automatically and provides methods to work with it.
+:cpp:class:`GNMGenericNetwork` 클래스는 GNMNetwork의 구체적인 구현입니다. GNMGenericNetwork는 (대응하는 드라이버의 케이퍼빌리티에 따라) GDALDataset 대부분을 지원하기 위한 클래스입니다. 기술적으로 네트워크 포맷 추상 개념은 GDAL 추상 개념인 데이터셋 및 레이어 접근법의 도움으로 달성됩니다. GNMGdalNetwork는 "네트워크 부분"을 "시스템 레이어"(wkbNone 도형, 특정 속성 필드) 집합으로 표현하고 공간/속성 데이터를 "클래스 레이어" 또는 "클래스"로 (일반적인 경우와 마찬가지로 도형 및 속성을 가진 레이어로) 간주하는 GDALDataset 인스턴스를 집계합니다. GNMGenericNetwork 클래스가 "네트워크 부분"을 자동적으로 생성하고 유지/관리하고 "네트워크 부분"을 작업할 수 있는 방법을 제공합니다.
 
-The way of describing real-world networks by GNMGenericNetwork intends to be a generic, because:
--The most general type of graph is used, which holds every useful information: directions of edges (directed/undirected), edge costs (weighted/unweighted). This graph is stored as an incidence list: source vertex feature id, target vertex feature id, edge feature id, direct cost, inverse cost, direction of edge;
--Any feature with any geometry can be the vertex or the edge in a graph. Also, it may be no feature “under” the connection's edge at all (actually the virtual edge is created for this case). All this means that user operates with the feature identifiers, while the GNMGenericNetwork guaranties the connections integrity among features; 
--Any feature in the network will gain the unique identifier – Global Feature Identifier (GFID) which allows unify any amount of "class layers" under one network;
--GNMGenericNetwork uses its own way to determine the network's business logic. See :cpp:func:`GNMGenericNetwork::CreateRule` for more details.
+GNMGenericNetwork가 현실에 존재하는 네트워크를 설명하는 방식은 일반적(generic)이어야 합니다. 다음과 같은 이유들 때문입니다:
 
-See the :cpp:class:`GNMGenericNetwork` class documentation for more details.
+- 유용한 모든 정보를 -- 경계의 방향(방향 있음/없음), 경계 비용(가중/비가중) -- 담고 있는 가장 일반적인 유형의 그래프를 사용합니다. 이 그래프는 소스 꼭짓점 객체ID, 대상 꼭짓점 객체ID, 경계 객체ID, 직접 비용, 역비용, 경계 방향의 발생 빈도(incidence) 목록으로 저장됩니다.
 
-The network of common format has also the following important features:
--The single spatial reference system is used in the network, that means that each feature which appears in the network will be transformed to this SRS;
--The network always created void and there is a need to import or create features;
--It is not possible to remove the "network part" from the dataset – only delete the whole network with all data. The deletion is made layer by layer and deletes only system and class layers which registered in the network.
+- 모든 도형을 가진 모든 객체가 그래프에서 꼭짓점 또는 경계일 수 있습니다. 또한 연결의 경계 "아래"에 객체가 하나도 없을 수도 있습니다. (사실 이런 경우 때문에 가상 경계를 생성합니다.) 종합하면 GNMGenericNetwork 클래스가 객체들 간의 연결 무결성을 보장하는 동안 사용자는 객체ID로 작업한다는 뜻힙니다.
 
-Network analysis
+- 네트워크에 있는 모든 객체가 유일 식별자를 -- 하나의 네트워크 아래 "클래스 레이어"를 무제한으로 허용하는 전체 수준 객체 식별자(Global Feature Identifier; GFID)를 -- 얻을 것입니다.
+
+- GNMGenericNetwork는 자신만의 방식으로 네트워크의 비즈니스 로직을 판단합니다. 자세한 내용은 :cpp:func:`GNMGenericNetwork::CreateRule` 함수를 참조하십시오.
+
+더 자세한 정보를 원한다면 :cpp:class:`GNMGenericNetwork` 클래스 문서를 참조하십시오.
+
+공통 포맷 네트워크는 다음과 같은 중요 기능들도 가지고 있습니다:
+
+- 네트워크에서 단일 공간 좌표계를 사용합니다. 즉 네트워크에 나타나는 각 객체가 이 공간 좌표계로 변환될 것이라는 의미입니다.
+
+- 네트워크는 항상 텅 빈(void) 채로 생성되기 때문에, 객체를 가져오거나 생성해야 합니다.
+
+- 데이터셋으로부터 "네트워크 부분"을 제거할 수는 없습니다. 전체 네트워크를 모든 데이터와 함께 삭제할 뿐입니다. 레이어 하나씩 삭제하며, 네트워크에 등록된 시스템 및 클래스 레이어만 삭제합니다.
+
+네트워크 분석
 ----------------
 
-The network analysis in GNM is implemented in :cpp:class:`GNMNetwork` object.
+GNM에서의 네트워크 분석은 :cpp:class:`GNMNetwork` 객체에 구현되어 있습니다.
 
-:cpp:class:`GNMGenericNetwork` holds the graph in memory in STL containers and provides basic algorithms which return the results in the array-form (e.g. std::vector full of path's edges and vertices GFIDs). But the caller get a result as OGRLayer there features get from layers consist the network. Also some additional fields created (VERTEX/EDGE indicator field, GFID, layer name, etc.). The caller have to free the result OGRLayer via :cpp:func:`GDALDataset::ReleaseResultSet`
+:cpp:class:`GNMGenericNetwork` 클래스는 메모리에 있는 STL 컨테이너 안에 그래프를 담고 있으며 결과물을 배열 형식으로 반환하는 기본 알고리즘들을 제공합니다. (예를 들어 경로의 경계들 및 꼭짓점들의 GFID로 꽉 차 있는 std::vector를 반환합니다.) 그러나 호출자는 네트워크로 이루어진 레이어로부터 객체를 가져오는 OGRLayer를 결과물로 얻습니다. 또 (VERTEX/EDGE 지시자 필드, GFID, 레이어 이름 등등의) 추가 필드도 생성합니다. 호출자는 :cpp:func:`GDALDataset::ReleaseResultSet` 함수를 통해 결과물 OGRLayer를 해제해야 합니다.
+

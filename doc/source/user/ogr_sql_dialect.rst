@@ -1,165 +1,112 @@
 .. _ogr_sql_dialect:
 
 ================================================================================
-OGR SQL dialect
+OGR SQL 방언
 ================================================================================
 
 .. highlight:: sql
 
-The GDALDataset supports executing commands against a datasource via the
-:cpp:func:`GDALDataset::ExecuteSQL` method.  While in theory
-any sort of command could be handled this way, in practice the mechanism is
-used to provide a subset of SQL SELECT capability to applications.  This
-page discusses the generic SQL implementation implemented within OGR, and
-issue with driver specific SQL support.
+GDALDataset은 :cpp:func:`GDALDataset::ExecuteSQL` 메소드를 통해 데이터소스를 대상으로 하는 명령어 실행을 지원합니다. 이론적으로는 어떤 유형의 명령어든 이 방식으로 처리할 수 있지만, 실제로는 응용 프로그램에 SQL SELECT 케이퍼빌리티의 부분 집합을 제공하기 위해 이 메커니즘을 사용합니다. 이 문서에서는 OGR 내부에 구현된 일반 SQL 구현 및 드라이버 특화 SQL 지원이 가지는 문제점을 논의합니다.
 
-An alternate "dialect", the SQLite dialect, can be used
-instead of the OGRSQL dialect. Refer to the :ref:`sql_sqlite_dialect` page for more details.
+OGR SQL 방언 대신 대체 "방언"인 SQLite 방언을 사용할 수 있습니다. 자세한 내용은 :ref:`sql_sqlite_dialect` 문서를 참조하십시오.
 
-The OGRLayer class also supports applying an attribute query filter to
-features returned using the :cpp:func:`OGRLayer::SetAttributeFilter()` method.  The
-syntax for the attribute filter is the same as the WHERE clause in the
-OGR SQL SELECT statement.  So everything here with regard to the WHERE
-clause applies in the context of the ``SetAttributeFilter()`` method.
+OGRLayer 클래스도 :cpp:func:`OGRLayer::SetAttributeFilter()` 메소드를 사용해서 반환되는 객체에 속성 쿼리 필터를 적용할 수 있습니다. 속성 필터의 문법은 OGR SQL SELECT 선언문의 WHERE 절의 문법과 동일합니다. 즉 이 문서에서 WHERE 절과 관련된 모든 것은 ``SetAttributeFilter()`` 메소드의 맥락에서 적용됩니다.
 
 SELECT
 ------
 
-The SELECT statement is used to fetch layer features (analogous to table
-rows in an RDBMS) with the result of the query represented as a temporary layer
-of features. The layers of the datasource are analogous to tables in an
-RDBMS and feature attributes are analogous to column values. The simplest
-form of OGR SQL SELECT statement looks like this:
+SELECT 선언문을 사용해서 임시 객체 레이어로 표현되는 쿼리 결과물을 가진 (RDBMS의 테이블 행과 유사한) 레이어 객체를 가져옵니다. 데이터소스의 레이어는 RDBMS에 있는 테이블과 유사하며 객체 속성은 열의 값과 유사합니다. OGR SQL SELECT 문의 가장 단순한 형식은 다음과 같습니다:
 
 .. code-block::
 
     SELECT * FROM polylayer
 
-In this case all features are fetched from the layer named "polylayer", and
-all attributes of those features are returned. This is essentially
-equivalent to accessing the layer directly. In this example the "*"
-is the list of fields to fetch from the layer, with "*" meaning that all
-fields should be fetched.
+이 경우 "polylayer"라는 레이어로부터 모든 객체를 가져오고, 이 객체들의 모든 속성을 반환합니다. 레이어에 직접 접근하는 것과 본질적으로 동등합니다. 이 예시에서 "\*"는 레이어로부터 가져올 필드들의 목록이며, 이때 "\*"는 모든 필드를 가져와야 한다는 뜻입니다.
 
-This slightly more sophisticated form still pulls all features from the layer
-but the schema will only contain the geometry column and the EAS_ID and PROP_VALUE
-attributes. With OGR SQL dialect the geometry column is always included in the
-result so it does not need to appear in the SQL statement.
+다음 예시는 조금 더 복잡한 형식으로, 레이어로부터 모든 객체를 가져오지만 스키마는 도형 열과 EAS_ID 및 PROP_VALUE 속성만 담게 될 것입니다. OGR SQL 방언을 사용하면 언제나 결과물에 도형 열을 포함시키기 때문에 SQL 문에 따로 작성할 필요가 없습니다:
 
 .. code-block::
 
     SELECT eas_id, prop_value FROM polylayer
 
-A much more ambitious SELECT, restricting the features fetched with a
-WHERE clause, and sorting the results might look like:
+
+다음은 WHERE 절로 가져오는 객체를 제약하고 결과물을 정렬시키는 좀 더 복잡한 SELECT 문의 예시입니다:
 
 .. code-block::
 
     SELECT * from polylayer WHERE prop_value > 220000.0 ORDER BY prop_value DESC
 
-This select statement will produce a table with just one feature, with geometry
-and one attribute (named something like "count_eas_id") containing the number of
-distinct values of the eas_id attribute.
+다음 SELECT 문은 객체 하나만 가진 테이블을 생성합니다. 이 객체는 도형 및 EAS_ID 속성의 개별 값 여러 개를 담고 있는 ("count_eas_id" 같은 이름을 가진) 속성 하나를 가집니다:
 
 .. code-block::
 
     SELECT COUNT(DISTINCT eas_id) FROM polylayer
 
-General syntax
+일반 문법
 ++++++++++++++
 
-The general syntax of a SELECT statement is:
-
+SELECT 문의 일반 문법은 다음과 같습니다:
 
 .. code-block::
 
     SELECT [fields] FROM layer_name [JOIN ...] [WHERE ...] [ORDER BY ...] [LIMIT ...] [OFFSET ...]
 
-
-List Operators
+목록 연산자
 ++++++++++++++
 
-The field list is a comma separate list of the fields to be carried into
-the output features from the source layer.  They will appear on output features
-in the order they appear on in the field list, so the field list may be used
-to re-order the fields.
+'fields' 목록은 소스 레이어로부터 산출 객체로 옮겨지는 필드들을 쉼표로 구분한 목록입니다. 이 필드들은 산출 객체에 필드 목록에서의 순서대로 나타나기 때문에, 필드 목록을 필드들을 재정렬하기 위해 사용할 수도 있습니다.
 
-A special form of the field list uses the DISTINCT keyword.  This returns a
-list of all the distinct values of the named attribute.  When the DISTINCT
-keyword is used, only one attribute may appear in the field list.  The DISTINCT
-keyword may be used against any type of field.  Currently the distinctness
-test against a string value is case insensitive in OGR SQL.  The result of
-a SELECT with a DISTINCT keyword is a layer with one column (named the same
-as the field operated on), and one feature per distinct value.  Geometries
-are discarded.  The distinct values are assembled in memory, so a lot of
-memory may be used for datasets with a large number of distinct values.
-
+DISTINCT 키워드를 사용하는 특수 형식의 필드 목록이 있습니다. 이 특수 목록은 지정된 속성의 모든 개별 값들의 목록을 반환합니다. DISTINCT 키워드를 사용하는 경우, 필드 목록에 단 하나의 속성만 나타날 수도 있습니다. DISTINCT 키워드는 모든 유형의 필드에 사용할 수 있습니다. 현재 OGR SQL에서 문자열 값을 대상으로 테스트된 개별성(distinctness)은 대소문자를 구분하지 않습니다. DISTINCT 키워드를 사용한 SELECT 문의 결과물은 (작업한 필드와 같은 이름을 가진) 열 1개를 가진 레이어로, 개별 값 하나 당 객체 하나를 가집니다. 도형은 폐기합니다. 개별 값들을 메모리로 불러오기 때문에, 수많은 개수의 개별 값을 가진 데이터셋의 경우 메모리를 많이 차지할 수도 있습니다.
 
 .. code-block::
 
     SELECT DISTINCT areacode FROM polylayer
 
-There are also several summarization operators that may be applied to columns.
-When a summarization operator is applied to any field, then all fields must
-have summarization operators applied.   The summarization operators are
-COUNT (a count of instances), AVG (numerical average), SUM (numerical sum),
-MIN (lexical or numerical minimum), and MAX (lexical or numerical maximum).
-This example produces a variety of summarization information on parcel
-property values:
+열에 적용할 수도 있는 요약(summarization) 연산자도 몇 개 있습니다. 어떤 필드에 요약 연산자를 적용하는 경우, 모든 필드에 요약 연산자를 적용해야만 합니다. 이런 요약 연산자로는 COUNT(인스턴스의 개수), AVG(숫자 평균), SUM(숫자 합), MIN(어휘 또는 숫자 최소값), 그리고 MAX(어휘 또는 숫자 최대값)가 있습니다. 다음은 행정 구역 속성값에 관한 다양한 요약 정보를 생성하는 예시입니다:
 
 .. code-block::
 
     SELECT MIN(prop_value), MAX(prop_value), AVG(prop_value), SUM(prop_value),
         COUNT(prop_value) FROM polylayer WHERE prov_name = 'Ontario'
 
-It is also possible to apply the COUNT() operator to a DISTINCT SELECT to get
-a count of distinct values, for instance:
+SELECT 문의 DISTINCT 키워드에 COUNT() 연산자를 적용하면 개별 값들의 개수도 수집할 수 있습니다. 다음은 그 예시입니다:
 
 .. code-block::
 
     SELECT COUNT(DISTINCT areacode) FROM polylayer
 
-As a special case, the COUNT() operator can be given a "*" argument instead
-of a field name which is a short form for count all the records.
+특수 사용례로, COUNT() 연산자에 필드명 대신 모든 레코드를 세도록 하기 위한 단축 형식인 "\*" 인자를 지정할 수도 있습니다:
 
 .. code-block::
 
     SELECT COUNT(*) FROM polylayer
 
+필드명 앞에 테이블명을 접두어로 붙일 수도 있지만, 결합(join)을 수행하는 경우에만 의미가 있습니다. JOIN 단락에서 자세히 설명하겠습니다.
 
-Field names can also be prefixed by a table name though this is only
-really meaningful when performing joins.  It is further demonstrated in
-the JOIN section.
-
-Field definitions can also be complex expressions using arithmetic, and
-functional operators.   However, the DISTINCT keyword, and summarization
-operators like MIN, MAX, AVG and SUM may not be applied to expression fields.
-Boolean resulting expressions (comparisons, logical operators) can also be used.
+필드 정의가 산술 및 함수 연산자를 사용하는 복잡 표현식일 수도 있습니다. 하지만 DISTINCT 키워드와 MIN, MAX, AVG 및 SUM 같은 요약 연산자는 표현식 필드에 적용되지 못 할 수도 있습니다. 불(boolean) 값을 산출하는 (비교 및 논리 연산자) 표현식도 사용할 수 있습니다:
 
 .. code-block::
 
     SELECT cost+tax from invoice
 
-or
-
+또는
 
 .. code-block::
 
     SELECT CONCAT(owner_first_name,' ',owner_last_name) from properties
 
-Functions
+함수
 *********
 
-The SUBSTR function can be used to extract a substring from a string.
-Its syntax is the following one : SUBSTR(string_expr, start_offset [, length]). It extracts a substring of string_expr,
-starting at offset start_offset (1 being the first character of string_expr, 2 the second one, etc...).
-If start_offset is a negative value, the substring is extracted from the end of the string (-1 is the
-last character of the string, -2 the character before the last character, ...).
-If length is specified, up to length characters are extracted from the string. Otherwise the
-remainder of the string is extracted.
+SUBSTR 함수를 사용해서 문자열로부터 하위 문자열을 추출할 수 있습니다. 그 문법은 다음과 같습니다:
 
-Note: for the time being, the character as considered to be equivalent to bytes, which may not be
-appropriate for multi-byte encodings like UTF-8.
+::
+
+   SUBSTR(string_expr, start_offset [, length])
+
+이 명령어는 string_expr로부터 start_offset 오프셋에서 시작하는 (start_offset=1이면 string_expr의 첫 번째 문자, start_offset=2면 두 번째 문자, ...) 하위 문자열을 추출합니다. start_offset이 음의 값인 경우, 문자열의 끝으로부터 (start_offset=-1이면 문자열의 마지막 문자, start_offset=-2이면 마지막 문자 바로 앞의 문자, ...) 하위 문자열을 추출합니다. 'length'를 지정하면 문자열로부터 해당 개수만큼의 문자들을 추출합니다. 지정하지 않으면 문자열의 끝까지 추출합니다.
+
+주의: 당분간은 문자를 바이트와 동등한 것으로 간주합니다. 이는 UTF-8처럼 문자 하나를 바이트 여러 개로 표현하는 인코딩에는 적절하지 않을 수도 있습니다.
 
 .. code-block::
 
@@ -167,160 +114,169 @@ appropriate for multi-byte encodings like UTF-8.
     SELECT SUBSTR('abcdef',4)   FROM xxx   --> 'def'
     SELECT SUBSTR('abcdef',-2)  FROM xxx   --> 'ef'
 
-The ``hstore_get_value()`` function can be used to extract
-a value associate to a key from a HSTORE string, formatted like 'key=>value,other_key=>other_value,...'
+``hstore_get_value()`` 함수를 사용하면 HSTORE 문자열로부터 키와 관련된 값을 ``key=>value,other_key=>other_value,...`` 같은 서식으로 추출할 수 있습니다:
 
 .. code-block::
 
     SELECT hstore_get_value('a => b, "key with space"=> "value with space"', 'key with space') FROM xxx --> 'value with space'
 
-Using the field name alias
+필드 이름 별명 사용하기
 **************************
 
-OGR SQL supports renaming the fields following the SQL92 specification by
-using the AS keyword according to the following example:
+OGR SQL은 다음 예시와 같은 문법으로 AS 키워드를 이용해서 필드명이 SQL92 사양을 준수하도록 재명명할 수 있습니다:
 
 .. code-block::
 
     SELECT *, OGR_STYLE AS STYLE FROM polylayer
 
-The field name alias can be used as the last operation in the column specification.
-Therefore we cannot rename the fields inside an operator, but we can
-rename whole column expression, like these two:
+열 지정 작업에서 이 필드 이름 별명을 마지막 작업으로 사용할 수 있습니다. 따라서 연산자 안에서 필드를 재명명할 수 없지만, 전체 열 표현식을 다음 두 예시처럼 재명명할 수는 있습니다:
 
 .. code-block::
 
     SELECT COUNT(areacode) AS "count" FROM polylayer
     SELECT dollars/100.0 AS cents FROM polylayer
 
-Changing the type of the fields
+필드 유형 변경하기
 *******************************
 
-OGR SQL supports changing the type of the columns by using the SQL92 compliant CAST
-operator according to the following example:
+OGR SQL은 다음 예시와 같은 문법으로 SQL92 사양을 준수하는 CAST 연산자를 이용해서 열 유형을 변경할 수 있습니다:
 
 .. code-block::
 
     SELECT *, CAST(OGR_STYLE AS character(255)) FROM rivers
 
-Currently casting to the following target types are supported:
+현재 다음 대상 유형들로 캐스트할 수 있습니다:
 
 - boolean
-- character(field_length). By default, field_length=1.
+- character(field_length): field_length의 기본값은 1입니다.
 - float(field_length)
 - numeric(field_length, field_precision)
-- smallint(field_length) : 16 bit signed integer
+- smallint(field_length): 부호 있는 16비트 정수형
 - integer(field_length)
-- bigint(field_length), 64 bit integer, extension to SQL92
+- bigint(field_length): 64비트 정수형으로, SQL92 사양의 확장 사양입니다.
 - date(field_length)
 - time(field_length)
 - timestamp(field_length)
 - geometry, geometry(geometry_type), geometry(geometry_type,epsg_code)
 
-Specifying the field_length and/or the field_precision is optional.  An
-explicit value of zero can be used as the width for character() to indicate
-variable width.  Conversion to the 'integer list', 'double list'
-and 'string list' OGR data types are not supported, which doesn't conform to
-the SQL92 specification.
+field_length 그리고/또는 field_precision 지정은 선택적 옵션입니다. character() 유형의 길이를 명확하게 0으로 지정하면 가변 길이(variable width)를 사용할 수 있습니다. 'integer list', 'double list' 및 'string list' OGR 데이터 유형으로의 변환은 지원하지 않습니다. 이 유형들은 SQL92 사양을 준수하지 않기 때문입니다.
 
-While the CAST operator can be applied anywhere in an expression, including
-in a WHERE clause, the detailed control of output field format is only
-supported if the CAST operator is the "outer most" operators on a field
-in the field definition list.  In other contexts it is still useful to
-convert between numeric, string and date data types.
+CAST 연산자는 WHERE 절 안을 포함해서 표현식 안 어디에나 넣을 수 있지만, CAST 연산자가 필드 정의 목록에 있는 필드에 대한 "가장 바깥쪽에 있는" 연산자인 경우에만 산출 필드 유형을 세밀하게 제어할 수 있습니다. CAST가 "가장 바깥쪽에 있는" 연산자가 아닌 경우에도 숫자형, 문자열 및 날짜 데이터 유형들을 서로 변환하는 데 유용한 연산자입니다.
 
-Casting a WKT string to a geometry is allowed.
-geometry_type can be POINT[Z], LINESTRING[Z], POLYGON[Z], MULTIPOINT[Z],
-MULTILINESTRING[Z], MULTIPOLYGON[Z], GEOMETRYCOLLECTION[Z] or GEOMETRY[Z].
+WKT 문자열을 도형으로 캐스트할 수 있습니다. 이때 geometry_type은 POINT[Z], LINESTRING[Z], POLYGON[Z], MULTIPOINT[Z], MULTILINESTRING[Z], MULTIPOLYGON[Z], GEOMETRYCOLLECTION[Z] 또는 GEOMETRY[Z] 가운데 하나일 수 있습니다.
 
-String literals and identifiers quoting
+문자열 직역 및 식별자 인용
 ***************************************
 
-Strict SQL92 rules are applied regarding string literals and identifiers quoting.
+SQL92 규칙은 문자열 직역(string literals) 및 식별자 인용이라는 측면에서 엄격하게 적용됩니다.
 
-String literals (constants) must be surrounded with single-quote characters. e.g.
-WHERE a_field = 'a_value'
+문자열 직역(상수)을 작은따옴표 문자로 감싸야만 합니다:
 
-Identifiers (column names and tables names) can be used unquoted if they don't
-contain special characters or are not a SQL reserved keyword. Otherwise they must
-be surrounded with double-quote characters. e.g. WHERE "from" = 5.
+::
+
+   WHERE a_field = 'a_value'
+
+식별자가 특수 문자를 포함하고 있지 않거나 SQL 예약 키워드가 아닌 경우 (열 이름 및 테이블 이름의) 식별자를 인용 부호 없이 사용할 수 있습니다. 하지만 그렇다면 반드시 큰따옴표 문자로 감싸야만 합니다:
+
+::
+
+   WHERE "from" = 5
 
 WHERE
 +++++
 
-The argument to the WHERE clause is a logical expression used select records
-from the source layer.  In addition to its use within the WHERE statement,
-the WHERE clause handling is also used for OGR attribute queries on regular
-layers via :cpp:func:`OGRLayer::SetAttributeFilter`.
+WHERE 절에 들어가는 인자는 소스 레이어로부터 레코드를 선택하기 위해 사용되는 논리 표현식입니다. WHERE 문 안에서의 쓰임뿐만 아니라, WHERE 절이 처리하는 이 표현식은 :cpp:func:`OGRLayer::SetAttributeFilter` 메소드를 통해 정규 레이어에 대한 OGR 속성 쿼리에도 사용됩니다.
 
-In addition to the arithmetic and other functional operators available in
-expressions in the field selection clause of the SELECT statement, in the
-WHERE context logical operators are also available and the evaluated value
-of the expression should be logical (true or false).
+WHERE 절 맥락에서는 SELECT 문의 필드 선택 절에 있는 표현식에 사용할 수 있는 산술 및 기타 함수 연산자뿐만 아니라, 논리 연산자도 사용할 수 있으며 표현식의 평가된 값은 논리적(참 또는 거짓)이어야 합니다.
 
-The available logical operators are
-``=``,
-``!=``,
-``<>``,
-``<``,
-``>``,
-``<=``,
-``>=``,
-``LIKE`` and
-``ILIKE``,
-``BETWEEN`` and
-``IN``.
-Most of the operators are self explanatory, but it is worth noting that ``!=``
-is the same as ``<>``, the string equality is
-case insensitive, but the ``<``, ``>``, ``<=`` and ``>=`` operators *are* case sensitive. 
+다음 논리 연산자를 사용할 수 있습니다:
 
-Starting with GDAL 3.1, LIKE is case sensitive, and ILIKE is case insensitive.
-In previous versions, LIKE was also case insensitive. If the old behavior is
-wished in GDAL 3.1, the :decl_configoption:`OGR_SQL_LIKE_AS_ILIKE` can be set to ``YES``.
+- ``=``
+- ``!=``
+- ``<>``
+- ``<``
+- ``>``
+- ``<=``
+- ``>=``
+- ``LIKE`` 및 ``ILIKE``
+- ``BETWEEN`` 및 ``IN``
 
-The value argument to the ``LIKE`` and ``ILIKE`` operators is a pattern against which
-the value string is matched.  In this pattern percent (%) matches any number of
-characters, and underscore ( _ ) matches any one character. An optional ESCAPE escape_char
-clause can be added so that the percent or underscore characters can be searched
-as regular characters, by being preceded with the escape_char.
+대부분의 연산자는 따로 설명이 필요없지만, ``!=`` 와 ``<>`` 연산자는 동등하고 문자열 동등 비교는 대소문자를 구분하지 않지만 ``<``, ``>``, ``<=`` 그리고 ``>=`` 연산자는 대소문자를 구분한다는 사실은 기억해둘 만합니다.
+
+GDAL 3.1버전부터 ``LIKE`` 연산자는 대소문자를 구분하고 ``ILIKE`` 연산자는 대소문자를 구분하지 않습니다. 이전 버전들에서는 ``LIKE`` 연산자도 대소문자를 구분하지 않았습니다. GDAL 3.1버전에서 예전 습성을 사용하고 싶다면 :decl_configoption:`OGR_SQL_LIKE_AS_ILIKE` 환경설정 옵션을 YES로 설정해주면 됩니다.
+
+``LIKE`` 및 ``ILIKE`` 연산자에 들어가는 값 인자는 값 문자열이 일치하는지 판단하기 위한 패턴입니다. 이 패턴에서 백분율('%') 문자는 어떤 개수의 문자와도 일치하며, 언더바('_') 문자는 문자 1개와 일치합니다. 선택적인 ESCAPE escape_char 절을 추가해서 앞에 escape_char 문자가 붙는 백분율 또는 언더바 문자를 정규 문자로 검색할 수 있습니다.
+
+.. list-table:: Pattern Arguments of LIKE and ILIKE operators
+   :header-rows: 1
+
+   * - 문자열
+     - 패턴
+     - 일치 여부
+   * - Alberta
+     - ALB%
+     - Ｏ
+   * - Alberta
+     - _lberta
+     - Ｏ
+   * - St. Alberta
+     - _lberta
+     - Ｘ
+   * - St. Alberta
+     - %lberta
+     - Ｏ
+   * - Robarts St.
+     - %Robarts%
+     - Ｏ
+   * - 12345
+     - 123%45
+     - Ｏ
+   * - 123.45
+     - 12?45
+     - Ｘ
+   * - N0N 1P0
+     - %N0N%
+     - Ｏ
+   * - L4C 5E2
+     - %N0N%
+     - Ｘ
+
+``IN`` 연산자는 값들의 목록을 인자로 입력받으며 입력 목록에 있는 속성 값들의 멤버십을 테스트합니다.
+
+.. list-table:: Logics of IN operator
+   :header-rows: 1
+
+   * - 값
+     - 값 목록
+     - 일치 여부
+   * - 321
+     - IN (456,123)
+     - Ｘ
+   * - 'Ontario'
+     - IN ('Ontario','BC')
+     - Ｏ
+   * - 'Ont'
+     - IN ('Ontario','BC')
+     - Ｘ
+   * - 1
+     - IN (0,2,4,6)
+     - Ｘ
+
+``BETWEEN`` 연산자의 문법은 다음과 같으며:
 
 ::
 
-    String             Pattern       Matches?
-    ------             -------       --------
-    Alberta            ALB%          Yes
-    Alberta            _lberta       Yes
-    St. Alberta        _lberta       No
-    St. Alberta        %lberta       Yes
-    Robarts St.        %Robarts%     Yes
-    12345              123%45        Yes
-    123.45             12?45         No
-    N0N 1P0            %N0N%         Yes
-    L4C 5E2            %N0N%         No
+   field_name BETWEEN value1 AND value2
 
-The ``IN`` takes a list of values as its argument and tests the attribute
-value for membership in the provided set.
+이 표현식은 다음과 동등합니다:
 
 ::
 
-    Value              Value Set            Matches?
-    ------             -------              --------
-    321                IN (456,123)         No
-    'Ontario'          IN ('Ontario','BC')  Yes
-    'Ont'              IN ('Ontario','BC')  No
-    1                  IN (0,2,4,6)         No
+   field_name >= value1 AND field_name <= value2
 
-The syntax of the ``BETWEEN`` operator is "field_name BETWEEN value1 AND value2"
-and it is equivalent to "field_name >= value1 AND field_name <= value2".
+앞의 이항 연산자들뿐만 아니라, 필드가 NULL인지 여부를 테스트하기 위한 추가 연산자들이 있습니다. 바로 ``IS NULL`` 과 ``IS NOT NULL`` 연산자입니다.
 
-In addition to the above binary operators, there are additional operators
-for testing if a field is null or not. These are the ``IS NULL``
-and ``IS NOT NULL`` operators.
-
-Basic field tests can be combined in more complicated predicates using logical
-operators include ``AND``, ``OR``, and the unary logical ``NOT``.
-Subexpressions should be bracketed to make precedence
-clear.  Some more complicated predicates are:
+``AND``, ``OR`` 및 단항 ``NOT`` 을 포함하는 논리 연산자들을 이용하는 좀 더 복잡한 표현식에 이런 기본 필드 테스트를 결합시킬 수 있습니다. 이런 하위 표현식은 우선 순위를 명확하게 하기 위해 괄호로 묶어야 합니다. 다음은 이런 복잡한 표현식의 예시입니다:
 
 .. code-block::
 
@@ -328,20 +284,17 @@ clear.  Some more complicated predicates are:
     SELECT * FROM poly WHERE NOT (area_code LIKE 'N0N%')
     SELECT * FROM poly WHERE (prop_value IS NOT NULL) AND (prop_value < 100000)
 
-WHERE Limitations
+WHERE 제한 사항
 +++++++++++++++++
 
-- Fields must all come from the primary table (the one listed in the FROM clause).
+- (FROM 절에 목록화된) 기본 테이블에서 모든 필드를 가져와야만 합니다.
 
-- All string comparisons are case insensitive except for ``<``, ``>``, ``<=`` and ``>=``
+- ``<``, ``>``, ``<=`` 및 ``>=`` 연산자를 제외한 모든 문자열 비교는 대소문자를 구분하지 않습니다.
 
 ORDER BY
 ++++++++
 
-The ``ORDER BY`` clause is used force the returned features to be reordered
-into sorted order (ascending or descending) on one or multiple fields.
-Ascending (increasing) order is the default if neither the ASC or DESC keyword
-is provided.  For example:
+``ORDER BY`` 절은 반환된 객체들을 하나 이상의 필드에 대해 정렬 순서에 따라 (오름차순 또는 내림차순) 강제로 재정렬합니다. ASC 또는 DESC 키워드를 둘 다 지정하지 않는 경우 기본값은 (증가하는) 오름차순입니다. 다음은 그 예시입니다:
 
 .. code-block::
 
@@ -351,40 +304,32 @@ is provided.  For example:
     SELECT DISTINCT zip_code FROM property ORDER BY zip_code
     SELECT * FROM property ORDER BY prop_value ASC, another_field DESC
 
-Note that ORDER BY clauses cause two passes through the feature set.  One to
-build an in-memory table of field values corresponded with feature ids, and
-a second pass to fetch the features by feature id in the sorted order. For
-formats which cannot efficiently randomly read features by feature id this can
-be a very expensive operation.
+ORDER BY 절이 객체 집합을 두 번 처리한다는 사실을 기억하십시오. 첫 번째는 객체ID에 대응하는 필드 값들을 가진 인메모리 테이블을 작성하고, 두 번째는 객체ID를 이용해서 정렬 순서대로 객체를 가져옵니다. 객체ID를 이용해서 객체를 효율적으로 임의 읽기할 수 없는 포맷의 경우 이 작업이 아주 오래 걸릴 수 있습니다.
 
-Sorting of string field values is case sensitive, not case insensitive like in
-most other parts of OGR SQL.
+대소문자를 구분하지 않는 다른 대부분의 OGR SQL 경우와는 달리, 문자열 필드 값을 정렬하는 작업은 대소문자를 구분합니다.
 
-LIMIT and OFFSET
+LIMIT 및 OFFSET
 ++++++++++++++++
 
-Starting with GDAL 2.2, the ``LIMIT`` clause can be used to limit the
-number of features returned. For example
+GDAL 2.2버전부터, ``LIMIT`` 절을 사용해서 반환되는 객체들의 개수를 제한할 수 있습니다. 다음은 그 예시입니다:
 
 .. code-block::
 
     SELECT * FROM poly LIMIT 5
 
-The ``OFFSET`` clause can be used to skip the first features of the result
-set. The value after OFFSET is the number of features skipped. For example, to
-skip the first 3 features from the result set:
+``OFFSET`` 절을 사용하면 결과물 집합에서 처음 객체들을 건너뛸 수 있습니다. OFFSET 뒤에 오는 값이 건너뛸 객체 개수입니다. 예를 들어 결과물 집합에서 처음 3개의 객체를 건너뛰려면:
 
 .. code-block::
 
     SELECT * FROM poly OFFSET 3
 
-Both clauses can be combined:
+이 두 절을 결합할 수 있습니다:
 
 .. code-block::
 
     SELECT * FROM poly LIMIT 5 OFFSET 3
 
-JOINs
+JOIN
 +++++
 
 OGR SQL supports a limited form of one to one JOIN.  This allows records from
@@ -480,7 +425,7 @@ in the below "JOIN limitations" section. In particular, in case of multiple join
 or more) the fields compared in a JOIN must belong to the primary table (the one
 after FROM) and the table of the active JOIN.
 
-JOIN Limitations
+JOIN 제한 사
 ++++++++++++++++
 
 - Joins can be very expensive operations if the secondary table is not indexed on the key field being used.
@@ -502,7 +447,7 @@ statement to the rows returned by the left SELECT statement.
     UNION ALL [(] SELECT field_list FROM second_layer [WHERE where_expr] [)]
     [UNION ALL [(] SELECT field_list FROM third_layer [WHERE where_expr] [)]]*
 
-UNION ALL restrictions
+UNION ALL 제약 조건
 ++++++++++++++++++++++
 
 The processing of UNION ALL in OGR differs from the SQL standard, in which it accepts
@@ -537,7 +482,7 @@ the feature id, but it may be explicitly included using a syntax like:
 
     SELECT FID, * FROM nation
 
-Geometry field
+도형 필드
 ++++++++++++++
 
 The OGR SQL dialect adds the geometry field of the datasource to the result set
@@ -625,7 +570,7 @@ the nation_id field of the nation table a command like this would be used:
 
     CREATE INDEX ON nation USING nation_id
 
-Index Limitations
+색인 제한 사항
 +++++++++++++++++
 
 - Indexes are not maintained dynamically when new features are added to or removed from a layer.
@@ -700,15 +645,16 @@ for instance.  The returned temporary layer should be released with
 :cpp:func:`GDALDataset::ReleaseResultsSet` method when no longer needed.  Failure
 to release it before the datasource is destroyed may result in a crash.
 
-Non-OGR SQL
------------
+OGR가 아닌 SQL
+--------------
 
 All OGR drivers for database systems: :ref:`vector.mysql`, :ref:`vector.pg`,
 :ref:`vector.oci`, :ref:`vector.sqlite`, :ref:`vector.odbc`, :ref:`vector.pgeo`,
-and :ref:`vector.mssqlspatial`,
+:ref:`vector.hana` and :ref:`vector.mssqlspatial`,
 override the :cpp:func:`GDALDataset::ExecuteSQL` function with dedicated implementation
 and, by default, pass the SQL statements directly to the underlying RDBMS.
 In these cases the SQL syntax varies in some particulars from OGR SQL.
 Also, anything possible in SQL can then be accomplished for these particular
 databases.  Only the result of SQL WHERE statements will be returned as
 layers.
+
