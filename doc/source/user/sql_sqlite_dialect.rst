@@ -1,123 +1,83 @@
 .. _sql_sqlite_dialect:
 
 ================================================================================
-SQL SQLite dialect
+SQL SQLite 방언
 ================================================================================
 
 .. highlight:: sql
 
-The SQLite "dialect" can be used as an alternate SQL dialect to the
-:ref:`ogr_sql_dialect`.
-This assumes that GDAL/OGR is built with support for SQLite, and preferably
-with `Spatialite <https://www.gaia-gis.it/fossil/libspatialite/index>`_ support too to benefit from spatial functions.
+SQLite "방언"을 :ref:`ogr_sql_dialect` 에 대한 대체 SQL 방언으로 사용할 수 있습니다.
+SQLite 방언을 사용한다는 것은 GDAL/OGR가 SQLite 지원과 함께, 그리고 이왕이면 공간 함수를 이용할 수 있도록 `SpatiaLite <https://www.gaia-gis.it/fossil/libspatialite/index>`_ 지원도 함께 빌드되었다는 뜻입니다.
 
-The SQLite dialect may be used with any OGR datasource, like the OGR SQL dialect. It
-is available through the GDALDataset::ExecuteSQL() method by specifying the pszDialect to
-"SQLITE". For the :ref:`ogrinfo` or :ref:`ogr2ogr`
-utility, you must specify the "-dialect SQLITE" option.
+SQLite 방언은 OGR SQL 방언과 마찬가지로 모든 OGR 데이터소스에 사용할 수 있습니다. ``pszDialect`` 인자를 "SQLITE"로 지정하면 :cpp:func:`GDALDataset::ExecuteSQL` 메소드를 통해 SQLite 방언을 사용할 수 있습니다. :ref:`ogrinfo` 또는 :ref:`ogr2ogr` 유틸리티의 경우, "-dialect SQLITE" 옵션을 지정해야만 합니다.
 
-This is mainly aimed to execute SELECT statements, but, for datasources that support
-update, INSERT/UPDATE/DELETE statements can also be run. GDAL is internally using
-`the Virtual Table Mechanism of SQLite <https://sqlite.org/vtab.html>`_
-and therefore operations like ALTER TABLE are not supported. For executing ALTER TABLE
-or DROP TABLE use :ref:`ogr_sql_dialect`
+SQLite 방언의 주요 목적은 SELECT 문을 실행하는 것이지만, 업데이트를 지원하는 데이터소스의 경우 INSERT/UPDATE/DELETE 문도 실행할 수 있습니다. GDAL은 내부적으로 `SQLite의 가상 테이블 메커니즘 <https://sqlite.org/vtab.html>`_ 을 이용하기 때문에, ALTER TABLE 같은 작업은 지원하지 않습니다. ALTER TABLE 또는 DROP TABLE을 실행하려면 :ref:`ogr_sql_dialect` 을 사용하십시오.
 
-If the datasource is SQLite database (GeoPackage, SpatiaLite) then SQLite dialect
-acts as native SQL dialect and Virtual Table Mechanism is not used. It is possible to
-force GDAL to use Virtual Tables even in this case by specifying
-"-dialect INDIRECT_SQLITE". This should be used only when necessary, since going through
-the virtual table mechanism might affect performance.
+데이터소스가 SQLite 데이터베이스(지오패키지, SpatiaLite)인 경우 SQLite 방언이 네이티브 SQL 방언으로 동작하기 때문에 가상 테이블 메커니즘을 이용하지 않습니다. 이런 경우에도 "-dialect INDIRECT_SQLITE" 옵션을 지정하면 GDAL이 가상 테이블 메커니즘을 이용하도록 강제할 수 있습니다. 이 옵션은 꼭 필요한 경우에만 사용해야 합니다. 가상 테이블 메커니즘을 이용하면 성능이 저하될 수도 있기 때문입니다.
 
-The syntax of the SQL statements is fully the one of the SQLite SQL engine. You can
-refer to the following pages:
+SQL 선언문의 문법은 SQLite SQL 엔진의 완전한 문법과 동일합니다. 다음 웹페이지들을 참조하십시오:
 
 - `SELECT <http://www.sqlite.org/lang_select.html>`_
 - `INSERT <http://www.sqlite.org/lang_insert.html>`_
 - `UPDATE <http://www.sqlite.org/lang_update.html>`_
 - `DELETE <http://www.sqlite.org/lang_delete.html>`_
 
-SELECT statement
+SELECT 문
 ----------------
 
-The SELECT statement is used to fetch layer features (analogous to table
-rows in an RDBMS) with the result of the query represented as a temporary layer
-of features. The layers of the datasource are analogous to tables in an
-RDBMS and feature attributes are analogous to column values. The simplest
-form of OGR SQLITE SELECT statement looks like this:
+SELECT 선언문을 사용해서 임시 객체 레이어로 표현되는 쿼리 결과물을 가진 (RDBMS의 테이블 행과 유사한) 레이어 객체를 가져옵니다. 데이터소스의 레이어는 RDBMS에 있는 테이블과 유사하며 객체 속성은 열의 값과 유사합니다. OGR SQLITE SELECT 문의 가장 단순한 형식은 다음과 같습니다:
 
 .. code-block::
 
     SELECT * FROM polylayer
 
-More complex statements can of course be used, including WHERE, JOIN, USING, GROUP BY,
-ORDER BY, sub SELECT, ...
+WHERE, JOIN, USING, GROUP BY, ORDER BY, sub SELECT 등을 포함하는 좀 더 복잡한 선언문도 당연히 사용할 수 있습니다.
 
-The table names that can be used are the layer names available in the datasource on
-which the ExecuteSQL() method is called.
+ExecuteSQL() 메소드가 호출되는 데이터소스에서 사용할 수 있는 레이어 이름을 테이블 이름으로 사용할 수 있습니다.
 
-Similarly to OGRSQL, it is also possible to refer to layers of other datasources with
-the following syntax : "other_datasource_name"."layer_name".
+OGR SQL과 마찬가지로, 다른 데이터소스의 레이어도 ``"other_datasource_name"."layer_name"`` 와 같은 문법으로 참조할 수 있습니다:
 
 .. code-block::
 
     SELECT p.*, NAME FROM poly p JOIN "idlink.dbf"."idlink" il USING (eas_id)
 
-If the master datasource is SQLite database (GeoPackage, SpatiaLite) it is necessary to
-use indirect SQLite dialect. Otherwise additional datasources are never opened but tables to
-be used in joins are searched from the master database.
+마스터 데이터소스가 SQLite 데이터베이스(지오패키지, SpatiaLite)인 경우 간접 SQLite 방언을 사용해야 합니다. 그렇지 않으면 추가 데이터소스를 열지 않고 마스터 데이터베이스로부터 JOIN에서 사용할 테이블을 찾습니다.
 
 .. code-block:: shell
 
     ogrinfo jointest.gpkg -dialect INDIRECT_SQLITE -sql "SELECT a.ID,b.ID FROM jointest a JOIN \"jointest2.shp\".\"jointest2\" b ON a.ID=b.ID"
 
-The column names that can be used in the result column list, in WHERE, JOIN, ... clauses
-are the field names of the layers. Expressions, SQLite functions, spatial functions, etc...
-can also be used.
+결과물의 열 목록, WHERE 절, JOIN 등에 레이어의 필드 이름을 열 이름으로 사용할 수 있습니다. 표현식, SQLite 함수, 공간 함수 등도 사용할 수 있습니다.
 
+WHERE 절 또는 JOIN에 나타나는 필드에 대한 조건을 가능한 한 기저 OGR 레이어에 적용되는 속성 필터로 변환합니다. 부 테이블이 사용 중인 키 필드에 대해 색인되어 있지 않은 경우 JOIN 작업의 부하량이 매우 커질 수 있습니다.
 
-The conditions on fields expressed in WHERE clauses, or in JOINs are
-translated, as far as possible, as attribute filters that are applied on the
-underlying OGR layers. Joins can be very expensive operations if the secondary table is not
-indexed on the key field being used.
-
-Delimited identifiers
+구분 식별자
 +++++++++++++++++++++
 
-If names of layers or attributes are reserved keywords in SQL like 'FROM' or they
-begin with a number or underscore they must be handled as "delimited identifiers" and
-enclosed between double quotation marks in queries. Double quotes can be used even when
-they are not strictly needed.
+레이어 또는 속성의 이름이 'FROM'처럼 SQL에 예약된 키워드거나 숫자 또는 언더바로 시작하는 경우, 반드시 "구분 식별자(delimited identifier)"로 처리해야만 하고 쿼리에서 큰따옴표 기호로 감싸야만 합니다. 꼭 필요하지 않은 경우에도 큰따옴표를 사용할 수 있습니다:
 
 .. code-block::
 
     SELECT "p"."geometry", "p"."FROM", "p"."3D" FROM "poly" p
 
-When SQL statements are used in the command shell and the statement itself is put
-between double quotes, the internal double quotes must be escaped with \\
+명령줄 셸에서 SQL 선언문을 사용하는데 선언문 자체가 큰따옴표로 감싸인 경우, 선언문 안에 있는 큰따옴표를 "\\"로 이스케이프 처리해야만 합니다:
 
 .. code-block:: shell
 
     ogrinfo p.shp -sql "SELECT geometry \"FROM\", \"3D\" FROM p"
 
-Geometry field
+도형 필드
 ++++++++++++++
 
-The ``GEOMETRY`` special field represents the geometry of the feature
-returned by OGRFeature::GetGeometryRef(). It can be explicitly specified
-in the result column list of a SELECT, and is automatically selected if the
-* wildcard is used.
+``GEOMETRY`` 특수 필드는 :cpp:func:`OGRFeature::GetGeometryRef` 메소드가 반환하는 객체의 도형을 표현합니다. SELECT 문의 결과물 열 목록에 도형 필드를 명확하게 지정할 수 있으며, "\*" 와일드카드 문자를 사용하는 경우 자동으로 선택할 것입니다.
 
-For OGR layers that have a non-empty geometry column name (generally for RDBMS datasources),
-as returned by OGRLayer::GetGeometryColumn(), the name of the geometry special field
-in the SQL statement will be the name of the geometry column of the underlying OGR layer.
-If the name of the geometry column in the source layer is empty, like with shapefiles etc.,
-the name to use in the SQL statement is always "geometry".
+:cpp:func:`OGRLayer::GetGeometryColumn` 메소드가 반환하는 도형 열 이름이 빈 문자열이 아닌 OGR 레이어의 경우 (일반적으로 RDBMS 데이터소스인 경우) SQL 선언문에서 기저 OGR 레이어의 도형 열 이름을 도형 특수 필드의 이름으로 사용합니다. shapefile 등의 경우처럼 소스 레이어에 있는 도형 열 이름이 빈 문자열이라면, SQL 선언문에 항상 "geometry"라는 이름을 사용합니다:
 
 .. code-block::
 
     SELECT EAS_ID, GEOMETRY FROM poly
 
-returns:
+이 SELECT 문은 다음을 반환합니다:
 
 ::
 
@@ -129,7 +89,7 @@ returns:
 
     SELECT * FROM poly
 
-returns:
+그리고 이 SELECT 문은 다음을 반환합니다:
 
 ::
 
@@ -139,50 +99,41 @@ returns:
     PRFEDEA (String) = 35043411
     POLYGON ((479819.84375 4765180.5,479690.1875 4765259.5,[...],479819.84375 4765180.5))
 
-Feature id
+객체ID
 ++++++++++
 
-The feature id is a special property of a feature and not treated
-as an attribute of the feature.  In some cases it is convenient to be able to
-utilize the feature id in queries and result sets as a regular field.  To do
-so use the name ``rowid``. The field wildcard expansions will not include
-the feature id, but it may be explicitly included using a syntax like:
+객체ID는 일반적으로 객체의 특수 속성(property)으로, 객체 속성(attribute)으로 취급되지 않습니다. 쿼리에 객체ID를 활용해서 결과물을 정규 필드로 산출할 수 있다면 편리한 경우가 있습니다. 이렇게 하려면 ``rowid`` 라는 이름을 사용하십시오. 필드 와일드카드 확장 사양은 객체ID를 포함하지 않지만, 다음과 같은 문법을 사용해서 명확하게 포함시킬 수도 있습니다:
 
 .. code-block::
 
     SELECT rowid, * FROM nation
 
-It is of course possible to rename it:
+당연히 재명명할 수도 있습니다:
 
 .. code-block::
 
     SELECT rowid AS fid, * FROM nation
 
-OGR_STYLE special field
+OGR_STYLE 특수 필드
 +++++++++++++++++++++++
 
-The ``OGR_STYLE`` special field represents the style string of the feature
-returned by OGRFeature::GetStyleString(). By using this field and the
-``LIKE`` operator the result of the query can be filtered by the style.
-For example we can select the annotation features as:
+``OGR_STYLE`` 특수 필드는 :cpp:func:`OGRFeature::GetStyleString` 메소드가 반환하는 객체의 스타일 문자열을 표현합니다. 이 필드와 ``LIKE`` 연산자를 사용하면 쿼리 결과물을 스타일로 필터링할 수 있습니다. 다음은 주석 객체를 선택하는 예시입니다:
 
 .. code-block::
 
     SELECT * FROM nation WHERE OGR_STYLE LIKE 'LABEL%'
 
-Spatialite SQL functions
+SpatiaLite SQL 함수
 ++++++++++++++++++++++++
 
-When GDAL/OGR is build with support for the `Spatialite <https://www.gaia-gis.it/fossil/libspatialite/index>`_ library,
-a lot of `extra SQL functions <http://www.gaia-gis.it/gaia-sins/spatialite-sql-latest.html>`_,
-in particular spatial functions, can be used in results column fields, WHERE clauses, etc....
+GDAL/OGR를 `SpatiaLite <https://www.gaia-gis.it/fossil/libspatialite/index>`_ 라이브러리 지원과 함께 빌드하면, 결과물 열 필드, WHERE 절 등등에 수많은 `추가 SQL 함수 <http://www.gaia-gis.it/gaia-sins/spatialite-sql-latest.html>`_ 를, 그 중에서도 특히 공간 함수를 사용할 수 있습니다:
 
 .. code-block::
 
     SELECT EAS_ID, ST_Area(GEOMETRY) AS area FROM poly WHERE
         ST_Intersects(GEOMETRY, BuildCircleMbr(479750.6875,4764702.0,100))
 
-returns:
+이 SELECT 문은 다음을 반환합니다:
 
 ::
 
@@ -198,12 +149,10 @@ returns:
     EAS_ID (Real) = 170
     area (Real) = 5268.8125
 
-OGR datasource SQL functions
+OGR 데이터소스 SQL 함수
 ++++++++++++++++++++++++++++
 
-The ``ogr_datasource_load_layers(datasource_name[, update_mode[, prefix]])``
-function can be used to automatically load all the layers of a datasource as
-:ref:`VirtualOGR tables <vector.sqlite>`.
+``ogr_datasource_load_layers(datasource_name[, update_mode[, prefix]])`` 함수를 사용해서 데이터소스의 모든 레이어를 자동으로 :ref:`가상 OGR 테이블 <vector.sqlite>` 로 불러올 수 있습니다:
 
 ::
 
@@ -216,17 +165,17 @@ function can be used to automatically load all the layers of a datasource as
     sqlite> SELECT * FROM sqlite_master;
     table|poly|poly|0|CREATE VIRTUAL TABLE "poly" USING VirtualOGR('poly.shp', 0, 'poly')
 
-OGR layer SQL functions
+OGR 레이어 SQL 함수
 +++++++++++++++++++++++
 
-The following SQL functions are available and operate on a layer name :
-``ogr_layer_Extent()``, ``ogr_layer_SRID()``,
-``ogr_layer_GeometryType()`` and ``ogr_layer_FeatureCount()``
+``ogr_layer_Extent()``, ``ogr_layer_SRID()``, ``ogr_layer_GeometryType()`` 및 ``ogr_layer_FeatureCount()`` SQL 함수들에 레이어 이름을 지정해서 사용할 수 있습니다:
 
 .. code-block::
 
     SELECT ogr_layer_Extent('poly'), ogr_layer_SRID('poly') AS srid,
         ogr_layer_GeometryType('poly') AS geomtype, ogr_layer_FeatureCount('poly') AS count
+
+이 SELECT 문은 다음을 반환합니다:
 
 ::
 
@@ -236,46 +185,38 @@ The following SQL functions are available and operate on a layer name :
     count (Integer) = 10
     POLYGON ((478315.53125 4762880.5,481645.3125 4762880.5,481645.3125 4765610.5,478315.53125 4765610.5,478315.53125 4762880.5))
 
-OGR compression functions
+OGR 압축 함수
 +++++++++++++++++++++++++
 
-``ogr_deflate(text_or_blob[, compression_level])`` returns a binary blob
-compressed with the ZLib deflate algorithm. See :cpp:func:`CPLZLibDeflate`
+``ogr_deflate(text_or_blob[, compression_level])`` 함수는 ZLib DEFLATE 알고리즘으로 압축한 바이너리 블랍(blob)을 반환합니다. :cpp:func:`CPLZLibDeflate` 함수를 참조하십시오.
 
-``ogr_inflate(compressed_blob)`` returns the decompressed binary blob,
-from a blob compressed with the ZLib deflate algorithm.
-If the decompressed binary is a string, use
-CAST(ogr_inflate(compressed_blob) AS VARCHAR). See CPLZLibInflate().
+``ogr_inflate(compressed_blob)`` 은 ZLib DEFLATE 알고리즘으로 압축한 블랍으로부터 압축 해제한 바이너리 블랍을 반환합니다. 압축된 바이너리가 문자열인 경우, ``CAST(ogr_inflate(compressed_blob) AS VARCHAR)`` 를 사용하십시오. :cpp:func:`CPLZLibInflate` 함수를 참조하십시오.
 
-Other functions
+기타 함수
 +++++++++++++++
 
-The ``hstore_get_value()`` function can be used to extract
-a value associate to a key from a HSTORE string, formatted like "key=>value,other_key=>other_value,..."
+``hstore_get_value()`` 함수를 사용하면 HSTORE 문자열로부터 키와 관련된 값을 ``key=>value,other_key=>other_value,...`` 같은 서식으로 추출할 수 있습니다:
 
 .. code-block::
 
     SELECT hstore_get_value('a => b, "key with space"=> "value with space"', 'key with space') --> 'value with space'
 
-OGR geocoding functions
+OGR 지오코딩 함수
 +++++++++++++++++++++++
 
-The following SQL functions are available : ``ogr_geocode(...)`` and ``ogr_geocode_reverse(...)``.
+``ogr_geocode(...)`` 및 ``ogr_geocode_reverse(...)`` SQL 함수를 사용할 수 있습니다.
 
-``ogr_geocode(name_to_geocode [, field_to_return [, option1 [, option2, ...]]])`` where
-name_to_geocode is a literal or a column name that must be geocoded. field_to_return if specified can be "geometry" for
-the geometry (default), or a field name of the layer returned by :cpp:func:`OGRGeocode`. The special field  "raw" can also be used
-to return the raw response (XML string) of the geocoding service.
-option1, option2, etc.. must be of the key=value format, and are options understood
-by :cpp:func:`OGRGeocodeCreateSession` or OGRGeocode().
+- ``ogr_geocode(name_to_geocode [, field_to_return [, option1 [, option2, ...]]])``:
+  "name_to_geocode"는 글자 그대로 지오코딩할 이름 또는 지오코딩해야만 할 열 이름입니다. 선택적인 "field_to_return"을 지정한다면, 반환할 필드가 도형 필드인 경우 (기본값) "geometry"일 수 있고, 또는 :cpp:func:`OGRGeocode` 함수가 반환하는 레이어의 필드 이름일 수 있습니다. 특수 필드 "raw"를 지정하면 지오코딩 서비스의 원시(raw) 응답을 (XML 문자열을) 반환할 수 있습니다.
+  "option1", "option2", ...는 키=값 서식이어야만 하며, :cpp:func:`OGRGeocodeCreateSession` 또는 :cpp:func:`OGRGeocode` 함수가 이해하는 옵션이어야 합니다.
 
-This function internally uses the OGRGeocode() API. Refer to it for more details.
+이 함수는 내부적으로 :cpp:func:`OGRGeocode` API를 사용합니다. 더 자세한 내용은 OGRGeocode() API를 참조하십시오.
 
 .. code-block::
 
     SELECT ST_Centroid(ogr_geocode('Paris'))
 
-returns:
+이 SELECT 문은 다음을 반환합니다:
 
 ::
 
@@ -286,7 +227,7 @@ returns:
 
     ogrinfo cities.csv -dialect sqlite -sql "SELECT *, ogr_geocode(city, 'country') AS country, ST_Centroid(ogr_geocode(city)) FROM cities"
 
-returns:
+그리고 이 SELECT 문은 다음을 반환합니다:
 
 
 .. highlight:: none
@@ -348,28 +289,21 @@ returns:
 
 .. highlight:: sql
 
-``ogr_geocode_reverse(longitude, latitude, field_to_return [, option1 [, option2, ...]])`` where
-longitude, latitude is the coordinate to query. field_to_return must be a field name of the layer
-returned by OGRGeocodeReverse() (for example 'display_name'). The special field  "raw" can also be used
-to return the raw response (XML string) of the geocoding service.
-option1, option2, etc.. must be of the key=value format, and are options understood
-by OGRGeocodeCreateSession() or OGRGeocodeReverse().
+- ``ogr_geocode_reverse(longitude, latitude, field_to_return [, option1 [, option2, ...]])``:
+  이때 "longitude, latitude"가 쿼리할 좌표입니다. "field_to_return"은 :cpp:func:`OGRGeocodeReverse` 가 반환하는 레이어의 (예를 들어 'display_name' 같은) 필드 이름이어야만 합니다. 특수 필드 "raw"를 지정하면 지오코딩 서비스의 원시(raw) 응답을 (XML 문자열을) 반환할 수 있습니다.
+  "option1", "option2", ...는 키=값 서식이어야만 하며, :cpp:func:`OGRGeocodeCreateSession` 또는 :cpp:func:`OGRGeocodeReverse` 함수가 이해하는 옵션이어야 합니다.
 
-``ogr_geocode_reverse(geometry, field_to_return [, option1 [, option2, ...]])`` is also accepted
-as an alternate syntax where geometry is a (Spatialite) point geometry.
+- ``ogr_geocode_reverse(geometry, field_to_return [, option1 [, option2, ...]])``:
+  "geometry"가 (SpatiaLite) 포인트 도형인 대체 문법도 허용됩니다.
 
-This function internally uses the :cpp:func:`OGRGeocodeReverse` API. Refer to it for more details.
+이 함수는 내부적으로 :cpp:func:`OGRGeocodeReverse` API를 사용합니다. 더 자세한 내용은 OGRGeocodeReverse() API를 참조하십시오.
 
-Spatialite spatial index
+SpatiaLite 공간 색인
 ++++++++++++++++++++++++
 
-Spatialite spatial index mechanism can be triggered by making sure a spatial index
-virtual table is mentioned in the SQL (of the form idx_layername_geometrycolumn), or
-by using the more recent SpatialIndex from the VirtualSpatialIndex extension. In which
-case, a in-memory RTree will be built to be used to speed up the spatial queries.
+SQL에 공간 색인 가상 테이블을 ("idx_layername_geometrycolumn" 형식으로) 확실하게 언급하거나 또는 VirtualSpatialIndex 확장 사양으로부터 좀 더 최신인 SpatialIndex를 사용하면 SpatiaLite 공간 색인 메커니즘을 촉발시킬 수 있습니다. 이 경우, 인메모리 R-트리를 작성해서 공간 쿼리의 속도를 향상시키는 데 사용할 것입니다.
 
-For example, a spatial intersection between 2 layers, by using a spatial index on one
-of the layers to limit the number of actual geometry intersection computations :
+예를 들어 두 레이어가 공간 교차한다고 할 때 레이어 중 하나에 공간 색인을 사용하면 실제 도형 교차 계산의 개수를 제한할 수 있습니다:
 
 .. code-block::
 
@@ -380,7 +314,7 @@ of the layers to limit the number of actual geometry intersection computations :
                 xmax >= MbrMinX(cities.geometry) AND xmin <= MbrMaxX(cities.geometry) AND
                 ymax >= MbrMinY(cities.geometry) AND ymin <= MbrMaxY(cities.geometry))
 
-or more elegantly :
+또는 좀 더 명쾌하게 작성할 수 있습니다:
 
 .. code-block::
 
@@ -389,3 +323,4 @@ or more elegantly :
         regions.rowid IN (
             SELECT rowid FROM SpatialIndex WHERE
                 f_table_name = 'regions' AND search_frame = cities.geometry)
+
