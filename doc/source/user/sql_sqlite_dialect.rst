@@ -210,82 +210,82 @@ OGR 지오코딩 함수
   "name_to_geocode"는 글자 그대로 지오코딩할 이름 또는 지오코딩해야만 할 열 이름입니다. 선택적인 "field_to_return"을 지정한다면, 반환할 필드가 도형 필드인 경우 (기본값) "geometry"일 수 있고, 또는 :cpp:func:`OGRGeocode` 함수가 반환하는 레이어의 필드 이름일 수 있습니다. 특수 필드 "raw"를 지정하면 지오코딩 서비스의 원시(raw) 응답을 (XML 문자열을) 반환할 수 있습니다.
   "option1", "option2", ...는 키=값 서식이어야만 하며, :cpp:func:`OGRGeocodeCreateSession` 또는 :cpp:func:`OGRGeocode` 함수가 이해하는 옵션이어야 합니다.
 
-이 함수는 내부적으로 :cpp:func:`OGRGeocode` API를 사용합니다. 더 자세한 내용은 OGRGeocode() API를 참조하십시오.
+  이 함수는 내부적으로 :cpp:func:`OGRGeocode` API를 사용합니다. 더 자세한 내용은 OGRGeocode() API를 참조하십시오.
 
-.. code-block::
+  .. code-block::
 
-    SELECT ST_Centroid(ogr_geocode('Paris'))
+      SELECT ST_Centroid(ogr_geocode('Paris'))
 
-이 SELECT 문은 다음을 반환합니다:
+  이 SELECT 문은 다음을 반환합니다:
 
-::
+  ::
 
-    OGRFeature(SELECT):0
-    POINT (2.342878767069653 48.85661793020374)
+      OGRFeature(SELECT):0
+      POINT (2.342878767069653 48.85661793020374)
 
-.. code-block:: shell
+  .. code-block:: shell
 
-    ogrinfo cities.csv -dialect sqlite -sql "SELECT *, ogr_geocode(city, 'country') AS country, ST_Centroid(ogr_geocode(city)) FROM cities"
+      ogrinfo cities.csv -dialect sqlite -sql "SELECT *, ogr_geocode(city, 'country') AS country, ST_Centroid(ogr_geocode(city)) FROM cities"
 
-그리고 이 SELECT 문은 다음을 반환합니다:
+  그리고 이 SELECT 문은 다음을 반환합니다:
 
 
-.. highlight:: none
+  .. highlight:: none
 
-::
+  ::
 
-    OGRFeature(SELECT):0
-    id (Real) = 1
-    city (String) = Paris
-    country (String) = France métropolitaine
-    POINT (2.342878767069653 48.85661793020374)
+      OGRFeature(SELECT):0
+      id (Real) = 1
+      city (String) = Paris
+      country (String) = France métropolitaine
+      POINT (2.342878767069653 48.85661793020374)
 
-    OGRFeature(SELECT):1
-    id (Real) = 2
-    city (String) = London
-    country (String) = United Kingdom
-    POINT (-0.109369427546499 51.500506667319407)
+      OGRFeature(SELECT):1
+      id (Real) = 2
+      city (String) = London
+      country (String) = United Kingdom
+      POINT (-0.109369427546499 51.500506667319407)
 
-    OGRFeature(SELECT):2
-    id (Real) = 3
-    city (String) = Rennes
-    country (String) = France métropolitaine
-    POINT (-1.68185153381778 48.111663929761093)
+      OGRFeature(SELECT):2
+      id (Real) = 3
+      city (String) = Rennes
+      country (String) = France métropolitaine
+      POINT (-1.68185153381778 48.111663929761093)
 
-    OGRFeature(SELECT):3
-    id (Real) = 4
-    city (String) = Strasbourg
-    country (String) = France métropolitaine
-    POINT (7.767762859150757 48.571233274141846)
+      OGRFeature(SELECT):3
+      id (Real) = 4
+      city (String) = Strasbourg
+      country (String) = France métropolitaine
+      POINT (7.767762859150757 48.571233274141846)
 
-    OGRFeature(SELECT):4
-    id (Real) = 5
-    city (String) = New York
-    country (String) = United States of America
-    POINT (-73.938140243499049 40.663799577449979)
+      OGRFeature(SELECT):4
+      id (Real) = 5
+      city (String) = New York
+      country (String) = United States of America
+      POINT (-73.938140243499049 40.663799577449979)
 
-    OGRFeature(SELECT):5
-    id (Real) = 6
-    city (String) = Berlin
-    country (String) = Deutschland
-    POINT (13.402306623451983 52.501470321410636)
+      OGRFeature(SELECT):5
+      id (Real) = 6
+      city (String) = Berlin
+      country (String) = Deutschland
+      POINT (13.402306623451983 52.501470321410636)
 
-    OGRFeature(SELECT):6
-    id (Real) = 7
-    city (String) = Beijing
-    POINT (116.391195 39.9064702)
+      OGRFeature(SELECT):6
+      id (Real) = 7
+      city (String) = Beijing
+      POINT (116.391195 39.9064702)
 
-    OGRFeature(SELECT):7
-    id (Real) = 8
-    city (String) = Brasilia
-    country (String) = Brasil
-    POINT (-52.830435216371839 -10.828214867369699)
+      OGRFeature(SELECT):7
+      id (Real) = 8
+      city (String) = Brasilia
+      country (String) = Brasil
+      POINT (-52.830435216371839 -10.828214867369699)
 
-    OGRFeature(SELECT):8
-    id (Real) = 9
-    city (String) = Moscow
-    country (String) = Российская Федерация
-    POINT (37.367988106866868 55.556208255649558)
+      OGRFeature(SELECT):8
+      id (Real) = 9
+      city (String) = Moscow
+      country (String) = Российская Федерация
+      POINT (37.367988106866868 55.556208255649558)
 
 .. highlight:: sql
 
@@ -296,7 +296,7 @@ OGR 지오코딩 함수
 - ``ogr_geocode_reverse(geometry, field_to_return [, option1 [, option2, ...]])``:
   "geometry"가 (SpatiaLite) 포인트 도형인 대체 문법도 허용됩니다.
 
-이 함수는 내부적으로 :cpp:func:`OGRGeocodeReverse` API를 사용합니다. 더 자세한 내용은 OGRGeocodeReverse() API를 참조하십시오.
+  이 함수는 내부적으로 :cpp:func:`OGRGeocodeReverse` API를 사용합니다. 더 자세한 내용은 OGRGeocodeReverse() API를 참조하십시오.
 
 SpatiaLite 공간 색인
 ++++++++++++++++++++++++
