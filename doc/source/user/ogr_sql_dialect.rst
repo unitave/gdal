@@ -598,7 +598,7 @@ The following OGR SQL ALTER TABLE commands can be used.
 
       ALTER TABLE tablename ADD [COLUMN] columnname columntype
 
-새 필드를 추가합니다. 레이어가 OLCCreateField 케이퍼빌리티를 선언하는 경우 지원합니다.
+  새 필드를 추가합니다. 레이어가 OLCCreateField 케이퍼빌리티를 선언하는 경우 지원합니다.
 
 - "ALTER TABLE tablename RENAME [COLUMN] oldcolumnname TO newcolumnname" to rename an existing field. Supported if the layer declares the OLCAlterFieldDefn capability.
 
