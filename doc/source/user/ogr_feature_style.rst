@@ -1,158 +1,109 @@
 .. _ogr_feature_style:
 
 ================================================================================
-Feature Style Specification
+피처 스타일 사양
 ================================================================================
 
-Version 0.016 - 2018-12-03
+0.016버전 - 2018년 12월 3일
 
-1. Overview
+1. 개요
 -----------
 
-This document defines the way feature style information (i.e. colors,
-line width, symbols, etc.) should be handled at the various levels in
-GDAL's vector drivers (OGR).
+이 문서는 GDAL 벡터 드라이버(OGR)에서 피처 스타일 정보(예: 색상, 선 굵기, 심볼 등등)를 다양한 수준에서 처리해야 하는 방식을 정의합니다.
 
-The following GDAL vector drivers have varying levels of support for
-feature styles: :ref:`DWG (libopencad) <vector.cad>`, :ref:`DWG
-(Teigha) <vector.dwg>`, :ref:`DXF <vector.dxf>`, :ref:`KML
-(libkml) <vector.libkml>`, :ref:`MapInfo <vector.mitab>`,
-:ref:`MicroStation DGN v7 <vector.dgn>` and :ref:`DGN v8 <vector.dgnv8>`,
-:ref:`OpenJUMP JML <vector.jml>` and :ref:`PDF <raster.pdf>`.
+다음 GDAL 벡터 드라이버는 피처 스타일을 다양한 수준에서 지원합니다:
 
-1.1 Style is a property of Feature object
+-  :ref:`DWG (libopencad) <vector.cad>`
+-  :ref:`DWG (Teigha) <vector.dwg>`
+-  :ref:`DXF <vector.dxf>`
+-  :ref:`KML (libkml) <vector.libkml>`
+-  :ref:`MapInfo <vector.mitab>`
+-  :ref:`마이크로스테이션 DGN v7 <vector.dgn>` 및 :ref:`DGN v8 <vector.dgnv8>`
+-  :ref:`OpenJUMP JML <vector.jml>` 및 :ref:`PDF <raster.pdf>`
+
+1.1 스타일은 피처 객체의 속성(property)이다
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Conceptually, the feature style should be seen as a property of a
-feature. Even though some systems store style information in a special
-attribute, in GDAL it is more consistent to see the style as a property,
-just the same way the geometry of a feature is also a property.
+피처 스타일은 개념적으로 피처의 속성(property)으로 보여야 합니다. 일부 시스템이 특수 속성(attribute)에 스타일 정보를 저장하긴 하지만, GDAL에서는 더 일관적으로 -- 피처의 도형도 속성(property)인 것과 똑같은 방식으로 -- 스타일을 속성(property)으로 간주합니다.
 
-This does not prevent us from storing the style information in an
-attribute when writing to some formats that have no provision for styles
-(e.g. E00). But then at the time such a dataset is opened through GDAL,
-the name of the attribute that contains style information should either
-be specified in some metadata, or be specified by the user.
+그렇다고는 하지만 스타일에 대한 준비가 되어 있지 않은 몇몇 포맷을 작성하는 경우 (예: E00) 속성(attribute)에 스타일 정보를 저장하는 일을 피할 수는 없습니다. 그러나 GDAL을 통해 데이터셋을 여는 것과 같은 때에, 스타일 정보를 담고 있는 속성(attribute)의 이름을 메타데이터에 지정하거나 또는 사용자가 지정해야 합니다.
 
-Also, in the SFCOM interface, the style information will be stored in an
-attribute just like the geometry is.
+또한 SFCOM 인터페이스에서는 도형과 마찬가지로 속성(attribute)에 스타일 정보를 저장할 것입니다.
 
-1.2 Feature Styles can be stored at 2 levels
+1.2 피처 스타일은 2개 수준에 저장할 수 있다
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The style defines the way a feature should be drawn, but it is very
-common to have several features that share the same style. In those
-cases, instead of duplicating the style information on each feature, we
-will provide a more efficient way to share style information.
+스타일은 피처를 그려야 하는 방식을 정의하지만, 피처 여러 개가 동일한 스타일을 공유하는 경우도 매우 흔합니다. 이런 경우 각 피처에 스타일 정보를 복제하는 대신 스타일 정보를 공유할 수 있는 더 효율적인 방식을 제공할 것입니다.
 
-There are two levels at which style information can be found:
+스타일 정보를 찾을 수 있는 수준이 2개 있습니다:
 
--  A **dataset** can have a table of pre-defined styles that can then be
-   referred to by the layers or by the individual features. The
-   mechanism for that is defined further down in this document.
--  A **feature (OGRFeature object)** can have its own complete style
-   definition. Alternatively, a feature can be linked to a style in the
-   dataset's table of styles. This can save storage space when the same
-   styles are reused often.
+-  **데이터셋** 이 향우 레이어 또는 개별 피처가 참조할 수 있는 사전 정의 스타일 테이블을 가질 수 있습니다. 이 문서에 이를 위한 메커니즘을 정의하고 있습니다.
 
-It should be possible to have style information stored at one or more of
-the various levels while working on a given dataset. The level(s) where
-the style is actually stored will depend on the most efficient approach
-for the format we are dealing with.
+-  **피처 (OGRFeature 객체)** 가 자신만의 완전한 스타일 정의를 가질 수 있습니다. 또는 데이터셋의 스타일 테이블에 있는 스타일에 피처를 링크시킬 수 있는데, 동일한 스타일을 자주 재사용하는 경우 저장소 공간을 절약할 수 있습니다.
 
-1.3 Drawing Tools
+어떤 데이터셋을 작업하는 동안 하나 이상의 여러 수준에 스타일 정보를 저장할 수 있을 것입니다. 스타일을 실제로 저장하는 수준(들)은 지금 작업 중인 포맷에 대한 가장 효율적인 접근법이 무엇이냐에 따라 달라집니다.
+
+1.3 그리기 도구
 ~~~~~~~~~~~~~~~~~
 
-We define a small set of drawing tools that are used to build style
-definitions:
+스타일 정의를 작성하는 데 사용되는 몇몇 그리기(drawing) 도구의 집합을 정의합니다:
 
--  **PEN**: For linear styles
--  **BRUSH**: For filling areas
--  **SYMBOL**: Point symbols
--  **LABEL**: For annotations
+-  **PEN**: 선 스타일 용
+-  **BRUSH**: 면 채우기 용
+-  **SYMBOL**: 포인트 심볼
+-  **LABEL**: 주석 용
 
-Each drawing tool can take a number of parameters, all optional. The
-style syntax is built in a way that a system that cannot support all
-possible parameters can safely skip and ignore the parameters it does
-not support. This will also make it easy to extend the specification in
-the future without breaking existing code or applications.
+이 그리기 도구들은 각각 (모두 선택적인) 파라미터 여러 개를 가질 수 있습니다. 스타일 문법은 이 가능한 모든 파라미터를 전부 지원하지 못 하는 시스템이 지원하지 않는 파라미터들을 안전하게 건너뛰고 무시할 수 있는 방식으로 작성됩니다. 이런 문법은 향후 기존 코드 또는 응용 프로그램을 건드리지 않고 사양을 확장시키기 쉽게 해줄 것입니다.
 
-A style can use a single tool, or use a combination of one or more
-tools. By combining the use of several tools in a style, one can build
-virtually any type of graphical representation. For instance, the SYMBOL
-tool can be used to place spaced symbols along a line. Also, the LABEL
-tool can be used to place text on a point, stretch it along a line, or
-even, by combining the PEN tool with the LABEL tool, use the line as a
-leader to the text label, and draw the text string on the last vertex of
-the line.
+스타일은 단일 도구를 사용할 수도 있고, 또는 하나 이상의 도구를 결합해서 사용할 수도 있습니다. 스타일에 도구 여러 개를 결합해서 사용하면 거의 모든 유형의 그래픽 표현을 작성할 수 있습니다. 예를 들어 SYMBOL 도구를 사용해서 라인을 따라 일정 간격으로 심볼을 배치할 수 있습니다. 또 LABEL 도구를 사용해서 포인트 위에 텍스트를 배치하고 라인을 따라 늘릴 수 있습니다. 여기에 LABEL 도구와 PEN 도구를 결합하면 라인을 텍스트 라벨의 지시선으로 사용해서 라인의 마지막 꼭짓점에 텍스트 문자열을 그릴 수도 있습니다.
 
-Of course, few systems can support all that. But the intention here is
-to have a style specification that is powerful and flexible enough to
-allow all types of formats to exchange style information with the least
-possible loss.
+물론, 이 모든 것을 지원할 수 있는 시스템은 많지 않습니다. 그러나 여기에서 강조하고자 하는 것은 스타일 사양이 모든 유형의 포맷이 스타일 정보를 가능한 한 손실 없이 교환할 수 있도록 해주는 충분히 강력하고 유연한 사양이라는 점입니다.
 
-1.4 Feature attributes can be used by style definitions
+1.4 스타일 정의가 피처 속성(attribute)을 사용할 수 있다
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In some cases, it might be useful for a style definition to refer to an
-attribute field on the feature for a given tool parameter's value
-instead of having a hardcoded value inside the style itself.
+스타일 정의가 어떤 도구 파라미터의 값에 대해 스타일 자체 안에 하드코딩된 값을 가지는 대신 피처의 속성 필드를 참조하는 것이 더 유용한 경우가 종종 있습니다.
 
-Example of this are text angle, text string, etc... these values change
-for every single text label, but we can share the rest of the label
-style at the layer level if we lookup the angle and text string in an
-attribute on each feature.
+텍스트 기울기 각도, 텍스트 문자열 등등 각 단일 텍스트 라벨별로 달라지는 값을 예로 들 수 있습니다. 각 피처의 속성에서 각도 및 텍스트 문자열을 검색할 수 있다면 레이어 수준에서 나머지 라벨 스타일을 공유할 수 있습니다.
 
-The syntax of the style string provides a way that any parameter value
-can be either a constant value, or a lookup to an attribute field.
+스타일 문자열의 문법은 모든 파라미터 값이 상수값 또는 속성 필드 검색값 가운데 하나일 수 있는 방식입니다.
 
-1.5 Tool parameter units
+1.5 도구 파라미터 단위
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Several parameter values can be expressed in different measurement units
-depending on the file format you are dealing with. For instance, some
-systems express line width, or text height in points, other in pixels,
-and others use ground units. In order to accommodate all that, all
-parameters can be specified in one of the following units systems:
+작업 중인 파일 포맷에 따라 몇몇 파라미터 값을 서로 다른 측정 단위로 표현할 수 있습니다. 예를 들면 일부 시스템들은 선 굵기 또는 텍스트 높이를 포인트 단위로 표현하는데 다른 시스템들은 픽셀 단위로 표현하고 또다른 시스템들은 지상 단위로 표현합니다. 이 모든 단위를 수용하기 위해, 모든 파라미터를 다음 단위계 가운데 하나로 지정할 수 있습니다:
 
--  **g**: Map Ground Units (whatever the map coordinate units are)
--  **px**: Pixels
--  **pt**: Points (1/72 inch)
--  **mm**: Millimeters
--  **cm**: Centimeters
--  **in**: Inches
+-  **g**: 맵 지상 단위(Map Ground Unit) (맵의 좌표계 단위)
+-  **px**: 픽셀
+-  **pt**: 포인트 (1/72 인치)
+-  **mm**: 밀리미터
+-  **cm**: 센티미터
+-  **in**: 인치
 
-Some tools will have to be provided at the GDAL client level to simplify
-the conversion of any value from one units system to another. This would
-imply that the GDAL client has to specify a map scale so that
-conversions from ground units to paper/pixel units can be performed.
+몇몇 도구는 한 단위계로부터 다른 단위계로의 값 변환을 단순화하기 위해 GDAL 클라이언트 수준에서 단위계를 지정해야 합니다. 즉 지상 단위로부터 종이/픽셀 단위로의 변환을 수행할 수 있도록 GDAL 클라이언트가 맵 축척을 지정해야 한다는 뜻입니다.
 
 --------------
 
-2. Feature Style String
+2. 피처 스타일 문자열
 -----------------------
 
-As was mentioned earlier, styles definitions will usually be stored as
-strings, either in a per-layer (or per-dataset) table, or directly in
-the features.
+앞에서 말했듯이, 스타일 정의는 보통 레이어별 (또는 데이터셋별) 테이블에 또는 피처에 직접 문자열로 저장됩니다.
 
-2.1 Examples
+2.1 예시
 ~~~~~~~~~~~~
 
-Here are some example style definition strings:
+다음은 스타일 정의 문자열의 몇몇 예시입니다:
 
--  A 5 pixels wide red line:
+-  5픽셀 굵기의 적색 라인:
    ``PEN(c:#FF0000,w:5px)``
--  A polygon filled in blue, with a black outline:
+-  외곽선이 흑색이고 안은 청색으로 채워진 폴리곤A:
    ``BRUSH(fc:#0000FF);PEN(c:#000000)``
--  A point symbol:
+-  포인트 심볼:
    ``SYMBOL(c:#00FF00,id:"points.sym-45,ogr-sym-7")``
--  A text label, taking the text string from the "text_attribute"
-   attribute field:
+-  "text_attribute" 속성(attribute) 테이블로부터 텍스트 문자열을 가져오는 텍스트 라벨:
    ``LABEL(f:"Times New Roman",s:12pt,t:{text_attribute})"``
 
-Here is what a style table that contains all the above styles could look
-like:
+다음은 앞의 모든 스타일을 담고 있는 스타일 테이블의 모습의 예시입니다:
 
 ::
 
@@ -161,37 +112,25 @@ like:
        campsite:  SYMBOL(c:#00FF00,id:"points.sym-45,ogr-sym-7")
        label:     LABEL(f:"Times New Roman",s:12pt,t:{text_attribute})
 
-Then individual features can refer to styles from the table above using
-the "@" character followed by the style name in their style property.
+이런 테이블이 있다면 개별 피처가 스타일 속성(property)에 있는 스타일 이름 앞에 "@" 문자를 붙여서 이 테이블로부터 스타일을 참조할 수 있습니다.
 
-For instance, a feature with its style set to "@road" would be drawn as
-a red line.
+예를 들어, 스타일이 "@road"로 설정된 객체는 적색 선으로 그려질 것입니다.
 
-2.2 Style String Syntax
+2.2 스타일 문자열 문법
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Each feature object has a style property (a string):
+각 피처 객체는 스타일 속성(property) 문자열을 가집니다:
 
 ::
 
     <style_property> = "<style_def>" | "" | "@<style_name>" | "{<field_name>}"
 
--  ``<style_def>`` is defined later in this section.
--  An empty style string means that the feature's style is unspecified.
-   It does not indicate that the feature is invisible – an invisible
-   feature may be indicated using a fully transparent color, like
-   PEN(c:#00000000).
--  ``@<style_name>`` is a reference to a predefined style in the layer
-   or the dataset's style table. The layer's table is looked up first,
-   and if style_name is not found there then the dataset's table will be
-   looked up.
--  Finally, ``{<field_name>}`` means that the style property should be
-   read from the specified attribute field.
+-  ``<style_def>`` 는 이 아래에서 정의합니다.
+-  비어 있는 스타일 문자열은 피처 스타일을 지정하지 않았다는 의미입니다. 피처가 비가시화되었다는 의미가 아닙니다. 비가시화 피처는 ``PEN(c:#00000000)`` 처럼 완전히 투명한 색상을 사용해서 나타냅니다.
+-  ``@<style_name>`` 은 레이어 또는 데이터셋 스타일 테이블에 있는 사전 정의 스타일을 참조한다는 뜻입니다. 먼저 레이어의 테이블을 검색해서 "style_name"이 없는 경우 데이터셋의 테이블을 검색할 것입니다.
+-  마지막으로, ``{<field_name>}`` 은 지정한 속성(attribute) 필드로부터 스타일 속성(property)을 읽어와야 한다는 의미입니다.
 
-The <style_def> is the real style definition. It is a combination of 1
-or more style parts separated by semicolons. Each style_part uses a
-drawing tool to define a portion of the complete graphical
-representation:
+<style_def>가 실제 스타일 정의입니다. 스타일 정의는 하나 이상의 스타일 부분들을 쌍반점으로 구분해서 결합한 것입니다. 각 <style_part>는 완전한 그래픽 표현의 일부분을 정의하는 그리기 도구를 사용합니다:
 
 ::
 
@@ -199,11 +138,11 @@ representation:
 
   <style_part> =   <tool_name>([<tool_param>[,<tool_param>[,...]]])
 
-  <tool_name> =    name of a drawing tool, for now: PEN | BRUSH | SYMBOL | LABEL
+  <tool_name> =    그리기 도구의 이름, 현재: PEN | BRUSH | SYMBOL | LABEL
 
   <tool_param> =   <param_name>:<param_value>
 
-  <param_name> =   see list of parameters names for each drawing tool
+  <param_name> =   각 그리기 도구의 파라미터 이름 목록 참조
 
   <param_value> =  <value> | <value><units>
 
@@ -211,67 +150,50 @@ representation:
 
   <units> =        g | px | pt | mm | cm | in
 
-By default, style parts are drawn in the order that they appear in the
-style_def string unless each part is assigned a different level
-parameter value (see the level parameter definition).
+기본적으로, 각 부분에 서로 다른 수준 파라미터 값이 할당되어 있지 않는 이상 <style_def> 문자열에 나타나는 순서대로 스타일 부분을 그립니다. (수준 파라미터 정의를 참조하십시오.)
 
-All drawing tool parameters are optional. So it is legal to have a
-style_part with an empty drawing tool parameter list (e.g. "PEN()"). For
-each parameter that does not have any specified value, it is up to the
-client application to use its own default value. This document provides
-advisory default values for most parameters, but it is not mandatory for
-an application to use those default values.
+그리기 도구의 파라미터는 모두 선택적입니다. 따라서 비어 있는 그리기 도구 파라미터 목록을 가진 (예: ``PEN()``) <style_part>를 작성할 수 있습니다. 값을 지정하지 않은 각 파라미터의 경우 클라이언트 응용 프로그램에 따라 자신만의 기본값을 사용할 것입니다. 이 문서는 파라미터 대부분에 대한 권장 기본값을 제공하지만, 응용 프로그램이 이 기본값들을 반드시 사용해야 하는 것은 아닙니다.
 
-When {<field_name>} is used for a tool_param value, several options are
-available with respect to the units. The units can be specified after
-the field name as in PEN(c:#FF0000,w:{line_width}pt) or can be left
-unspecified as in PEN(c:#FF0000,w:{line_width}). In the first case, the
-default units will be points (pt), but if the attribute field line_width
-contains a value followed by a units abbreviation (e.g. "5px") then the
-units specified in the attribute fields have precedence (in this case
-pixels). Note that the attribute field does not have to contain a units
-value and probably won't in most cases; it is just an optional feature
-to be able to override the default units from inside an attribute
-field's value.
+<tool_param> 값에 {<field_name>}를 사용하는 경우, 단위에 따라 각각 몇 개의 옵션을 사용할 수 있습니다. 이 단위는 ``PEN(c:#FF0000,w:{line_width}pt)`` 처럼 필드 이름 뒤에 지정할 수도 있고 또는 ``PEN(c:#FF0000,w:{line_width})`` 처럼 지정하지 않을 수도 있습니다. 전자의 경우 기본 단위가 포인트(pt)이지만 "line_width" 속성(attribute) 필드의 값 뒤에 단위 축약어가 붙은 경우 (예: ``5px``) 이 속성 필드에 지정된 단위를 우선합니다. (이 경우 픽셀 단위를 사용할 것입니다.)
+대부분의 경우 속성 필드가 단위 값을 담고 있지 않을 것이라는 사실을 기억하십시오. 속성 필드의 값이 기본 단위를 대체할 수 있는 선택적인 기능일 뿐입니다.
 
-2.3 Pen Tool Parameters
+2.3 펜 도구 파라미터
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-**Applicable geometry types:**
+**적용할 수 있는 도형 유형:**
 
--  Point: When applied to a point, a PEN tool can only define the color
-   and the size of the point to draw.
--  Polyline: This is the most obvious case.
--  Polygon: Defines the way the outline of a polygon should be drawn.
+-  포인트:
+   포인트에 적용되는 경우, PEN 도구는 그릴 포인트의 색상과 크기만 정의할 수 있습니다.
 
-Here is the current list of PEN tool parameters. While this is
-sufficient to cover all the cases that we have encountered so far, new
-parameters might be added in the future to handle new types of graphical
-representation. Note again that all parameters are optional:
+-  폴리라인:
+   가장 당연한 경우입니다.
 
-- ``c``: **Pen Color**, expressed hexadecimal (#RRGGBB[AA])
+-  폴리곤:
+   폴리곤의 외곽선을 그려야 할 방식을 정의합니다.
 
-  * [AA]: the last 2 digits define the alpha channel value, with 0 being
-    transparent and FF being opaque. The default is FF (opaque)
-  * Suggested default: black (c:#000000)
-  * Example: PEN(c:#FF0000), or PEN(C:#FF0000FF)
+다음은 현재 PEN 도구의 파라미터 목록입니다. 이제까지 맞닥뜨렸던 모든 경우들을 다루기에 충분하지만 향후 새로운 유형의 그래픽 표현을 처리하기 위해 새로운 파라미터가 추가될 수도 있습니다. 다시 한번 모든 파라미터가 선택적이라는 사실을 기억하십시오:
+
+- ``c``: **펜 색상**, 16진법으로 표현 (#RRGGBB[AA])
+
+  * [AA]: 마지막 두 자리가 알파 채널 값을 정의합니다. 00이 투명, FF가 불투명입니다. 기본값은 FF(불투명)입니다.
+  * 권장 기본값: 흑색(c:#000000)
+  * 예시: PEN(c:#FF0000) 또는 PEN(C:#FF0000FF)
 
 
-- ``w``: **Pen Width**, expressed as a numeric value with units (g, px, pt, mm,
-  cm, in)
+- ``w``: **펜 굵기**, 단위(g, px, pt, mm, cm, in)를 가진 숫자형 값으로 표현
 
-  * Suggested default: 1 pixel
-  * Examples: PEN(c:#FF0000,w:5px), PEN(w:3pt), PEN(w:50g)
+  * 권장 기본값: 1픽셀
+  * 예시: PEN(c:#FF0000,w:5px), PEN(w:3pt), PEN(w:50g)
 
-- ``p``: **Pattern**. To create dash lines. A list of pen-down/pen-up distances
+- ``p``: **패턴**. 점선을 생성합니다. 펜다운(pen-down)/펜업(pen-up) 거리 목록입니다.
 
-  Examples:
+  예시:
 
-  * |style_pen1| = PEN(c:#FF0000,w:2px,p:"4px 5px"). short-dash line
+  * |style_pen1| = PEN(c:#FF0000,w:2px,p:"4px 5px"): 짧은파선
 
-  * |style_pen2| = PEN(c:#FF0000,w:2px,p:"10px 5px"). long-dash line
+  * |style_pen2| = PEN(c:#FF0000,w:2px,p:"10px 5px"): 긴파선
 
-  * |style_pen3| = PEN(c:#FF0000,w:2px,p:"10px 5px 4px 5px"). long/short dash
+  * |style_pen3| = PEN(c:#FF0000,w:2px,p:"10px 5px 4px 5px"): 1점 쇄선
 
 .. |style_pen1| image:: ../../images/style_pen1.png
    :width: 75px
@@ -283,531 +205,358 @@ representation. Note again that all parameters are optional:
    :width: 75px
    :height: 15px
 
+- ``id``: **펜 이름 또는 ID의 쉼표 구분 목록**.
+  이름 또는 ID를 가진 펜을 식별하는 시스템 용 파라미터입니다. 대상 시스템이 한 이름을 인식할 때까지 ID 쉼표 구분 목록에서 이름을 스캔합니다. 펜 ID는 (아래에서 설명하는) 시스템 특화 ID일 수도 있고 또는 알려진 선 패턴을 위해 사전 정의된 OGR 펜 ID 가운데 하나일 수도 있습니다. ``id`` 파라미터는 응용 프로그램이 시스템 특화 ID를 이해할 것이라는 가정에 의존하는 일이 없도록 항상 쉼표 구분 목록 마지막에 OGR ID 하나를 포함해야 합니다.
 
-- ``id``: **Comma-delimited list of Pen Names or Ids**
-  For systems that identify pens with a name or an id. The names in the
-  comma-delimited list of ids are scanned until one is recognized by the target
-  system. Pen Ids can be either system-specific ids (see further below) or be
-  one of the pre-defined OGR pen ids for known line patterns. The id parameter
-  should always include one of the OGR ids at the end of the comma-delimited
-  list of ids so that an application never has to rely on understanding
-  system-specific ids.
+  다음은 현재 OGR 펜 ID 목록입니다(시간이 지나며 늘어날 수 있습니다):
 
-  Here is the current list of OGR pen ids (this could grow time):
+  -  ogr-pen-0: 실선(solid) (ID를 지정하지 않는 경우 기본값입니다)
+  -  ogr-pen-1: NULL 펜 (비가시화)
+  -  ogr-pen-2: 파선(dash)
+  -  ogr-pen-3: 짧은파선(short-dash)
+  -  ogr-pen-4: 긴파선(long-dash)
+  -  ogr-pen-5: 점선(dot line)
+  -  ogr-pen-6: 1점 쇄선(dash-dot line)
+  -  ogr-pen-7: 2점 쇄선(dash-dot-dot line)
+  -  ogr-pen-8: 대체선(alternate-line) (픽셀마다 설정)
 
-  -  ogr-pen-0: solid (the default when no id is provided)
-  -  ogr-pen-1: null pen (invisible)
-  -  ogr-pen-2: dash
-  -  ogr-pen-3: short-dash
-  -  ogr-pen-4: long-dash
-  -  ogr-pen-5: dot line
-  -  ogr-pen-6: dash-dot line
-  -  ogr-pen-7: dash-dot-dot line
-  -  ogr-pen-8: alternate-line (sets every other pixel)
+  시스템 특화 ID는 특화 ID를 생성한 특정 시스템에만 의미가 있을 가능성이 높습니다. 특화 ID는 시스템 이름으로 시작해서 대시("-")가 붙고 그 뒤에 해당 시스템에 의미가 있는 어떤 정보든 (숫자, 이름, 파일명 등등) 붙여야 합니다. 예를 들면 "mapinfo-5", "mysoft-lines.sym-123", 또는 "othersystems-funnyline"처럼 말입니다.
 
- System-specific ids are very likely to be meaningful only to that specific
- system that created them. The ids should start with the system's name,
- followed by a dash (-), followed by whatever information is meaningful to that
- system (a number, a name, a filename, etc.).
- e.g. "mapinfo-5", or "mysoft-lines.sym-123", or "othersystems-funnyline"
+  외부 파일에 선 패턴을 저장하거나 자신만의 사전 정의 선 스타일 집합을 가진 시스템의 데이터를 처리하는 경우 (예를 들면 MapInfo MIF 포맷을 TAB으로 손실 없이 변환하려는 경우) 정보 손실을 방지하기 위해 시스템 특화 ID를 사용합니다.
+
+  예시:
  
- System-specific ids are allowed in order to prevent loss of information when
- dealing with data from systems that store line patterns in external files or
- that have their own pre-defined set of line styles (for instance, to do a
- MapInfo MIF to TAB translation without any loss.
+  - PEN(c:#00FF00,id:"ogr-pen-0") - 단순 실선
+  - PEN(c:#00FF00,id:"mapinfo-5,ogr-pen-7") - MapInfo의 5번 펜에 대응하며, MapInfo 펜을 이해하지 못 하는 시스템에서는 기본 "ogr-pen-7"(2점 쇄선)으로 돌아갑니다.
 
- Examples:
- 
- - PEN(c:#00FF00,id:"ogr-pen-0") - simple solid line
- - PEN(c:#00FF00,id:"mapinfo-5,ogr-pen-7") - corresponds to MapInfo's Pen #5,
-   and a system that can't understand MapInfo pens falls back on the default
-   "ogr-pen-7" pen (dot-dot line).
+- ``cap``: **펜 끝(Pen Cap)** - 선의 마지막 포인트의 형태를 설정합니다.
+
+  * "cap:b" - 편평(Butt): 선의 마지막이 마지막 포인트를 넘어서지 않습니다. 기본값입니다.
+  * "cap:r" - 둥글림(Round): 선의 마지막을 선 굵기가 지름인 원으로 마무리합니다.
+  * "cap:p" - 투영(Projecting): 편평과 비슷하지만, 선의 마지막이 마지막 포인트를 선 굵기의 반만큼 넘어섭니다.
 
 
-- ``cap``: **Pen Cap** - Set the shape of  end points of lines.
+- ``j``: **펜 결합(Pen Join)** - 선들의 결합 포인트(꼭짓점)의 형태를 설정합니다.
 
-  * "cap:b" - Butt: The ends of the line don't extend beyond the end points.
-    This is the default.
-  * "cap:r" - Round: Terminate lines with a circle whose diameter is equal to
-    the line width.
-  * "cap:p" - Projecting: Similar to Butt, but the ends of the line extend by
-    half of line width beyond the end points.
+  * "j:m" - 마이터(Miter): 선들의 외곽 경계가 접할 때까지 늘립니다. 기본값입니다.
+  * "j:r" - 둥글림(Rounded): 중심이 결합 포인트이고 지름이 선 굵기인 원호로 선들을 결합합니다.
+  * "j:b" - 베벨(Bevel): 편평 끝을 가진 선들을 결합한 다음 결합 위치에 만들어지는 삼각형 홈을 채웁니다.
 
+- ``dp``: **수직 오프셋(Perpendicular Offset)**, 숫자형 값 단위(g, px, pt, mm, cm, in)로 표현됩니다.
 
-- ``j``: **Pen Join** - Set the shape of the join point (vertex) of lines.
+  라인 중심으로부터의 오프셋입니다. 음수로 지정하면 주 선분의 왼쪽에 펜을 그리고, 그렇지 않으면 오른쪽에 그릴 것입니다.
 
-  * "j:m" - Miter: Extend the outer edge of the lines until they touch.
-    This is the default.
-  * "j:r" - Rounded: Join lines with an arc whose center is at the join point
-    and whose diameter is equal to the line width.
-  * "j:b" - Bevel: Join the lines with butt end caps and fill the resulting
-    triangular notch at the join position.
+- ``l``: **우선 순위 수준(Priority Level)** - 스타일 부분들을 그려야 할 순서를 정의하는 숫자형 값입니다.
 
+  우선 순위가 낮은 스타일 부분을 먼저 그리고, 그 위에 우선 순위가 높은 스타일 부분을 그립니다. 우선 순위 수준을 지정하지 않는 경우 기본값은 1입니다.
 
-- ``dp``: **Perpendicular Offset**, expressed as a numeric value units (g, px,
-  pt, mm, cm, in)
-
-  Offset from the line center. If the offset is negative then the pen will be
-  drawn left of the main segment and right otherwise.
-
-
-- ``l``: **Priority Level** - Numeric value defining the order in which style
-  parts should be drawn.
-
-  Lower priority style parts are drawn first, and higher priority ones are
-  drawn on top. If priority level is unspecified, the default is 1.
-
-
-2.4 Brush Tool Parameters
+2.4 브러시 도구 파라미터
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Applicable geometry types:**
+**적용할 수 있는 도형 유형:**
 
--  Point: Not applicable.
--  Polyline: Not applicable.
--  Polygon: Defines the way the surface of a polygon is filled.
+-  포인트: 적용할 수 없습니다.
+-  폴리라인: 적용할 수 없습니다.
+-  폴리곤: 폴리곤의 면을 채울 방식을 정의합니다.
 
-Here is the current list of BRUSH tool parameters. Note again that that
-this list may be extended in the future, and all parameters are
-optional:
+다음은 현재 BRUSH 도구의 파라미터 목록입니다. 다시 한번 향후 새로운 파라미터가 추가될 수도 있으며 모든 파라미터가 선택적이라는 사실을 기억하십시오:
 
-- ``fc``: **Brush ForeColor**, expressed in hexadecimal (#RRGGBB[AA]).
-  Used for painting the brush pattern itself.
+- ``fc``: **브러시 전경색(Brush ForeColor)**, 16진법으로 표현(#RRGGBB[AA])됩니다. 브러시 패턴 자체를 칠하는 데 사용되는 색상입니다.
 
-  * [AA]: the last 2 digits define the alpha channel value, with 0 being
-    transparent and FF being opaque. The default is FF (opaque)
-  * Suggested default: 50% grey (c:#808080)
-  * Example: BRUSH(fc:#FF0000)
+  * [AA]: 마지막 두 자리가 알파 채널 값을 정의합니다. 00이 투명, FF가 불투명입니다. 기본값은 FF(불투명)입니다.
+  * 권장 기본값: 50% 회색 (c:#808080)
+  * 예시: BRUSH(fc:#FF0000)
 
+- ``bc``: **브러시 배경색(Brush BackColor)**, 6진법으로 표현(#RRGGBB[AA])됩니다. 브러시 패턴 아래의 면을 칠하는 데 사용되는 색상입니다.
 
-- ``bc``: **Brush BackColor**, expressed in hexadecimal (#RRGGBB[AA]). 
-  Used for painting the area behind the brush pattern.
+  * [AA]: 마지막 두 자리가 알파 채널 값을 정의합니다. 00이 투명, FF가 불투명입니다. 기본값은 FF(불투명)입니다.
+  * 권장 기본값: 투명 (c:#FFFFFF00)
+  * 예시: BRUSH(fc:#FF0000,bc:#FFEEDD)
 
-  * [AA]: the last 2 digits define the alpha channel value, with 0 being
-    transparent and FF being opaque. The default is FF (opaque)
-  * Suggested default: transparent (c:#FFFFFF00)
-  * Example: BRUSH(fc:#FF0000,bc:#FFEEDD)
+- ``id``: **브러시 이름 또는 브러시 ID**.
+  브러시 이름 또는 ID를 쉼표로 구분한 목록입니다. 대상 시스템이 한 이름을 인식할 때까지 ID 쉼표 구분 목록에서 이름을 스캔합니다.
 
+  브러시 ID는 (아래에서 설명하는) 시스템 특화 ID일 수도 있고 또는 잘 알려진 브러시 패턴을 위해 사전 정의된 OGR 브러시 ID 가운데 하나일 수도 있습니다. ``id`` 파라미터는 응용 프로그램이 시스템 특화 ID를 이해할 것이라는 가정에 의존하는 일이 없도록 항상 쉼표 구분 목록 마지막에 OGR ID 하나를 포함해야 합니다.
 
-- ``id``: **Brush Name or Brush Id** - Comma-delimited list of brush names or
-  ids. The names in the comma-delimited list of ids are scanned until one is
-  recognized by the target system.
-
-  Brush Ids can be either system-specific ids (see furtherbelow) or be one of
-  the pre-defined OGR brush ids for well known brush patterns. The id parameter
-  should always include one of the OGR ids at the end of the comma-delimited
-  list of ids so that an application never has to rely on understanding
-  system-specific ids.
-
-  Here is the current list of OGR brush ids (this could grow over time):
+  다음은 현재 OGR 브러시 ID 목록입니다(시간이 지나며 늘어날 수 있습니다):
 
   .. image:: ../../images/style_ogr_brush.png
 
-  - ogr-brush-0: solid foreground color (the default when no id  is provided)
-  - ogr-brush-1: null brush (transparent - no fill, irrespective of fc or bc
-    values
-  - ogr-brush-2: horizontal hatch
-  - ogr-brush-3: vertical hatch
-  - ogr-brush-4: top-left to bottom-right diagonal hatch
-  - ogr-brush-5: bottom-left to top-right diagonal hatch
-  - ogr-brush-6: cross hatch
-  - ogr-brush-7: diagonal cross hatch
+  - ogr-brush-0: 단색(solid) 전경색 (ID를 지정하지 않는 경우 기본값입니다)
+  - ogr-brush-1: NULL 브러시 (투명 - 채우지 않음, fc 또는 bc 값을 무시)
+  - ogr-brush-2: 수평 해치(hatch)
+  - ogr-brush-3: 수직 해치
+  - ogr-brush-4: 좌상단-우하단 사선 해치
+  - ogr-brush-5: 좌하단-우상단 사선 해치
+  - ogr-brush-6: 십자 해치
+  - ogr-brush-7: 사선 십자 해치
 
-  Like with Pen Ids, system-specific brush ids are very likely to be meaningful
-  only to that specific system that created them. The ids should start with the
-  system's name, followed by a dash (-), followed by whatever information is
-  meaningful to that system (a number, a name, a filename, etc.).
+  펜 ID와 마찬가지로, 시스템 특화 ID는 특화 ID를 생성한 특정 시스템에만 의미가 있을 가능성이 높습니다. 특화 ID는 시스템 이름으로 시작해서 대시("-")가 붙고 그 뒤에 해당 시스템에 의미가 있는 어떤 정보든 (숫자, 이름, 파일명 등등) 붙여야 합니다.
 
-  The following conventions will be used for common system-specific brush ids:
+  시스템 특화 브러시 ID에 사용되는 공통 규범은 다음과 같습니다:
 
-  - "bmp-filename.bmp" for Windows BMP patterns
+  - 윈도우 BMP 패턴의 경우 "bmp-filename.bmp"
 
-  Other conventions may be added in the future (such as vector symbols, WMF,
-  etc).
+  다른 (벡터 심볼, WMF 등등) 규범이 향후 추가될 수도 있습니다.
 
+- ``a``: **각도** - 브러시 패턴에 적용할 (도 단위, 시계 반대 방향) 기울기 각도입니다.
 
-- ``a``: **Angle** - Rotation angle (in degrees, counterclockwise) to apply to
-  the brush pattern.
+- ``s``: **크기 또는 크기 조정 인자(Size or Scaling Factor)** - 단위가 있거나 없는 숫자형 값입니다.
 
+  단위가 지정된 경우 이 값은 브러시 또는 심볼을 그릴 절대 크기입니다.
+  단위가 지정되지 않은 경우 이 값은 심볼의 기본 크기에 상대적인 크기 조정 인자입니다.
 
-- ``s``: **Size or Scaling Factor** - Numeric value with or without units.
+- ``dx``, ``dy``: **간격(Spacing)** - 단위(g, px, pt, mm, cm, in)를 가진 숫자형 값으로 표현됩니다.
 
-  If units are specified, then this value is the absolute size to draw the
-  brush or symbol. If no units are specified then it is taken as a scaling
-  factor relative to the symbol's default size.
+  포인트 심볼을 사용해서 면을 채우는 경우, 이 값이 포인트 사이의 거리를 정의할 것입니다.
+  "dx"는 두 인접 심볼들의 중심 사이의 수평 거리이고 "dy"는 수직 거리입니다.
+  기본값은 심볼의 경계 상자 너비를 "dx"로, 높이를 "dy"로 사용하는 것입니다.
 
+- ``l``: **우선 순위 수준(Priority Level)** - 스타일 부분들을 그려야 할 순서를 정의하는 숫자형 값입니다.
 
-- ``dx``, ``dy``: **Spacing**, expressed as a numeric value with units (g, px,
-  pt, mm, cm, in)
-
-  If filling an area using point symbols, these values will define the spacing
-  to use between them. "dx" is the horizontal distance between the center of
-  two adjacent symbols and "dy" is the vertical distance. The default is to use
-  the symbol's bounding box width and height for dx and dy respectively.
+  우선 순위가 낮은 스타일 부분을 먼저 그리고, 그 위에 우선 순위가 높은 스타일 부분을 그립니다. 우선 순위 수준을 지정하지 않는 경우 기본값은 1입니다.
 
 
-- ``l``: **Priority Level** - Numeric value defining the order in which style
-  parts should be drawn.
-
-  Lower priority style parts are drawn first, and higher priority ones are drawn
-  on top. If priority level is unspecified, the default is 1.
-
-
-2.5 Symbol Tool Parameters
+2.5 심볼 도구 파라미터
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Applicable geometry types:**
+**적용할 수 있는 도형 유형:**
 
--  Point: Place a symbol at the point's location
--  Polyline: Place symbols along the polyline, either at each vertex, or
-   equally spaced.
--  Polygon: Place the symbols on the outline of the polygon.
+-  포인트: 포인트 위치에 심볼을 배치합니다.
+-  폴리라인: 폴리라인을 따라 심볼을 각 꼭짓점에 또는 일정한 간격으로 배치합니다.
+-  폴리곤: 심볼을 폴리곤 외곽선에 배치합니다.
 
-Here is the current list of SYMBOL tool parameters. Note again that that
-this list may be extended in the future, and all parameters are
-optional:
+다음은 현재 SYMBOL 도구의 파라미터 목록입니다. 다시 한번 향후 새로운 파라미터가 추가될 수도 있으며 모든 파라미터가 선택적이라는 사실을 기억하십시오:
 
-- ``id``: **Symbol Name or Id** - Comma-delimited list of symbol names or ids.
+- ``id``: **Symbol Name or Id** - 심볼 이름 또는 ID를 쉼표로 구분한 목록입니다. 대상 시스템이 한 이름을 인식할 때까지 ID 쉼표 구분 목록에서 이름을 스캔합니다.
 
-  The names in the comma-delimited list of ids are scanned until one is
-  recognized by the target system.
+  심볼 ID는 (아래에서 설명하는) 시스템 특화 ID일 수도 있고 또는 잘 알려진 심볼을 위해 사전 정의된 OGR 심볼 ID 가운데 하나일 수도 있습니다. ``id`` 파라미터는 응용 프로그램이 시스템 특화 ID를 이해할 것이라는 가정에 의존하는 일이 없도록 항상 쉼표 구분 목록 마지막에 OGR ID 하나를 포함해야 합니다.
 
-  Symbol Ids can be either system-specific ids (see further below) or be one of
-  the pre-defined OGR symbol ids for well known symbols. The id parameter should
-  always include one of the OGR ids at the end of the comma-delimited list of
-  ids so that an application never has to rely on understanding system-specific
-  ids.
-
-  Here is the current list of OGR symbol ids (this could grow over time):
+  다음은 현재 OGR 심볼 ID 목록입니다(시간이 지나며 늘어날 수 있습니다):
 
   .. image:: ../../images/style_ogr_sym.png
 
-  - ogr-sym-0: cross (+)
-  - ogr-sym-1: diagcross (X)
-  - ogr-sym-2: circle (not filled)
-  - ogr-sym-3: circle (filled)
-  - ogr-sym-4: square (not filled)
-  - ogr-sym-5: square (filled)
-  - ogr-sym-6: triangle (not filled)
-  - ogr-sym-7: triangle (filled)
-  - ogr-sym-8: star (not filled)
-  - ogr-sym-9: star (filled)
-  - ogr-sym-10: vertical bar (can be rotated using angle attribute to produce
-    diagonal bar)
+  - ogr-sym-0: 십자(cross) (+)
+  - ogr-sym-1: 사선 십자(diagcross) (X)
+  - ogr-sym-2: 원(circle) (채우기 없음)
+  - ogr-sym-3: 원(circle) (채우기 있음)
+  - ogr-sym-4: 정사각형(square) (채우기 없음)
+  - ogr-sym-5: 정사각형(square) (채우기 있음)
+  - ogr-sym-6: 삼각형(triangle) (채우기 없음)
+  - ogr-sym-7: 삼각형(triangle) (채우기 있음)
+  - ogr-sym-8: 별표(star) (채우기 없음)
+  - ogr-sym-9: 별표(star) (채우기 있음)
+  - ogr-sym-10: 수직 막대(vertical bar) (사선 막대를 생성하려면 각도 속성(attribute)을 이용해서 기울이면 됩니다)
 
-  Like with Pen Ids, system-specific symbol ids are very likely to be meaningful
-  only to that specific system that created them. The ids should start with the
-  system's name, followed by a dash (-), followed by whatever information is
-  meaningful to that system (a number, a name, a filename, etc.).
+  펜 ID와 마찬가지로, 시스템 특화 ID는 특화 ID를 생성한 특정 시스템에만 의미가 있을 가능성이 높습니다. 특화 ID는 시스템 이름으로 시작해서 대시("-")가 붙고 그 뒤에 해당 시스템에 의미가 있는 어떤 정보든 (숫자, 이름, 파일명 등등) 붙여야 합니다.
 
-  The following conventions will be used for common system-specific symbol ids:
+  시스템 특화 심볼 ID에 사용되는 공통 규범은 다음과 같습니다:
 
-  - "bmp-filename.bmp" for Windows BMP symbols
-  - "font-sym-%d" for a font symbols, where %d is a glyph number inside a font,
-    font family is defined by **f** style field.
+  - 윈도우 BMP 심볼의 경우 "bmp-filename.bmp"
+  - 글꼴 심볼의 경우 "font-sym-%d", 이때 '%d'가 글꼴 안의 글리프(glyph) 번호이고 **f** 스타일 필드가 글꼴 계열(font family)을 정의합니다.
 
-  Other conventions may be added in the future (such as vector symbols, WMF,
-  etc.)
+  다른 (벡터 심볼, WMF 등등) 규범이 향후 추가될 수도 있습니다.
 
+- ``a``: **각도** - 심볼에 적용할 (도 단위, 시계 반대 방향) 기울기 각도입니다.
 
-- ``a``: **Angle** - Rotation angle (in degrees, counterclockwise) to apply to
-  the symbol.
+- ``c``: **심볼 색상**, 16진법으로 표현 (#RRGGBB[AA])
 
+  * [AA]: 마지막 두 자리가 알파 채널 값을 정의합니다. 00이 투명, FF가 불투명입니다. 기본값은 FF(불투명)입니다.
+  * 권장 기본 심볼 색상: 흑색(c:#000000) 
+  * 예시: SYMBOL(c:#FF0000)
 
-- ``c``: **Symbol Color**, expressed in hexadecimal (#RRGGBB[AA])
+- ``o``: **심볼 외곽선 색상(Symbol Outline Color)** - 16진법으로 표현됩니다(#RRGGBB[AA]).
 
-  * [AA]: the last 2 digits define the alpha channel value, with 0 being
-    transparent and FF being opaque. The default is FF (opaque)
-  * Suggested default symbol color: black (c:#000000) 
-  * Example ::
+  이 파라미터를 설정하는 경우, 심볼 주변에 이 색상의 할로(halo) 또는 경계선을 추가로 그립니다.
 
-        SYMBOL(c:#FF0000)
+- ``s``:  **크기 또는 크기 조정 인자(Size or Scaling Factor)** - 단위가 있거나 없는 숫자형 값입니다.
 
-- ``o``: **Symbol Outline Color**, expressed in hexadecimal (#RRGGBB[AA]).
+  단위가 지정된 경우 이 값은 심볼을 그릴 절대 크기입니다.
+  단위가 지정되지 않은 경우 이 값은 심볼의 기본 크기에 상대적인 크기 조정 인자입니다.
 
-  If this parameter is set, an additional halo or border of this color is drawn
-  around the symbol.
+- ``dx``, ``dy``: **X 및 Y 오프셋** - 단위(g, px, pt, mm, cm, in)를 가진 숫자형 값으로 표현되는 심볼 삽입 포인트입니다.
 
+  포인트 도형에 그리고 폴리라인의 각 꼭짓점에 심볼을 배치합니다.
 
-- ``s``:  **Size or Scaling Factor** - Numeric value with or without units.
+- ``ds``, ``dp``, ``di``: **간격(Spacing) 파라미터** -  심볼을 단위(g, px, pt, mm, cm, in)를 가진 숫자형 값으로 표현되는 간격으로 라인을 따라 배치합니다.
 
-  If units are specified, then this value is the absolute size to draw the
-  symbol. If no units are specified then it is taken as a scaling factor
-  relative to the symbol's default size.
+  * ``ds``: 라인을 따라 심볼을 배치할 때 사용할 간격입니다.
+    라인 도형을 가진 피처에 심볼을 적용하면 기본적으로 각 꼭짓점에 배치하지만, "ds"를 설정하면 라인을 따라 일정한 간격으로 심볼을 배치합니다. 이 파라미터는 포인트 도형을 가진 피처에는 아무 영향도 미치지 못 합니다.
 
+  * ``dp``: "ds"와 함께 사용해서 심볼의 중심과 심볼이 배치된 라인 사이의 수직 거리를 지정할 수 있습니다.
 
-- ``dx``, ``dy``: **X and Y offset**, of the symbol's insertion point, expressed
-  as a numeric value with units (g, px, pt, mm, cm, in)
+  * ``di``: 라인의 시작점으로부터의 시작 오프셋을 지정할 수 있습니다.
 
-  Applies to point geometries, and to symbols placed at each vertex of a
-  polyline.
+  * 예시:
 
-
-- ``ds``, ``dp``, ``di``: **Spacing parameters** for symbols spaced along a
-  line, expressed as a numeric value with units (g, px, pt, mm, cm, in).
-
-  * ``ds`` is the step to use when  placing symbols along the line.
-    By default, symbols applied to a feature with a line geometry are placed at
-    each vertex, butsetting "ds" triggers the placement of symbols at an equal
-    distance along the line. "ds" has no effect for a feature with a point
-    geometry.
-
-  * ``dp`` can be used together with "ds" to specify the perpendicular distance
-    between the symbols' center and the line along which they're placed.
-
-  * ``di`` can be used to specify an initial offset from the beginning of the
-    line.
-
-  * Example ::
+    ::
 
         SYMBOL(id:123, s:5, di:5px, ds:50px)
 
+- ``l``: **우선 순위 수준(Priority Level)** - 스타일 부분들을 그려야 할 순서를 정의하는 숫자형 값입니다.
 
-- ``l``: **Priority Level** - Numeric value defining the order in which style
-  parts should be drawn.
+  우선 순위가 낮은 스타일 부분을 먼저 그리고, 그 위에 우선 순위가 높은 스타일 부분을 그립니다. 우선 순위 수준을 지정하지 않는 경우 기본값은 1입니다.
 
-  Lower priority style parts are drawn first, and higher priority ones are drawn
-  on top. If priority level is unspecified, the default is 1.
+- ``f``: **글꼴 이름** - 글꼴 이름을 쉼표로 구분한 목록입니다.
 
+  CSS 'font-family' 속성(property)처럼 작동합니다: 알려진 글꼴 이름을 찾을 때까지 글꼴 이름 목록을 스캔합니다.
 
-- ``f``: **Font Name** - Comma-delimited list of fonts names.
+  * 예시:
 
-  Works like the CSS font-family property: the list of font names is scanned
-  until a known font name is encountered.
+    ::
 
-  Example ::
+        SYMBOL(c:#00FF00,s:12pt,id:"font-sym-75,ogr-sym-9",f:"MapInfo_Cartographic")
 
-    SYMBOL(c:#00FF00,s:12pt,id:"font-sym-75,ogr-sym-9",f:"MapInfo_Cartographic")
-
-
-2.6 Label Tool Parameters
+2.6 라벨 도구 파라미터
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Applicable geometry types:**
+**적용할 수 있는 도형 유형:**
 
--  Point: Place a text label at the point's location
--  Polyline: Place text along the polyline.
--  Polygon: Place a label at the centroid of the polygon. All parameters
-   behave exactly as if the geometry was a point located at the
-   polygon's centroid.
+-  포인트: 포인트 위치에 텍스트 라벨을 배치합니다.
+-  폴리라인: 폴리라인을 따라 텍스트 라벨을 배치합니다.
+-  폴리곤: 폴리곤 중심점(centroid)에 텍스트 라벨을 배치합니다. 모든 파라미터가 해당 도형이 폴리곤 중심점에 위치한 포인트인 것처럼 작동합니다.
 
-Here is the current list of LABEL tool parameters. Note again that that
-this list may be extended in the future, and all parameters are
-optional:
+다음은 현재 LABEL 도구의 파라미터 목록입니다. 다시 한번 향후 새로운 파라미터가 추가될 수도 있으며 모든 파라미터가 선택적이라는 사실을 기억하십시오:
 
-- ``f``: **Font Name** - Comma-delimited list of fonts names.
+- ``f``: **글꼴 이름** - 글꼴 이름을 쉼표로 구분한 목록입니다.
 
-  Works like the CSS font-family property: the list of font names is scanned
-  until a known font name is encountered.
+  CSS 'font-family' 속성(property)처럼 작동합니다: 알려진 글꼴 이름을 찾을 때까지 글꼴 이름 목록을 스캔합니다.
 
-  Example ::
+  * 예시:
 
-    LABEL(f:"Noto Sans, Helvetica", s:12pt, t:"Hello World!")
+    ::
 
+        LABEL(f:"Noto Sans, Helvetica", s:12pt, t:"Hello World!")
 
-- ``s``: **Font Size**, expressed as a numeric value with units (g, px, pt,
-  mm, cm, in).
+- ``s``: **글꼴 크기** - 단위(g, px, pt, mm, cm, in)를 가진 숫자형 값으로 표현됩니다.
 
-  In the CAD world, font size, or "text height", determines the height of a
-  capital letter - what typographers call "cap height". But in the worlds of
-  typesetting, graphics and cartography, font size refers to the "em height"
-  of the font, which is taller than the cap height. This means that text
-  assigned a height of 1 inch in a DXF file will look larger (often about 45%
-  larger) than 72-point text in a PDF file or MapInfo map. At present, GDAL
-  vector drivers treat the "s:" style string value as whichever font size
-  measurement (cap height or em height) is used natively by that format, which
-  may result in incorrect text sizing when using the ogr2ogr tool. This
-  parameter could be subject to clearer specification in the future.
+  CAD 분야에서 글꼴 크기 또는 "텍스트 높이"는 글꼴 제작자들이 "캡 높이(cap-height)"라고 부르는 대문자의 높이를 결정합니다. 그러나 조판(typeset), 그래픽 및 지도 제작(cartography) 분야에서 글꼴 크기라고 하면 캡 높이보다 더 높은 글꼴의 "em 높이"를 말합니다. 즉 DXF 파일에서 1인치 높이가 할당된 텍스트가 PDF 파일 또는 MapInfo 맵에서 72포인트 높이인 텍스트보다 더 크게 (거의 45% 더 크게) 보일 것이라는 의미입니다.
+  GDAL 벡터 드라이버는 현재 "s:" 스타일 문자열 값을 해당 포맷이 네이티브하게 사용하는 (캡 높이든 em 높이든) 글꼴 크기 측정치로 취급하기 때문에, ogr2ogr 도구 사용 시 텍스트 크기가 부정확하게 출력될 수도 있습니다. 이 파라미터는 향후 사양을 더 명확하게 정의해야 할 대상이 될 수 있습니다.
 
+- ``t``: **텍스트 문자열** - 고정값 문자열일 수도 있고, 또는 속성(attribute) 필드의 값을 가리키는 참조일 수도 있습니다.
 
-- ``t``: **Text String** - Can be a constant string, or a reference to an
-  attribute field's value.
+  문자열 안에 큰따옴표 또는 백슬래시("\") 문자가 존재하는 경우 그 앞에 백슬래시 문자를 넣어 이스케이프 처리해야 합니다.
 
-  If a double-quote character or backslash (\) character is present in the
-  string, it is escaped with a backslash character before it.
+  * 예시:
 
-  Examples ::
+    ::
 
-    LABEL(f:"Arial, Helvetica", s:12pt, t:"Hello World!")
-    LABEL(f:"Arial, Helvetica", s:12pt, t:"Hello World with escaped \\"quotes\" and \\\backslash!")
-    LABEL(f:"Arial, Helvetica", s:12pt, t:{text_attribute})
+        LABEL(f:"Arial, Helvetica", s:12pt, t:"Hello World!")
+        LABEL(f:"Arial, Helvetica", s:12pt, t:"Hello World with escaped \"quotes\" and \\backslash!")
+        LABEL(f:"Arial, Helvetica", s:12pt, t:{text_attribute})
 
+- ``a``: **각도** - (도 단위, 시계 반대 방향) 기울기 각도입니다.
 
-- ``a``: **Angle** - Rotation angle (in degrees, counterclockwise).
+- ``c``: **텍스트 전경색**, 16진법으로 표현 (#RRGGBB[AA])
 
-- ``c``: **Text Foreground Color**, expressed in hexadecimal (#RRGGBB[AA])
-  Suggested default: black (c:#000000)
+  권장 기본값: 흑색(c:#000000)
 
-- ``b``: **Text Background Color** - Color of the filled box to draw behind the
-  label, expressed in hexadecimal (#RRGGBB[AA]). No box drawn if not set.
+- ``b``: **텍스트 배경색** - 16진법으로 (#RRGGBB[AA]) 표현되는, 라벨 아래 그릴 채우기 상자의 색상입니다. 설정하지 않는 경우 상자를 그리지 않습니다.
 
-- ``o``: **Text Outline Color** - Color of the text outline (halo in MapInfo
-  terminology), expressed in hexadecimal (#RRGGBB[AA]). No outline if not set.
+- ``o``: **텍스트 외곽선 색상** - 16진법으로 (#RRGGBB[AA]) 표현되는 텍스트 외곽선 (MapInfo 용어로는 할로(halo)) 색상입니다. 설정하지 않는 경우 외곽선을 그리지 않습니다.
 
-- ``h``: **Shadow Color** - Color of the text shadow, expressed in hexadecimal
-  (#RRGGBB[AA]). No shadow if not set.
+- ``h``: **음영 색상** - 16진법으로 (#RRGGBB[AA]) 표현되는 텍스트 음영의 색상입니다. 설정하지 않는 경우 음영을 그리지 않습니다.
 
-- ``w``: **Stretch** - The stretch factor changes the width of all characters in
-  the font by the given percentage. For example, a setting of 150 results in all
-  characters in the font being stretched to 150% of their usual width. The
-  default stretch factor is 100.
+- ``w``: **늘리기(Stretch)** - 늘리기 인자는 글꼴의 모든 문자의 너비를 지정한 백분율로 변경합니다.
+  예를 들어 150으로 설정하면 글꼴의 모든 문자를 기본 너비의 150%로 늘입니다. 늘리기 인자의 기본값은 100입니다.
 
-- ``m``: **Label Placement Mode** - How the text is drawn relative to the
-  feature's geometry.
+- ``m``: **라벨 배치 모드(Label Placement Mode)** - 객체의 도형을 기준으로 텍스트를 그리는 방법을 지정합니다.
 
-  * "m:p" - The default. A simple label is attached to a point or to the first
-    vertex of a polyline.
-  * "m:l" - Text is attached to the last vertex of a polyline. A PEN tool can
-    be combined with this LABEL tool to draw the polyline as a leader to the
-    label.
-  * "m:s" - Stretch the text string along a polyline, with an equal spacing
-    between each character.
-  * "m:m" - Place text as a single label at the middle of a polyline (based on
-    total line length).
-  * "m:w" - One word per line segment in a polyline.
-  * "m:h" - Every word of text attached to polyline is placed horizontally in
-    its segment, anchor point is a center of segment.
-  * "m:a" - Every word of text attached to polyline is stretched to fit the
-    segment of polyline and placed along that segment. The anchor point is a
-    start of a segment.
+  * "m:p" - 기본값입니다. 포인트 또는 폴리라인의 첫 번째 꼭짓점에 단순 라벨을 붙입니다.
+  * "m:l" - 폴리라인의 마지막 꼭짓점에 텍스트 라벨을 붙입니다. 이 LABEL 도구에 PEN 도구를 결합해서 폴리라인을 라벨을 가리키는 지시선으로 그릴 수 있습니다.
+  * "m:s" - 폴리라인을 따라 텍스트 문자열을 늘입니다. 이때 각 문자 사이의 간격은 일정합니다.
+  * "m:m" - 폴리라인의 (총 라인 길이를 기반으로 한) 중앙에 텍스트를 단일 라벨로 배치합니다.
+  * "m:w" - 폴리라인에 있는 라인 선분 당 단어 하나씩 배치합니다.
+  * "m:h" - 폴리라인에 추가된 텍스트의 모든 단어를 해당 선분에 평행하게 배치합니다. 이때 기준점(anchor point)은 해당 선분의 중앙입니다.
+  * "m:a" - 폴리라인에 추가된 텍스트의 모든 단어를 폴리라인의 선분에 맞게 늘인 다음 해당 선분을 따라 배치합니다. 이때 기준점은 해당 선분의 시작점입니다.
 
+- ``p``: **기준 위치(Anchor Position)** - 라벨이 추가된 포인트를 기준으로 라벨 위치를 정의하는 1에서 12까지의 값입니다.
 
-- ``p``: **Anchor Position** - A value from 1 to 12 defining the label's
-  position relative to the point to which it is attached
-
-  There are four vertical alignment modes: *baseline*, *center*, *top* and
-  *bottom*; and three horizontal modes: *left*, *center* and *right*.
+  수직 정렬 모드가 *baseline*, *center*, *top* 및 *bottom* 4개가 있고, 수평 정렬 모드는 *left*, *center* 및 *right* 3개가 있습니다.
 
   .. image:: ../../images/style_textanchor.png
 
-  Currently, the precise interpretation of these values (for example, whether
-  accents on uppercase letters sit above or below the alignment point with p:7)
-  differs from file format to file format. This parameter could be subject to
-  clearer specification in the future.
+  현재, 이 값들의 정확한 해석은 (예를 들어 "p:7"으로 설정하는 경우 대문자의 정점이 정렬 포인트 위 또는 아래에 있을지 여부는) 파일 포맷에 따라 달라집니다. 이 파라미터는 향후 사양을 더 명확하게 정의해야 할 대상이 될 수 있습니다.
 
+- ``dx``, ``dy``: **X 및 Y 오프셋** - 단위(g, px, pt, mm, cm, in)를 가진 숫자형 값으로 표현되는 라벨 삽입 포인트입니다.
 
-- ``dx``, ``dy``: **X and Y offset** of the label's insertion point, expressed
-  as a numeric value with units (g, px, pt, mm, cm, in).
+  포인트 도형에 그리고 폴리라인의 각 꼭짓점에 텍스트를 배치합니다.
 
-  Applies to text placed on a point, or at each vertex of a polyline.
+- ``dp``: ``dp``: **수직 오프셋(Perpendicular Offset)** - 숫자형 값 단위(g, px, pt, mm, cm, in)로 표현되는, 라인을 따라 배치된 라벨에 적용할 수직 오프셋입니다.
 
+  "dp"는 라벨과 라벨이 배치된 라인 사이의 수직 거리입니다. 음수로 지정하면 주 선분의 왼쪽으로 라벨을 이동시키고, 그렇지 않으면 오른쪽으로 이동시킬 것입니다.
 
-- ``dp``: **Perpendicular Offset** for labels placed along a line, expressed as
-  a numeric value with units (g, px, pt, mm, cm, in).
+- ``bo``: **볼드체(Bold)** - 굵은 글꼴로 출력하려면 1로 설정합니다. 그렇지 않다면 0으로 설정하거나 파라미터를 생략하십시오.
 
-  "dp" specifies the perpendicular distance between the label and the line along
-  which it is placed. If the offset is negative then the label will be shifted
-  left of the main segment, and right otherwise.
+- ``it``: **이탤릭체(Italic)** - 기울임 글꼴로 출력하려면 1로 설정합니다. 그렇지 않다면 0으로 설정하거나 파라미터를 생략하십시오.
 
+- ``un``: **밑줄(Underline)** - 텍스트에 밑줄을 그으려면 1로 설정합니다. 그렇지 않다면 0으로 설정하거나 파라미터를 생략하십시오.
 
-- ``bo``: **Bold** - Set to 1 for bold text. Set to 0 or omitted otherwise.
+- ``st``:  **취소선(Strikethrough)** - 텍스트에 취소선을 그으려면 1로 설정합니다. 그렇지 않다면 0으로 설정하거나 파라미터를 생략하십시오.
 
-- ``it``: **Italic** - Set to 1 for italic text. Set to 0 or omitted otherwise.
+- ``l``: **우선 순위 수준(Priority Level)** - 스타일 부분들을 그려야 할 순서를 정의하는 숫자형 값입니다.
 
-- ``un``: **Underline** - Set to 1 for underlined text. Set to 0 or omitted
-  otherwise.
+  우선 순위가 낮은 스타일 부분을 먼저 그리고, 그 위에 우선 순위가 높은 스타일 부분을 그립니다. 우선 순위 수준을 지정하지 않는 경우 기본값은 1입니다.
 
-- ``st``:  **Strikethrough** - Set to 1 for struck-through text. Set to 0 or
-  omitted otherwise.
-
-- ``l``: **Priority Level** - Numeric value defining the order in which style
-  parts should be drawn.
-
-  Lower priority style parts are drawn first, and higher priority ones are drawn
-  on top. If priority level is unspecified, the default is 1.
-
-
-2.7 Styles Table Format
+2.7 스타일 테이블 서식
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-For file formats that support tables of styles, then the predefined
-styles would be stored in that format.
+스타일 테이블을 지원하는 파일 포맷의 경우, 해당 포맷에 사전 정의 스타일을 저장할 것입니다.
 
-For file formats that do not support tables of styles, then the style
-table could be stored in a text file with a .ofs (OGR Feature Styles)
-extension and the same basename as the dataset. This would apply to
-formats like Esri Shapefile.
+스타일 테이블을 지원하지 않는 파일 포맷의 경우, 데이터셋과 동일한 기본명과 .ofs (OGR 피처 스타일) 확장자를 가진 텍스트 파일에 스타일 테이블을 저장할 수 있습니다. ESRI Shapefile 같은 포맷에 적용될 수 있습니다.
 
-Here is an example of a .ofs file:
+다음은 .ofs 파일의 예시입니다:
 
 ::
 
-       #OFS-Version: 1.0
-       #StyleField: "style"
+    #OFS-Version: 1.0
+    #StyleField: "style"
 
-       DefaultStyle: PEN(c:#000000)
-       road:      PEN(c:#FF0000,w:5px)
-       lake:      BRUSH(fc:#0000FF);PEN(c:#000000)
-       campsite:  SYMBOL(c:#00FF00,id:"points.sym-45,ogr-sym-7")
-       label:     LABEL(f:"Times New Roman",s:12pt,t:{text_attribute})
+    DefaultStyle: PEN(c:#000000)
+    road:      PEN(c:#FF0000,w:5px)
+    lake:      BRUSH(fc:#0000FF);PEN(c:#000000)
+    campsite:  SYMBOL(c:#00FF00,id:"points.sym-45,ogr-sym-7")
+    label:     LABEL(f:"Times New Roman",s:12pt,t:{text_attribute})
 
-The first line is a signature with a version number, which must be
-present.
+첫 줄이 버전 번호의 서명으로, 반드시 존재해야만 합니다.
 
-The second line (StyleField: "style") is the name of the attribute field
-in which the Feature Style String is stored for each object in the
-corresponding layer. This is optional, if not set, then the objects in
-the layer will all share the same style defined in DefaultStyle.
+두 번째 줄(StyleField: "style")은 해당 레이어에 있는 각 객체의 피처 스타일 문자열이 저장된 속성(attribute) 필드의 이름입니다. 이 줄은 선택적으로, 설정하지 않는 경우 레이어에 있는 모든 객체가 DefaultStyle에 정의된 동일한 스타일을 공유할 것입니다.
 
-The third line (DefaultStyle:...) defines the style that applies by
-default to all objects that have no explicit style.
+세 번째 줄(DefaultStyle:...)은 스타일이 명확하게 지정되지 않은 모든 객체에 기본적으로 적용될 스타일을 정의합니다.
 
-Then the list of style definitions follow.
+그 다음 줄부터 스타일 정의 목록이 나열됩니다.
 
-2.8 Using OGR SQL to transfer the style between the data sources
+2.8 OGR SQL을 사용해서 데이터소스들 간에 스타일을 전송하기
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can use the **OGR_STYLE** special field to extract the feature level
-style, and ogr2ogr can be used to transfer the style string between data
-sources according to the following example:
+**OGR_STYLE** 특수 필드를 사용해서 피처 수준 스타일을 추출할 수 있고, 다음 예시와 같은 문법으로 ogr2ogr 유틸리티를 이용해서 데이터소스들 간에 추출한 스타일 문자열을 전송할 수 있습니다:
 
 ::
 
-     ogr2ogr -f "ESRI Shapefile" -sql "select *, OGR_STYLE from rivers" rivers.shp rivers.tab
+    ogr2ogr -f "ESRI Shapefile" -sql "select *, OGR_STYLE from rivers" rivers.shp rivers.tab
 
-Without specifying the length of the style field, the output driver may
-truncate the length to a default value. Therefore it may be necessary to
-specify the target length manually, like:
+스타일 필드의 길이를 지정하지 않으면 산출 드라이버가 필드 길이를 기본값에 맞춰 절단(truncate)할 수도 있습니다. 따라서 대상 길이를 다음과 같이 직접 지정해줘야 할 수도 있습니다:
 
 ::
 
-     ogr2ogr -f "ESRI Shapefile" -sql "select *, CAST(OGR_STYLE AS character(255)) from rivers" rivers.shp rivers.tab
+    ogr2ogr -f "ESRI Shapefile" -sql "select *, CAST(OGR_STYLE AS character(255)) from rivers" rivers.shp rivers.tab
 
-OGR is aware of using the OGR_STYLE field if it exists, and
-OGRFeature::GetStyleString will return the value of this field if no
-style string has been specified programmatically.
-
- 
+OGR는 OGR_STYLE 필드가 존재하는 경우 사용할 것이며, 스타일 문자열을 프로그램적으로 지정하지 않은 경우 :cpp:func:`OGRFeature::GetStyleString` 함수가 이 필드의 값을 반환할 것입니다.
 
 --------------
 
-3. OGR Support Classes
+3. OGR 지원 클래스
 ----------------------
 
-The :cpp:class:`OGRFeature` class has member functions
-:cpp:func:`OGRFeature::GetStyleString`, :cpp:func:`OGRFeature::SetStyleString` and :cpp:func:`OGRFeature::SetStyleStringDirectly`
-which may be used to interact with a feature's style string as a C-style
-string. Additionally, there are :cpp:func:`OGRFeature::GetStyleTable`, :cpp:func:`OGRFeature::SetStyleTable` and
-:cpp:func:`OGRFeature::SetStyleTableDirectly` for managing style tables as instances of the
-:cpp:class:`OGRStyleTable` class.
+:cpp:class:`OGRFeature` 클래스는 피처의 스타일 문자열을 C 스타일 문자열로 대화형 작업하기 위해 사용할 수도 있는 :cpp:func:`OGRFeature::GetStyleString`, :cpp:func:`OGRFeature::SetStyleString` 및 :cpp:func:`OGRFeature::SetStyleStringDirectly` 함수들을 멤버로 가지고 있습니다.
+뿐만 아니라 스타일 테이블을 :cpp:class:`OGRStyleTable` 클래스의 인스턴스로 관리하기 위한 :cpp:func:`OGRFeature::GetStyleTable`, :cpp:func:`OGRFeature::SetStyleTable` 및
+:cpp:func:`OGRFeature::SetStyleTableDirectly` 함수들도 있습니다.
 
-The :cpp:class:`OGRLayer` and :cpp:class:`GDALDataset` classes also have :cpp:func:`OGRLayer::GetStyleTable`,
-:cpp:func:`OGRLayer::SetStyleTable` and :cpp:func:`OGRLayer::SetStyleTableDirectly` member functions.
+:cpp:class:`OGRLayer` 및 :cpp:class:`GDALDataset` 클래스도 :cpp:func:`OGRLayer::GetStyleTable`, :cpp:func:`OGRLayer::SetStyleTable` 및 :cpp:func:`OGRLayer::SetStyleTableDirectly` 함수들을 멤버로 가지고 있습니다.
 
-To parse style strings, the :cpp:class:`OGRStyleMgr` class is used. Each style tool in the string
-is accessed as an instance of the :cpp:class:`OGRStyleTool` class. Lastly, four helper classes exist,
-one for each tool (:cpp:class:`OGRStylePen`,
-:cpp:class:`OGRStyleBrush`,
-:cpp:class:`OGRStyleSymbol`,
-:cpp:class:`OGRStyleLabel`), with each available
-parameter represented by a getter and setter member function. To
-understand these classes better, it may be useful to read the
-`ogr_featurestyle.h <https://github.com/OSGeo/gdal/blob/master/ogr/ogr_featurestyle.h>`__
-and
-`ogrfeaturestyle.cpp <https://github.com/OSGeo/gdal/blob/master/ogr/ogrfeaturestyle.cpp>`__
-code files.
+스타일 문자열을 파싱하기 위해 :cpp:class:`OGRStyleMgr` 클래스를 사용합니다. 문자열에 있는 각 스타일 도구를 :cpp:class:`OGRStyleTool` 클래스의 인스턴스로 접근합니다. 마지막으로 각 도구에 대한 도우미 클래스 4개가 각각(:cpp:class:`OGRStylePen`, :cpp:class:`OGRStyleBrush`, :cpp:class:`OGRStyleSymbol`, :cpp:class:`OGRStyleLabel`) 존재합니다. 게터(getter) 및 세터(setter) 멤버 함수가 각 도우미 클래스가 사용할 수 있는 파라미터를 표현합니다. 이 클래스들을 더 잘 이해하고 싶다면 `ogr_featurestyle.h <https://github.com/OSGeo/gdal/blob/master/ogr/ogr_featurestyle.h>`_ 와 `ogrfeaturestyle.cpp <https://github.com/OSGeo/gdal/blob/master/ogr/ogrfeaturestyle.cpp>`_ 코드 파일을 읽어보면 도움이 될 수도 있습니다.
 
-Here is some example C++ code:
+다음은 C++ 코드 예시입니다:
 
 .. code-block:: c++
 
@@ -815,19 +564,19 @@ Here is some example C++ code:
 
       OGRStyleMgr *poStyleMgr = new OGRStyleMgr(&oStyleTable);
 
-      // Create a new style in the style table by specifying the whole style string
+      // 전체 스타일 문자열을 지정해서 스타일 테이블에 새 스타일을 생성
 
       if (poStyleMgr->AddStyle("@Name","PEN(c:#123456;w:10px);BRUSH(c:#345678)"))
       {
         poStyleMgr->SetFeatureStyleString(poFeature,"@Name",TRUE)
-        // or
+        // 또는
         poStyleMgr->SetFeatureStyleString(poFeature,"PEN(c:#123456,w:10px);BRUSH(c:#345678)",FALSE)
       }
 
       oStyleTable->SaveStyleTable("ttt.tbl");
 
 
-      // Create a new style in the style table by specifying each tool (part) as a string
+      // 각 도구(부분)를 문자열로 지정해서 스타일 테이블에 새 스타일을 생성
 
       poStyleMgr->InitStyleString();
       poStyleMgr->AddPart("PEN(c:#123456,w:10px)");
@@ -838,7 +587,7 @@ Here is some example C++ code:
       oStyleTable->SaveStyleTable("ttt.tbl");
 
 
-      // Create a new style in the style table using the style tool helper classes
+      // 스타일 도구 도우미 클래스를 이용해서 스타일 테이블에 새 스타일을 생성
 
       OGRStyleTool *poStylePen = new OGRStylePen;
 
@@ -850,7 +599,7 @@ Here is some example C++ code:
       delete poStylePen;
 
 
-      // Reading a style
+      // 스타일 읽어오기
 
       OGRStyleTool *poStyleTool;
 
@@ -868,13 +617,13 @@ Here is some example C++ code:
                  poStylePen->GetRGBFromString(pszColor, nRed, nGreen,
                                           nBlue, nTrans);
                else
-                 // Color not defined
+                 // 색상 정의되지 않음
 
                dfWidth = poStylePen->Width(bDefault);
                if (bDefault == FALSE)
                  // Use dfWidth
                else
-                 // dfWidth not defined
+                 // dfWidth 정의되지 않음
 
               :
               :
@@ -884,7 +633,7 @@ Here is some example C++ code:
 
 .. only:: html
 
-    Revision history
+    개정 이력
     ----------------
 
     -  **Version 0.016 - 2018-12-03 - Andrew Sudorgin**
