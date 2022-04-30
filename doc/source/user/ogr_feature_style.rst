@@ -636,40 +636,35 @@ OGR는 OGR_STYLE 필드가 존재하는 경우 사용할 것이며, 스타일 �
     개정 이력
     ----------------
 
-    -  **Version 0.016 - 2018-12-03 - Andrew Sudorgin**
-       Restored and documented font property for point symbols
-    -  **Version 0.015 - 2018-01-08 - Alan Thomas**
-       Update outdated material; minor changes to BRUSH 'id' and LABEL 't',
-       'bo', 'it', 'un', 'st'; clarify BRUSH 'fc', 'bc', SYMBOL 'o' and
-       LABEL 's', 'w', 'p'
-    -  **Version 0.014 - 2011-07-24 - Even Rouault**
-       Mention the escaping of double-quote characters in the text string of
-       a LABEL (ticket #3675)
-    -  **Version 0.013 - 2008-07-29 - Daniel Morissette**
-       Added 'o:' for font point symbol outline color (ticket #2509)
-    -  **Version 0.012 - 2008-07-21 - Daniel Morissette**
-       Added 'o:' for text outline color and updated 'b:' to be specifically
-       a filled label background box (ticket #2480)
-    -  **Version 0.011 - 2008-02-28 - Tamas Szekeres**
-       Note about OGR SQL to transfer the style between the data sources
-    -  **Version 0.010 - 2006-09-23- Andrey Kiselev**
-       Added label styles 'w', 'st', 'h', 'm:h', 'm:a', 'p:{10,11,12}'
-    -  **Version 0.009 - 2005-03-11- Frank Warmerdam**
-       Remove reference to OGRWin, move into ogr distribution
-    -  **Version 0.008 - 2001-03-21- Frank Warmerdam**
-       Fix minor typos (h:12pt instead of s:12pt in examples)
-    -  **Version 0.008 - 2000-07-15 - Stephane Villeneuve**
-       Remove style table in Layer. Add forecolor and backcolor to brush.
-    -  **Version 0.007 - 2000-06-22 - Daniel Morissette**
-       Fixed typo and added offset param for PEN.
-    -  **Version 0.006 - 2000-06-20 - Daniel Morissette**
-       Added the OGR-Win idea and made small changes here and there.
-    -  **Version 0.005 - 2000-06-12 - Daniel Morissette**
-       Allow passing of comma-delimited list of names in PEN's "id"
-       parameter.
-       Defined system-independent pen style names.
-    -  **Version 0.004 - 2000-06-09 - Stephane Villeneuve**
-       Added PEN cap and join parameters
-       More clearly defined the API
-    -  **Version 0.003 - 2000-02-15 - Daniel Morissette**
-       First kind-of-complete version.
+    -  **0.016버전 - 2018년 12월 3일 - 앤드루 수도르긴(Andrew Sudorgin)**
+       포인트 심볼 용 글꼴 속성 복원 및 문서화
+    -  **0.015버전 - 2018년 1월 8일 - 앨런 토마스(Alan Thomas)**
+       구식이 된 내용 업데이트; BRUSH 'id' 및 LABEL 't', 'bo', 'it', 'un', 'st'에 사소한 변경; BRUSH 'fc', 'bc', SYMBOL 'o' 및 LABEL 's', 'w', 'p'의 의미 명확화
+    -  **0.014버전 - 2011년 7월 24일 - 이벤 루올(Even Rouault)**
+       LABEL의 텍스트 문자열에서 큰따옴표 문자 이스케이프 처리에 관한 언급 추가 (ticket #3675)
+    -  **0.013버전 - 2008년 7월 29일 - 대니얼 모리셋(Daniel Morissette)**
+       포인트 심볼 외곽선 색상 용 'o:' 추가 (ticket #2509)
+    -  **0.012버전 - 2008년 7월 21일 - 대니얼 모리셋(Daniel Morissette)**
+       텍스트 외곽선 색상 용 'o:' 추가, 'b:'를 라벨 배경 상자 채우기로 업데이트 (ticket #2480)
+    -  **0.011버전 - 2008년 2월 28일 - 세케레시 터마시(Szekeres Tamás)**
+       데이터소스들 사이에 스타일을 전송하기 위한 OGR SQL에 관한 메모
+    -  **0.010버전 - 2006년 9월 23일 - 안드레이 키셀레프(Andrey Kiselev)**
+       라벨 스타일 'w', 'st', 'h', 'm:h', 'm:a', 'p:{10,11,12}' 추가
+    -  **0.009버전 - 2005년 3월 11일 - 프랑크 바르메르담(Frank Warmerdam)**
+       OGRWin에 대한 참조 제거, OGR 배포판으로 이동
+    -  **0.008버전 - 2001년 3월 21일 - 프랑크 바르메르담(Frank Warmerdam)**
+       몇몇 오타 수정 (예시에서 s:12pt 대신 h:12pt)
+    -  **0.008버전 - 2000년 7월 15일 - 스테판 빌뇌브(Stephane Villeneuve)**
+       레이어에서 스타일 테이블 제거, 브러시에 전경색 및 배경색 추가
+    -  **0.007버전 - 2000년 6월 22일 - 대니얼 모리셋(Daniel Morissette)**
+       오타 수정 및 PEN에 offset 파라미터 추가
+    -  **0.006버전 - 2000년 6월 20일 - 대니얼 모리셋(Daniel Morissette)**
+       OGR-Win 아이디어를 추가하고 이것저것 수정
+    -  **0.005버전 - 2000년 6월 12일 - 대니얼 모리셋(Daniel Morissette)**
+       PEN의 "id" 파라미터에 이름들의 쉼표 구분 목록 허용
+       시스템 독립적인 펜 스타일 이름들 정의
+    -  **0.004버전 - 2000년 6월 9일 - 스테판 빌뇌브(Stephane Villeneuve)**
+       PEN cap 및 join 파라미터 추가
+       API 정의를 좀 더 명확하게 수정
+    -  **0.003버전 - 2000년 2월 15일 - 대니얼 모리셋(Daniel Morissette)**
+       첫 번째 완성(에 가까운) 버전.
