@@ -4,14 +4,14 @@
 GDALDriver C++ API
 ================================================================================
 
-GDALDriver class
+GDALDriver 클래스
 ----------------
 
 .. doxygenclass:: GDALDriver
    :project: api
    :members:
 
-GDALDriverManager class
+GDALDriverManager 클래스
 -----------------------
 
 .. doxygenclass:: GDALDriverManager

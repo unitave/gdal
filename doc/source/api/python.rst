@@ -1,129 +1,99 @@
 .. _python:
 
 ================================================================================
-Python bindings
+파이썬 바인딩
 ================================================================================
 
-This Python package and extensions are a number of tools for programming and manipulating the `GDAL <http://www.gdal.org/>`__ Geospatial Data Abstraction Library.
-Actually, it is two libraries -- GDAL for manipulating geospatial raster data and OGR for manipulating geospatial vector data -- but we'll refer to the entire package as the GDAL library for the purposes of this document.
+이 파이썬 패키지 및 확장 사양은 `GDAL <https://gdal.org/>`_ 지리공간 데이터 추상 라이브러리를 프로그래밍하고 조정하기 위한 도구 모음입니다.
+이 패키지는 실제로 2개의 라이브러리 -- 지리공간 래스터 데이터 용 GDAL과 지리공간 벡터 데이터용 OGR -- 이지만 이 문서의 목적을 위해 전체 패키지를 GDAL 라이브러리라고 부를 것입니다.
 
-The GDAL project (primarily Even Rouault) maintains SWIG generated Python
-bindings for GDAL and OGR. Generally speaking the classes and methods mostly
-match those of the GDAL and OGR C++ classes. There is no Python specific
-reference documentation, but the :ref:`tutorials <tutorials>` includes Python examples.
+GDAL 프로젝트가 (예전에는 이벤 루올(Even Rouault)이) SWIG(Simplified Wrapper and Interface Generator)이 생성한 GDAL 및 OGR 용 파이썬 바인딩을 유지/관리합니다. 일반적으로, 클래스 및 메소드 대부분은 GDAL과 OGR의 대응하는 C++ 클래스와 일치합니다. 파이썬 특화 참조 문서는 존재하지 않지만, :ref:`예제 <tutorials>` 문서에 파이썬 예시가 포함되어 있습니다.
 
-
-Tutorials
+예제
 ---------
 
-Chris Garrard has given courses at Utah State University on "Geoprocessing with Python using Open Source GIS" (`http://www.gis.usu.edu/~chrisg/python <http://www.gis.usu.edu/~chrisg/python>`__). There are many slides, examples, test data... and homework ;-) that can
-be greatly helpful for beginners with GDAL/OGR in Python.
+크리스 개러드(Chris Garrard)가 유타 주립 대학교에서 `"오픈소스 GIS를 이용한 파이썬 지리 정보 처리(Geoprocessing with Python using Open Source GIS)" <https://www.gis.usu.edu/~chrisg/python/>`_) 를 강의했습니다. 파이썬 GDAL/OGR 초심자에게 굉장히 도움이 될 수 있는 슬라이드, 예제, 테스트 데이터 및 과제가 많이 있습니다.
 
-Greg Petrie has an OGR related tutorial available at `http://cosmicproject.org/OGR <http://cosmicproject.org/OGR>`__.
+그렉 페트리(Greg Petrie)가 `http://cosmicproject.org/OGR <http://cosmicproject.org/OGR>`_ 에 OGR 관련 예제를 제공하고 있습니다.
 
-A cookbook full of recipes for using the Python GDAL/OGR bindings : `http://pcjericks.github.io/py-gdalogr-cookbook/index.html <http://pcjericks.github.io/py-gdalogr-cookbook/index.html>`__
+`http://pcjericks.github.io/py-gdalogr-cookbook/index.html <http://pcjericks.github.io/py-gdalogr-cookbook/index.html>`_ 웹사이트는 파이썬 GDAL/OGR 바인딩을 이용하기 위한 레시피를 가득 담고 있는 쿡북입니다.
 
-Examples
+예시
 --------
 
-* An assortment of other samples are available in the Python github samples directory at
-  `https://github.com/OSGeo/gdal/tree/master/swig/python/gdal-utils/osgeo_utils/samples
-  <https://github.com/OSGeo/gdal/tree/master/swig/python/gdal-utils/osgeo_utils/samples>`__
-  with some description in the :ref:`python_samples`.
-* Several `GDAL utilities <https://github.com/OSGeo/gdal/tree/master/swig/python/gdal-utils/osgeo_utils/>`__
-  are implemented in Python and can be useful examples.
-* The majority of GDAL regression tests are written in Python. They are available at
-  `https://github.com/OSGeo/gdal/tree/master/autotest <https://github.com/OSGeo/gdal/tree/master/autotest>`__
-* Some examples of GDAL/numpy integration can be found is found in the following scripts:
-  - `gdal_calc.py`
-  - `val_repl.py`
-  - `gdal_merge.py`
-  - `gdal2tiles.py`
-  - `gdal2xyz.py`
-  - `pct2rgb.py`
-  - `gdallocationinfo.py`
+-  `https://github.com/OSGeo/gdal/tree/master/swig/python/gdal-utils/osgeo_utils/samples <https://github.com/OSGeo/gdal/tree/master/swig/python/gdal-utils/osgeo_utils/samples>`_ 에서 다른 예시 모음을 볼 수 있으며, 그 중 몇몇은 :ref:`python_samples` 문서에서 설명하고 있습니다.
+-  여러 `GDAL 유틸리티 <https://github.com/OSGeo/gdal/tree/master/swig/python/gdal-utils/osgeo_utils/>`_ 가 파이썬으로 구현되었으며 유용한 예시가 될 수 있습니다.
+-  The majority of GDAL regression tests are written in Python. They are available at
+  `https://github.com/OSGeo/gdal/tree/master/autotest <https://github.com/OSGeo/gdal/tree/master/autotest>`_
+-  다음 스크립트에서 몇몇 GDAL/NumPy 통합의 예시를 찾아볼 수 있습니다:
 
-Gotchas
--------
+   -  :ref:`gdal_calc.py`
+   -  :ref:`val_repl.py`
+   -  :ref:`gdal_merge.py`
+   -  :ref:`gdal2tiles.py`
+   -  :ref:`gdal2xyz.py`
+   -  :ref:`pct2rgb.py`
+   -  :ref:`gdallocationinfo.py`
 
-Although GDAL's and OGR's Python bindings provide a fairly "Pythonic" wrapper around the underlying C++ code, there are several ways in which the Python bindings differ from typical Python libraries.
-These differences can catch Python programmers by surprise and lead to unexpected results. These differences result from the complexity of developing a large, long-lived library while continuing to maintain
-backward compatibility. They are being addressed over time, but until they are all gone, please review this list of :ref:`python_gotchas`.
+`Gotcha <https://en.wikipedia.org/wiki/Gotcha_(programming)>`_
+---------
 
+GDAL의 그리고 OGR의 파이썬 바인딩이 기저 C++ 코드를 감싸는 꽤 "파이썬적인" 래퍼(wrapper)를 제공하긴 하지만, 이 파이썬 바인딩이 전형적인 파이썬 라이브러리와 다른 점이 몇 가지 있습니다.
+파이썬 프로그래머에게 이런 차이점들이 예상치 못 하게 다가와 예상하지 못 한 결과로 이어질 수 있습니다. 이런 차이점들은 수명이 긴 대용량 라이브러리를 개발하면서 하위 호환성을 계속 유지하려 하는 과정에서 나타납니다. 시간이 지나면서 이런 차이점들이 수정되고 있지만, 모두 사라지기 전까지는 다음 :ref:`python_gotchas` 목록을 살펴보십시오.
 
-Dependencies
-------------
+의존성
+------
 
- * libgdal (3.2.0 or greater) and header files (gdal-devel)
- * numpy (1.0.0 or greater) and header files (numpy-devel) (not explicitly
-   required, but many examples and utilities will not work without it)
+   -  libgdal(3.2.0 이상 버전) 및 헤더 파일들(gdal-devel)
+   -  NumPy(1.0.0 이상 버전) 및 헤더 파일들(numpy-devel) (반드시 필요한 것은 아니지만, 이게 없다면 많은 예시 및 유틸리티가 동작하지 않을 것입니다.)
 
+설치
+----
 
-Installation
-------------
+유닉스
+~~~~~~
 
-Unix
-~~~~
-
-The GDAL Python bindings support both distutils and setuptools, with a
-preference for using setuptools.  If setuptools can be imported, setup will
-use that to build an egg by default.  If setuptools cannot be imported, a
-simple distutils root install of the GDAL package (and no dependency
-chaining for numpy) will be made.
-
+GDAL 파이썬 바인딩은 "distutils" 및 "setuptools" 패키지를 둘 다 지원합니다. 이 중에서 "setuptools" 사용을 권장합니다. "setuptools"를 가져올 수 있는 경우, 기본적으로 설정 프로그램(setup)이 이 패키지를 이용해서 에그(배포용 압축 파일)를 작성할 것입니다. "setuptools"를 가져올 수 없다면 단순 "distutils"이 루트에 GDAL 패키지를 (NumPy 의존성 연결 없이) 설치할 것입니다.
 
 easy_install
 ~~~~~~~~~~~~
 
-GDAL can be installed from the Python CheeseShop:
+파이썬 CheeseShop으로부터 GDAL을 설치할 수 있습니다:
 
 .. code-block:: Bash
 
     $ sudo easy_install GDAL
 
-It may be necessary to have libgdal and its development headers installed
-if easy_install is expected to do a source build because no egg is available
-for your specified platform and Python version.
+사용자가 지정한 플랫폼과 파이썬 버전을 위한 에그가 없기 때문에 easy_install이 소스 빌드를 할 거라고 예상되는 경우, libgdal 및 그 개발 헤더들이 설치되어 있어야 할 수도 있습니다.
 
 setup.py
 ~~~~~~~~
 
-Most of setup.py's important variables are controlled with the setup.cfg
-file.  In setup.cfg, you can modify pointers to include files and libraries.
-The most important option that will likely need to be modified is the
-gdal_config parameter.  If you installed GDAL from a package, the location
-of this program is likely /usr/bin/gdal-config, but it may be in another place
-depending on how your packager arranged things.
+"setup.py" 스크립트의 중요한 변수들은 "setup.cfg" 파일로 제어됩니다. "setup.cfg" 파일에서 포인터가 파일 및 라이브러리를 포함하도록 수정할 수 있습니다. 수정해야 할 가장 중요한 옵션은 'gdal_config' 파라미터입니다. 패키지로부터 GDAL을 설치한 경우, 이 프로그램의 위치는 대부분의 경우 ``/usr/bin/gdal-config`` 이지만 사용자 패키지 관리자가 어떻게 작동했느냐에 따라 다른 위치에 있을 수도 있습니다.
 
-After modifying the location of gdal-config, you can build and install with the setup script:
+'gdal-config'의 위치를 수정한 다음, "setup.py" 스크립트로 빌드하고 설치할 수 있습니다:
 
 .. code-block:: Bash
 
     $ python setup.py build
     $ python setup.py install
 
-If you have setuptools installed, you can also generate an egg:
+"setuptools" 패키지를 설치한 경우, 에그도 생성할 수 있습니다:
 
 .. code-block:: Bash
 
     $ python setup.py bdist_egg
 
-
-
-
-Building as part of the GDAL library source tree
+GDAL 라이브러리 소스 트리의 일부분으로 빌드하기
 ------------------------------------------------
 
-You can also have the GDAL Python bindings built as part of a source
-build by specifying --with-python as part of your configure line:
+사용자의 환경설정 줄에 '--with-python'을 지정하면 GDAL 파이썬 바인딩을 소스 빌드의 일부분으로도 빌드할 수 있습니다:
 
 .. code-block:: Bash
 
     $ ./configure --with-python
 
-
-
-Use the typical make and make install commands to complete the installation:
+설치를 완료하려면 일반적인 'make' 및 'make install' 명령어를 사용하십시오:
 
 .. code-block:: Bash
 
@@ -131,69 +101,56 @@ Use the typical make and make install commands to complete the installation:
     $ make install
 
 .. note::
-    ./configure attempts to detect if you have setuptools installed in the tree
-    of the Python binary it was given (or detected on the execution path), and it
-    will use an egg build by default in that instance.  If you have a need to
-    use a distutils-only install, you will have to edit setup.py to ensure that
-    the HAVE_SETUPTOOLS variable is ultimately set to False and proceed with a
-    typical 'python setup.py install' command.
 
+    ``./configure`` 는 지정된 파이썬 바이너리의 트리에 (또는 실행 경로에) "setuptools"가 설치되어 있는지 탐지하려 시도해서, 탐지되는 경우 기본적으로 에그 빌드를 사용할 것입니다. "distutils"만 사용해서 설치해야 하는 경우 "setup.py" 스크립트의 HAVE_SETUPTOOLS 변수가 궁극적으로 False로 설정되도록 편집한 다음 일반적인 ``python setup.py install`` 명령어를 실행하십시오.
 
-Windows
+윈도우
 ~~~~~~~
 
-You will need the following items to complete an install of the GDAL Python bindings on Windows:
+윈도우 상에 GDAL 파이썬 바인딩 설치를 완료하려면 다음 항목이 필요할 것입니다:
 
-* `GDAL Windows Binaries <http://download.osgeo.org/gdal/win32/1.6/>`__ The basic install requires the gdalwin32exe160.zip distribution file. Other files you see in the directory are for various optional plugins and development headers/include files. After downloading the zip file, extract it to the directory of your choosing.
+-  `GDAL 윈도우 바이너리 <http://download.osgeo.org/gdal/win32/1.6/>`_:
+   기본 설치는 "gdalwin32exe160.zip" 배포 파일을 요구합니다. 이 디렉터리에 있는 다른 파일들은 선택적인 다양한 플러그인 및 개발 헤더/인클루드 파일들을 위한 것입니다. ZIP 압축 파일을 다운로드한 다음, 사용자가 선택한 디렉터리에 압축 해제하십시오.
 
-As explained in the README_EXE.txt file, after unzipping the GDAL binaries you will need to modify your system path and variables. If you're not sure how to do this, read the `Microsoft KnowledgeBase doc <http://support.microsoft.com/kb/310519>`__
+"README_EXE.txt" 파일에 설명된 대로, GDAL 바이너리를 압축 해제한 다음 사용자의 시스템 경로 및 변수들을 수정해야 할 것입니다. 어떻게 해야 할지 잘 모르겠다면 `마이크로소프트 지식 기반 문서 <http://support.microsoft.com/kb/310519>`_ 를 읽어보십시오.
 
-1. Add the installation directory bin folder to your system PATH, remember to put a semicolon in front of it before you add to the existing path.
+1. 사용자 시스템 PATH에 설치 디렉터리 "bin" 폴더를 추가하십시오. 새 경로를 추가하기 전에 기존 경로 뒤에 쌍반점을 입력해야 한다는 사실을 기억하십시오:
 
 .. code-block:: bat
 
     C:\gdalwin32-1.7\bin
 
-2. Create a new user or system variable with the data folder from your installation.
+2. 사용자 설치 디렉터리의 "data" 폴더로 새 사용자 및 시스템 변수를 생성하십시오:
 
 .. code-block:: bat
 
     Name : GDAL_DATA
     Path : C:\gdalwin32-1.7\data
 
-
-Skip down to the `Usage <https://trac.osgeo.org/gdal/wiki/GdalOgrInPython#usage>`__ section to test your install. Note, a reboot may be required.
+사용자 설치가 제대로 되었는지 테스트해보려면 `사용례 <https://trac.osgeo.org/gdal/wiki/GdalOgrInPython#usage>`_ 단락으로 건너뛰십시오. 리부트해야 할 수도 있다는 사실을 기억하십시오.
 
 SWIG
 ----
 
-The GDAL Python package is built using `SWIG <http://www.swig.org/>`__. The earliest version of `SWIG <http://www.swig.org/>`__
-that is supported to generate the wrapper code is 1.3.40.  It is possible
-that usable bindings will build with a version earlier than 1.3.40, but no
-development efforts are targeted at versions below it.  You should not have
-to run SWIG in your development tree to generate the binding code, as it
-is usually included with the source.  However, if you do need to regenerate,
-you can do so with the following make command from within the ./swig/python
-directory:
+GDAL 파이썬 패키지는 `SWIG <https://www.swig.org/>`_ 을 이용해서 빌드됩니다. 래퍼(wrapper) 코드 생성을 지원하는 최초 `SWIG <https://www.swig.org/>`_ 버전은 1.3.40입니다. 1.3.40 이전 버전으로 사용 가능한 바인딩을 빌드할 수는 있지만, 1.3.40 미만 버전을 대상으로는 어떤 개발도 진행되고 있지 않습니다. 바인딩 코드를 생성하기 위해 사용자 개발 트리에서 SWIG을 실행할 필요는 없습니다. 일반적으로 소스에 포함되어 있기 때문입니다. 하지만 재생성해야 하는 경우 ``./swig/python`` 디렉터리 안에서 다음 'make' 명령어를 실행하면 됩니다:
 
 .. code-block:: Bash
 
     $ make generate
 
-To ensure that all of the bindings are regenerated, you can clean the
-bindings code out before the generate command by issuing:
+바인딩을 모두 재생성하도록 보장하려면, 'generate' 명령어를 실행하기 전에 바인딩 코드를 삭제하면 됩니다:
 
 .. code-block:: Bash
 
     $ make veryclean
 
-Usage
------
+사용례
+------
 
-Imports
+가져오기
 ~~~~~~~~
 
-There are five major modules that are included with the `GDAL <http://www.gdal.org/>`__ Python bindings.:
+`GDAL <https://gdal.org/>`_ 파이썬 바인딩에 포함된 주요 모듈 5개가 있습니다:
 
 .. code-block:: python
 
@@ -203,11 +160,7 @@ There are five major modules that are included with the `GDAL <http://www.gdal.o
     >>> from osgeo import gdal_array
     >>> from osgeo import gdalconst
 
-
-Additionally, there are five compatibility modules that are included but
-provide notices to state that they are deprecated and will be going away.
-If you are using GDAL 1.7 bindings, you should update your imports to utilize
-the usage above, but the following will work until GDAL 3.1.
+뿐만 아니라 퇴출되었으며 곧 없어질 예정이라는 경고를 띄우는 호환성 모듈도 5개가 있습니다. GDAL 1.7 바인딩을 사용하는 경우 앞의 주요 모듈을 사용하기 위해 사용자의 가져오기를 업데이트해야 하지만, 다음 호환성 모듈도 GDAL 3.1버전까지는 작동할 것입니다:
 
 .. code-block:: python
 
@@ -217,9 +170,7 @@ the usage above, but the following will work until GDAL 3.1.
     >>> import gdalnumeric
     >>> import gdalconst
 
-If you have previous code that imported the global module and still need to
-support the old import, a simple try...except import can silence the
-deprecation warning and keep things named essentially the same as before:
+사용자가 전체 수준 모듈을 가져오는 예전 코드를 가지고 있기 때문에 구식 가져오기를 계속 지원해야 하는 경우 단순한 ``try ... except`` 가져오기를 사용하면 퇴출 경고를 띄우지 않고 모듈 이름을 본질적으로 예전과 동일하게 유지할 수 있습니다:
 
 .. code-block:: python
 
@@ -228,46 +179,33 @@ deprecation warning and keep things named essentially the same as before:
     ... except ImportError:
     ...     import gdal
 
-Docstrings
+닥스트링
 ~~~~~~~~~~
 
-Currently, only the OGR module has docstrings which are generated from the
-C/C++ API doxygen materials.  Some of the arguments and types might not
-match up exactly with what you are seeing from Python, but they should be
-enough to get you going.  Docstrings for GDAL and OSR are planned for a future
-release.
-
+현재, OGR 모듈만 C/C++ API 독시젠(Doxygen) 자료로부터 생성된 파이썬 닥스트링(docstring)을 가지고 있습니다. 몇몇 인자 및 유형이 파이썬의 인자 및 유형과 정확하게 일치하지 않을 수도 있지만, 시작하기에는 충분할 것입니다. GDAL 및 OGR 용 닥스트링은 향후 배포될 예정입니다.
 
 Numpy
--------------
+-----
 
-One advanced feature of the GDAL Python bindings not found in the other
-language bindings (C#, Perl) is integration with the Python numerical array
-facilities. The gdal.Dataset.ReadAsArray() method can be used to read raster
-data as numerical arrays, ready to use with the Python numerical array
-capabilities.
+GDAL 파이썬 바인딩의 고급 기능 가운데 다른 언어 바인딩에서는 찾아볼 수 없는 고급 기능 하나는 파이썬 숫자형 배열 기능과의 통합입니다. ``gdal.Dataset.ReadAsArray()`` 메소드를 사용하면, 래스터 데이터를 파이썬 숫자형 배열 케이퍼빌리티에서 사용될 준비가 된 숫자형 배열로 읽어올 수 있습니다.
 
-These facilities have evolved somewhat over time. In the past the package was known as "Numeric" and imported using "import Numeric". A new generation is imported using "import numpy". Currently the old
-generation bindings only support the older Numeric package, and the new generation bindings only support the new generation numpy package. They are mostly compatible, and by importing gdalnumeric (or osgeo.gdal_array)
-you will get whichever is appropriate to the current bindings type.
+시간이 흐르면서 이 기능은 조금 진화했습니다. 예전에는 패키지가 "Numeric"이라고 알려져 있었으며 ``import Numeric`` 명령어로 가져왔습니다. 새로운 세대의 패키지는 ``import numpy`` 명령어로 가져옵니다. 현재 구세대 바인딩은 예전 "Numeric" 패키지만 지원하며, 신세대 바인딩은 신세대 "numpy" 패키지만 지원합니다. 대부분의 경우 서로 호환되며, "gdalnumeric"을 (또는 "osgeo.gdal_array"를) 가져오면 현재 바인딩 유형에 적절한 패키지를 얻을 것입니다.
 
-Examples
-~~~~~~~~
+예시
+~~~~
 
-One example of GDAL/numpy integration is found in the `val_repl.py <https://github.com/OSGeo/gdal/blob/master/swig/python/gdal-utils/osgeo_utils/samples/val_repl.py>`__ script.
+`val_repl.py <https://github.com/OSGeo/gdal/blob/master/swig/python/gdal-utils/osgeo_utils/samples/val_repl.py>`_ 스크립트에서 GDAL/NumPy 통합의 예시를 하나 찾아볼 수 있습니다.
 
 .. note::
-   **Performance Notes**
+   **성능 메모**
 
-   ReadAsArray expects to make an entire copy of a raster band or dataset
-   unless the data are explicitly subsetted as part of the function call. For
-   large data, this approach is expected to be prohibitively memory intensive.
+   ``gdal.Dataset.ReadAsArray()`` 메소드는 데이터가 함수 호출의 일부분으로 명확하게 부분 집합 지정되지 않은 이상 래스터 밴드 또는 데이터셋 전체를 복사할 것입니다. 대용량 데이터의 경우 이런 접근법은 엄청나게 메모리 집약적일 것으로 예상됩니다.
 
-
-.. _GDAL API Tutorial: https://gdal.org/tutorials/
-.. _GDAL Windows Binaries: http://gisinternals.com/sdk/
-.. _Microsoft Knowledge Base doc: http://support.microsoft.com/kb/310519
-.. _Python Cheeseshop: http://pypi.python.org/pypi/GDAL/
+.. _GDAL API 예제: https://gdal.org/tutorials/
+.. _GDAL 윈도우 바이너리: http://gisinternals.com/sdk/
+.. _마이크로소프트 지식 기반 문서: http://support.microsoft.com/kb/310519
+.. _파이썬 Cheeseshop: http://pypi.python.org/pypi/GDAL/
 .. _val_repl.py: http://trac.osgeo.org/gdal/browser/trunk/gdal/swig/python/gdal-utils/osgeo_utils/samples/val_repl.py
 .. _GDAL: http://www.gdal.org
 .. _SWIG: http://www.swig.org
+

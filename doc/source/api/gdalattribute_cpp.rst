@@ -4,14 +4,14 @@
 GDALAttribute C++ API
 ================================================================================
 
-GDALAttribute class
+GDALAttribute 클래스
 -------------------
 
 .. doxygenclass:: GDALAttribute
    :project: api
    :members:
 
-GDALIHasAttribute interface
+GDALIHasAttribute 인터페이스
 ---------------------------
 
 .. doxygenclass:: GDALIHasAttribute

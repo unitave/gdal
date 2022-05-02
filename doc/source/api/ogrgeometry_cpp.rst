@@ -4,135 +4,135 @@
 OGRGeometry C++ API
 ================================================================================
 
-Include file: ogr_geometry.h
+헤더 파일: ogr_geometry.h
 
-OGRGeometryFactory class
+OGRGeometryFactory 클래스
 ------------------------
 
 .. doxygenclass:: OGRGeometryFactory
    :project: api
    :members:
 
-OGRGeometry class
+OGRGeometry 클래스
 -----------------
 
 .. doxygenclass:: OGRGeometry
    :project: api
    :members:
 
-OGRPoint class
+OGRPoint 클래스
 --------------
 
 .. doxygenclass:: OGRPoint
    :project: api
    :members:
 
-OGRLineString class
+OGRLineString 클래스
 -------------------
 
 .. doxygenclass:: OGRLineString
    :project: api
    :members:
 
-OGRLinearRing class
+OGRLinearRing 클래스
 -------------------
 
 .. doxygenclass:: OGRLinearRing
    :project: api
    :members:
 
-OGRCircularString class
+OGRCircularString 클래스
 -----------------------
 
 .. doxygenclass:: OGRCircularString
    :project: api
    :members:
 
-OGRCurve class
+OGRCurve 클래스
 --------------
 
 .. doxygenclass:: OGRCurve
    :project: api
    :members:
 
-OGRSurface class
+OGRSurface 클래스
 ----------------
 
 .. doxygenclass:: OGRSurface
    :project: api
    :members:
 
-OGRPolygon class
+OGRPolygon 클래스
 ----------------
 
 .. doxygenclass:: OGRPolygon
    :project: api
    :members:
 
-OGRCurvePolygon class
+OGRCurvePolygon 클래스
 ---------------------
 
 .. doxygenclass:: OGRCurvePolygon
    :project: api
    :members:
 
-OGRMultiPoint class
+OGRMultiPoint 클래스
 -------------------
 
 .. doxygenclass:: OGRMultiPoint
    :project: api
    :members:
 
-OGRMultiLineString class
+OGRMultiLineString 클래스
 ------------------------
 
 .. doxygenclass:: OGRMultiLineString
    :project: api
    :members:
 
-OGRMultiPolygon class
+OGRMultiPolygon 클래스
 ---------------------
 
 .. doxygenclass:: OGRMultiPolygon
    :project: api
    :members:
 
-OGRGeometryCollection class
+OGRGeometryCollection 클래스
 ---------------------------
 
 .. doxygenclass:: OGRGeometryCollection
    :project: api
    :members:
 
-OGRMultiCurve class
+OGRMultiCurve 클래스
 -------------------
 
 .. doxygenclass:: OGRMultiCurve
    :project: api
    :members:
 
-OGRMultiSurface class
+OGRMultiSurface 클래스
 ---------------------
 
 .. doxygenclass:: OGRMultiSurface
    :project: api
    :members:
 
-OGRPolyhedralSurface class
+OGRPolyhedralSurface 클래스
 --------------------------
 
 .. doxygenclass:: OGRPolyhedralSurface
    :project: api
    :members:
 
-OGRTriangle class
+OGRTriangle 클래스
 -----------------
 
 .. doxygenclass:: OGRTriangle
    :project: api
    :members:
 
-OGRTriangulatedSurface class
+OGRTriangulatedSurface 클래스
 ----------------------------
 
 .. doxygenclass:: OGRTriangulatedSurface

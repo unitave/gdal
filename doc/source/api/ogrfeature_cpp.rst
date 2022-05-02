@@ -4,56 +4,56 @@
 OGRFeature C++ API
 ================================================================================
 
-OGRFeature class
+OGRFeature 클래스
 ----------------
 
 .. doxygenclass:: OGRFeature
    :project: api
    :members:
 
-OGRFeatureDefn class
+OGRFeatureDefn 클래스
 --------------------
 
 .. doxygenclass:: OGRFeatureDefn
    :project: api
    :members:
 
-OGRFieldDefn class
+OGRFieldDefn 클래스
 ------------------
 
 .. doxygenclass:: OGRFieldDefn
    :project: api
    :members:
 
-OGRGeomFieldDefn class
+OGRGeomFieldDefn 클래스
 ----------------------
 
 .. doxygenclass:: OGRGeomFieldDefn
    :project: api
    :members:
 
-OGRFieldDomain class
+OGRFieldDomain 클래스
 --------------------
 
 .. doxygenclass:: OGRFieldDomain
    :project: api
    :members:
 
-OGRCodedFieldDomain class
+OGRCodedFieldDomain 클래스
 +++++++++++++++++++++++++
 
 .. doxygenclass:: OGRCodedFieldDomain
    :project: api
    :members:
 
-OGRRangeFieldDomain class
+OGRRangeFieldDomain 클래스
 +++++++++++++++++++++++++
 
 .. doxygenclass:: OGRRangeFieldDomain
    :project: api
    :members:
 
-OGRGlobFieldDomain class
+OGRGlobFieldDomain 클래스
 ++++++++++++++++++++++++
 
 .. doxygenclass:: OGRGlobFieldDomain

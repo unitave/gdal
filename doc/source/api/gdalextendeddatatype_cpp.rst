@@ -4,14 +4,14 @@
 GDALExtendedDataType C++ API
 ================================================================================
 
-GDALExtendedDataType class
+GDALExtendedDataType 클래스
 --------------------------
 
 .. doxygenclass:: GDALExtendedDataType
    :project: api
    :members:
 
-GDALEDTComponent class
+GDALEDTComponent 클래스
 ----------------------
 
 .. doxygenclass:: GDALEDTComponent

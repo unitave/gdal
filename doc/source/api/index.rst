@@ -6,7 +6,7 @@ API
 
 .. only:: not latex
 
-   `Full Doxygen output <../doxygen/index.html>`_
+   `전체 독시젠(Doxygen) 산출물 <../doxygen/index.html>`_
    ----------------------------------------------
 
    C API
@@ -25,7 +25,7 @@ API
    C++ API
    -------
 
-   Raster API
+   래스터 API
    +++++++++++++++++++++++++++
 
    .. toctree::
@@ -36,7 +36,7 @@ API
        gdalrasterband_cpp
        gdalwarp_cpp
 
-   Vector API
+   벡터 API
    +++++++++++++++++++++++++++
 
    .. toctree::
@@ -47,7 +47,7 @@ API
        ogrgeometry_cpp
        ogrlayer_cpp
 
-   Spatial reference system API
+   공간 좌표계 API
    ++++++++++++++++++++++++++++
 
    .. toctree::
@@ -55,7 +55,7 @@ API
 
        ogrspatialref
 
-   Multi-dimensional array API
+   다중 차원 배열 API
    +++++++++++++++++++++++++++
 
    .. toctree::
@@ -68,7 +68,7 @@ API
        gdalattribute_cpp
        gdalextendeddatatype_cpp
 
-   Miscellaneous C++ API
+   기타 C++ API
    ++++++++++++++++++++++++++++
 
    .. toctree::
@@ -77,7 +77,7 @@ API
        cpl_cpp
        gnm_cpp
 
-   Python API
+   파이썬 API
    ----------
 
    .. toctree::
@@ -89,14 +89,14 @@ API
        python_samples
 
 
-   `Java API <../java/index.html>`_
+   `자바 API <../java/index.html>`_
    --------------------------------
 
 
-   GDAL/OGR In Other Languages
+   다른 언어로 된 GDAL/OGR
    ---------------------------
 
-   There is a set of generic `SWIG <http://www.swig.org/>`__ interface files in the GDAL source tree (subdirectory swig) and a set of language bindings based on those. Currently active ones are:
+   GDAL 소스 트리에 ('swig' 하위 디렉터리에) 일반 `SWIG <http://www.swig.org/>`_ 인터페이스 파일들의 집합과 그에 기반한 언어 바인딩 집합이 있습니다. 현재 다음 파일들이 활성 상태입니다:
 
    .. toctree::
        :maxdepth: 1
@@ -104,7 +104,8 @@ API
        csharp/index
        java/index
 
-   There are also other bindings that are developed outside of the GDAL source tree (**note**: those offer APIs not strictly coupled the GDAL/OGR C/C++ API). These include bindings for
+   GDAL 소스 트리 외부에서 개발된 다른 바인딩들도 있습니다. (**주의**: )
+   There are also other bindings that are developed outside of the GDAL source tree (**note**: 이런 언어 바인딩들은 GDAL/OGR C/C++ API와 엄격하게 결합되지 않은 API를 제공합니다.) 다음과 같은 바인딩들을 포함합니다:
 
       .. toctree::
        :maxdepth: 1
@@ -112,20 +113,18 @@ API
        Go <https://github.com/lukeroth/gdal>
        Julia <https://github.com/JuliaGeo/GDAL.jl>
        Lua <https://trac.osgeo.org/gdal/wiki/GdalOgrInLua>
-       Original Node.js bindings <https://github.com/naturalatlas/node-gdal>
-       Node.js fork with full Promise-based async and TypeScript support <https://www.npmjs.com/package/gdal-async>
-       Perl <https://metacpan.org/release/Geo-GDAL-FFI>
+       원본 Node.js 바인딩 <https://github.com/naturalatlas/node-gdal>
+       전체 프로미스(Promise) 기반 비동기 및 TypeScript 지원을 포함하는 Node.js 포크 <https://www.npmjs.com/package/gdal-async>
+       펄(Perl) <https://metacpan.org/release/Geo-GDAL-FFI>
        PHP <http://dl.maptools.org/dl/php_ogr/php_ogr_documentation.html>
        R <http://cran.r-project.org/web/packages/rgdal/index.html>
 
-    .. warning::
-        For Perl, since GDAL 3.5 the link `Perl <https://trac.osgeo.org/gdal/wiki/GdalOgrInPerl>`__ is deprecated, use above link instead.
+   .. warning::
+        펄의 경우, GDAL 3.5버전부터 `Perl <https://trac.osgeo.org/gdal/wiki/GdalOgrInPerl>`_ 링크가 퇴출되었기 때문에, 앞의 링크를 대신 사용하십시오.
 
-        For R, rgdal in SourceForge is out of date.
+        R의 경우, 소스포지(SourceForge)에 있는 rgdal이 오래되었습니다.
 
-
-
-    There are also more Pythonic ways of using the vector/OGR functions with
+   벡터/OGR 함수를 좀 더 파이썬처럼 사용하는 방식도 있습니다:
 
       .. toctree::
        :maxdepth: 1
@@ -133,7 +132,7 @@ API
        Fiona <https://github.com/Toblerity/Fiona>
        Rasterio <https://github.com/mapbox/rasterio>
 
-    There is a more idiomatic Golang way of using the raster functions with
+   래스터 함수를 좀 더 관용적인 Go 언어처럼 사용하는 방식이 있습니다:
 
       .. toctree::
        :maxdepth: 1
@@ -142,5 +141,5 @@ API
 
 .. only:: latex
 
-    API is omitted in this PDF document. You can consult it on
-    https://gdal.org/api/index.html
+   이 PDF 문서에서는 API가 생략되었습니다. https://gdal.org/api/index.html 에서 볼 수 있습니다.
+
