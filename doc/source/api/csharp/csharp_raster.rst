@@ -1,17 +1,16 @@
 .. _csharp_raster:
 
 ================================================================================
-C# Raster Interface
+C# 래스터 인터페이스
 ================================================================================
 
-The GDAL C# interface supports transferring raster data between the C# application and GDAL.
+GDAL C# 인터페이스는 C# 응용 프로그램과 GDAL 간의 래스터 데이터 전송을 지원합니다.
 
-The various :file:`Band.ReadRaster`, :file:`Band.WriteRaster`, :file:`Dataset.ReadRaster`, :file:`Dataset.WriteRaster` overloads
-are involved in transferring raster data between the managed and the unmanaged parts of the application.
+다양한 :file:`Band.ReadRaster`, :file:`Band.WriteRaster`, :file:`Dataset.ReadRaster`, :file:`Dataset.WriteRaster` 오버로드(overload) 들이 응용 프로그램의 관리 부분과 비관리 부분 간의 래스터 데이터 전송에 관여하고 있습니다.
 
-This page will summarize the main aspects of raster data handling related exclusively to the C# interface.
+이 페이지에서는 특히 C# 인터페이스에 관련된 래스터 데이터 처리의 주요 측면을 요약할 것입니다.
 
-The :file:`Band` class contains the following :file:`ReadRaster`/:file:`WriteRaster` overloads:
+:file:`Band` 클래스는 다음 :file:`ReadRaster`/:file:`WriteRaster` 오버로드들을 담고 있습니다:
 
 .. code-block:: C#
 
@@ -51,30 +50,26 @@ The :file:`Band` class contains the following :file:`ReadRaster`/:file:`WriteRas
     public CPLErr WriteRaster(int xOff, int yOff, int xSize, int ySize, IntPtr buffer, 
         int buf_xSize, int buf_ySize, DataType buf_type, int pixelSpace, int lineSpace){}
 
-The only difference between these functions is the actual type of the buffer parameter.
-The last 2 overloads are the generic overloads and the caller should write the proper marshaling
-code for the buffer holding the raster data. The overloads that have a C# array as the buffer parameter
-implement the proper marshaling code for the caller.
+이 함수들 사이의 유일한 차이점은 버퍼 파라미터의 실제 유형뿐입니다. 마지막 두 오버로드는 일반 오버로드로, 호출자가 래스터 데이터를 담고 있는 버퍼에 대한 적절한 정렬(marshaling) 코드를 작성해야 합니다. C# 배열을 버퍼 파라미터로 가지고 있는 오버로드는 호출자에 적절한 정렬 코드를 구현합니다.
 
-Reading the raster image
-------------------------
+래스터 이미지 읽어오기
+----------------------
 
-When reading raster data from GDAL, the user will probably create a .NET image to hold C# representation of the data.
-The raster data can be read directly or in a buffered fashion.
+GDAL로부터 래스터 데이터를 읽어올 때, 사용자가 데이터의 C# 표현을 담을 .NET 이미지를 생성할 수도 있습니다. 래스터 데이터를 직접 또는 버퍼를 이용해서 읽어올 수 있습니다.
 
-Using the buffered read approach
-++++++++++++++++++++++++++++++++
+버퍼 이용 읽기 접근법 사용하기
+++++++++++++++++++++++++++++++
 
-When reading the image this way the C# API will copy the image data between the C and the C# arrays:
+이미지를 이 방법으로 읽어오는 경우 C# API가 C 배열과 C# 배열 간에 이미지 데이터를 복사할 것입니다:
 
 .. code-block:: C#
 
-    // Creating a Bitmap to store the GDAL image in
+    // GDAL 이미지를 저장할 비트맵 생성
     Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format32bppRgb);
-    // Creating a C# array to hold the image data
+    // 이미지 데이터를 담을 C# 배열 생성
     byte[] r = new byte[width * height];
     band.ReadRaster(0, 0, width, height, r, width, height, 0, 0);
-    // Copying the pixels into the C# bitmap
+    // C# 비트맵에 픽셀 복사
     int i, j;
     for (i = 0; i< width; i++) 
     {
@@ -85,7 +80,7 @@ When reading the image this way the C# API will copy the image data between the 
         }
     }
 
-In this case the interface implementation uses an internally created unmanaged array to transfer the data between the C and C++ part of the code, like:
+이 경우 인터페이스 구현이 내부적으로 생성된 비관리 배열을 이용해서 코드의 C 부분과 C++ 부분 간에 데이터를 다음과 같이 전송합니다:
 
 .. code-block:: C#
 
@@ -102,16 +97,16 @@ In this case the interface implementation uses an internally created unmanaged a
         return retval;
     }
 
-Using the direct read approach
-++++++++++++++++++++++++++++++
+직접 읽기 접근법 사용하기
++++++++++++++++++++++++++
 
-Raster data can be read into the C# bitmap directly using the following approach:
+다음과 같은 접근법을 사용해서 C# 비트맵에 래스터 데이터를 직접 읽어올 수 있습니다:
 
 .. code-block:: C#
 
-    // Creating a Bitmap to store the GDAL image in
+    // GDAL 이미지를 저장할 비트맵 생성
     Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format8bppIndexed);
-    // Obtaining the bitmap buffer
+    // 비트맵 버퍼 가져오기
     BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
     try 
     {
@@ -124,14 +119,12 @@ Raster data can be read into the C# bitmap directly using the following approach
         bitmap.UnlockBits(bitmapData);
     }
 
-This approach is more performant than the previous since there's no need to allocate an intermediary array for transferring the data.
+이 접근법이 앞의 접근법보다 성능면에서 좋습니다. 데이터를 전송하기 위해 중간(intermediary) 배열을 할당할 필요가 없기 때문입니다.
 
-Using /unsafe code and the fixed statement
-++++++++++++++++++++++++++++++++++++++++++
+/unsafe 코드 및 고정 선언문 사용하기
+++++++++++++++++++++++++++++++++++++
 
-In the previous examples the programmer could ignore bothering with implementing the marshaling code for the raster arrays.
-Both of the examples prevent the garbage collector from relocating the array during the execution of the P/Invoke call.
-Without using an intermediary array the programmer can also use the following method to read the raster data:
+앞의 예시들에서는 프로그래머가 래스터 배열 용 정렬 코드를 굳이 구현하지 않아도 괜찮았습니다. 두 예시 모두 P/Invoke 호출을 실행하는 동안 가비지 수거기가 배열을 재배치하는 일을 방지하기 때문입니다. 프로그래머는 중간 배열을 사용하지 않고서도 다음과 같은 방법을 사용해서 래스터 데이터를 읽어올 수 있습니다:
 
 .. code-block:: C#
 
@@ -140,12 +133,12 @@ Without using an intermediary array the programmer can also use the following me
     band.ReadRaster(0, 0, width, height, ptr, width, height, 1, width);
     }
 
-When using this approach the application must be compiled using the :program:`/unsafe` command line option.
+이 접근법을 사용하는 경우 응용 프로그램을 :program:`/unsafe` 명령줄 옵션을 이용해서 컴파일해야만 합니다.
 
-Using indexed / grayscale images
-++++++++++++++++++++++++++++++++
+색인/회색조 이미지 사용하기
++++++++++++++++++++++++++++
 
-The :file:`PaletteInterp` enumeration can be used to distinguish between the various type of the image color interpretations.
+:file:`PaletteInterp` 목록을 이용해서 다양한 유형의 이미지 색상 해석들을 구분할 수 있습니다:
 
 .. code-block:: C#
 
@@ -156,16 +149,16 @@ The :file:`PaletteInterp` enumeration can be used to distinguish between the var
         Console.WriteLine("   This raster band has RGB palette interpretation!");
     }
 
-When reading images with indexed color representations, the programmer might have to do some extra work copying the palette over:
+색인된 색상 표현을 가진 이미지를 읽어오는 경우, 프로그래머가 다음과 같이 색상표를 복사하는 추가 작업을 해야 할 수도 있습니다:
 
 .. code-block:: C#
 
-    // Get the GDAL Band objects from the Dataset
+    // 데이터셋으로부터 GDAL 밴드 객체 가져오기
     Band band = dataset.GetRasterBand(1);
     ColorTable ct = band.GetRasterColorTable();
-    // Create a Bitmap to store the GDAL image in
+    // GDAL 이미지를 저장할 비트맵 생성
     Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format8bppIndexed);
-    // Obtaining the bitmap buffer
+    // 비트맵 버퍼 가져오기
     BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
     try 
         {
@@ -189,15 +182,15 @@ When reading images with indexed color representations, the programmer might hav
             }
         }
 
-When reading grayscale images, the programmer should create a sufficient palette for the .NET image.
+회색조 이미지를 읽어오는 경우, 프로그래머는 .NET 이미지를 위해 충분한 색상표를 생성해야 합니다:
 
 .. code-block:: C#
 
-    // Get the GDAL Band objects from the Dataset
+    // 데이터셋으로부터 GDAL 밴드 객체 가져오기
     Band band = ds.GetRasterBand(1);
-    // Create a Bitmap to store the GDAL image in
+    // GDAL 이미지를 저장할 비트맵 생성
     Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format8bppIndexed);
-    // Obtaining the bitmap buffer
+    // 비트맵 버퍼 가져오기
     BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
     try 
         {
@@ -216,13 +209,16 @@ When reading grayscale images, the programmer should create a sufficient palette
             bitmap.UnlockBits(bitmapData);
         }
 
-Related C# examples
-+++++++++++++++++++
+관련 C# 예시
+++++++++++++
 
-The following examples demonstrate the usage of the GDAL raster operations mentioned previously:
+다음 예시들은 앞에서 설명한 GDAL 래스터 작업의 사용례를 보여줍니다:
 
-* `GDALRead.cs <https://github.com/OSGeo/gdal/blob/master/swig/csharp/apps/GDALRead.cs>`__
-* `GDALReadDirect.cs <https://github.com/OSGeo/gdal/blob/master/swig/csharp/apps/GDALReadDirect.cs>`__
-* `GDALWrite.cs <https://github.com/OSGeo/gdal/blob/master/swig/csharp/apps/GDALReadDirect.cs>`__
+-  `GDALRead.cs <https://github.com/OSGeo/gdal/blob/master/swig/csharp/apps/GDALRead.cs>`_
+-  `GDALReadDirect.cs <https://github.com/OSGeo/gdal/blob/master/swig/csharp/apps/GDALReadDirect.cs>`_
+-  `GDALWrite.cs <https://github.com/OSGeo/gdal/blob/master/swig/csharp/apps/GDALReadDirect.cs>`_
 
-.. note:: This document was amended from the previous version at `https://trac.osgeo.org/gdal/wiki/GdalOgrCsharpRaster <https://trac.osgeo.org/gdal/wiki/GdalOgrCsharpRaster>`__
+.. note::
+
+   이 문서는 `https://trac.osgeo.org/gdal/wiki/GdalOgrCsharpRaster <https://trac.osgeo.org/gdal/wiki/GdalOgrCsharpRaster>`_ 에 있는 이전 버전을 수정한 것입니다.
+

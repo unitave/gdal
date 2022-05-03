@@ -1,25 +1,23 @@
 .. _csharp_usage:
 
 ================================================================================
-C# Bindings Usage Advice
+C# 바인딩 사용례 조언
 ================================================================================
 
-Adding reference to the GDAL/OGR assemblies
--------------------------------------------
+GDAL/OGR 집합에 참조 추가하기
+-----------------------------
 
-TODO
+작성 예정
 
-Using the interface classes
----------------------------
+인터페이스 클래스 사용하기
+--------------------------
 
-TODO
+작성 예정
 
+로컬 검색 경로 수정하기
+-----------------------
 
-Modifying Local Search Path
----------------------------
-
-
-If you want to add a folder to PATH during run-time, so you don't have to pollute system PATH permanently, you can do it this way, in C#
+시스템 PATH를 영구적으로 변경하지 않아도 되도록 런타임 도중 PATH에 폴더를 추가하고 싶다면, C#에서 다음과 같은 방법으로 할 수 있습니다:
 
 .. code-block:: C#
 
@@ -39,10 +37,10 @@ If you want to add a folder to PATH during run-time, so you don't have to pollut
     path += ";" + GDAL_HOME;
     SetEnvironmentVariable("PATH", path);
 
+MSDN 문서:
 
-MSDN documentation:
+-  `http://msdn2.microsoft.com/en-us/library/ms686206.aspx <http://msdn2.microsoft.com/en-us/library/ms686206.aspx>`_
+-  `http://msdn2.microsoft.com/en-us/library/system.environment.setenvironmentvariable.aspx <http://msdn2.microsoft.com/en-us/library/system.environment.setenvironmentvariable.aspx>`_
 
-* `http://msdn2.microsoft.com/en-us/library/ms686206.aspx <http://msdn2.microsoft.com/en-us/library/ms686206.aspx>`__
-* `http://msdn2.microsoft.com/en-us/library/system.environment.setenvironmentvariable.aspx <http://msdn2.microsoft.com/en-us/library/system.environment.setenvironmentvariable.aspx>`__
+:program:`SetEnvironmentVariable()` 에 P/Invoke를 호출하는 대신, C# 네이티브 :program:`Environment.SetEnvironmentVariable()` 메소드를 사용할 수 있습니다. 이 메소드에는 두 가지 버전이 있기 때문에, 문서를 자세히 읽어보십시오. P/Invoke를 통해 접근하는 Win32 API 호출과는 달리, :program:`Environment.SetEnvironmentVariable()` 메소드는 프로세스들에 걸쳐 환경을 영구적으로 변경'할 수도' 있는 오버로드를 가지고 있습니다.
 
-Instead of the P/Invoke call to :program:`SetEnvironmentVariable()`, you can use C# native method :program:`Environment.SetEnvironmentVariable()`. Read the doc carefully, because there are two versions of this method. Unlike the Win32 API call accessed through P/Invoke, the method :program:`Environment.SetEnvironmentVariable()` has an overload that *may* change environment permanently, across processes.
