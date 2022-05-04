@@ -1,22 +1,22 @@
 .. _raster_api_tut:
 
 ================================================================================
-Raster API tutorial
+래스터 API 예제
 ================================================================================
 
-Opening the File
-----------------
+파일 열기
+---------
 
-Before opening a GDAL supported raster datastore it is necessary to register drivers. There is a driver for each supported format. Normally this is accomplished with the :cpp:func:`GDALAllRegister` function which attempts to register all known drivers, including those auto-loaded from .so files using :cpp:func:`GDALDriverManager::AutoLoadDrivers`. If for some applications it is necessary to limit the set of drivers it may be helpful to review the code from gdalallregister.cpp. Python automatically calls GDALAllRegister() when the gdal module is imported.
+GDAL이 지원하는 래스터 데이터 저장소를 열기 전에 드라이버를 등록해야 합니다. 지원하는 포맷별로 드라이버가 존재합니다. 일반적으로 :cpp:func:`GDALDriverManager::AutoLoadDrivers` 함수를 이용해서 .so 파일로부터 자동으로 불러오는 드라이버를 포함, 알려진 모든 드라이버를 등록하려 시도하는 :cpp:func:`GDALAllRegister` 함수로 드라이버를 등록합니다. 일부 응용 프로그램의 경우 등록되는 드라이버 집합을 제한해야 한다면, :file:`gdalallregister.cpp` 파일의 코드를 살펴보는 것이 도움이 될 수도 있습니다. 파이썬은 GDAL 모듈을 가져올 때 자동적으로 :cpp:func:`GDALAllRegister` 함수를 호출합니다.
 
-Once the drivers are registered, the application should call the free standing :cpp:func:`GDALOpen` function to open a dataset, passing the name of the dataset and the access desired (GA_ReadOnly or GA_Update).
+드라이버를 등록한 다음, 응용 프로그램이 독립형 :cpp:func:`GDALOpen` 함수를 호출해서 데이터셋의 이름 및 원하는 접근법(GA_ReadOnly 또는 GA_Update)을 전송해서 데이터를 열어야 합니다.
 
-In C++:
+C++ 코드:
 
 .. code-block:: c++
 
     #include "gdal_priv.h"
-    #include "cpl_conv.h" // for CPLMalloc()
+    #include "cpl_conv.h" // CPLMalloc() 용
     int main()
     {
         GDALDataset  *poDataset;
@@ -27,12 +27,12 @@ In C++:
             ...;
         }
 
-In C:
+C 코드:
 
 .. code-block:: c
 
     #include "gdal.h"
-    #include "cpl_conv.h" /* for CPLMalloc() */
+    #include "cpl_conv.h" /* CPLMalloc() 용 */
     int main()
     {
         GDALDatasetH  hDataset;
@@ -44,7 +44,7 @@ In C:
         }
 
 
-In Python:
+파이썬 코드:
 
 .. code-block:: python
 
@@ -53,29 +53,29 @@ In Python:
     if not dataset:
         ...
 
-Note that if :cpp:func:`GDALOpen` returns NULL it means the open failed, and that an error messages will already have been emitted via :cpp:func:`CPLError`. If you want to control how errors are reported to the user review the :cpp:func:`CPLError` documentation. Generally speaking all of GDAL uses :cpp:func:`CPLError` for error reporting. Also, note that pszFilename need not actually be the name of a physical file (though it usually is). It's interpretation is driver dependent, and it might be an URL, a filename with additional parameters added at the end controlling the open or almost anything. Please try not to limit GDAL file selection dialogs to only selecting physical files.
+:cpp:func:`GDALOpen` 이 NULL을 반환한다면 파일 열기가 실패했으며 이미 :cpp:func:`CPLError` 함수를 통해 오류 메시지를 발송했을 것이라는 의미입니다. 오류가 사용자에게 리포트되는 방법을 제어하고 싶다면 :cpp:func:`CPLError` 문서를 살펴보십시오. 일반적으로, 모든 GDAL이 :cpp:func:`CPLError` 함수를 이용해서 오류를 리포트합니다. 또한 'pszFilename'이 실제로 디스크 상에 존재하는 파일의 이름일 필요는 없다는 사실을 기억하십시오. (보통 실제로 존재하는 파일의 이름이긴 합니다.) 데이터셋 이름의 해석은 드라이버에 따라 달라지며, 이 이름은 URL일 수도 있고 파일 열기를 제어하는 추가 파라미터가 뒤에 추가된 파일명일 수도 있고, 또는 거의 어떤 것이든 될 수 있습니다. GDAL 파일 선택 대화창을 디스크 상에 존재하는 파일만 선택하기 위한 것으로 제한하지 말아주십시오.
 
-Getting Dataset Information
----------------------------
+데이터셋 정보 수집하기
+----------------------
 
-As described in the :ref:`raster_data_model`, a :cpp:class:`GDALDataset` contains a list of raster bands, all pertaining to the same area, and having the same resolution. It also has metadata, a coordinate system, a georeferencing transform, size of raster and various other information.
+:ref:`raster_data_model` 에서 설명했듯이, :cpp:class:`GDALDataset` 클래스는 모두 동일 영역 범위이고 동일 해상도를 가진 래스터 밴드들의 목록을 담고 있습니다. 메타데이터, 좌표계, 지리참조 변환, 래스터 크기, 그리고 다양한 기타 정보도 가지고 있습니다.
 
-In the particular, but common, case of a "north up" image without any rotation or shearing, the georeferencing transform :ref:`geotransforms_tut` takes the following form :
+특수하지만 동시에 흔한 경우로, 기울어지지 않은 또는 전단(剪斷)되지 않은 "북쪽이 위"인 이미지의 경우 지리참조 변환 :ref:`geotransforms_tut` 는 다음 형식을 취합니다:
 
 .. code-block:: c
 
-    adfGeoTransform[0] /* top left x */
-    adfGeoTransform[1] /* w-e pixel resolution */
+    adfGeoTransform[0] /* 좌상단 x */
+    adfGeoTransform[1] /* w-e 픽셀 해상도 */
     adfGeoTransform[2] /* 0 */
-    adfGeoTransform[3] /* top left y */
+    adfGeoTransform[3] /* 좌상단 y */
     adfGeoTransform[4] /* 0 */
-    adfGeoTransform[5] /* n-s pixel resolution (negative value) */
+    adfGeoTransform[5] /* n-s 픽셀 해상도 (음의 값) */
 
-In the general case, this is an affine transform.
+일반적인 경우, 이는 아핀 변환입니다.
 
-If we wanted to print some general information about the dataset we might do the following:
+데이터셋에 관한 몇몇 일반 정보를 출력하고자 하는 경우 다음과 같은 코드를 실행할 수도 있습니다:
 
-In C++:
+C++ 코드:
 
 .. code-block:: c++
 
@@ -96,7 +96,7 @@ In C++:
                 adfGeoTransform[1], adfGeoTransform[5] );
     }
 
-In C:
+C 코드:
 
 .. code-block:: c
 
@@ -120,7 +120,7 @@ In C:
                 adfGeoTransform[1], adfGeoTransform[5] );
     }
 
-In Python:
+파이썬 코드:
 
 .. code-block:: python
 
@@ -135,12 +135,12 @@ In Python:
         print("Origin = ({}, {})".format(geotransform[0], geotransform[3]))
         print("Pixel Size = ({}, {})".format(geotransform[1], geotransform[5]))
 
-Fetching a Raster Band
-----------------------
+래스터 밴드 가져오기
+--------------------
 
-At this time access to raster data via GDAL is done one band at a time. Also, there is metadata, block sizes, color tables, and various other information available on a band by band basis. The following codes fetches a :cpp:class:`GDALRasterBand` object from the dataset (numbered 1 through :cpp:func:`GDALRasterBand::GetRasterCount`) and displays a little information about it.
+현재 GDAL을 통해 래스터 데이터에 접근하면 한 번에 밴드 하나씩 접근합니다. 또한 밴드별로 메타데이터, 블록 크기, 색상표, 그리고 다양한 기타 정보를 사용할 수 있습니다. 다음 코드들은 (:cpp:func:`GDALRasterBand::GetRasterCount` 함수를 통해 1번으로 번호가 매겨진) 데이터셋으로부터 :cpp:class:`GDALRasterBand` 객체를 가져와서 관련 정보를 출력합니다:
 
-In C++:
+C++ 코드:
 
 .. code-block:: c++
 
@@ -167,7 +167,7 @@ In C++:
                 poBand->GetColorTable()->GetColorEntryCount() );
 
 
-In C:
+C 코드:
 
 .. code-block:: c
 
@@ -194,7 +194,7 @@ In C:
                 GDALGetColorEntryCount(
                     GDALGetRasterColorTable( hBand ) ) );
 
-In Python:
+파이썬 코드:
 
 .. code-block:: python
 
@@ -213,12 +213,12 @@ In Python:
     if band.GetRasterColorTable():
         print("Band has a color table with {} entries".format(band.GetRasterColorTable().GetCount()))
 
-Reading Raster Data
--------------------
+래스터 데이터 읽기
+------------------
 
-There are a few ways to read raster data, but the most common is via the :cpp:func:`GDALRasterBand::RasterIO` method. This method will automatically take care of data type conversion, up/down sampling and windowing. The following code will read the first scanline of data into a similarly sized buffer, converting it to floating point as part of the operation.
+래스터 데이터를 읽어올 수 있는 방법이 몇 가지 있지만, 가장 흔한 방법은 :cpp:func:`GDALRasterBand::RasterIO` 메소드를 통해 읽어오는 것입니다. 이 메소드는 데이터 유형 변환, 업샘플링/다운샘플링 및 윈도윙(windowing) 작업을 자동으로 처리할 것입니다. 다음 코드들은 데이터의 첫 번째 스캔라인을 부동소수점형으로 변환시켜 비슷한 크기의 버퍼로 읽어올 것입니다.
 
-In C++:
+C++ 코드:
 
 .. code-block:: c++
 
@@ -229,9 +229,9 @@ In C++:
                     pafScanline, nXSize, 1, GDT_Float32,
                     0, 0 );
 
-The pafScanline buffer should be freed with CPLFree() when it is no longer used.
+더 이상 사용하지 않을 때 :cpp:func:`CPLFree()` 함수로 'pafScanline' 버퍼를 해제해줘야 합니다.
 
-In C:
+C 코드:
 
 .. code-block:: c
 
@@ -242,9 +242,9 @@ In C:
                 pafScanline, nXSize, 1, GDT_Float32,
                 0, 0 );
 
-The pafScanline buffer should be freed with CPLFree() when it is no longer used.
+더 이상 사용하지 않을 때 :cpp:func:`CPLFree()` 함수로 'pafScanline' 버퍼를 해제해줘야 합니다.
 
-In Python:
+파이썬 코드:
 
 .. code-block:: python
 
@@ -253,14 +253,14 @@ In Python:
                             buf_xsize=band.XSize, buf_ysize=1,
                             buf_type=gdal.GDT_Float32)
 
-Note that the returned scanline is of type string, and contains xsize*4 bytes of raw binary floating point data. This can be converted to Python values using the struct module from the standard library:
+반환되는 스캔라인이 문자열 유형이고 원시(raw) 바이너리 부동소수점형 데이터 'XSize*4'바이트를 담고 있다는 사실을 기억하십시오. 다음과 같이 표준 라이브러리의 'struct' 모듈을 이용해서 이 스캔라인을 파이썬 값으로 변환할 수 있습니다:
 
 .. code-block:: python
 
     import struct
     tuple_of_floats = struct.unpack('f' * b2.XSize, scanline)
 
-The RasterIO call takes the following arguments.
+:cpp:func:`GDALRasterBand::RasterIO` 함수는 다음 인자들을 입력받습니다:
 
 .. code-block:: c++
 
@@ -271,27 +271,27 @@ The RasterIO call takes the following arguments.
                                     int nPixelSpace,
                                     int nLineSpace )
 
-Note that the same RasterIO() call is used to read, or write based on the setting of eRWFlag (either GF_Read or GF_Write). The nXOff, nYOff, nXSize, nYSize argument describe the window of raster data on disk to read (or write). It doesn't have to fall on tile boundaries though access may be more efficient if it does.
+동일한 :cpp:func:`GDALRasterBand::RasterIO` 호출이 'eRWFlag'의 설정을 (GF_Read 또는 GF_Write) 기반으로 읽기 또는 쓰기에 사용된다는 사실을 기억하십시오. 'nXOff', 'nYOff', 'nXSize', 'nYSize' 인자는 디스크에서 읽어올 (또는 작성할) 래스터 데이터의 윈도우를 서술합니다. 이 윈도우가 꼭 타일 경계선과 일치할 필요는 없지만 일치하는 경우 더욱 효율적으로 접근할 수 있을 것입니다.
 
-The pData is the memory buffer the data is read into, or written from. It's real type must be whatever is passed as eBufType, such as GDT_Float32, or GDT_Byte. The RasterIO() call will take care of converting between the buffer's data type and the data type of the band. Note that when converting floating point data to integer RasterIO() rounds down, and when converting source values outside the legal range of the output the nearest legal value is used. This implies, for instance, that 16bit data read into a GDT_Byte buffer will map all values greater than 255 to 255, the data is not scaled!
+'pData'는 데이터를 읽어올 (또는 작성할) 메모리 버퍼입니다. 이 버퍼의 실수 유형은 GDT_Float32 또는 GDT_Byte처럼 eBufType으로 전송되는 값이어야만 합니다. :cpp:func:`RasterIO` 를 호출하면 버퍼의 데이터 유형과 밴드의 데이터 유형 간의 변환을 처리할 것입니다. 부동소수점형 데이터를 정수형으로 변환하는 경우 :cpp:func:`RasterIO` 가 값을 내림(round down)하고, 산출물의 정당한 범위를 벗어나는 소스 값을 변환하는 경우 정당한 범위 안에 있는 최근접 값을 사용한다는 사실을 기억하십시오. 다시 말해, 예를 들면 GDT_Byte 버퍼로 16비트 데이터를 읽어올 때 255를 초과하는 모든 값을 255로 변환할 것입니다. 데이터를 크기 조정하지 않습니다!
 
-The nBufXSize and nBufYSize values describe the size of the buffer. When loading data at full resolution this would be the same as the window size. However, to load a reduced resolution overview this could be set to smaller than the window on disk. In this case the RasterIO() will utilize overviews to do the IO more efficiently if the overviews are suitable.
+'nBufXSize' 및 'nBufYSize' 값은 버퍼의 크기를 서술합니다. 전체 해상도 수준의 데이터를 불러오는 경우 버퍼 크기가 윈도우 크기와 동일할 것입니다. 하지만 감소 해상도 오버뷰를 불러오는 경우 디스크 상에서의 윈도우보다 작게 설정할 수 있습니다. 이 경우 오버뷰를 사용하는 편이 더 적합하다면 :cpp:func:`RasterIO` 가 I/O를 더 효율적으로 수행하기 위해 오버뷰를 활용할 것입니다.
 
-The nPixelSpace, and nLineSpace are normally zero indicating that default values should be used. However, they can be used to control access to the memory data buffer, allowing reading into a buffer containing other pixel interleaved data for instance.
+일반적으로 'nPixelSpace' 및 'nLineSpace' 값은 기본값을 사용해야 한다는 뜻인 0입니다. 하지만 이 값들을 사용해서 메모리 데이터 버퍼에의 접근을 제어할 수 있습니다. 예를 들어 다른 픽셀 교차삽입 데이터를 담고 있는 버퍼에 데이터를 읽어올 수 있습니다.
 
-Closing the Dataset
--------------------
+데이터셋 종료하기
+-----------------
 
-Please keep in mind that :cpp:class:`GDALRasterBand` objects are owned by their dataset, and they should never be destroyed with the C++ delete operator. :cpp:class:`GDALDataset`'s can be closed by calling :cpp:func:`GDALClose` (it is NOT recommended to use the delete operator on a GDALDataset for Windows users because of known issues when allocating and freeing memory across module boundaries. See the relevant topic on the FAQ). Calling GDALClose will result in proper cleanup, and flushing of any pending writes. Forgetting to call GDALClose on a dataset opened in update mode in a popular format like GTiff will likely result in being unable to open it afterwards.
+:cpp:class:`GDALRasterBand` 객체는 해당 데이터셋의 소유이기 때문에, 절대로 C++ 삭제 연산자로 삭제해서는 안 된다는 사실을 기억하십시오. :cpp:func:`GDALClose` 함수를 호출하면 :cpp:class:`GDALDataset` 클래스를 종료할 수 있습니다. (윈도우 사용자의 경우 GDALDataset에 삭제 연산자를 사용하는 것을 권장하지 않습니다. 모듈 경계에 걸쳐 메모리를 할당하고 해제하는 경우 발생한다고 알려진 문제점 때문입니다. FAQ에서 관련 주제를 읽어보십시오.) :cpp:func:`GDALClose` 함수를 호출하면 제대로 마무리(cleanup)하고 대기 중인 모든 쓰기를 플러싱(flushing)할 것입니다. GeoTIFF 같은 유명한 포맷으로 된 데이터셋을 업데이트 모드로 열었는데 이 데이터셋에 대해 :cpp:func:`GDALClose` 함수를 호출하는 일을 잊었다면, 일반적으로 다시 열 수 없게 될 것입니다.
 
-Techniques for Creating Files
------------------------------
+파일 생성 기법
+--------------
 
-New files in GDAL supported formats may be created if the format driver supports creation. There are two general techniques for creating files, using CreateCopy() and Create(). The CreateCopy method involves calling the CreateCopy() method on the format driver, and passing in a source dataset that should be copied. The Create method involves calling the Create() method on the driver, and then explicitly writing all the metadata, and raster data with separate calls. All drivers that support creating new files support the CreateCopy() method, but only a few support the Create() method.
+GDAL이 지원하는 포맷의 드라이버가 생성을 지원하는 경우 해당 포맷으로 된 새 파일을 생성할 수도 있습니다. :cpp:func:`GDALDriver::CreateCopy` 그리고 :cpp:func:`GDALDriver::Create` 메소드를 사용하는 일반 기법이 두 가지 존재합니다. CreateCopy 메소드는 포맷 드라이버에 :cpp:func:`CreateCopy` 함수를 호출해서 복사해야 할 데이터셋에 전송합니다. Create 메소드는 드라이버에 :cpp:func:`Create` 함수를 호출한 다음, 모든 메타데이터와 래스터 데이터를 개별 호출로 명확하게 작성합니다. 새 파일 생성을 지원하는 모든 드라이버는 :cpp:func:`CreateCopy` 메소드를 지원하지만, :cpp:func:`Create` 메소드를 지원하는 드라이버는 몇 개 없습니다.
 
-To determine if a particular format supports Create or CreateCopy it is possible to check the DCAP_CREATE and DCAP_CREATECOPY metadata on the format driver object. Ensure that :cpp:func:`GDALAllRegister` has been called before calling :cpp:func:`GDALDriverManager::GetDriverByName`. In this example we fetch a driver, and determine whether it supports Create() and/or CreateCopy().
+특정 포맷이 :cpp:func:`Create` 또는 :cpp:func:`CreateCopy` 를 지원하는지 판단하려면 포맷 드라이버 객체 상에 DCAP_CREATE 및 DCAP_CREATECOPY 메타데이터가 존재하는지 확인해보면 됩니다. :cpp:func:`GDALDriverManager::GetDriverByName` 함수를 호출하기 전에 :cpp:func:`GDALAllRegister` 를 호출했는지 확인하십시오. 다음은 드라이버 객체를 가져와서 :cpp:func:`Create` 그리고/또는 :cpp:func:`CreateCopy` 를 지원하는지 판단하는 예시입니다:
 
-In C++:
+C++ 코드:
 
 .. code-block:: c++
 
@@ -309,7 +309,7 @@ In C++:
         if( CSLFetchBoolean( papszMetadata, GDAL_DCAP_CREATECOPY, FALSE ) )
             printf( "Driver %s supports CreateCopy() method.\n", pszFormat );
 
-In C:
+C 코드:
 
 .. code-block:: c
 
@@ -326,7 +326,7 @@ In C:
         if( CSLFetchBoolean( papszMetadata, GDAL_DCAP_CREATECOPY, FALSE ) )
             printf( "Driver %s supports CreateCopy() method.\n", pszFormat );
 
-In Python:
+파이썬 코드:
 
 .. code-block:: python
 
@@ -339,14 +339,14 @@ In Python:
     if metadata.get(gdal.DCAP_CREATECOPY) == "YES":
         print("Driver {} supports CreateCopy() method.".format(fileformat))
 
-Note that a number of drivers are read-only and won't support Create() or CreateCopy().
+드라이버들 가운데 상당수가 읽기 전용이기 때문에 :cpp:func:`Create` 또는 :cpp:func:`CreateCopy` 를 지원하지 않을 것이라는 사실을 기억하십시오.
 
-Using CreateCopy()
-------------------
+CreateCopy() 사용하기
+---------------------
 
-The :cpp:func:`GDALDriver::CreateCopy` method can be used fairly simply as most information is collected from the source dataset. However, it includes options for passing format specific creation options, and for reporting progress to the user as a long dataset copy takes place. A simple copy from the a file named pszSrcFilename, to a new file named pszDstFilename using default options on a format whose driver was previously fetched might look like this:
+:cpp:func:`GDALDriver::CreateCopy` 메소드를 사용해서 소스 데이터셋으로부터 대부분의 정보를 꽤 간단하게 수집할 수 있습니다. 하지만 이 메소드는 포맷 특화 생성 옵션을 전송하기 위한 옵션들과 대용량 데이터셋을 복사하는 동안 사용자에게 진행 상황을 리포트하기 위한 옵션들을 포함합니다. 이전에 불러온 드라이버의 포맷에 기본 옵션을 사용해서 'pszSrcFilename'이라는 기존 파일을 'pszDstFilename'이라는 새 파일로 복사하는 단순한 코드는 다음과 같을 것입니다:
 
-In C++:
+C++ 코드:
 
 .. code-block:: c++
 
@@ -355,12 +355,12 @@ In C++:
     GDALDataset *poDstDS;
     poDstDS = poDriver->CreateCopy( pszDstFilename, poSrcDS, FALSE,
                                     NULL, NULL, NULL );
-    /* Once we're done, close properly the dataset */
+    /* 작업이 끝나면 데이터셋을 제대로 종료합니다 */
     if( poDstDS != NULL )
         GDALClose( (GDALDatasetH) poDstDS );
     GDALClose( (GDALDatasetH) poSrcDS );
 
-In C:
+C 코드:
 
 .. code-block:: c
 
@@ -368,26 +368,26 @@ In C:
     GDALDatasetH hDstDS;
     hDstDS = GDALCreateCopy( hDriver, pszDstFilename, hSrcDS, FALSE,
                             NULL, NULL, NULL );
-    /* Once we're done, close properly the dataset */
+    /* 작업이 끝나면 데이터셋을 제대로 종료합니다 */
     if( hDstDS != NULL )
         GDALClose( hDstDS );
     GDALClose(hSrcDS);
 
-In Python:
+파이썬 코드:
 
 .. code-block:: python
 
     src_ds = gdal.Open(src_filename)
     dst_ds = driver.CreateCopy(dst_filename, src_ds, strict=0)
-    # Once we're done, close properly the dataset
+    # 작업이 끝나면 데이터셋을 제대로 종료합니다
     dst_ds = None
     src_ds = None
 
-Note that the CreateCopy() method returns a writable dataset, and that it must be closed properly to complete writing and flushing the dataset to disk. In the Python case this occurs automatically when "dst_ds" goes out of scope. The FALSE (or 0) value used for the bStrict option just after the destination filename in the CreateCopy() call indicates that the CreateCopy() call should proceed without a fatal error even if the destination dataset cannot be created to exactly match the input dataset. This might be because the output format does not support the pixel datatype of the input dataset, or because the destination cannot support writing georeferencing for instance.
+:cpp:func:`CreateCopy` 메소드는 작성 가능한 데이터셋을 반환하며, 쓰기를 완료하고 데이터셋을 디스크로 플러싱하기 위해서는 이 데이터셋을 제대로 종료해야만 한다는 사실을 기억하십시오. 파이썬 코드의 경우 "dst_ds"가 범위를 벗어날 때 데이터셋을 자동으로 종료합니다. :cpp:func:`CreateCopy` 호출에서 대상 파일명 바로 뒤에 오는 'bStrict' 옵션의 값이 FALSE(또는 0)인 경우 대상 데이터셋을 입력 데이터셋과 정확하게 일치하도록 생성할 수 없더라도 치명적인 오류 없이 :cpp:func:`CreateCopy` 호출을 진행해야 한다는 뜻입니다. 예를 들면 산출 포맷이 입력 데이터셋의 픽셀 데이터 유형을 지원하지 않거나 또는 지리참조 정보 작성을 지원하지 못 하기 때문일 수도 있습니다.
 
-A more complex case might involve passing creation options, and using a predefined progress monitor like this:
+다음은 생성 옵션을 전송하고 사전 정의된 진행 상황 모니터를 사용하는 좀 더 복잡한 경우의 예시입니다:
 
-In C++:
+C++ 코드:
 
 .. code-block:: c++
 
@@ -398,12 +398,12 @@ In C++:
         papszOptions = CSLSetNameValue( papszOptions, "COMPRESS", "PACKBITS" );
         poDstDS = poDriver->CreateCopy( pszDstFilename, poSrcDS, FALSE,
                                         papszOptions, GDALTermProgress, NULL );
-        /* Once we're done, close properly the dataset */
+        /* 작업이 끝나면 데이터셋을 제대로 종료합니다 */
         if( poDstDS != NULL )
             GDALClose( (GDALDatasetH) poDstDS );
         CSLDestroy( papszOptions );
 
-In C:
+C 코드:
 
 .. code-block:: c
 
@@ -414,28 +414,28 @@ In C:
         papszOptions = CSLSetNameValue( papszOptions, "COMPRESS", "PACKBITS" );
         hDstDS = GDALCreateCopy( hDriver, pszDstFilename, hSrcDS, FALSE,
                                 papszOptions, GDALTermProgres, NULL );
-        /* Once we're done, close properly the dataset */
+        /* 작업이 끝나면 데이터셋을 제대로 종료합니다 */
         if( hDstDS != NULL )
             GDALClose( hDstDS );
         CSLDestroy( papszOptions );
 
-In Python:
+파이썬 코드:
 
 .. code-block:: python
 
     src_ds = gdal.Open(src_filename)
     dst_ds = driver.CreateCopy(dst_filename, src_ds, strict=0,
                             options=["TILED=YES", "COMPRESS=PACKBITS"])
-    # Once we're done, close properly the dataset
+    # 작업이 끝나면 데이터셋을 제대로 종료합니다
     dst_ds = None
     src_ds = None
 
-Using Create()
---------------
+Create() 사용하기
+-----------------
 
-For situations in which you are not just exporting an existing file to a new file, it is generally necessary to use the :cpp:func:`GDALDriver::Create` method (though some interesting options are possible through use of virtual files or in-memory files). The Create() method takes an options list much like CreateCopy(), but the image size, number of bands and band type must be provided explicitly.
+기존 파일을 그냥 새 파일로 내보내는 것이 아닌 상황이라면, (가상 파일 또는 인메모리 파일을 이용해서 몇몇 흥미로운 옵션들을 사용할 수 있긴 하지만) 일반적으로 :cpp:func:`GDALDriver::Create` 메소드를 이용해야 합니다. :cpp:func:`Create` 메소드는 :cpp:func:`CreateCopy` 와 대부분 비슷한 옵션 목록을 입력받지만, 이미지 크기, 밴드 개수 및 밴드 유형을 명확하게 지정해줘야만 합니다:
 
-In C++:
+C++ 코드:
 
 .. code-block:: c++
 
@@ -444,7 +444,7 @@ In C++:
     poDstDS = poDriver->Create( pszDstFilename, 512, 512, 1, GDT_Byte,
                                 papszOptions );
 
-In C:
+C 코드:
 
 .. code-block:: c
 
@@ -453,16 +453,16 @@ In C:
     hDstDS = GDALCreate( hDriver, pszDstFilename, 512, 512, 1, GDT_Byte,
                         papszOptions );
 
-In Python:
+파이썬 코드:
 
 .. code-block:: python
 
     dst_ds = driver.Create(dst_filename, xsize=512, ysize=512,
                         bands=1, eType=gdal.GDT_Byte)
 
-Once the dataset is successfully created, all appropriate metadata and raster data must be written to the file. What this is will vary according to usage, but a simple case with a projection, geotransform and raster data is covered here.
+데이터셋을 성공적으로 생성하고 나면, 파일에 적절한 모든 메타데이터와 래스터 데이터를 작성해야만 합니다. 사용례에 따라 어떤 메타데이터와 래스터 데이터가 적절한지 달라지지만, 다음은 투영법, 지리변환 및 래스터 데이터를 처리하는 단순한 경우의 예시입니다:
 
-In C++:
+C++ 코드:
 
 .. code-block:: c++
 
@@ -480,10 +480,10 @@ In C++:
     poBand = poDstDS->GetRasterBand(1);
     poBand->RasterIO( GF_Write, 0, 0, 512, 512,
                     abyRaster, 512, 512, GDT_Byte, 0, 0 );
-    /* Once we're done, close properly the dataset */
+    /* 작업이 끝나면 데이터셋을 제대로 종료합니다 */
     GDALClose( (GDALDatasetH) poDstDS );
 
-In C:
+C 코드:
 
 .. code-block:: c
 
@@ -503,10 +503,10 @@ In C:
     hBand = GDALGetRasterBand( hDstDS, 1 );
     GDALRasterIO( hBand, GF_Write, 0, 0, 512, 512,
                 abyRaster, 512, 512, GDT_Byte, 0, 0 );
-    /* Once we're done, close properly the dataset */
+    /* 작업이 끝나면 데이터셋을 제대로 종료합니다 */
     GDALClose( hDstDS );
 
-In Python:
+파이썬 코드:
 
 .. code-block:: python
 
@@ -519,6 +519,6 @@ In Python:
     dst_ds.SetProjection(srs.ExportToWkt())
     raster = numpy.zeros((512, 512), dtype=numpy.uint8)
     dst_ds.GetRasterBand(1).WriteArray(raster)
-    # Once we're done, close properly the dataset
+    # 작업이 끝나면 데이터셋을 제대로 종료합니다
     dst_ds = None
 
