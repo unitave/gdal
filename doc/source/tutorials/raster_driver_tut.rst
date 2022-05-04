@@ -1,26 +1,26 @@
 .. _raster_driver_tut:
 
 ================================================================================
-Raster driver implementation tutorial
+래스터 드라이버 구현 예제
 ================================================================================
 
 .. highlight:: cpp
 
-Overall Approach
-----------------
+전반적인 접근법
+---------------
 
-In general new formats are added to GDAL by implementing format specific drivers as subclasses of :cpp:class:`GDALDataset`, and band accessors as subclasses of :cpp:class:`GDALRasterBand`. As well, a :cpp:class:`GDALDriver` instance is created for the format, and registered with the :cpp:class:`GDALDriverManager`, to ensure that the system knows about the format.
+일반적으로 새 포맷은 포맷 특화 드라이버를 :cpp:class:`GDALDataset` 클래스의 하위 클래스로, 밴드 접근자(accessor)를 :cpp:class:`GDALRasterBand` 클래스의 하위 클래스로 구현해서 GDAL에 추가됩니다. 또한 시스템이 해당 포맷에 관해 알고 있도록 보장하기 위해 포맷을 위한 :cpp:class:`GDALDriver` 인스턴스를 생성한 다음 :cpp:class:`GDALDriverManager` 로 등록합니다.
 
-This tutorial will start with implementing a simple read-only driver (based on the JDEM driver), and then proceed to utilizing the RawRasterBand helper class, implementing creatable and updatable formats, and some esoteric issues.
+이 예제에서는 (JDEM 드라이버를 기반으로) 단순한 읽기 전용 드라이버를 구현한 다음 :cpp:class:`RawRasterBand` 도우미 클래스를 활용해서 생성 가능하고 업데이트 가능한 포맷을 구현합니다. 몇몇 난해한 문제점들도 논의할 것입니다.
 
-It is strongly advised that the :ref:`raster_data_model` be reviewed and understood before attempting to implement a GDAL driver.
+GDAL 드라이버를 구현하려 시도하기 전에 :ref:`raster_data_model` 을 살펴보고 이해할 것을 강력히 권장합니다.
 
-Implementing the Dataset
-------------------------
+데이터셋 구현하기
+-----------------
 
-We will start showing minimal implementation of a read-only driver for the Japanese DEM format (`jdemdataset.cpp <https://github.com/OSGeo/gdal/blob/master/frmts/jdem/jdemdataset.cpp>`_). First we declare a format specific dataset class, JDEMDataset in this case.
+일본 DEM 포맷(`jdemdataset.cpp <https://github.com/OSGeo/gdal/blob/master/frmts/jdem/jdemdataset.cpp>`_) 용 읽기 전용 드라이버를 최소한으로 구현하는 방법으로 시작하겠습니다. 먼저 포맷 특화 데이터셋 클래스를, 이 경우 :cpp:class:`JDEMDataset` 을 선언합니다:
 
-.. code-block::
+.. code-block:: c++
 
     class JDEMDataset : public GDALPamDataset
     {
@@ -36,19 +36,19 @@ We will start showing minimal implementation of a read-only driver for the Japan
         const char *GetProjectionRef();
     };
 
-In general we provide capabilities for a driver, by overriding the various virtual methods on the GDALDataset base class. However, the Open() method is special. This is not a virtual method on the base class, and we will need a freestanding function for this operation, so we declare it static. Implementing it as a method in the JDEMDataset class is convenient because we have privileged access to modify the contents of the database object.
+일반적으로 :cpp:class:`GDALDataset` 기본 클래스에 대해 다양한 가상 메소드를 대체해서 드라이버에 케이퍼빌리티를 제공합니다. 하지만 :cpp:func:`Open` 메소드는 특별합니다. 이 메소드는 기본 클래스에 대한 가상 메소드가 아니며, 이 작업에 독립형 함수가 필요할 것이기 때문에 이 메소드를 정적이라고 선언합니다. :cpp:func:`Open` 메소드를 JDEMDataset 안의 메소드로 구현하면 편리합니다. 데이터셋 객체의 콘텐츠를 수정할 수 있는 권한을 가지고 접근할 수 있기 때문입니다.
 
-The open method itself may look something like this:
+``Open()`` 메소드 자체는 다음처럼 보일 수도 있습니다:
 
-.. code-block::
+.. code-block:: c++
 
     GDALDataset *JDEMDataset::Open( GDALOpenInfo *poOpenInfo )
     {
-        // Confirm that the header is compatible with a JDEM dataset.
+        // 헤더가 JDEM 데이터셋과 호환되는지 확인합니다.
         if( !Identify(poOpenInfo) )
             return NULL;
 
-        // Confirm the requested access is supported.
+        // 요구되는 접근을 지원하는지 확인합니다.
         if( poOpenInfo->eAccess == GA_Update )
         {
             CPLError(CE_Failure, CPLE_NotSupported,
@@ -57,20 +57,20 @@ The open method itself may look something like this:
             return NULL;
         }
 
-        // Check that the file pointer from GDALOpenInfo* is available
+        // GDALOpenInfo* 로부터 나온 파일 포인터를 사용할 수 있는지 확인합니다.
         if( poOpenInfo->fpL == NULL )
         {
             return NULL;
         }
 
-        // Create a corresponding GDALDataset.
+        // 대응하는 GDALDataset을 생성합니다.
         JDEMDataset *poDS = new JDEMDataset();
 
-        // Borrow the file pointer from GDALOpenInfo*.
+        // GDALOpenInfo* 로부터 파일 포인터를 빌려옵니다.
         poDS->fp = poOpenInfo->fpL;
         poOpenInfo->fpL = NULL;
 
-        // Read the header.
+        // 헤더를 읽어옵니다.
         VSIFReadL(poDS->abyHeader, 1, 1012, poDS->fp);
         poDS->nRasterXSize =
             JDEMGetField(reinterpret_cast<char *>(poDS->abyHeader) + 23, 3);
@@ -85,59 +85,49 @@ The open method itself may look something like this:
             return NULL;
         }
 
-        // Create band information objects.
+        // 밴드 정보 객체를 생성합니다.
         poDS->SetBand(1, new JDEMRasterBand(poDS, 1));
 
-        // Initialize any PAM information.
+        // 모든 PAM 정보를 초기화합니다.
         poDS->SetDescription(poOpenInfo->pszFilename);
         poDS->TryLoadXML();
 
-        // Initialize default overviews.
+        // 기본 오버뷰들을 초기화합니다.
         poDS->oOvManager.Initialize(poDS, poOpenInfo->pszFilename);
         return poDS;
     }
 
-The first step in any database Open function is to verify that the file
-being passed is in fact of the type this driver is for.  It is important
-to realize that each driver's Open function is called in turn till one
-succeeds.  Drivers must quietly return NULL if the passed file is not of
-their format.  They should only produce an error if the file does appear to
-be of their supported format, but is for some reason unsupported or corrupt.
-The information on the file to be opened is passed in contained in a
-GDALOpenInfo object.  The GDALOpenInfo includes the following public
-data members:
+모든 데이터베이스 :cpp:func:`Open` 함수에서 첫 번째 단계는 전송되는 파일이 실제로 해당 드라이버 용 포맷인지 검증하는 것입니다. 하나가 성공할 때까지 각 드라이버의 :cpp:func:`Open` 함수를 차례로 호출한다는 사실을 아는 것이 중요합니다. 전송되는 파일이 자신의 포맷이 아닌 경우 드라이버가 조용히 NULL을 반환해야만 합니다. 전송되는 파일이 드라이버가 지원하는 포맷으로 보이기는 하지만 어떤 이유 때문에 지원할 수 없거나 오류가 발생하는 경우에만 오류를 발생시켜야 합니다. 열어야 할 파일에 대한 정보는 :cpp:class:`GDALOpenInfo` 객체에 담아 전송됩니다. :cpp:class:`GDALOpenInfo` 클래스는 다음 공개 데이터 멤버들을 포함합니다:
 
-.. code-block::
+   -  char       \*pszFilename;
+   -  char\**    papszOpenOptions;
+   -  GDALAccess eAccess;  // GA_ReadOnly 또는 GA_Update
+   -  int        nOpenFlags;
+   -  int        bStatOK;
+   -  int        bIsDirectory;
+   -  VSILFILE   \*fpL;
+   -  int        nHeaderBytes;
+   -  GByte      \*pabyHeader;
 
-    char        *pszFilename;
-    char**      papszOpenOptions;
-    GDALAccess  eAccess;  // GA_ReadOnly or GA_Update
-    int         nOpenFlags;
-    int         bStatOK;
-    int         bIsDirectory;
-    VSILFILE   *fpL;
-    int         nHeaderBytes;
-    GByte       *pabyHeader;
+해당 파일을 지원하는지 판단하기 위해 드라이버가 이 공개 데이터를 검사할 수 있습니다. 'pszFilename'이 파일 시스템에 있는 객체를 참조하는 경우, 'bStatOK' 플래그가 TRUE로 설정될 것입니다. 마찬가지로 파일을 성공적으로 열었다면 처음 몇 KB를 읽어와서 정확히 'nHeaderBytes' 용량을 가진 'pabyHeader'에 넣습니다.
 
-The driver can inspect these to establish if the file is supported. If the `pszFilename` refers to an object in the file system, the `bStatOK` flag will be set to TRUE. As well, if the file was successfully opened, the first kilobyte or so is read in, and put in pabyHeader, with the exact size in `nHeaderBytes`.
+이 전형적인 테스트 작업 예시에서, 파일을 성공적으로 열었고, 테스트를 수행하기 위해 최소한으로 필요한 헤더 정보를 가지고 있으며, 해당 포맷에 예상되는 다양한 헤더 부분들이 존재한다는 사실을 검증했습니다. 이 경우 JDEM 포맷에 매직 넘버가 존재하지 않기 때문에 타당한 세기(century) 값을 가졌다고 보장하기 위해 다양한 날짜 필드들을 확인합니다. 이 테스트가 실패하는 경우, 이 파일을 지원하지 않는다는 사실을 나타내는 NULL을 조용히 반환합니다.
 
-In this typical testing example it is verified that the file was successfully opened, that we have at least enough header information to perform our test, and that various parts of the header are as expected for this format. In this case, there are no magic numbers for JDEM format so we check various date fields to ensure they have reasonable century values. If the test fails, we quietly return NULL indicating this file isn't of our supported format.
+실제로는 식별 작업을 :cpp:func:`Identify` 정적 함수에 위임합니다:
 
-The identification is in fact delegated to a Identify() static function :
-
-.. code-block::
+.. code-block:: c++
 
     /************************************************************************/
     /*                              Identify()                              */
     /************************************************************************/
     int JDEMDataset::Identify( GDALOpenInfo * poOpenInfo )
     {
-        // Confirm that the header has what appears to be dates in the
-        // expected locations.  Sadly this is a relatively weak test.
+        // 헤더의 예상 위치에 날짜로 보이는 내용이 있는지 확인합니다.
+        // 안타깝게도 상대적으로 엉성한 테스트입니다.
         if( poOpenInfo->nHeaderBytes < 50 )
             return FALSE;
 
-        // Check if century values seem reasonable.
+        // 세기(century) 값이 타당하게 보이는지 확인합니다.
         const char *psHeader = reinterpret_cast<char *>(poOpenInfo->pabyHeader);
         if( (!EQUALN(psHeader + 11, "19", 2) &&
             !EQUALN(psHeader + 11, "20", 2)) ||
@@ -151,16 +141,10 @@ The identification is in fact delegated to a Identify() static function :
         return TRUE;
     }
 
-It is important to make the "is this my format" test as stringent as
-possible.  In this particular case the test is weak, and a file that happened
-to have 19s or 20s at a few locations could be erroneously recognized as
-JDEM format, causing it to not be handled properly.
-Once we are satisfied that the file is of our format, we can do any other
-tests that are necessary to validate the file is usable, and in particular
-that we can provide the level of access desired.  Since the JDEM driver does
-not provide update support, error out in that case.
+"이 포맷을 지원하는가" 테스트를 가능한 한 엄격하게 만드는 것이 중요합니다. 이 특정한 예시에서 테스트가 엉성하기 때문에 몇몇 위치에 19 또는 20이라는 값을 우연히 가지고 있는 파일을 JDEM 포맷으로 잘못 인식할 수 있습니다. 당연히 해당 파일을 제대로 처리하지 못 할 것입니다.
+파일이 지원하는 포맷으로 검증되었다면, 해당 파일을 사용할 수 있는지, 그리고 특히 원하는 접근 수준을 지정할 수 있는지 검증하기 위해 필요한 다른 모든 테스트를 수행할 수 있습니다. JDEM 드라이버가 업데이트를 지원하지 않기 때문에 업데이트를 시도하는 경우 오류가 발생할 것입니다.
 
-.. code-block::
+.. code-block:: c++
 
     if( poOpenInfo->eAccess == GA_Update )
     {
@@ -170,26 +154,26 @@ not provide update support, error out in that case.
         return NULL;
     }
 
-Next we need to create an instance of the database class in which we will set various information of interest.
+그 다음 단계에서는 다양한 관심 정보를 설정할 데이터베이스 클래스의 인스턴스를 생성해야 합니다.
 
-.. code-block::
+.. code-block:: c++
 
-    // Check that the file pointer from GDALOpenInfo* is available.
+    // GDALOpenInfo* 로부터 나온 파일 포인터를 사용할 수 있는지 확인합니다.
     if( poOpenInfo->fpL == NULL )
     {
         return NULL;
     }
     JDEMDataset *poDS = new JDEMDataset();
 
-    // Borrow the file pointer from GDALOpenInfo*.
+    // GDALOpenInfo* 로부터 파일 포인터를 빌려옵니다.
     poDS->fp = poOpenInfo->fpL;
     poOpenInfo->fpL = NULL;
 
-At this point we "borrow" the file handle that was held by GDALOpenInfo*. This file pointer uses the VSI*L GDAL API to access files on disk. This virtualized POSIX-style API allows some special capabilities like supporting large files, in-memory files and zipped files.
+이 단계에서 :cpp:class:`GDALOpenInfo*` 클래스가 담고 있는 파일 핸들(handle)을 "빌려옵니다". 이 파일 포인터는 디스크 상에 있는 파일에 접근하기 위해 VSI*L GDAL API를 사용합니다. 이 가상화 POSIX 스타일 API는 대용량 파일, 인메모리 파일 및 ZIP 압축 파일을 지원하는 등 몇몇 특수 케이퍼빌리티를 제공합니다.
 
-Next the X and Y size are extracted from the header. The `nRasterXSize` and `nRasterYSize` are data fields inherited from the GDALDataset base class, and must be set by the Open() method.
+그 다음, 헤더로부터 X 및 Y 크기를 추출합니다. 'nRasterXSize' 및 'nRasterYSize'가 :cpp:class:`GDALDataset` 기본 클래스로부터 상속된 데이터 필드로, :cpp:func:`Open` 메소드로 설정되어야만 합니다.
 
-.. code-block::
+.. code-block:: c++
 
     VSIFReadL(poDS->abyHeader, 1, 1012, poDS->fp);
     poDS->nRasterXSize =
@@ -205,29 +189,29 @@ Next the X and Y size are extracted from the header. The `nRasterXSize` and `nRa
         return NULL;
     }
 
-All the bands related to this dataset must be created and attached using the SetBand() method. We will explore the JDEMRasterBand() class shortly.
+:cpp:func:`SetBand` 메소드를 이용해서 이 데이터셋에 관련된 모든 밴드들을 생성하고 추가해야만 합니다. 곧 :cpp:class:`JDEMRasterBand` 클래스를 탐구할 것입니다.
 
-.. code-block::
+.. code-block:: c++
 
-    // Create band information objects.
+    // 밴드 정보 객체를 생성합니다.
     poDS->SetBand(1, new JDEMRasterBand(poDS, 1));
 
-Finally we assign a name to the dataset object, and call the GDALPamDataset TryLoadXML() method which can initialize auxiliary information from an .aux.xml file if available. For more details on these services review the GDALPamDataset and related classes.
+마지막으로 데이터셋 객체에 이름을 할당하고, 사용할 수 있는 경우 .aux.xml 파일로부터 보조 정보를 초기화할 수 있는 :cpp:func:`GDALPamDataset::TryLoadXML` 메소드를 호출합니다. 이런 서비스들에 대해 더 자세히 알고 싶다면 :cpp:class:`GDALPamDataset` 및 관련 클래스들을 살펴보십시오.
 
-.. code-block::
+.. code-block:: c++
 
-        // Initialize any PAM information.
+        // 모든 PAM 정보를 초기화합니다.
         poDS->SetDescription( poOpenInfo->pszFilename );
         poDS->TryLoadXML();
         return poDS;
     }
 
-Implementing the RasterBand
----------------------------
+RasterBand 구현하기
+-------------------
 
-Similar to the customized JDEMDataset class subclassed from GDALDataset, we also need to declare and implement a customized JDEMRasterBand derived from :cpp:class:`GDALRasterBand` for access to the band(s) of the JDEM file. For JDEMRasterBand the declaration looks like this:
+:cpp:class:`GDALDataset` 으로부터 하위 클래스로 파생된 사용자 지정 :cpp:class:`JDEMDataset` 클래스와 비슷하게, JDEM 파일의 밴드(들)에 접근하려면 :cpp:class:`GDALRasterBand` 클래스로부터 파생된 사용자 지정 :cpp:class:`JDEMRasterBand` 클래스도 선언하고 구현해야 합니다. :cpp:class:`JDEMRasterBand` 의 경우 다음과 같이 선언합니다:
 
-.. code-block::
+.. code-block:: c++
 
     class JDEMRasterBand : public GDALPamRasterBand
     {
@@ -236,11 +220,11 @@ Similar to the customized JDEMDataset class subclassed from GDALDataset, we also
         virtual CPLErr IReadBlock( int, int, void * );
     };
 
-The constructor may have any signature, and is only called from the Open() method. Other virtual methods, such as :cpp:func:`GDALRasterBand::IReadBlock` must be exactly matched to the method signature in gdal_priv.h.
+구성자(constructor)는 어떤 서명이든 가질 수 있고, :cpp:func:`Open` 메소드에서만 호출됩니다. :cpp:func:`GDALRasterBand::IReadBlock` 같은 다른 가상 메소드는 "gdal_priv.h" 파일에 있는 메소드 서명과 정확히 일치해야만 합니다.
 
-The constructor implementation looks like this:
+구성자(constructor)는 다음과 같이 구현합니다:
 
-.. code-block::
+.. code-block:: c++
 
     JDEMRasterBand::JDEMRasterBand( JDEMDataset *poDSIn, int nBandIn )
     {
@@ -251,21 +235,19 @@ The constructor implementation looks like this:
         nBlockYSize = 1;
     }
 
-The following data members are inherited from GDALRasterBand, and should generally be set in the band constructor.
+:cpp:class:`GDALRasterBand` 클래스로부터 다음 데이터 멤버들을 상속하고, 일반적으로 밴드 구성자에 설정해야 합니다.
 
-.. code-block::
+   -  poDS: 상위 GDALDataset을 가리키는 포인터입니다.
+   -  nBand: 데이터셋 안에 있는 밴드의 개수입니다.
+   -  eDataType: 해당 밴드에 있는 픽셀의 데이터 유형입니다.
+   -  nBlockXSize: 해당 밴드에 있는 블록 하나의 너비입니다.
+   -  nBlockYSize: 해당 밴드에 있는 블록 하나의 높이입니다.
 
-    poDS: Pointer to the parent GDALDataset.
-    nBand: The band number within the dataset.
-    eDataType: The data type of pixels in this band.
-    nBlockXSize: The width of one block in this band.
-    nBlockYSize: The height of one block in this band.
+가능한 :cpp:class:`GDALDataType` 값의 전체 목록은 "gdal.h" 파일에 선언되어 있고, GDT_Byte, GDT_UInt16, GDT_Int16, 및 GDT_Float32 유형을 포함합니다. 블록 크기는 데이터에 접근하기 위해 자연스럽거나 효율적인 블록 크기를 확립하는 데 사용됩니다. 타일화 데이터셋의 경우 블록 크기가 타일의 크기일 것이지만 다른 대부분의 데이터셋의 경우 이 예시에서와 마찬가지로 블록 크기가 스캔라인 한 줄의 크기일 것입니다.
 
-The full set of possible GDALDataType values are declared in gdal.h, and include GDT_Byte, GDT_UInt16, GDT_Int16, and GDT_Float32. The block size is used to establish a natural or efficient block size to access the data with. For tiled datasets this will be the size of a tile, while for most other datasets it will be one scanline, as in this case.
+다음은 실제로 이미지 데이터를 읽어오는 코드 :cpp:func:`IReadBlock` 을 구현하는 예시입니다:
 
-Next we see the implementation of the code that actually reads the image data, IReadBlock().
-
-.. code-block::
+.. code-block:: c++
 
     CPLErr JDEMRasterBand::IReadBlock( int nBlockXOff, int nBlockYOff,
                                     void * pImage )
@@ -296,22 +278,28 @@ Next we see the implementation of the code that actually reads the image data, I
         return CE_None;
     }
 
-Key items to note are:
+다음 중요 항목들을 기억해둘 만합니다:
 
-- It is typical to cast the GDALRasterBand::poDS member to the derived type of the owning dataset. If your RasterBand class will need privileged access to the owning dataset object, ensure it is declared as a friend (omitted above for brevity).
-- If an error occurs, report it with CPLError(), and return CE_Failure. Otherwise return CE_None.
-- The pImage buffer should be filled with one block of data. The block is the size declared in nBlockXSize and nBlockYSize for the raster band. The type of the data within pImage should match the type declared in eDataType in the raster band object.
-- The nBlockXOff and nBlockYOff are block offsets, so with 128x128 tiled datasets values of 1 and 1 would indicate the block going from (128,128) to (255,255) should be loaded.
+-  일반적으로 :cpp:class:`GDALRasterBand::poDS` 클래스 멤버를 이 클래스를 소유한 데이터셋의 파생 유형으로 캐스트합니다. 사용자의 RasterBand 클래스가 이 클래스를 소유한 데이터셋 객체에 접근하기 위한 권한이 필요할 경우, RasterBand 클래스를 `friend <https://docs.microsoft.com/ko-kr/cpp/cpp/friend-cpp?view=msvc-170>`_ 로 선언했는지 확인하십시오. (앞의 예시에서는 간결함을 위해 생략했습니다.)
 
-The Driver
-----------
+-  오류가 발생하는 경우, :cpp:func:`CPLError` 로 리포트하고 CE_Failure를 반환하십시오. 오류가 발생하지 않는다면 CE_None을 반환하십시오.
 
-While the JDEMDataset and JDEMRasterBand are now ready to use to read image data, it still isn't clear how the GDAL system knows about the new driver. This is accomplished via the :cpp:class:`GDALDriverManager`. To register our format we implement a registration function. The declaration goes in gcore/gdal_frmts.h:
-void CPL_DLL GDALRegister_JDEM(void);
+-  'pImage' 버퍼를 데이터의 블록 하나로 채워야 합니다. 이 블록의 크기는 래스터 밴드에 'nBlockXSize'와 'nBlockYSize'로 선언된 크기입니다. 'pImage' 내부의 데이터 유형은 래스터 밴드 객체에 'eDataType'으로 선언된 유형과 일치해야 합니다.
 
-The definition in the driver file is:
+-  'nBlockXOff' 및 'nBlockYOff'는 블록 오프셋이기 때문에, 128x128 크기의 타일화 데이터셋의 값이 1인 경우 (128,128)에서 (255,255)까지의 블록을 불러와야 합니다.
 
-.. code-block::
+드라이버
+--------
+
+이제 이미지 데이터를 읽어오기 위해 사용할 :cpp:class:`JDEMDataset` 과 :cpp:class:`JDEMRasterBand` 가 준비되었긴 하지만, GDAL 시스템이 어떻게 새 드라이버에 관해 알고 있는지 명확하지 않습니다. :cpp:class:`GDALDriverManager` 클래스를 통해 이를 달성합니다. 새 포맷을 등록하기 위해 등록(registration) 함수를 구현하십시오. :file:`gcore/gdal_frmts.h` 에 다음과 같이 선언합니다:
+
+.. code-block:: c++
+
+    void CPL_DLL GDALRegister_JDEM(void);
+
+드라이버 파일에 다음과 같이 정의합니다:
+
+.. code-block:: c++
 
     void GDALRegister_JDEM()
     {
@@ -335,54 +323,88 @@ The definition in the driver file is:
         GetGDALDriverManager()->RegisterDriver(poDriver);
     }
 
-Note the use of GDAL_CHECK_VERSION macro. This is an optional macro for drivers inside GDAL tree that don't depend on external libraries, but that can be very useful if you compile your driver as a plugin (that is to say, an out-of-tree driver). As the GDAL C++ ABI may, and will, change between GDAL releases (for example from GDAL 1.x to 1.y), it may be necessary to recompile your driver against the header files of the GDAL version with which you want to make it work. The GDAL_CHECK_VERSION macro will check that the GDAL version with which the driver was compiled and the version against which it is running are compatible.
+``GDAL_CHECK_VERSION`` 매크로를 사용한다는 사실을 기억하십시오. 외부 라이브러리에 의존하지 않는 GDAL 트리 안에 있는 드라이버에 대한 선택적인 매크로이지만, 사용자 드라이버를 플러그인으로 (다시 말해 트리 바깥에 있는 드라이버로) 컴파일하는 경우 매우 유용할 수 있습니다. GDAL C++ ABI가 GDAL 배포판들 사이에 (예를 들어 GDAL 1.x버전과 1.y버전 사이에) 변경될 수도 있고 변경될 것이기 때문에, 사용자 드라이버를 사용자가 작업하고자 하는 GDAL 버전의 헤더 파일을 대상으로 다시 컴파일해야 할 수도 있습니다. ``GDAL_CHECK_VERSION`` 매크로가 드라이버가 컴파일된 GDAL 버전과 드라이버가 실행되는 GDAL 버전이 호환되는지 확인할 것입니다.
 
-The registration function will create an instance of a GDALDriver object when first called, and register it with the GDALDriverManager. The following fields can be set in the driver before registering it with the GDALDriverManager.
+등록 함수를 처음 호출하면 :cpp:class:`GDALDriver` 객체의 인스턴스를 생성한 다음 :cpp:class:`GDALDriverManager` 로 등록할 것입니다. :cpp:class:`GDALDriverManager` 로 등록하기 전에 드라이버에 다음 필드들을 설정할 수 있습니다.
 
-- The description is the short name for the format. This is a unique name for this format, often used to identity the driver in scripts and command line programs. Normally 3-5 characters in length, and matching the prefix of the format classes. (mandatory)
-- GDAL_DCAP_RASTER: set to YES to indicate that this driver handles raster data. (mandatory)
-- GDAL_DMD_LONGNAME: A longer descriptive name for the file format, but still no longer than 50-60 characters. (mandatory)
-- GDAL_DMD_HELPTOPIC: The name of a help topic to display for this driver, if any. In this case JDEM format is contained within the various format web page held in gdal/html. (optional)
-- GDAL_DMD_EXTENSION: The extension used for files of this type. If more than one pick the primary extension, or none at all. (optional)
-- GDAL_DMD_MIMETYPE: The standard mime type for this file format, such as "image/png". (optional)
-- GDAL_DMD_CREATIONOPTIONLIST: There is evolving work on mechanisms to describe creation options. See the geotiff driver for an example of this. (optional)
-- GDAL_DMD_CREATIONDATATYPES: A list of space separated data types supported by this create when creating new datasets. If a Create() method exists, these will be will supported. If a CreateCopy() method exists, this will be a list of types that can be losslessly exported but it may include weaker data types than the type eventually written. For instance, a format with a CreateCopy() method, and that always writes Float32 might also list Byte, Int16, and UInt16 since they can losslessly translated to Float32. An example value might be "Byte Int16 UInt16". (required - if creation supported)
-- GDAL_DCAP_VIRTUALIO: set to YES to indicate that this driver can deal with files opened with the VSI*L GDAL API. Otherwise this metadata item should not be defined. (optional)
-- pfnOpen: The function to call to try opening files of this format. (optional)
-- pfnIdentify: The function to call to try identifying files of this format. A driver should return 1 if it recognizes the file as being of its format, 0 if it recognizes the file as being NOT of its format, or -1 if it cannot reach to a firm conclusion by just examining the header bytes. (optional)
-- pfnCreate: The function to call to create new updatable datasets of this format. (optional)
-- pfnCreateCopy: The function to call to create a new dataset of this format copied from another source, but not necessary updatable. (optional)
-- pfnDelete: The function to call to delete a dataset of this format. (optional)
-- pfnUnloadDriver: A function called only when the driver is destroyed. Could be used to cleanup data at the driver level. Rarely used. (optional)
+- 설명(description)은 포맷의 단축명입니다. 이 포맷의 유일한 이름으로, 스크립트 및 명령줄 프로그램에서 드라이버를 식별하기 위해 사용되는 경우가 많습니다. 일반적으로 문자 3~5개 길이이고 포맷 클래스의 접두어와 일치해야 합니다. (필수)
 
-Adding Driver to GDAL Tree
---------------------------
+- GDAL_DCAP_RASTER:
+  이 드라이버가 래스터 데이터를 처리한다는 사실을 나타내려면 YES로 설정하십시오. (필수)
 
-Note that the GDALRegister_JDEM() method must be called by the higher level program in order to have access to the JDEM driver. Normal practice when writing new drivers is to:
+- GDAL_DMD_LONGNAME:
+  파일 포맷의 더 긴 서술적인 이름이지만, 그래도 문자 50~60개 길이를 넘지 않습니다. (필수)
 
-- Add a driver directory under gdal/frmts, with the directory name the same as the short name.
-- Add a GNUmakefile and makefile.vc in that directory modeled on those from other similar directories (i.e. the jdem directory).
-- Add the module with the dataset, and rasterband implementation. Generally this is called <short_name>dataset.cpp, with all the GDAL specific code in one file, though that is not required.
-- Add the registration entry point declaration (i.e. GDALRegister_JDEM()) to gdal/gcore/gdal_frmts.h.
-- Add a call to the registration function to frmts/gdalallregister.cpp, protected by an appropriate #ifdef.
-- Add the format short name to the GDAL_FORMATS macro in GDALmake.opt.in (and to GDALmake.opt).
-- Add a format specific item to the EXTRAFLAGS macro in frmts/makefile.vc.
+- GDAL_DMD_HELPTOPIC:
+  (하나라도 존재하는 경우) 이 드라이버를 위해 출력할 도움말 주제의 이름입니다. 이 경우 JDEM 포맷이 :file:`gdal/html` 에 있는 다양한 포맷 웹페이지 안에 담겨 있습니다. (선택적)
 
-Once this is all done, it should be possible to rebuild GDAL, and have the new format available in all the utilities. The :ref:`gdalinfo` utility can be used to test that opening and reporting on the format is working, and the :ref:`gdal_translate` utility can be used to test image reading.
+- GDAL_DMD_EXTENSION:
+  이 유형의 파일에 사용되는 확장자입니다. 하나 이상인 경우 최우선 확장자를 선택하거나, 하나도 선택하지 마십시오. (선택적)
 
-Adding Georeferencing
----------------------
+- GDAL_DMD_MIMETYPE:
+  이 파일 포맷의 -- "image/png" 같은 -- 표준 미디어 유형(MIME)입니다. (선택적)
+
+- GDAL_DMD_CREATIONOPTIONLIST:
+  생성 옵션을 설명하는 메커니즘에 대한 작업이 진화하고 있습니다. 이에 대한 예시를 보고 싶다면 GeoTIFF 드라이버를 참조하십시오. (선택적)
+
+- GDAL_DMD_CREATIONDATATYPES:
+  새 데이터셋을 생성하는 경우 해당 데이터셋이 지원하는 데이터 유형을 공백으로 구분한 목록입니다. :cpp:func:`Create` 메소드가 존재한다면, 이 데이터 유형들을 지원할 것입니다. :cpp:func:`CreateCopy` 메소드가 존재하는 경우, 비손실 내보내기할 수 있는 유형들의 목록일 것이지만 실제로 작성되는 유형보다 더 엉성한 유형을 포함할 수도 있습니다. 예를 들어, :cpp:func:`CreateCopy` 메소드가 지원하고 항상 Float32 유형으로 작성되는 포맷의 지원 유형 목록에 Byte, Int16 및 UInt16가 포함될 수도 있습니다. 이 유형들이 Float32 유형으로 비손실 변환될 수 있기 때문입니다. 예시: "Byte Int16 UInt16" (드라이버가 생성을 지원하는 경우 필수)
+
+- GDAL_DCAP_VIRTUALIO:
+  아 드라이버가 VSI*L GDAL API로 연 파일을 처리할 수 있다는 사실을 나타내려면 YES로 설정하십시오. 처리할 수 없다면 이 메타데이터 항목을 정의해서는 안 됩니다. (선택적)
+
+- pfnOpen:
+  이 포맷의 파일을 열기 위해 호출할 함수입니다. (선택적)
+
+- pfnIdentify:
+  이 포맷의 파일을 식별하기 위해 호출할 함수입니다. 드라이버가 해당 파일을 지원하는 포맷으로 인식하는 경우 1을 반환하고, 지원하지 **않는** 포맷으로 인식하는 경우 0을 반환하며, 헤더 바이트들을 검사하는 것만으로는 확실히 판단할 수 없는 경우 -1을 반환할 것입니다. (선택적)
+
+- pfnCreate:
+  이 포맷으로 된, 업데이트 가능한 새 데이터셋을 생성하기 위해 호출할 함수입니다. (선택적)
+
+- pfnCreateCopy:
+  이 포맷으로 된, 업데이트 가능할 필요는 없는 새 데이터셋을 또다른 소스로부터 복사해서 생성하기 위해 호출할 함수입니다. (선택적)
+
+- pfnDelete:
+  이 포맷으로 된 데이터셋을 삭제하기 위해 호출할 함수입니다. (선택적)
+
+- pfnUnloadDriver:
+  드라이버를 삭제하는 경우에만 호출하는 함수입니다. 드라이버 수준에서 데이터를 정리(cleanup)하기 위해 사용할 수 있습니다. 거의 사용되지 않습니다. (선택적)
+
+GDAL 트리에 드라이버 추가하기
+-----------------------------
+
+JDEM 드라이버에 접근하기 위해서는 더 상위 수준에서 :cpp:func:`GDALRegister_JDEM` 메소드를 호출해야만 한다는 사실을 기억하십시오. 다음은 새 드라이버를 작성하는 일반적인 과정입니다:
+
+-  :file:`gdal/frmts` 아래 단축명과 동일한 이름을 가진 드라이버 디렉터리를 추가하십시오.
+
+-  해당 디렉터리에 다른 비슷한 디렉터리의 (예: 'jdem' 디렉터리의) 해당 파일들을 따라 :file:`GNUmakefile` 및 :file:`makefile.vc` 파일을 추가하십시오.
+
+-  데이터셋과 래스터밴드를 구현한 모듈을 추가하십시오. 일반적으로 :file:`<short_name>dataset.cpp` 라는 이름을 가진 파일입니다. 이 파일 하나에 -- 모든 코드를 필수적으로 담을 필요는 없지만 -- 모든 GDAL 특화 코드를 담고 있습니다.
+
+-  :file:`gdal/gcore/gdal_frmts.h` 에 등록 엔트리 포인트 선언을 (예: :cpp:func:`GDALRegister_JDEM`) 추가하십시오.
+
+-  :file:`frmts/gdalallregister.cpp` 에 알맞은 "#ifdef"로 보호받는 등록 함수 호출을 추가하십시오.
+
+-  :file:`GDALmake.opt.in` (그리고 :file:`GDALmake.opt`)에 있는 ``GDAL_FORMATS`` 매크로에 포맷 단축명을 추가하십시오.
+
+-  :file:`frmts/makefile.vc` 에 있는 ``EXTRAFLAGS`` 매크로에 포맷 특화 항목을 추가하십시오.
+
+이 모든 과정을 완료하고 GDAL을 다시 빌드하고 나면, 모든 유틸리티에서 새 포맷을 사용할 수 있게 될 것입니다. :ref:`gdalinfo` 유틸리티를 사용해서 새 포맷을 열고 관련 정보를 리포트할 수 있는지 테스트할 수 있습니다. :ref:`gdal_translate` 유틸리티를 사용하면 이미지를 읽어올 수 있는지 테스트할 수 있습니다.
+
+지리참조 정보 추가하기
+----------------------
 
 Now we will take the example a step forward, adding georeferencing support. We add the following two virtual method overrides to JDEMDataset, taking care to exactly match the signature of the method on the GDALDataset base class.
 
-.. code-block::
+.. code-block:: c++
 
     CPLErr      GetGeoTransform( double * padfTransform );
     const char *GetProjectionRef();
 
 The implementation of :cpp:func:`GDALDataset::GetGeoTransform` just copies the usual geotransform matrix into the supplied buffer. Note that :cpp:func:`GDALDataset::GetGeoTransform` may be called a lot, so it isn't generally wise to do a lot of computation in it. In many cases the Open() will collect the geotransform, and this method will just copy it over. Also note that the geotransform return is based on an anchor point at the top left corner of the top left pixel, not the center of pixel approach used in some packages.
 
-.. code-block::
+.. code-block:: c++
 
     CPLErr JDEMDataset::GetGeoTransform( double * padfTransform )
     {
@@ -402,7 +424,7 @@ The implementation of :cpp:func:`GDALDataset::GetGeoTransform` just copies the u
 
 The :cpp:func:`GDALDataset::GetProjectionRef` method returns a pointer to an internal string containing a coordinate system definition in OGC WKT format. In this case the coordinate system is fixed for all files of this format, but in more complex cases a definition may need to be composed on the fly, in which case it may be helpful to use the :cpp:class:`OGRSpatialReference` class to help build the definition.
 
-.. code-block::
+.. code-block:: c++
 
     const char *JDEMDataset::GetProjectionRef()
     {
@@ -426,7 +448,7 @@ Formats can also report that they have arbitrary overviews, by overriding the :c
 
 However, by far the most common approach to implementing overviews is to use the default support in GDAL for external overviews stored in TIFF files with the same name as the dataset, but the extension .ovr appended. In order to enable reading and creation of this style of overviews it is necessary for the GDALDataset to initialize the `oOvManager` object within itself. This is typically accomplished with a call like the following near the end of the Open() method (after the PAM :cpp:func:`GDALDataset::TryLoadXML`).
 
-.. code-block::
+.. code-block:: c++
 
     poDS->oOvManager.Initialize(poDS, poOpenInfo->pszFilename);
 
@@ -456,7 +478,7 @@ The GDALDriver::CreateCopy() method call is passed through directly, so that met
 The full implementation of the CreateCopy function for JPEG (which is assigned to pfnCreateCopy in the GDALDriver object) is here.
 static GDALDataset *
 
-.. code-block::
+.. code-block:: c++
 
     JPEGCreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
                     int bStrict, char ** papszOptions,
@@ -465,7 +487,7 @@ static GDALDataset *
         const int nBands = poSrcDS->GetRasterCount();
         const int nXSize = poSrcDS->GetRasterXSize();
         const int nYSize = poSrcDS->GetRasterYSize();
-        // Some some rudimentary checks
+        // 몇몇 기본적인 확인
         if( nBands != 1 && nBands != 3 )
         {
             CPLError(CE_Failure, CPLE_NotSupported,
@@ -484,7 +506,7 @@ static GDALDataset *
             return NULL;
         }
 
-        // What options has the user selected?
+        // 사용자가 어떤 옵션을 선택했는가?
         int nQuality = 75;
         if( CSLFetchNameValue(papszOptions, "QUALITY") != NULL )
         {
@@ -504,7 +526,7 @@ static GDALDataset *
             bProgressive = true;
         }
 
-        // Create the dataset.
+        // 데이터셋을 생성합니다.
         VSILFILE *fpImage = VSIFOpenL(pszFilename, "wb");
         if( fpImage == NULL )
         {
@@ -514,7 +536,7 @@ static GDALDataset *
             return NULL;
         }
 
-        // Initialize JPG access to the file.
+        // 파일에 대한 JPG 접근을 초기화합니다.
         struct jpeg_compress_struct sCInfo;
         struct jpeg_error_mgr sJErr;
         sCInfo.err = jpeg_std_error(&sJErr);
@@ -537,7 +559,7 @@ static GDALDataset *
             jpeg_simple_progression(&sCInfo);
         jpeg_start_compress(&sCInfo, TRUE);
 
-        // Loop over image, copying image data.
+        // 이미지를 반복하며 이미지 데이터를 복사합니다.
         GByte *pabyScanline = static_cast<GByte *>(CPLMalloc(nBands * nXSize));
         for( int iLine = 0; iLine < nYSize; iLine++ )
         {
@@ -548,7 +570,7 @@ static GDALDataset *
                     poBand->RasterIO(GF_Read, 0, iLine, nXSize, 1,
                                     pabyScanline + iBand, nXSize, 1, GDT_Byte,
                                     nBands, nBands * nXSize);
-                // TODO: Handle error.
+                // 할 일: 핸들(handle) 오류.
             }
             JSAMPLE *ppSamples = pabyScanline;
             jpeg_write_scanlines(&sCInfo, &ppSamples, 1);
@@ -567,14 +589,14 @@ In the case of dynamic creation, there is no source dataset. Instead the size, n
 
 The following sample implement PCI .aux labeled raw raster creation. It follows a common approach of creating a blank, but valid file using non-GDAL calls, and then calling GDALOpen(,GA_Update) at the end to return a writable file handle. This avoids having to duplicate the various setup actions in the Open() function.
 
-.. code-block::
+.. code-block:: c++
 
     GDALDataset *PAuxDataset::Create( const char * pszFilename,
                                     int nXSize, int nYSize, int nBands,
                                     GDALDataType eType,
                                     char ** /* papszParamList */ )
     {
-        // Verify input options.
+        // 입력 옵션을 검증합니다.
         if( eType != GDT_Byte && eType != GDT_Float32 &&
             eType != GDT_UInt16 && eType != GDT_Int16 )
         {
@@ -586,7 +608,7 @@ The following sample implement PCI .aux labeled raw raster creation. It follows 
             return NULL;
         }
 
-        // Try to create the file.
+        // 파일 생성을 시도합니다.
         FILE *fp = VSIFOpen(pszFilename, "w");
         if( fp == NULL )
         {
@@ -596,12 +618,12 @@ The following sample implement PCI .aux labeled raw raster creation. It follows 
             return NULL;
         }
 
-        // Just write out a couple of bytes to establish the binary
-        // file, and then close it.
+        // 바이너리 파일을 확립하기 위해 바이트 몇 개만 작성한 다음
+        // 종료합니다.
         VSIFWrite("\0\0", 2, 1, fp);
         VSIFClose(fp);
 
-        // Create the aux filename.
+        // 보조 파일명을 생성합니다.
         char *pszAuxFilename = static_cast<char *>(CPLMalloc(strlen(pszFilename) + 5));
         strcpy(pszAuxFilename, pszFilename);;
         for( int i = strlen(pszAuxFilename) - 1; i > 0; i-- )
@@ -614,7 +636,7 @@ The following sample implement PCI .aux labeled raw raster creation. It follows 
         }
         strcat(pszAuxFilename, ".aux");
 
-        // Open the file.
+        // 파일을 엽니다.
         fp = VSIFOpen(pszAuxFilename, "wt");
         if( fp == NULL )
         {
@@ -624,21 +646,21 @@ The following sample implement PCI .aux labeled raw raster creation. It follows 
             return NULL;
         }
 
-        // We need to write out the original filename but without any
-        // path components in the AuxiliaryTarget line.  Do so now.
+        // AuxiliaryTarget 줄에 어떤 경로 구성요소도 없이
+        // 원본 파일명을 작성해야 합니다. 여기에서 작성합니다.
         int iStart = strlen(pszFilename) - 1;
         while( iStart > 0 && pszFilename[iStart - 1] != '/' &&
             pszFilename[iStart - 1] != '\\' )
             iStart--;
         VSIFPrintf(fp, "AuxilaryTarget: %s\n", pszFilename + iStart);
 
-        // Write out the raw definition for the dataset as a whole.
+        // 데이터셋 전체에 대한 원시(raw) 정의를 작성합니다.
         VSIFPrintf(fp, "RawDefinition: %d %d %d\n",
                 nXSize, nYSize, nBands);
 
-        // Write out a definition for each band.  We always write band
-        // sequential files for now as these are pretty efficiently
-        // handled by GDAL.
+        // 각 밴드에 대한 정의를 작성합니다.
+        // 현재 밴드를 언제나 순차 파일로 작성합니다.
+        // GDAL이 꽤 효율적으로 처리할 수 있기 때문입니다.
         int nImgOffset = 0;
         for( int iBand = 0; iBand < nBands; iBand++ )
         {
@@ -665,7 +687,7 @@ The following sample implement PCI .aux labeled raw raster creation. It follows 
             nImgOffset += nYSize * nLineOffset;
         }
 
-        // Cleanup.
+        // 정리(cleanup).
         VSIFClose(fp);
         return static_cast<GDALDataset *>(GDALOpen(pszFilename, GA_Update));
     }
@@ -681,7 +703,7 @@ In these cases the format specific band class may not be required, or if require
 
 The Open() method for the dataset then instantiates raster bands passing all the layout information to the constructor. For instance, the PNM driver uses the following calls to create it's raster bands.
 
-.. code-block::
+.. code-block:: c++
 
     if( poOpenInfo->pabyHeader[1] == '5' )
     {
