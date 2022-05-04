@@ -395,14 +395,14 @@ JDEM 드라이버에 접근하기 위해서는 더 상위 수준에서 :cpp:func
 지리참조 정보 추가하기
 ----------------------
 
-Now we will take the example a step forward, adding georeferencing support. We add the following two virtual method overrides to JDEMDataset, taking care to exactly match the signature of the method on the GDALDataset base class.
+이제 한 단계 더 나아가 지리참조 정보 지원을 추가해보겠습니다. :cpp:class:`GDALDataset` 기본 클래스에 있는 메소드 서명과 정확하게 일치하도록 주의하면서, :cpp:class:`JDEMDataset` 에 다음 가상 메소드 2개를 재정의합니다.
 
 .. code-block:: c++
 
     CPLErr      GetGeoTransform( double * padfTransform );
     const char *GetProjectionRef();
 
-The implementation of :cpp:func:`GDALDataset::GetGeoTransform` just copies the usual geotransform matrix into the supplied buffer. Note that :cpp:func:`GDALDataset::GetGeoTransform` may be called a lot, so it isn't generally wise to do a lot of computation in it. In many cases the Open() will collect the geotransform, and this method will just copy it over. Also note that the geotransform return is based on an anchor point at the top left corner of the top left pixel, not the center of pixel approach used in some packages.
+:cpp:func:`GDALDataset::GetGeoTransform` 구현은 제공되는 버퍼에 일반적인 지리변환 행렬을 복사할 뿐입니다. :cpp:func:`GDALDataset::GetGeoTransform` 메소드를 자주 호출할 수도 있기 때문에 이 메소드 안에서 연산을 많이 하는 것은 일반적으로 현명하지 않다는 사실을 기억하십시오. 많은 경우 :cpp:func:`Open` 이 지리변환을 수집할 것이고, 이 메소드는 복사해올 뿐입니다. 또 반환되는 지리변환은 몇몇 패키지에서 사용되는 픽셀 중심 접근법이 아니라 좌상단 픽셀의 좌상단 모서리 위치에 있는 기준점(anchor point) 기반이라는 사실도 기억하십시오.
 
 .. code-block:: c++
 
@@ -422,7 +422,7 @@ The implementation of :cpp:func:`GDALDataset::GetGeoTransform` just copies the u
         return CE_None;
     }
 
-The :cpp:func:`GDALDataset::GetProjectionRef` method returns a pointer to an internal string containing a coordinate system definition in OGC WKT format. In this case the coordinate system is fixed for all files of this format, but in more complex cases a definition may need to be composed on the fly, in which case it may be helpful to use the :cpp:class:`OGRSpatialReference` class to help build the definition.
+:cpp:func:`GDALDataset::GetProjectionRef` 메소드는 OGC WKT 포맷으로 된 좌표계 정의를 담고 있는 내부 문자열을 가리키는 포인터를 반환합니다. 이 경우 이 포맷으로 된 모든 파일이 동일한 좌표계를 공유하지만, 더 복잡한 경우에는 좌표계 정의를 실시간(on-the-fly)으로 구성해야 할 수도 있습니다. 이런 경우 좌표계 정의 작성을 돕기 위한 :cpp:class:`OGRSpatialReference` 클래스를 사용하면 도움이 될 수도 있습니다.
 
 .. code-block:: c++
 
@@ -437,48 +437,52 @@ The :cpp:func:`GDALDataset::GetProjectionRef` method returns a pointer to an int
             "AUTHORITY[\"EPSG\",4301]]";
     }
 
-This completes explanation of the features of the JDEM driver. The full source for jdemdataset.cpp can be reviewed as needed.
+이것으로 JDEM 드라이버의 기능 설명을 마칩니다. :file:`jdemdataset.cpp` 의 전체 소스를 필요한 만큼 살펴볼 수 있습니다.
 
-Overviews
+오버뷰
 ---------
 
-GDAL allows file formats to make pre-built overviews available to applications via the :cpp:func:`GDALRasterBand::GetOverview` and related methods. However, implementing this is pretty involved, and goes beyond the scope of this document for now. The GeoTIFF driver (gdal/frmts/gtiff/geotiff.cpp) and related source can be reviewed for an example of a file format implementing overview reporting and creation support.
+GDAL은 파일 포맷이 :cpp:func:`GDALRasterBand::GetOverview` 및 관련 메소드를 통해 응용 프로그램이 사용할 수 있는 사전 빌드된 오버뷰를 생성할 수 있도록 허용하고 있습니다. 하지만 이를 구현하는 것은 상당히 복잡하며 현재로서는 이 문서의 범위를 벗어납니다. 오버뷰 리포트 및 생성 지원을 구현한 파일 포맷의 예시를 보고 싶다면 GeoTIFF 드라이버(:file:`gdal/frmts/gtiff/geotiff.cpp`) 및 관련 소스를 살펴보면 됩니다.
 
-Formats can also report that they have arbitrary overviews, by overriding the :cpp:func:`GDALRasterBand::HasArbitraryOverviews` method on the GDALRasterBand, returning TRUE. In this case the raster band object is expected to override the :cpp:func:`GDALRasterBand::RasterIO` method itself, to implement efficient access to imagery with resampling. This is also involved, and there are a lot of requirements for correct implementation of the RasterIO() method. An example of this can be found in the OGDI and ECW formats.
+:cpp:class:`GDALRasterBand` 에 대해 :cpp:func:`GDALRasterBand::HasArbitraryOverviews` 메소드를 대체하고 TRUE를 반환해서 파일 포맷이 임의 오버뷰를 가지고 있다고 리포트할 수도 있습니다. 이 경우 래스터 밴드 객체가 :cpp:func:`GDALRasterBand::RasterIO` 메소드 자체를 대체하고 리샘플링된 영상에 효율적인 접근을 구현할 것으로 예상됩니다. 이 또한 상당히 복잡하며 :cpp:func:`RasterIO` 를 정확하게 구현하기 위해서는 수많은 요구 사항을 만족시켜야 합니다. OGDI 및 ECW 포맷에서 이에 대한 예시를 찾아볼 수 있습니다.
 
-However, by far the most common approach to implementing overviews is to use the default support in GDAL for external overviews stored in TIFF files with the same name as the dataset, but the extension .ovr appended. In order to enable reading and creation of this style of overviews it is necessary for the GDALDataset to initialize the `oOvManager` object within itself. This is typically accomplished with a call like the following near the end of the Open() method (after the PAM :cpp:func:`GDALDataset::TryLoadXML`).
+하지만 지금까지 오버뷰를 구현하기 위한 가장 흔한 접근법은 데이터셋과 동일한 이름이지만 .ovr 확장자가 추가된 TIFF 파일로 저장된 외부 오버뷰를 위한 GDAL 기본 지원을 사용하는 것입니다. 이런 스타일의 오버뷰를 읽고 생성하기 위해서는 :cpp:class:`GDALDataset` 자체 안에 있는 'oOvManager' 객체를 초기화시켜야 합니다. 일반적으로 :cpp:func:`Open` 메소드의 마지막 가까이에 (PAM :cpp:func:`GDALDataset::TryLoadXML` 다음에) 다음과 같이 호출하면 초기화시킬 수 있습니다.
 
 .. code-block:: c++
 
     poDS->oOvManager.Initialize(poDS, poOpenInfo->pszFilename);
 
-This will enable default implementations for reading and creating overviews for the format. It is advised that this be enabled for all simple file system based formats unless there is a custom overview mechanism to be tied into.
+이렇게 하면 해당 포맷에 대해 오버뷰 읽기 및 생성의 기본 구현이 활성화될 것입니다. 사용자 지정 오버뷰 메커니즘이 연결되어 있지 않은 이상 모든 단순 파일 시스템 기반 포맷에 대해 이렇게 활성화시킬 것을 권장합니다.
 
-File Creation
--------------
+파일 생성
+---------
 
-There are two approaches to file creation. The first method is called the :cpp:func:`GDALDriver::CreateCopy` method, and involves implementing a function that can write a file in the output format, pulling all imagery and other information needed from a source GDALDataset. The second method, the dynamic creation method, involves implementing a Create method to create the shell of the file, and then the application writes various information by calls to set methods.
+파일 생성을 위한 접근법이 2개 있습니다. 첫 번째는 :cpp:func:`GDALDriver::CreateCopy` 메소드로, 소스 :cpp:class:`GDALDataset` 으로부터 필요한 모든 영상 및 기타 정보를 가져와서 산출 포맷으로 된 파일을 작성할 수 있는 함수를 구현해야 합니다. 두 번째는 동적 생성 메소드로, :cpp:func:`Create` 메소드를 구현해서 파일의 뼈대를 생성한 다음 응용 프로그램이 메소드를 설정하는 호출을 통해 다양한 정보를 작성합니다.
 
-The benefits of the first method are that that all the information is available at the point the output file is being created. This can be especially important when implementing file formats using external libraries which require information like color maps, and georeferencing information at the point the file is created. The other advantage of this method is that the CreateCopy() method can read some kinds of information, such as min/max, scaling, description and GCPs for which there are no equivalent set methods.
+첫 번째 메소드의 장점은 산출 파일 생성 시 모든 정보를 사용할 수 있다는 것입니다. 파일 생성 시 색상표 및 지리참조 정보 같은 정보를 요구하는 외부 라이브러리를 사용하는 파일 포맷을 구현하는 경우 특히 중요할 수 있습니다. 이 메소드의 다른 장점은 :cpp:func:`CreateCopy` 메소드가 동일한 기능을 하는 다른 설정 메소드가 없는 상황에서 최소값/최대값, 크기 조정 인자, 설명 및 GCP 같은 몇몇 종류의 정보를 읽어올 수 있다는 것입니다.
 
-The benefits of the second method are that applications can create an empty new file, and write results to it as they become available. A complete image of the desired data does not have to be available in advance.
+두 번째 메소드의 장점은 응용 프로그램이 비어 있는 새 파일을 생성한 다음 결과물을 사용할 수 있게 될 때 빈 파일에 결과물을 작성할 수 있다는 것입니다. 원하는 데이터의 전체 이미지를 사전에 준비할 필요가 없습니다.
 
-For very important formats both methods may be implemented, otherwise do whichever is simpler, or provides the required capabilities.
+매우 중요한 포맷의 경우 이 두 메소드가 구현되어 있을 수도 있습니다. 그렇지 않은 경우 더 단순한 쪽을 수행하거나, 필요한 케이퍼빌리티를 제공합니다.
 
 CreateCopy
 ++++++++++
 
-The GDALDriver::CreateCopy() method call is passed through directly, so that method should be consulted for details of arguments. However, some things to keep in mind are:
+:cpp:func:`GDALDriver::CreateCopy` 메소드 호출을 직접 전송해서 인자들의 자세한 내용에 대해 메소드를 참조할 수 있게 해야 합니다. 하지만 다음 내용을 기억해두십시오:
 
-- If the `bStrict` flag is FALSE the driver should try to do something reasonable when it cannot exactly represent the source dataset, transforming data types on the fly, dropping georeferencing and so forth.
-- Implementing progress reporting correctly is somewhat involved. The return result of the progress function needs always to be checked for cancellation, and progress should be reported at reasonable intervals. The JPEGCreateCopy() method demonstrates good handling of the progress function.
-- Special creation options should be documented in the on-line help. If the options take the format "NAME=VALUE" the papszOptions list can be manipulated with :cpp:func:`CPLFetchNameValue` as demonstrated in the handling of the QUALITY and PROGRESSIVE flags for JPEGCreateCopy().
-- The returned GDALDataset handle can be in ReadOnly or Update mode. Return it in Update mode if practical, otherwise in ReadOnly mode is fine.
+-  'bStrict' 플래그가 FALSE라면, 드라이버가 소스 데이터셋을 정확하게 표현하지 못 하거나 데이터 유형을 실시간으로 변환하지 못 하거나 지리참조 정보를 폐기하거나 등등의 경우 드라이버가 타당한 작업을 시도해야 합니다.
 
-The full implementation of the CreateCopy function for JPEG (which is assigned to pfnCreateCopy in the GDALDriver object) is here.
-static GDALDataset *
+-  진행 상황 리포트 작업을 정확하게 구현하는 것은 상당히 복잡합니다. 진행 상황 함수가 반환하는 결과물은 언제나 취소하는 경우인지 확인해야 하며, 적당한 간격으로 진행 상황을 리포트해야 합니다. :cpp:func:`JPEGCreateCopy` 메소드가 이 진행 상황 함수를 훌륭하게 처리하는 예시를 보여줍니다.
+
+-  온라인 도움말에 특수 생성 옵션들을 문서화해야 합니다. 옵션이 "NAME=VALUE" 서식을 입력받는 경우, :cpp:func:`JPEGCreateCopy` 메소드의 QUALITY 및 PROGRESSIVE 플래그의 처리에서 볼 수 있듯이 :cpp:func:`CPLFetchNameValue` 함수로 'papszOptions' 목록을 수정할 수 있습니다.
+
+-  반환되는 :cpp:class:`GDALDataset` 핸들이 ReadOnly 또는 Update 모드일 수 있습니다. 업데이트 모드가 실용적인 경우 핸들을 업데이트 모드로 반환하고, 그렇지 않다면 읽기 전용 모드로 반환해도 됩니다.
+
+다음은 (:cpp:class:`GDALDriver` 객체에 있는 'pfnCreateCopy'에 할당되는) JPEG 용 :cpp:func:`CreateCopy` 메소드를 완전하게 구현하는 예시입니다:
 
 .. code-block:: c++
+
+    static GDALDataset *
 
     JPEGCreateCopy( const char * pszFilename, GDALDataset *poSrcDS,
                     int bStrict, char ** papszOptions,
@@ -582,12 +586,12 @@ static GDALDataset *
         return static_cast<GDALDataset *>(GDALOpen(pszFilename, GA_ReadOnly));
     }
 
-Dynamic Creation
-++++++++++++++++
+동적 생성
++++++++++
 
-In the case of dynamic creation, there is no source dataset. Instead the size, number of bands, and pixel data type of the desired file is provided but other information (such as georeferencing, and imagery data) would be supplied later via other method calls on the resulting GDALDataset.
+동적 생성의 경우, 소스 데이터셋이 존재하지 않습니다. 그 대신 원하는 파일의 크기, 밴드 개수, 그리고 픽셀 데이터 유형을 지정합니다. 나중에 산출되는 :cpp:class:`GDALDataset` 에 다른 메소드들을 호출해서 (지리참조, 영상 데이터 같은) 다른 정보를 작성할 것입니다.
 
-The following sample implement PCI .aux labeled raw raster creation. It follows a common approach of creating a blank, but valid file using non-GDAL calls, and then calling GDALOpen(,GA_Update) at the end to return a writable file handle. This avoids having to duplicate the various setup actions in the Open() function.
+다음 예시는 PCI .aux 확장자를 사용하는 원시(raw) 래스터 생성을 구현합니다. GDAL이 아닌 메소드를 호출해서 비어 있지만 무결한 파일을 생성한 다음, 마지막에 :cpp:func:`GDALOpen` (그리고 :cpp:func:`GA_Update`) 함수를 호출해서 쓰기 가능한 파일 핸들을 반환합니다. 이렇게 하면 :cpp:func:`Open` 함수에 다양한 설정 액션을 복제해야 하는 일을 피할 수 있습니다.
 
 .. code-block:: c++
 
@@ -692,16 +696,16 @@ The following sample implement PCI .aux labeled raw raster creation. It follows 
         return static_cast<GDALDataset *>(GDALOpen(pszFilename, GA_Update));
     }
 
-File formats supporting dynamic creation, or even just update-in-place access also need to implement an IWriteBlock() method on the raster band class. It has semantics similar to IReadBlock(). As well, for various esoteric reasons, it is critical that a FlushCache() method be implemented in the raster band destructor. This is to ensure that any write cache blocks for the band be flushed out before the destructor is called.
+동적 생성을 지원하는 또는 제자리(in-place) 업데이트 접근만 지원하는 파일 포맷도 래스터 밴드 클래스에 대한 :cpp:func:`IWriteBlock` 메소드를 구현해야 합니다. 이 메소드는 :cpp:func:`IReadBlock` 과 비슷한 의미를 가지고 있습니다. 또한 다양한 난해한 이유 때문에, 래스터 밴드 삭제자(destructor)에 :cpp:func:`FlushCache` 메소드를 구현하는 것이 정말 중요합니다. 삭제자를 호출하기 전에 밴드에 대한 모든 쓰기 캐시 블록을 플러싱시키도록 보장하기 위해서입니다.
 
-RawDataset/RawRasterBand Helper Classes
----------------------------------------
+RawDataset/RawRasterBand 도우미 클래스
+--------------------------------------
 
-Many file formats have the actual imagery data stored in a regular, binary, scanline oriented format. Rather than re-implement the access semantics for this for each formats, there are provided :cpp:class:`RawDataset` and :cpp:class:`RawRasterBand` classes declared in gcore/ that can be utilized to implement efficient and convenient access.
+많은 파일 포맷들이 실제 영상 데이터를 정규, 바이너리, 스캔라인 지향 포맷으로 저장합니다. 각 포맷별로 이를 위한 접근 의미를 다시 구현하기보다, :file:`gcore/` 에 선언된 :cpp:class:`RawDataset` 및 :cpp:class:`RawRasterBand` 클래스를 활용해서 효율적이고 편리한 접근을 구현할 수 있습니다.
 
-In these cases the format specific band class may not be required, or if required it can be derived from RawRasterBand. The dataset class should be derived from RawDataset.
+이런 경우 포맷 특화 밴드 클래스가 필요하지 않을 수도 있고, 또는 필요한 경우 :cpp:class:`RawRasterBand` 로부터 파생시킬 수 있습니다. 데이터셋 클래스는 :cpp:class:`RawDataset` 으로부터 파생되어야 합니다.
 
-The Open() method for the dataset then instantiates raster bands passing all the layout information to the constructor. For instance, the PNM driver uses the following calls to create it's raster bands.
+그 다음 데이터셋에 대한 :cpp:func:`Open` 메소드가 구성자(constructor)에게 모든 레이아웃 정보를 전송해서 래스터 밴드를 인스턴스화합니다. 예를 들면 PNM 드라이버는 다음과 같은 호출을 사용해서 래스터 밴드를 생성합니다:
 
 .. code-block:: c++
 
@@ -724,32 +728,54 @@ The Open() method for the dataset then instantiates raster bands passing all the
                                 iIn+2, 3, nWidth*3, GDT_Byte, TRUE));
     }
 
-The RawRasterBand takes the following arguments.
+:cpp:class:`RawRasterBand` 클래스는 다음 인자들을 입력받습니다:
 
-- poDS: The GDALDataset this band will be a child of. This dataset must be of a class derived from RawRasterDataset.
-- nBand: The band it is on that dataset, 1 based.
-- fpRaw: The FILE * handle to the file containing the raster data.
-- nImgOffset: The byte offset to the first pixel of raster data for the first scanline.
-- nPixelOffset: The byte offset from the start of one pixel to the start of the next within the scanline.
-- nLineOffset: The byte offset from the start of one scanline to the start of the next.
-- eDataType: The GDALDataType code for the type of the data on disk.
-- bNativeOrder: FALSE if the data is not in the same endianness as the machine GDAL is running on. The data will be automatically byte swapped.
+-  poDS:
+   이 밴드의 상위 클래스가 될 :cpp:class:`GDALDataset` 입니다. 이 데이터셋은 반드시 :cpp:class:`RawRasterDataset` 으로부터 파생된 클래스여야 합니다.
 
-Simple file formats utilizing the Raw services are normally placed all within one file in the gdal/frmts/raw directory. There are numerous examples there of format implementation.
+-  nBand:
+   해당 데이터셋에 있는 밴드의 1에서 시작하는 번호입니다.
 
-Metadata, and Other Exotic Extensions
+-  fpRaw:
+   래스터 데이터를 담고 있는 파일을 가리키는 ``FILE *`` 핸들입니다.
+
+-  nImgOffset:
+   래스터 데이터의 첫 번째 스캔라인의 첫 번째 픽셀에 대한 바이트 오프셋입니다.
+
+-  nPixelOffset:
+   스캔라인 안에 있는 한 픽셀의 시작으로부터 다음 픽셀의 시작까지의 바이트 오프셋입니다
+
+-  nLineOffset:
+   한 스캔라인의 시작으로부터 다음 스캔라인의 시작까지의 바이트 오프셋입니다.
+
+-  eDataType:
+   디스크 상에 있는 데이터의 유형을 나타내는 :cpp:class:`GDALDataType` 코드입니다.
+
+-  bNativeOrder:
+   데이터가 GDAL이 실행 중인 머신과 동일한 엔디언(endian)에 있지 않는 경우 FALSE로 설정합니다. 데이터의 바이트를 자동으로 뒤바꿀 것입니다.
+
+"Raw" 서비스를 활용하는 단순 파일 포맷들은 일반적으로 :file:`gdal/frmts/raw` 디렉터리에 있는 파일 하나 안에 배치됩니다. 포맷 구현에 대한 수많은 예시들이 있습니다.
+
+메타데이터 및 기타 실험적인 확장 사양
 -------------------------------------
 
-There are various other items in the GDAL data model, for which virtual methods exist on the GDALDataset and GDALRasterBand. They include:
+GDAL 데이터 모델에는 다양한 다른 항목들이 있으며, :cpp:class:`GDALDataset` 및 :cpp:class:`GDALRasterBand` 상에 이에 대한 가상 메소드들이 존재합니다. 이 가상 메소드에는 다음이 포함됩니다:
 
-- Metadata: Name/value text values about a dataset or band. The GDALMajorObject (base class for GDALRasterBand and GDALDataset) has built-in support for holding metadata, so for read access it only needs to be set with calls to SetMetadataItem() during the Open(). The SAR_CEOS (frmts/ceos2/sar_ceosdataset.cpp) and GeoTIFF drivers are examples of drivers implementing readable metadata.
+-  Metadata:
+   데이터셋 또는 밴드에 관한 이름/값 텍스트 값입니다. (:cpp:class:`GDALDataset` 및 :cpp:class:`GDALRasterBand` 의 기반 클래스인) :cpp:class:`GDALMajorObject` 는 메타데이터를 담기 위한 지원을 내장하고 있기 때문에, 읽기 접근의 경우 :cpp:func:`Open` 도중 :cpp:func:`SetMetadataItem` 함수를 호출하도록 설정하기만 하면 됩니다. 읽기 가능한 메타데이터를 구현한 드라이버의 예시로는 SAR_CEOS(:file:`frmts/ceos2/sar_ceosdataset.cpp`) 및 GeoTIFF 드라이버가 있습니다.
 
-- ColorTables: GDT_Byte raster bands can have color tables associated with them. The frmts/png/pngdataset.cpp driver contains an example of a format that supports colortables.
+-  ColorTables:
+   GDT_Byte 래스터 밴드는 연결된 색상표를 가질 수 있습니다. :file:`frmts/png/pngdataset.cpp` 드라이버가 색상표를 지원하는 포맷의 예시를 담고 있습니다.
 
-- ColorInterpretation: The PNG driver contains an example of a driver that returns an indication of whether a band should be treated as a Red, Green, Blue, Alpha or Greyscale band.
+-  ColorInterpretation:
+   PNG 드라이버가 어떤 밴드를 적색, 녹색, 청색, 알파 또는 회색조 밴드로 취급해야 할지 여부를 나타내는 값을 반환하는 드라이버의 예시를 담고 있습니다.
 
-- GCPs: GDALDatasets can have a set of ground control points associated with them (as opposed to an explicit affine transform returned by GetGeotransform()) relating the raster to georeferenced coordinates. The MFF2 (gdal/frmts/raw/hkvdataset.cpp) format is a simple example of a format supporting GCPs.
+-  GCP:
+   :cpp:class:`GDALDataset` 은 연결된 지상기준점(Ground Control Point) 집합을 가질 수 있습니다. GCP는 (:cpp:func:`GetGeotransform` 함수가 반환하는 명확한 아핀 변환과는 반대로) 래스터를 지리참조 좌표에 연결합니다. GCP를 지원하는 단순 포맷의 예시로는 MFF2(:file:`gdal/frmts/raw/hkvdataset.cpp`) 포맷이 있습니다.
 
-- NoDataValue: Bands with known "nodata" values can implement the GetNoDataValue() method. See the PAux (frmts/raw/pauxdataset.cpp) for an example of this.
+-  NoDataValue:
+   알려진 "NODATA" 값을 가진 밴드는 :cpp:func:`GetNoDataValue` 메소드를 구현할 수 있습니다. 이 예시를 보고 싶다면 PAux(:file:`frmts/raw/pauxdataset.cpp`) 포맷을 참조하십시오.
 
-- Category Names: Classified images with names for each class can return them using the GetCategoryNames() method though no formats currently implement this.
+-  카테고리 이름:
+   :cpp:func:`GetCategoryNames` 메소드를 사용하면 범주 이미지의 각 범주의 이름을 반환할 수 있지만 현재 이 메소드를 구현한 포맷은 없습니다.
+
