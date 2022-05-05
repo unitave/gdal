@@ -1,26 +1,22 @@
 .. _vector_driver_tut:
 
 ================================================================================
-Vector driver implementation tutorial
+벡터 드라이버 구현 예제
 ================================================================================
 
 .. highlight:: cpp
 
-Overall Approach
-----------------
+전반적인 접근법
+---------------
 
-In general new formats are added to OGR by implementing format
-specific drivers with instantiating a :cpp:class:`GDALDriver` and subclasses of
-:cpp:class:`GDALDataset` and :cpp:class:`OGRLayer`.  The GDALDriver instance is registered with
-the :cpp:class:`GDALDriverManager` at runtime.
+일반적으로 새 포맷은 포맷 특화 드라이버를 :cpp:class:`GDALDataset` 클래스와 :cpp:class:`GDALDataset` 및 :cpp:class:`OGRLayer` 의 하위 클래스들을 인스턴스화해서 구현하는 방식으로 OGR에 추가됩니다. :cpp:class:`GDALDriver` 인스턴스는 런타임 시 :cpp:class:`GDALDriverManager` 를 통해 등록됩니다.
 
-Before following this tutorial to implement an OGR driver, please review
-the :ref:`vector_data_model` document carefully.
+OGR 드라이버를 구현하기 위한 이 예제를 따라 하기 전에, :ref:`vector_data_model` 문서를 자세히 살펴봐주십시오.
 
-The tutorial will be based on implementing a simple ascii point format.
+이 예제는 간단한 아스키 포인트 포맷 구현을 기반으로 할 것입니다.
 
-Implementing GDALDriver
------------------------
+GDALDriver 구현하기
+-------------------
 
 The format specific driver class is implemented as a instance of GDALDriver.
 One instance of the driver will normally be created, and registered with
