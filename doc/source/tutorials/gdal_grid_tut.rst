@@ -1,16 +1,13 @@
 .. _gdal_grid_tut:
 
 ================================================================================
-GDAL Grid Tutorial
+GDAL 그리드 예제
 ================================================================================
 
-Introduction to Gridding
-------------------------
+그리드 작업 소개
+----------------
 
-Gridding is a process of creating a regular grid (or call it a raster image)
-from the scattered data. Typically you have a set of arbitrary scattered over
-the region of survey measurements and you would like to convert them into the
-regular grid for further processing and combining with other grids.
+그리드 작업(gridding)이란 분산 데이터로부터 정규 그리드를 (또는 래스터 이미지라고 해도 됩니다) 생성하는 과정입니다. 일반적인 데이터는 관측 측정 영역에 걸쳐 임의의 집합이 분산되어 있는데, 추가 처리 및 다른 그리드와의 결합을 위해 이를 정규 그리드로 변환하고 싶을 것입니다.
 
 .. only:: latex
 
@@ -22,167 +19,133 @@ regular grid for further processing and combining with other grids.
     .. image:: ../../images/grid/gridding.png
         :alt:   Scattered data gridding
 
-This problem can be solved using data interpolation or approximation
-algorithms. But you are not limited by interpolation here. Sometimes you don't
-need to interpolate your data but rather compute some statistics or data
-metrics over the region. Statistics is valuable itself or could be used for
-better choosing the interpolation algorithm and parameters.
+데이터 보간 및 근사치 알고리즘을 사용하면 이 문제를 해결할 수 있습니다. 그러나 보간만으로 제한되지는 않습니다. 사용자 데이터를 보간하기보다 전체 영역에서 통계 또는 데이터 메트릭(data metrics)을 계산해야 하는 경우도 있습니다. 통계는 그 자체로 중요하며, 또는 더 나은 보간 알고리즘과 파라미터를 선택하기 위해 사용될 수도 있습니다.
 
-That is what GDAL Grid API is about. It helps you to interpolate your data
-(see `Interpolation of the Scattered Data`_) or compute data metrics (see
-`Data Metrics Computation`_).
+이것이 GDAL 그리드 API의 목적입니다. GDAL 그리드 API는 데이터 보간을 돕거나 (`분산 데이터의 보간`_ 참조) 또는 데이터 메트릭 계산을 (`데이터 메트릭 계산`_ 참조) 도와줍니다.
 
-There are two ways of using this interface. Programmatically it is available
-through the :cpp:func:`GDALGridCreate` C function; for end users there is a
-:ref:`gdal_grid` utility. The rest of this document discusses details on algorithms
-and their parameters implemented in GDAL Grid API.
+두 가지 방식으로 인터페이스를 사용할 수 있습니다. 프로그램적으로는 :cpp:func:`GDALGridCreate` C 함수를 통해 사용할 수 있고, 종단 사용자의 경우 :ref:`gdal_grid` 유틸리티를 통해 사용할 수 있습니다. 이 문서의 나머지 부분에서는 GDAL 그리드 API에 구현된 알고리즘 및 그 파라미터에 대한 자세한 내용을 논의할 것입니다.
 
-Interpolation of the Scattered Data
------------------------------------
+분산 데이터의 보간
+------------------
 
-Inverse Distance to a Power
-+++++++++++++++++++++++++++
+역거리 제곱
++++++++++++
 
-The Inverse Distance to a Power gridding method is a weighted average
-interpolator. You should supply the input arrays with the scattered data
-values including coordinates of every data point and output grid geometry. The
-function will compute interpolated value for the given position in output
-grid.
+역거리 제곱(Inverse Distance to a Power) 그리드 작업 메소드는 가중 평균(weighted average) 보간법을 사용합니다. 모든 데이터 포인트 및 산출 그리드 도형의 좌표을 포함하는 분산 데이터 값들을 가진 입력 배열을 지정해줘야 합니다. 이 함수는 산출 그리드에 지정한 위치에 대한 보간값을 계산할 것입니다.
 
-For every grid node the resulting value :math:`Z` will be calculated using
-formula:
+모든 그리드 노드에 대해 다음 공식을 사용해서 산출되는 :math:`Z` 값을 계산할 것입니다:
 
 .. math::
 
     Z=\frac{\sum_{i=1}^n{\frac{Z_i}{r_i^p}}}{\sum_{i=1}^n{\frac{1}{r_i^p}}}
 
-where:
+이때:
 
-- :math:`Z_i` is a known value at point :math:`i`,
-- :math:`r_i` is a distance from the grid node to point :math:`i`,
-- :math:`p` is a weighting power,
-- :math:`n` is a number of points in `Search Ellipse`_.
+-  :math:`Z_i` 는 :math:`i` 포인트 위치의 알려진 값,
+-  :math:`r_i` 는 그리드 노드로부터 :math:`i` 포인트까지의 거리,
+-  :math:`p` 는 가중 제곱(weighting power),
+-  :math:`n` 은 `검색 타원`_ 안에 있는 포인트의 개수입니다.
 
-The smoothing parameter :math:`s` is used as an additive term in the Euclidean distance calculation:
+:math:`s` 평활화(smoothing) 파라미터는 유클리드 거리 계산에서 추가 인자로 사용됩니다:
 
 .. math::
 
     {r_i}=\sqrt{{r_{ix}}^2 + {r_{iy}}^2 + s^2}
 
-where :math:`r_{ix}` and :math:`r_{iy}` are the horizontal and vertical
-distances between the grid node to point :math:`i` respectively.
+이때 :math:`r_{ix}` 및 :math:`r_{iy}` 는 각각 그리드 노드와 :math:`i` 포인트 사이의 수평 및 수직 거리입니다.
 
-In this method the weighting factor :math:`w` is
+이 메소드에서 :math:`w` 가중 인자는 다음과 같습니다:
 
 .. math::
 
     w=\frac{1}{r^p}
 
-See :cpp:class:`GDALGridInverseDistanceToAPowerOptions` for the list of
-:cpp:func:`GDALGridCreate` parameters and :ref:`gdal_grid_invdist` for the list
-of :ref:`gdal_grid` options.
+:cpp:func:`GDALGridCreate` 함수의 파라미터 목록은 :cpp:class:`GDALGridInverseDistanceToAPowerOptions` 를, :ref:`gdal_grid` 유틸리티의 옵션 목록은 :ref:`gdal_grid_invdist` 를 참조하십시오.
 
-Moving Average
-++++++++++++++
+이동 평균
++++++++++
 
-The Moving Average is a simple data averaging algorithm. It uses a moving
-window of elliptic form to search values and averages all data points within
-the window. `Search Ellipse`_ can be rotated by
-specified angle, the center of ellipse located at the grid node. Also the
-minimum number of data points to average can be set, if there are not enough
-points in window, the grid node considered empty and will be filled with
-specified NODATA value.
+이동 평균(Moving Average)은 간단한 데이터 평균 알고리즘입니다. 이 알고리즘은 타원 형태의 이동 창을 사용해서 값을 검색하고 창 안에 들어오는 모든 데이터 포인트의 평균을 계산합니다. 지정한 각도로 `검색 타원`_ 을 기울일 수 있고, 타원의 중심은 그리드 노드에 위치합니다. 또 평균을 계산하기 위한 데이터 포인트의 최소 개수도 설정할 수 있어서, 창 안에 충분한 포인트가 없을 경우 해당 그리드 노드가 비어 있다고 간주하고 지정한 NODATA 값으로 채울 것입니다.
 
-Mathematically it can be expressed with the formula:
+이 알고리즘은 수학적으로 다음 공식으로 표현할 수 있습니다:
 
 .. math::
 
      Z=\frac{\sum_{i=1}^n{Z_i}}{n}
 
-where:
+이때:
 
-- :math:`Z` is a resulting value at the grid node,
-- :math:`Z_i` is a known value at point :math:`i`,
-- :math:`n` is a number of points in search `Search Ellipse`_.
+-  :math:`Z` 는 그리드 노드 위치에 산출되는 값,
+-  :math:`Z_i` 는 :math:`i` 포인트 위치의 알려진 값,
+-  :math:`n` 은 `검색 타원`_ 안에 있는 포인트의 개수입니다.
 
-See :cpp:class:`GDALGridMovingAverageOptions` for the list of :cpp:func:`GDALGridCreate`
-parameters and  :ref:`gdal_grid_average` for the list of :ref:`gdal_grid` options.
+:cpp:func:`GDALGridCreate` 함수의 파라미터 목록은 :cpp:class:`GDALGridMovingAverageOptions` 를, :ref:`gdal_grid` 유틸리티의 옵션 목록은 :ref:`gdal_grid_average` 를 참조하십시오.
 
-Nearest Neighbor
-++++++++++++++++
+최근접 이웃
++++++++++++
 
-The Nearest Neighbor method doesn't perform any interpolation or smoothing, it
-just takes the value of nearest point found in grid node search ellipse and
-returns it as a result. If there are no points found, the specified NODATA
-value will be returned.
+최근접 이웃(Nearest Neighbor) 메소드는 어떤 보간이나 평탄화도 수행하지 않습니다. 그냥 그리드 노드 검색 타원에서 발견된 최근접 포인트의 값을 받아서 이를 결과물로 반환할 뿐입니다. 어떤 포인트도 발견하지 못 한 경우, 지정한 NODATA 값을 반환할 것입니다.
 
-See :cpp:class:`GDALGridNearestNeighborOptions` for the list of :cpp:func:`GDALGridCreate`
-parameters and :ref:`gdal_grid_nearest` for the list of :ref:`gdal_grid` options.
+:cpp:func:`GDALGridCreate` 함수의 파라미터 목록은 :cpp:class:`GDALGridNearestNeighborOptions` 를, :ref:`gdal_grid` 유틸리티의 옵션 목록은 :ref:`gdal_grid_nearest` 를 참조하십시오.
 
-Data Metrics Computation
-------------------------
+데이터 메트릭 계산
+------------------
 
-All the metrics have the same set controlling options. See the
-:cpp:class:`GDALGridDataMetricsOptions`.
+모든 메트릭이 동일한 제어 옵션 집합을 공유합니다. :cpp:class:`GDALGridDataMetricsOptions` 를 참조하십시오.
 
-Minimum Data Value
-++++++++++++++++++
+데이터 최소값
++++++++++++++
 
-Minimum value found in grid node `Search Ellipse`_.
-If there are no points found, the specified NODATA value will be returned.
+그리드 노드 `검색 타원`_ 에서 발견된 최소값입니다. 어떤 포인트도 발견하지 못 한 경우, 지정한 NODATA 값을 반환할 것입니다.
 
 .. math::
 
      Z=\min{(Z_1,Z_2,\ldots,Z_n)}
 
-where:
+이때:
 
-- :math:`Z` is a resulting value at the grid node,
-- :math:`Z_i` is a known value at point :math:`i`,
-- :math:`n` is a number of points in `Search Ellipse`_.
+-  :math:`Z` 는 그리드 노드 위치에 산출되는 값,
+-  :math:`Z_i` 는 :math:`i` 포인트 위치의 알려진 값,
+-  :math:`n` `검색 타원`_ 안에 있는 포인트의 개수입니다.
 
-Maximum Data Value
+데이터 최대값
 ++++++++++++++++++
 
-Maximum value found in grid node `Search Ellipse`_.
-If there are no points found, the specified NODATA value will be returned.
+그리드 노드 `검색 타원`_ 에서 발견된 최대값입니다. 어떤 포인트도 발견하지 못 한 경우, 지정한 NODATA 값을 반환할 것입니다.
 
 .. math::
 
      Z=\max{(Z_1,Z_2,\ldots,Z_n)}
 
-where:
+이때:
 
-- :math:`Z` is a resulting value at the grid node,
-- :math:`Z_i` is a known value at point :math:`i`,
-- :math:`n` is a number of points in `Search Ellipse`_.
+-  :math:`Z` 는 그리드 노드 위치에 산출되는 값,
+-  :math:`Z_i` 는 :math:`i` 포인트 위치의 알려진 값,
+-  :math:`n` `검색 타원`_ 안에 있는 포인트의 개수입니다.
 
-Data Range
-++++++++++
+데이터 범위
++++++++++++
 
-A difference between the minimum and maximum values found in grid `Search Ellipse`_.
-If there are no points found, the
-specified NODATA value will be returned.
+그리드 노드 `검색 타원`_ 에서 발견된 최소값 및 최대값의 차입니다. 어떤 포인트도 발견하지 못 한 경우, 지정한 NODATA 값을 반환할 것입니다.
 
 .. math::
 
      Z=\max{(Z_1,Z_2,\ldots,Z_n)}-\min{(Z_1,Z_2,\ldots,Z_n)}
 
-where:
+이때:
 
-- :math:`Z` is a resulting value at the grid node,
-- :math:`Z_i` is a known value at point :math:`i`,
-- :math:`n` is a number of points in `Search Ellipse`_.
+-  :math:`Z` 는 그리드 노드 위치에 산출되는 값,
+-  :math:`Z_i` 는 :math:`i` 포인트 위치의 알려진 값,
+-  :math:`n` `검색 타원`_ 안에 있는 포인트의 개수입니다.
 
-Search Ellipse
---------------
+검색 타원
+---------
 
-Search window in gridding algorithms specified in the form of rotated ellipse.
-It is described by the three parameters:
+그리드 작업 알고리즘에서 검색 창은 기울어진 타원 형태로 지정됩니다. 다음 파라미터 3개로 서술할 수 있습니다:
 
-- :math:`radius_1` is the first radius (:math:`x` axis if rotation angle is 0),
-- :math:`radius_2` is the second radius (:math:`y` axis if rotation angle is 0),
-- :math:`angle` is a search ellipse rotation angle (rotated counter clockwise).
+-  :math:`radius_1` 은 제1 반지름(기울기 각도가 0인 경우 :math:`x` 축),
+-  :math:`radius_2` 는 제2 반지름(기울기 각도가 0인 경우 :math:`y` 축),
+-  :math:`angle` 은 검색 타원의 (반시계 방향으로 기울어지는) 기울기 각도입니다.
 
 .. only:: latex
 
@@ -194,5 +157,5 @@ It is described by the three parameters:
     .. image:: ../../images/grid/ellipse.png
         :alt:   Search ellipse
 
-Only points located inside the search ellipse (including its border line) will
-be used for computation.
+검색 타원 (및 그 경계선) 안에 위치한 포인트들만 계산에 사용할 것입니다.
+

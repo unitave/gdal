@@ -65,11 +65,11 @@ C 코드:
 .. code-block:: c
 
     adfGeoTransform[0] /* 좌상단 x */
-    adfGeoTransform[1] /* w-e 픽셀 해상도 */
+    adfGeoTransform[1] /* 서-동 픽셀 해상도 */
     adfGeoTransform[2] /* 0 */
     adfGeoTransform[3] /* 좌상단 y */
     adfGeoTransform[4] /* 0 */
-    adfGeoTransform[5] /* n-s 픽셀 해상도 (음의 값) */
+    adfGeoTransform[5] /* 북-남 픽셀 해상도 (음의 값) */
 
 일반적인 경우, 이는 아핀 변환입니다.
 
@@ -282,7 +282,7 @@ C 코드:
 데이터셋 종료하기
 -----------------
 
-:cpp:class:`GDALRasterBand` 객체는 해당 데이터셋의 소유이기 때문에, 절대로 C++ 삭제 연산자로 삭제해서는 안 된다는 사실을 기억하십시오. :cpp:func:`GDALClose` 함수를 호출하면 :cpp:class:`GDALDataset` 클래스를 종료할 수 있습니다. (윈도우 사용자의 경우 GDALDataset에 삭제 연산자를 사용하는 것을 권장하지 않습니다. 모듈 경계에 걸쳐 메모리를 할당하고 해제하는 경우 발생한다고 알려진 문제점 때문입니다. FAQ에서 관련 주제를 읽어보십시오.) :cpp:func:`GDALClose` 함수를 호출하면 제대로 마무리(cleanup)하고 대기 중인 모든 쓰기를 플러싱(flushing)할 것입니다. GeoTIFF 같은 유명한 포맷으로 된 데이터셋을 업데이트 모드로 열었는데 이 데이터셋에 대해 :cpp:func:`GDALClose` 함수를 호출하는 일을 잊었다면, 일반적으로 다시 열 수 없게 될 것입니다.
+:cpp:class:`GDALRasterBand` 객체는 해당 데이터셋의 소유이기 때문에, 절대로 C++ 삭제 연산자로 삭제해서는 안 된다는 사실을 기억하십시오. :cpp:func:`GDALClose` 함수를 호출하면 :cpp:class:`GDALDataset` 클래스를 종료할 수 있습니다. (윈도우 사용자의 경우 GDALDataset에 삭제 연산자를 사용하는 것을 권장하지 않습니다. 모듈 경계에 걸쳐 메모리를 할당하고 해제하는 경우 발생한다고 알려진 문제점 때문입니다. FAQ에서 관련 주제를 읽어보십시오.) :cpp:func:`GDALClose` 함수를 호출하면 제대로 정리(cleanup)하고 대기 중인 모든 쓰기를 플러싱(flushing)할 것입니다. GeoTIFF 같은 유명한 포맷으로 된 데이터셋을 업데이트 모드로 열었는데 이 데이터셋에 대해 :cpp:func:`GDALClose` 함수를 호출하는 일을 잊었다면, 일반적으로 다시 열 수 없게 될 것입니다.
 
 파일 생성 기법
 --------------
