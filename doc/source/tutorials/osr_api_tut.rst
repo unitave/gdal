@@ -258,7 +258,7 @@ GDAL 3.0버전부터, :cpp:class:`OGRCoordinateTransformation` 클래스가 기�
 좌표 변환
 ---------
 
-:cpp:class:`OGRCoordinateTransformation` 클래스는 서로 다른 좌표계 사이에 위치를 변환하기 위해 사용됩니다. :cpp:func:`OGRCreateCoordinateTransformation` 메소드를 사용해서 새 변환 객체들을 생성한 다음 :cpp:func:`OGRCoordinateTransformation::Transform` 메소드로 서로 다른 좌표계 사이에 포인트 좌표를 변환할 수 있습니다.
+:cpp:class:`OGRCoordinateTransformation` 클래스는 서로 다른 좌표계 사이에 위치를 변환하기 위해 사용됩니다. :cpp:func:`OGRCreateCoordinateTransformation` 메소드를 사용해서 새 변환 객체들을 생성한 다음 :cpp:func:`OGRCoordinateTransformation::Transform` 메소드로 서로 다른 좌표계 사이에 포인트를 변환할 수 있습니다.
 
 .. code-block::
 
@@ -284,36 +284,15 @@ GDAL 3.0버전부터, :cpp:class:`OGRCoordinateTransformation` 클래스가 기�
                 x, y );
     }
 
+좌표 변환이 실패할 수 있는 지점이 몇 군데 있습니다. 먼저 :cpp:func:`OGRCreateCoordinateTransformation` 이 실패할 수도 있습니다. 일반적으로 메소드 내부에서 지정한 좌표계 사이에 변환을 확정할 수 없기 때문에 NULL 포인터를 반환하는 경우입니다.
 
-There are a couple of points at which transformations can
-fail.  First, OGRCreateCoordinateTransformation() may fail,
-generally because the internals recognize that no transformation
-between the indicated systems can be established, and will
-return a NULL pointer.
+:cpp:func:`OGRCoordinateTransformation::Transform` 메소드 자체가 실패할 수도 있습니다. 앞에서 언급했던 문제점들 가운데 하나가 지연된 결과일 수도 있고, 또는 전송된 하나 이상의 포인트에 대해 숫자가 정의되지 않은 작업의 결과일 수도 있습니다. :cpp:func:`Transform` 함수는 성공 시 TRUE를 반환하고, 포인트를 하나라도 변환 실패하는 경우 FALSE를 반환할 것입니다. 오류 시 포인트 배열을 정확히 규정할 수 없는(indeterminate) 상태로 내버려둡니다.
 
-The OGRCoordinateTransformation::Transform() method itself can
-also fail.  This may be as a delayed result of one of the above
-problems, or as a result of an operation being numerically
-undefined for one or more of the passed in points.  The
-Transform() function will return TRUE on success, or FALSE
-if any of the points fail to transform.  The point array is
-left in an indeterminate state on error.
+앞에서 보인 적은 없지만, 좌표 변환 서비스는 3차원 포인트를 입력받아 회전 타원체 및 원점에서의 표고 차에 대해 표고를 조정할 것입니다. 지리 좌표계 또는 투영 좌표계 상에서 지정된 표고는 타원체 고도로 간주됩니다. 수평 (지리 또는 투영) 좌표계와 수직 좌표계로 이루어진 복합 좌표계를 사용하는 경우 표고는 (해수면, 중력 기반 등등) 수직 원점과 상대적일 것입니다.
 
-Though not shown above, the coordinate transformation service can
-take 3D points, and will adjust elevations for elevation differences
-in spheroids, and datums. Elevations given on a geographic or projected CRS
-are assumed to be ellipsoidal heights. When using a compound CRS made of a
-horizontal CRS (geographic or projected) and a vertical CRS, elevations will
-be related to a vertical datum (mean sea level, gravity based, etc.).
+GDAL 3.0버전부터, 시간에 따라 달라지는 좌표 작업에 (일반적으로 십진년(decimal year) 단위의 값인) 시간 값도 지정할 수 있습니다.
 
-Starting with GDAL 3.0, a time value (generally as a value in decimal years) can
-also be specified for time-dependent coordinate operations.
-
-The following example shows how to conveniently create a long/lat coordinate
-system using the same geographic CRS as a projected coordinate
-system, and using that to transform between projected coordinates and
-long/lat. The returned coordinates will be in longitude, latitude order due to
-the call to SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER)
+다음 예시는 투영 좌표계와 동일한 지리 좌표계를 사용해서 경도/위도 좌표계를 편리하게 생성한 다음 이를 사용해서 투영 좌표와 경도/위도 좌표를 서로 변환하는 방법을 보여줍니다. ``SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER)`` 호출 때문에 좌표를 경도, 위도 순서로 반환할 것입니다.
 
 .. code-block::
 
@@ -338,20 +317,12 @@ the call to SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER)
     if( !poTransform->Transform( nPoints, x, y, z ) )
     ...
 
-Advanced Coordinate Transformation
-----------------------------------
+고급 좌표 변환
+--------------
 
-OGRCreateCoordinateTransformation() under-the-hood may determine several candidate
-coordinate operations transforming from the source CRS to the target CRS. Those
-candidate coordinate operations each have their own area of use. When Transform()
-is invoked, it will determine the most appropriate coordinate operation based on
-the coordinates of the point to transform and area of use. For example,
-there are several dozens of possible coordinate operations for the NAD27 to WGS84
-transformation.
+내부 :cpp:func:`OGRCreateCoordinateTransformation` 메소드가 소스 좌표계로부터 대상 좌표계로의 좌표 작업 변환 후보를 여러 개 결정할 수도 있습니다. 이 좌표 작업 후보들은 각각 자신만의 사용 영역을 가지고 있습니다. :cpp:func:`Transform` 을 호출하는 경우, 변환할 포인트의 좌표 및 사용 영역을 기반으로 가장 알맞은 좌표 작업을 결정할 것입니다. 예를 들어, NAD27을 WGS84로 변환하는 경우 사용할 수 있는 좌표 작업이 수십 개 존재합니다.
 
-If a bounding box of the area of interest into which coordinates to transform
-are located is known, it is possible to specify it to restrict the candidate
-coordinate operations to consider:
+변환하는 좌표가 위치하게 될 관심 영역의 경계 상자를 알고 있는 경우, 이를 지정해서 고려할 좌표 작업 후보를 제한하도록 할 수 있습니다:
 
 .. code-block::
 
@@ -359,10 +330,7 @@ coordinate operations to consider:
     options.SetAreaOfInterest(-100,40,-99,41);
     poTransform = OGRCreateCoordinateTransformation( &oNAD27, &oWGS84, options );
 
-For cases where a particular coordinate operation must be used, it is possible
-to specify it as as a PROJ string (single step operation or multiple step string
-starting with +proj=pipeline), a WKT2 string describing a CoordinateOperation,
-or a urn:ogc:def:coordinateOperation:EPSG::XXXX URN
+특정 좌표 작업을 사용해야만 하는 경우, (단일 단계 작업 또는 "+proj=pipeline"으로 시작하는 다중 단계 문자열인) PROJ 문자열로, CoordinateOperation을 서술하는 WKT2 문자열로, 또는 "urn:ogc:def:coordinateOperation:EPSG::XXXX" URN으로 지정할 수 있습니다.
 
 .. code-block::
 
@@ -384,16 +352,13 @@ or a urn:ogc:def:coordinateOperation:EPSG::XXXX URN
     poTransform = OGRCreateCoordinateTransformation( &oNAD27, &oWGS84, options );
 
 
-Alternate Interfaces
---------------------
+대체 인터페이스
+---------------
 
-A C interface to the coordinate system services is defined in
-ogr_srs_api.h, and Python bindings are available via the osr.py module.
-Methods are close analogs of the C++ methods but C and Python bindings
-are missing for some C++ methods.
+좌표계에 대한 C 언어 인터페이스는 :file:`ogr_srs_api.h` 에 정의되며, 파이썬 바인딩은 :file:`osr.py` 모듈을 통해 사용할 수 있습니다. 메소드는 C++ 메소드와 유사하지만 몇몇 C++ 메소드의 경우 대응하는 C 및 파이썬 바인딩이 존재하지 않기도 합니다.
 
-C bindings
-++++++++++
+C 바인딩
+++++++++
 
 .. code-block:: c
 
@@ -488,8 +453,8 @@ C bindings
                                     OGRSpatialReferenceH hTargetSRS,
                                     OGRCoordinateTransformationOptionsH hOptions );
 
-Python bindings
-+++++++++++++++
+파이썬 바인딩
++++++++++++++
 
 .. code-block:: python
 
@@ -515,28 +480,13 @@ Python bindings
         def TransformPoint(self, x, y, z = 0):
         def TransformPoints(self, points):
 
-History and implementation considerations
------------------------------------------
+이력 및 구현 고려 사항
+----------------------
 
-Before GDAL 3.0, the OGRSpatialReference class was strongly tied to OGC WKT (WKT 1)
-format specified by `Coordinate Transformation Services (CT) specification (01-009) <http://portal.opengeospatial.org/files/?artifact_id=999>`_,
-and the way
-it was interpreted by GDAL, which various caveats detailed in
-the :ref:`wktproblems` page.
-The class mostly contained an in-memory tree-like representation of WKT 1 strings.
-The class used to directly implement import and export to OGC WKT 1, WKT-ESRI and PROJ.4
-formats. Reprojection services were only available if GDAL had been build against
-the PROJ library.
+GDAL 3.0버전 이전에는, :cpp:class:`OGRSpatialReference` 클래스가 `좌표 변환 서비스 (CT) 사양 (01-009) <http://portal.opengeospatial.org/files/?artifact_id=999>`_ 가 지정하는 OGC WKT(WKT 1) 포맷 및 GDAL이 이를 해석하는 방식과 강력하게 연결되어 있었습니다. 이에 대한 여러 가지 조심할 점은 :ref:`wktproblems` 페이지에서 자세히 설명하고 있습니다.
+이 클래스는 대부분 WKT 1버전 문자열의 인메모리 유사 트리 표현을 담고 있었습니다. 이 클래스를 사용해서 OGC WKT 1, WKT-ESRI 및 PROJ.4 포맷 가져오기 및 내보내기를 직접 구현했습니다. 재투영 서비스는 GDAL이 PROJ 라이브러리를 대상으로 빌드되었을 경우에만 사용할 수 있었습니다.
 
-Starting with GDAL 3.0, the `PROJ <https://proj4.org>`_ >= 6.0 library
-has become a required dependency of GDAL.
-PROJ 6 has built-in support for OGC WKT 1, ESRI WKT, OGC WKT 2:2015
-and OGC WKT 2:2018 representations. PROJ 6 also implements a C++ object class
-hierarchy of the ISO-19111 / OGC Abstract Topic 2 "Referencing by coordinate" standard.
-Consequently the OGRSpatialReference class has been modified to act mostly as
-a wrapper on top of PROJ PJ* CRS objects, and tries to abstract away from
-the OGC WKT 1 representation as much as possible. However, for backward compatibility,
-some methods still expect arguments or return values that are specific of OGC WKT 1.
-The design of th OGRSpatialReference class is also still monolithic. Users wanting
-direct and fine grained access to CRS representations might want to directly use
-the PROJ 6 C or C++ API.
+GDAL 3.0버전부터, `PROJ <https://proj4.org>`_ 6.0 이상 버전 라이브러리가 GDAL의 필수 의존성이 되었습니다. PROJ 6버전은 OGC WKT 1, ESRI WKT, OGC WKT 2:2015 그리고 OGC WKT 2:2018 표현 지원을 내장하고 있습니다. PROJ 6버전은 `ISO-19111 / OGC 추상 주제 2 "좌표로 참조" 표준 <https://docs.ogc.org/as/18-005r5/18-005r5.html>`_ 의 C++ 객체 클래스 계층(hierarchy)도 구현합니다. 결과적으로 :cpp:class:`OGRSpatialReference` 클래스는 대부분 PROJ PJ* 좌표계 객체 상의 래퍼(wrapper) 역할을 하도록 그리고 가능한 한 OGC WKT 1 표현의 차이를 무시하려 시도하도록 수정되었습니다.
+하지만 하위 호환성을 위해 아직도 몇몇 메소드는 OGC WKT 1버전에 특화된 인자 또는 반환 값을 예상하고 있습니다.
+:cpp:class:`OGRSpatialReference` 클래스의 설계도 아직 획일적입니다. 좌표계 표현에 직접적이고 세밀한 접근을 원하는 사용자는 PROJ 6 C 또는 C++ API를 직접 사용하고자 할 수도 있습니다.
+
