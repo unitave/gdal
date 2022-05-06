@@ -1,14 +1,14 @@
 .. _multidimensional_api_tut:
 
 ================================================================================
-Multidimensional raster API tutorial
+다중차원 래스터 API 예제
 ================================================================================
 
-Read the content of an array
-----------------------------
+배열 내용 읽어오기
+------------------
 
-In C++
-++++++
+C++ 코드
+++++++++
 
 .. code-block:: c++
 
@@ -42,15 +42,15 @@ In C++
         std::vector<double> values(nValues);
         poVar->Read(std::vector<GUInt64>{0,0,0}.data(),
                     anCount.data(),
-                    nullptr, /* step: defaults to 1,1,1 */
-                    nullptr, /* stride: default to row-major convention */
+                    nullptr, /* step: 기본값은 1,1,1 */
+                    nullptr, /* stride: 기본값은 행 중심 규범 */
                     GDALExtendedDataType::Create(GDT_Float64),
                     &values[0]);
         return 0;
     }
 
-In C
-++++
+C 코드
+++++++
 
 .. code-block:: c
 
@@ -112,12 +112,12 @@ In C
         GDALMDArrayRead(hVar,
                         panOffset,
                         panCount,
-                        NULL, /* step: defaults to 1,1,1 */
-                        NULL, /* stride: default to row-major convention */
+                        NULL, /* step: 기본값은 1,1,1 */
+                        NULL, /* stride: 기본값은 행 중심 규범 */
                         hDT,
                         padfValues,
-                        NULL, /* array start. Omitted */
-                        0 /* array size in bytes. Omitted */);
+                        NULL, /* 배열 시작. 생략됨 */
+                        0 /* 바이트 단위 배열 크기. 생략됨 */);
         GDALExtendedDataTypeRelease(hDT);
         GDALMDArrayRelease(hVar);
         CPLFree(panOffset);
@@ -127,8 +127,8 @@ In C
         return 0;
     }
 
-In Python
-+++++++++
+파이썬 코드
++++++++++++
 
 .. code-block:: python
 
@@ -138,7 +138,7 @@ In Python
     var = rootGroup.OpenMDArray("temperature")
     data = var.Read(buffer_datatype = gdal.ExtendedDataType.Create(gdal.GDT_Float64))
 
-If NumPy is available:
+NumPy를 사용할 수 있는 경우:
 
 .. code-block:: python
 
@@ -148,14 +148,14 @@ If NumPy is available:
     var = rootGroup.OpenMDArray("temperature")
     data = var.ReadAsArray(buffer_datatype = gdal.ExtendedDataType.Create(gdal.GDT_Float64))
 
+기타 예시
+---------
 
-Other examples
---------------
+GDAL 자동 테스트 스위트의 테스트 스크립트들:
 
-Test scripts from the GDAL autotest suite
+  -  https://raw.githubusercontent.com/OSGeo/gdal/master/autotest/gdrivers/memmultidim.py
+  -  https://raw.githubusercontent.com/OSGeo/gdal/master/autotest/gdrivers/netcdf_multidim.py
+  -  https://raw.githubusercontent.com/OSGeo/gdal/master/autotest/gdrivers/vrtmultidim.py
+  -  https://raw.githubusercontent.com/OSGeo/gdal/master/autotest/utilities/test_gdalmdiminfo_lib.py
+  -  https://raw.githubusercontent.com/OSGeo/gdal/master/autotest/utilities/test_gdalmdimtranslate_lib.py
 
-  - https://raw.githubusercontent.com/OSGeo/gdal/master/autotest/gdrivers/memmultidim.py
-  - https://raw.githubusercontent.com/OSGeo/gdal/master/autotest/gdrivers/netcdf_multidim.py
-  - https://raw.githubusercontent.com/OSGeo/gdal/master/autotest/gdrivers/vrtmultidim.py
-  - https://raw.githubusercontent.com/OSGeo/gdal/master/autotest/utilities/test_gdalmdiminfo_lib.py
-  - https://raw.githubusercontent.com/OSGeo/gdal/master/autotest/utilities/test_gdalmdimtranslate_lib.py

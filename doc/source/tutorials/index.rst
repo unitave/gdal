@@ -1,10 +1,10 @@
 .. _tutorials:
 
 ================================================================================
-Tutorials
+예제
 ================================================================================
 
-Raster
+래스터
 ------
 
 .. toctree::
@@ -16,16 +16,16 @@ Raster
    gdal_grid_tut
    geotransforms_tut
 
-Multidimensional raster
------------------------
+다중차원 래스터
+---------------
 
 .. toctree::
    :maxdepth: 1
 
    multidimensional_api_tut
 
-Vector
-------
+벡터
+----
 
 .. toctree::
    :maxdepth: 1
@@ -34,16 +34,16 @@ Vector
    vector_driver_tut
    vector_python_driver
 
-Geographic Network Model
-------------------------
+지리 네트워크 모델
+------------------
 
 .. toctree::
    :maxdepth: 1
 
    gnm_api_tut
 
-Projections and Spatial Reference Systems tutorial (OSR - OGRSpatialReference)
-------------------------------------------------------------------------------
+투영법 및 공간 좌표계 예제 (OSR - OGRSpatialReference)
+------------------------------------------------------
 
 .. toctree::
    :maxdepth: 1
