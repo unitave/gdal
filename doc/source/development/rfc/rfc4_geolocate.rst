@@ -1,56 +1,42 @@
 .. _rfc-4:
 
 =========================================================================
-RFC 4: Geolocation Arrays
+RFC 4: 지리위치 배열
 =========================================================================
 
-Author: Frank Warmerdam
+저자: 프랑크 바르메르담
 
-Contact: warmerdam@pobox.com
+연락처: warmerdam@pobox.com
 
-Status: Development
+상태: 개발 중
 
-Summary
--------
+요약
+----
 
-It is proposed that GDAL support an additional mechanism for geolocation
-of imagery based on large arrays of points associating pixels and lines
-with geolocation coordinates. These arrays would be represented as
-raster bands themselves.
+GDAL이 지리위치(geolocation) 좌표를 가진 픽셀 및 줄과 연결된 대용량 포인트 배열을 기반으로 한 영상의 지리위치에 대한 추가 메커니즘을 지원한다는 제안입니다. 이 배열은 래스터 밴드 자체로 표현될 것입니다.
 
-It is common in AVHRR, Envisat, HDF and netCDF data products to
-distribute geolocation for raw or projected data in this manner, and
-current approaches to representing this as very large numbers of GCPs,
-or greatly subsampling the geolocation information to provide more
-reasonable numbers of GCPs are inadequate for many applications.
+AVHRR, Envisat, HDF 및 netCDF 데이터 제품들이 이런 방식으로 원시(raw) 또는 투영 데이터에 대한 지리위치를 배포하는 것은 흔한 일이며, 지리위치를 매우 많은 개수의 GCP로 표현하거나 또는 더 합리적인 개수의 GCP를 제공하기 위해 지리위치 정보를 크게 서브샘플링하는 현재 접근법은 다수의 응용 프로그램에 대해 적합하지 않습니다.
 
-Geolocation Domain Metadata
----------------------------
+지리위치 도메인 메타데이터
+--------------------------
 
-Datasets with geolocation information will include the following dataset
-level metadata items in the "GEOLOCATION" domain to identify the
-geolocation arrays, and the details of the coordinate system and
-relationship back to the original pixels and lines.
+지리위치 정보를 가진 데이터셋은 "GEOLOCATION" 도메인에 지리위치 배열, 좌표계 상세 정보 및 원본 픽셀 및 줄과의 관계성을 식별하기 위한 다음 데이터셋 수준 메타데이터 항목들을 포함합니다.
 
--  SRS: wkt encoding of spatial reference system.
--  X_DATASET: dataset name (defaults to same dataset if not specified)
--  X_BAND: band number within X_DATASET.
--  Y_DATASET: dataset name (defaults to same dataset if not specified)
--  Y_BAND: band number within Y_DATASET.
--  Z_DATASET: dataset name (defaults to same dataset if not specified)
--  Z_BAND: band number within Z_DATASET. (optional)
--  PIXEL_OFFSET: pixel offset into geo-located data of left geolocation
-   pixel
--  LINE_OFFSET: line offset into geo-located data of top geolocation
-   pixel
--  PIXEL_STEP: each geolocation pixel represents this many geolocated
-   pixels.
--  LINE_STEP: each geolocation pixel represents this many geolocated
-   lines.
+-  SRS: WKT로 인코딩한 공간 좌표계
+-  X_DATASET: 데이터셋 이름 (지정하지 않는 경우 기본값은 동일한 데이터셋)
+-  X_BAND: X_DATASET 안에 있는 밴드 번호
+-  Y_DATASET: 데이터셋 이름 (지정하지 않는 경우 기본값은 동일한 데이터셋)
+-  Y_BAND: Y_DATASET 안에 있는 밴드 번호
+-  Z_DATASET: 데이터셋 이름 (지정하지 않는 경우 기본값은 동일한 데이터셋)
+-  Z_BAND: Z_DATASET 안에 있는 밴드 번호 (선택적)
+-  PIXEL_OFFSET: 좌측 지리위치 픽셀의 지리위치 데이터에 대한 픽셀 오프셋
+-  LINE_OFFSET: 최상단 지리위치 픽셀의 지리위치 데이터에 대한 줄 오프셋
+-  PIXEL_STEP: 각 지리위치 픽셀이 이만큼의 지리위치 픽셀들을 대표합니다.
+-  LINE_STEP: 각 지리위치 픽셀이 이만큼의 지리위치 줄들을 대표합니다.
+-  GEOREFERENCING_CONVENTION: (GDAL 3.5버전에서 추가됨)
+   픽셀의 좌상단 모서리를 참조하는 X/Y 값들을 나타내는 TOP_LEFT_CORNER 또는 픽셀의 중심을 참조하는 X/Y 값들을 나타내는 PIXEL_CENTER 가운데 하나입니다. 기본값은 TOP_LEFT_CORNER입니다.
 
-In the common case where two of the bands of a dataset are actually
-latitude and longitude, and so the geolocation arrays are the same size
-as the base image, the metadata might look like:
+데이터셋의 밴드 2개가 실제로 위도 및 경도인 일반적인 경우, 따라서 지리위치 배열이 기반 이미지와 동일한 크기인 경우 메타데이터가 다음과 비슷하게 보일 수도 있습니다:
 
 ::
 
@@ -62,9 +48,7 @@ as the base image, the metadata might look like:
    PIXEL_STEP: 1
    LINE_STEP: 1
 
-For AVHRR datasets, there are only 11 points (note, the more recent NOAA
-AVHRR datasets have 51 points), but for every line. So the result for a
-LAC dataset might look like:
+AVHRR 데이터셋의 경우, 한 줄 당 포인트 11개뿐입니다(좀 더 최신인 NOAA AVHRR 데이터셋은 포인트 51개를 가진다는 사실을 기억하십시오). 따라서 LAC 데이터셋의 결과물은 다음과 비슷하게 보일 수도 있습니다:
 
 ::
 
@@ -78,71 +62,45 @@ LAC dataset might look like:
    PIXEL_STEP: 40
    LINE_STEP: 1
 
-This assumes the L1B driver is modified to support the special access to
-GCPs as bands using the L1BGCPS: prefix.
+이 경우 L1B 드라이버가 ``L1BGCPS:`` 접두어를 이용해서 GCP를 밴드로서 특수 접근할 수 있도록 수정되었다고 가정합니다.
 
-Updating Drivers
-----------------
+드라이버 업데이트
+-----------------
 
-1. HDF4: Client needs mandate immediate incorporation of geolocation
-   array support in the HDF4 driver (specifically for swath products).
-   (complete)
-2. HDF5: Some HDF5 products include geolocation information that should
-   be handled as arrays. No timetable for update.
-3. AVHRR: Has 11/51 known locations per-scanline. These are currently
-   substantially downsampled and returned as GCPs, but this format would
-   be an excellent candidate for treating as geolocation arrays. Planned
-   in near future.
-4. Envisat: Envisat raw products use geolocation information currently
-   subsampled as GCPs, good candidate for upgrade. No timetable for
-   update.
-5. netCDF: NetCDF files can have differently varying maps in x and y
-   directions, which are represented as geolocation arrays when they are
-   encoded as CF conventions "two-dimensional coordinate variables". See
-   the netcdf driver page for details.
-6. OPeNDAP: Can have differently varying maps in x and y directions
-   which could be represented as geolocation arrays when they are
-   irregular. No timetable for update.
+1. HDF4:
+   (특히 Swath 제품의 경우) 클라이언트가 HDF4 드라이버에 지리위치 배열 지원을 필수적으로 즉시 통합하도록 요구합니다. (완료)
+2. HDF5:
+   일부 HDF5 제품이 배열로 처리해야 할 지리위치 정보를 포함하고 있습니다. 현재 업데이트 계획이 없습니다.
+3. AVHRR:
+   현재 스캔라인 당 알려진 위치를 11개/51개 가지고 있습니다. 현재 이 위치들을 크게 다운샘플링해서 GCP로 반환하지만, 이 포맷은 지리위치 배열로 취급하기에 탁월한 후보입니다. 가까운 미래에 업데이트가 계획되어 있습니다.
+4. Envisat:
+   Envisat 원시(raw) 제품은 현재 GCP로 서브샘플링된 지리위치 정보를 사용하기 때문에 훌륭한 업그레이드 후보입니다. 현재 업데이트 계획이 없습니다.
+5. netCDF:
+   NetCDF 파일은 "2차원 좌표 변수" CF 규범으로 인코딩되는 경우 지리위치 배열로 표현되는 X 및 Y 방향으로 가변되는 서로 다른 맵들을 가질 수 있습니다. 자세한 내용은 NetCDF 드라이버 페이지를 참조하십시오.
+6. OPeNDAP:
+   X 및 Y 방향이 비정규적인 경우 지리위치 배열로 표현되는 X 및 Y 방향으로 가변되는 서로 다른 맵들을 가질 수 있습니다. 현재 업데이트 계획이 없습니다.
 
-Changes to Warp API and gdalwarp
---------------------------------
+왜곡 API 및 gdalwarp 변경
+-------------------------
 
-Introduce a new geolocation array based transformation method, following
-the existing GDALTransformer mechanism. A geolocation array transformer
-will be created with the following function call. The "char \**" array
-is the list of metadata from the GEOLOCATION metadata domain.
+기존 GDALTransformer 메커니즘을 따르는 변환(transformation) 메소드 기반의 새로운 지리위치 배열을 도입합니다. 다음 함수 호출로 지리위치 배열 변환기를 생성할 것입니다. "char \**" 배열이 GEOLOCATION 메타데이터 도메인으로부터 나온 메타데이터 목록입니다.
 
 ::
 
-    void *GDALCreateGeoLocTransformer( GDALDatasetH hBaseDS, 
+    void *GDALCreateGeoLocTransformer( GDALDatasetH hBaseDS,
                                        char **papszGeolocationInfo,
                                        int bReversed );
 
-This transformer is currently partially implemented, but in a manner
-that potentially uses a great deal of memory (twice the memory needed
-for the geolocation arrays), and with still dubious correctness, but
-once approved this will be fixup up to at least be correct, though
-likely not efficient for the time being.
+이 변환기는 현재 부분적으로 구현되어 있지만, 많은 양의 메모리를 (지리위치 배열에 필요한 메모리의 2배를) 사용할 가능성이 있는 방식으로 구현되었고 정확도도 신뢰할 수 없습니다. 그러나 최소한의 정확도를 만족시키도록 수정되면, 당분간은 비효율적일 수도 있지만 승인될 것입니다.
 
-The GDALGenImgProjTransformer will be upgraded to instantiate the GeoLoc
-transformer (instead of an affine, gcp, or rpc transformer) if only
-geolocation information is available (done). However, the current
-GDALCreateGenImgProjTransformer() function does not provide a mechanism
-to select which transformation mechanism is used. So, for instance, if
-an affine transform is available it will be used in preference to
-geolocation data. If bGCPUseOK is TRUE, gcps will be used in preference
-to geolocation data.
+GDALGenImgProjTransformer가 지리위치 정보를 사용할 수만 있다면 (아핀, GCP, 또는 RPC(Remote Procedure Call) 변환기가 아니라) GeoLoc 변환기를 인스턴스화하도록 업그레이드할 것입니다. (완료) 하지만, 현재 GDALCreateGenImgProjTransformer() 함수는 어떤 변환 메커니즘을 사용할지 선택하는 메커니즘을 제공하지 않습니다. 즉 예를 들어 아핀 변환을 사용할 수 있는 경우 지리위치 데이터보다 아핀 변환 사용을 선호할 것입니다. 'bGCPUseOK'가 TRUE라면, 지리위치 데이터보다 GCP 사용을 선호할 것입니다.
 
-The gdalwarp program currently always sets bGCPUseOK to TRUE so there is
-no means for gdalwarp users select use of geolocation data in preference
-to gcps. Some modification to gdalwarp may be needed in the future in
-this regard.
+현재 gdalwarp 프로그램은 항상 'bGCPUseOK'를 TRUE로 설정하기 때문에 gdalwarp 유틸리티 사용자가 GCP보다 지리위치 데이터 사용을 선호하도록 선택할 수 있는 방법이 없습니다. 이런 측면에서 향후 gdalwarp 유틸리티를 수정해야 할 수도 있습니다.
 
-Preserving Geolocation Through Translation
-------------------------------------------
+변환 도중 지리위치 정보를 보전하기
+----------------------------------
 
-| ''How do we preserve access to geolocation information when
-  translating a dataset? Do applications like gdal_translate need
-  special handling?
-| Placement of the geolocation data in a special metadata domain means
-  it won't be transferred in default translations.''
+-  "데이터셋을 변환할 때 지리위치 정보에 대한 접근을 어떻게 보전할까요? gdal_translate 같은 프로그램에 특수 처리를 해야 합니까?"
+
+-  "특수 메타데이터 도메인에 지리위치 데이터를 배치하기 때문에 기본 변환 시 전송되지 않을 것입니다."
+

@@ -1,51 +1,36 @@
 .. _rfc-2:
 
 ===============================================
-RFC 2: Migration to OSGeo Subversion Repository
+RFC 2: OSGeo SVN 저장소로 마이그레이션
 ===============================================
 
-Author: Frank Warmerdam
+저자: 프랑크 바르메르담
 
-Contact: warmerdam@pobox.com
+연락처: warmerdam@pobox.com
 
-Status: Adopted
+상태: 승인
 
-Summary
--------
+요약
+----
 
-It is proposed that the GDAL source tree be moved a subversion
-repository in such a manner as to preserve the history existing in the
-CVS repository. A 1.3.x branch will be created after automatic updating
-of the header format.
+GDAL 소스 트리를 CVS 저장소의 기존 이력을 보전하는 방식으로 SVN(subversion) 저장소로 이동시키자는 제안입니다. 헤더 서식을 자동으로 업데이트한 다음 1.3.x 버전 브랜치를 생성할 것입니다.
 
-Details
--------
+상세 사항
+---------
 
-1. The conversion will be done by Howard Butler using the cvs2svn tool.
-2. At least 24 hours notice will be provided before the transition
-   starts to allow committers to commit any outstanding work that is
-   ready to into the repository.
-3. When the conversion starts, the GDAL (and gdalautotest) trees will be
-   removed from cvs.maptools.org, and archived to avoid any confusion.
-4. Frank Warmerdam will modify the "daily cvs snapshot" capability to
-   work from SVN.
-5. Frank will be responsible for updating the source control information
-   in the documentation.
-6. All source files in SVN will have the svn:keywords property set to
-   "Id" by Frank after they are created.
-7. Committers will need to get a login on osgeo.org and notify Frank to
-   regain commit access. Committer access on the new repository will be
-   enabled after the above changes are all complete.
-8. The GDAL committers document should be updated, removing non-GDAL
-   committers (ie. libtiff, geotiff, etc).
+1. 하워드 버틀러(Howard Butler)가 cvs2svn 도구를 사용해서 변환할 것입니다.
+2. 데이터 이동이 시작되기 최소 24시간 전에 공지해서 커밋 개발자들이 저장소에 커밋할 준비가 된 중요한 모든 작업물을 커밋할 수 있게 할 것입니다.
+3. 변환이 시작되면, 어떤 혼동도 일어나지 않도록 GDAL (및 gdalautotest) 트리가 'cvs.maptools.org'로부터 제거되어 아카이브에 보관될 것입니다.
+4. 프랑크 바르메르담이 "일일 CVS 스냅샷" 케이퍼빌리티가 SVN에서도 작동하도록 수정할 것입니다.
+5. 프랑크 바르메르담이 책임지고 문서에 있는 소스 제어 정보를 업데이트할 것입니다.
+6. SVN에 모든 소스 파일을 생성한 다음 프랑크 바르메르담이 소스 파일의 'svn:keywords' 속성을 "ID"로 설정할 것입니다.
+7. 커밋 개발자가 커밋 접근 권한을 다시 얻으려면 'OSGeo.org'에 로그인 계정을 생성하고 프랑크 바르메르담에게 알려야 할 것입니다. 앞의 모든 변경 사항이 완료된 후, 커밋 개발자의 새 저장소 접근 권한이 활성화될 것입니다.
+8. GDAL 커밋 개발자 문서에서 GDAL이 아닌 내용을 (예: libtiff, GeoTIFF 등등) 제거해서 업데이트해야 합니다.
 
-Header Format
--------------
+헤더 서식
+---------
 
-SVN does not support history insertion in source files, and to keep the
-old history listings around without keeping them up to date would be
-very confusing. So it is proposed that Frank Warmerdam write a script to
-strip the history logs out. Changing this:
+SVN은 소스 파일에 이력을 삽입하는 것을 지원하지 않으며, 오래된 이력 목록을 최신으로 업데이트하지 않고 유지하기란 매우 혼란스러울 것입니다. 따라서 프랑크 바르메르담이 이력 로그를 제거하는 스크립트를 작성할 것을 제안합니다. 다음을:
 
 ::
 
@@ -72,7 +57,7 @@ strip the history logs out. Changing this:
 
    CPL_CVSID("$Id: RFC2_SVN.dox 10627 2007-01-17 05:20:16Z warmerdam $");
 
-to this:
+다음으로 변경합니다:
 
 ::
 
@@ -94,10 +79,8 @@ to this:
 
 .. _branch-for-13:
 
-Branch for 1.3
---------------
+1.3버전 용 브랜치
+-----------------
 
-Once the headers have been updated appropriately, a 1.3 branch will be
-established in subversion. The intent is that further 1.3.x releases
-would be made against this "stable branch" while trunk work is towards a
-1.4.0 release targeted for around the time of the OSGeo conference.
+헤더를 제대로 업데이트했다면, SVN에 1.3버전 브랜치를 확립할 것입니다. 1.3버전 브랜치의 목적은 향후 1.3.x 버전 배포판을 이 "안정 브랜치"를 대상으로 생성하는 반면, 트렁크(trunk) 작업은 OSGeo 컨퍼런스 시기 전후를 목표로 개발 중인 1.4.0버전 배포판을 향하는 것입니다.
+
