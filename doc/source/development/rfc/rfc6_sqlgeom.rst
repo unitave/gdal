@@ -1,66 +1,50 @@
 .. _rfc-6:
 
 =======================================================================================
-RFC 6: Geometry and Feature Style as OGR Special Fields
+RFC 6: OGR 특수 필드로서의 도형 및 피처 스타일
 =======================================================================================
 
-Author: Tamas Szekeres
+저자: 세케레시 터마시(Szekeres Tamás)
 
-Contact: szekerest@gmail.com
+연락처: szekerest@gmail.com
 
-Status: Adopted
+상태: 승인
 
-Summary
--------
+요약
+----
 
-This proposal addresses and issue have been discovered long ago, and OGR
-provides no equivalent solution so far.
+이 제안은 오래 전 발견되었지만 OGR가 이제까지 대응하는 해결 방법을 제공하지 않은 문제점을 지적합니다.
 
-Some of the supported formats like Mapinfo.tab may contain multiple
-geometry types and style information. In order to handle this kind of
-data sources properly a support for selecting the layers by geometry
-type or by the style info would be highly required. For more details see
-the following MapServer related bugs later in this document.
+Mapinfo.tab 같은 몇몇 지원 포맷은 도형 유형 및 스타일 정보 여러 개를 담을 수도 있습니다. 이런 종류의 데이터소스를 제대로 처리하려면 도형 유형 또는 스타일 정보로 레이어를 선택할 수 있는 기능을 반드시 지원해야 합니다. 더 자세한 정보는 이 문서 후반에 있는 MapServer 관련 버그를 참조하십시오.
 
-All of the proposed changes can be found at the tracking bug of this RFC
-referenced later in this document.
+모든 변경 사항 제안은 이 문서 후반에 있는 이 RFC에 대한 버그 추적에서 찾아볼 수 있습니다.
 
-Main concepts
--------------
+주요 개념
+---------
 
-The most reasonable way to support this feature is to extend the
-currently existing 'special field' approach to allow specifying more
-than one fields. Along with the already defined 'FID' field we will add
-the following ones:
+이 기능을 지원할 수 있는 가장 합리적인 방법은 현재 하나 이상의 필드들을 지정할 수 있게 해주는 기존 '특수 필드' 접근법을 확장하는 것입니다. 이미 정의된 'FID' 필드에 더해 다음 필드들을 추가할 것입니다:
 
--  'OGR_GEOMETRY' containing the geometry type like 'POINT' or
-   'POLYGON'.
--  'OGR_STYLE' containing the style string.
--  'OGR_GEOM_WKT' containing the full WKT of the geometry.
+-  'OGR_GEOMETRY': 'POINT' 또는 'POLYGON' 같은 도형 유형을 담는 필드입니다.
+-  'OGR_STYLE': 스타일 문자열을 담는 필드입니다.
+-  'OGR_GEOM_WKT': 도형의 완전한 WKT를 담는 필드입니다.
 
-By providing the aforementioned fields one can make for example the
-following selections:
+이런 필드들을 지정하면, 예를 들어 다음과 같이 레이어를 선택할 수 있습니다:
 
--  select FID, OGR_GEOMETRY, OGR_STYLE, OGR_GEOM_WKT, \* from MyTable
-   where OGR_GEOMETRY='POINT' OR OGR_GEOMETRY='POLYGON'
--  select FID, OGR_GEOMETRY, OGR_STYLE, OGR_GEOM_WKT, \* from MyTable
-   where OGR_STYLE LIKE '%BRUSH%'
--  select FID, OGR_GEOMETRY, OGR_STYLE, OGR_GEOM_WKT, \* from MyTable
-   where OGR_GEOM_WKT LIKE 'POLYGON%'
--  select distinct OGR_GEOMETRY from MyTable order by OGR_GEOMETRY desc
+-  ``select FID, OGR_GEOMETRY, OGR_STYLE, OGR_GEOM_WKT, * from MyTable where OGR_GEOMETRY='POINT' OR OGR_GEOMETRY='POLYGON'``
+-  ``select FID, OGR_GEOMETRY, OGR_STYLE, OGR_GEOM_WKT, * from MyTable where OGR_STYLE LIKE '%BRUSH%'``
+-  ``select FID, OGR_GEOMETRY, OGR_STYLE, OGR_GEOM_WKT, * from MyTable where OGR_GEOM_WKT LIKE 'POLYGON%'``
+-  ``select distinct OGR_GEOMETRY from MyTable order by OGR_GEOMETRY desc``
 
-Implementation
---------------
+구현
+----
 
-There are two distinct areas where this feature plays a role
+이 기능이 역할을 수행할 수 있는 두 가지 별개의 영역이 있습니다:
 
--  Feature query implemented at ogrfeaturequery.cpp
+-  :file:`ogrfeaturequery.cpp` 에 구현된 피처 쿼리
 
--  SQL based selection implemented at ogr_gensql.cpp and
-   ogrdatasource.cpp
+-  :file:`ogr_gensql.cpp` 및 :file:`ogrdatasource.cpp` 에 구현된 SQL 기반 선택 작업
 
-To specify arbitrary number of special fields we will declare an array
-for the field names and types in ogrfeaturequery.cpp as
+임의 개수의 특수 필드를 지정하려면, :file:`ogrfeaturequery.cpp` 에 필드명 및 유형을 위한 배열을 다음과 같이 선언합니다:
 
 ::
 
@@ -69,8 +53,7 @@ for the field names and types in ogrfeaturequery.cpp as
    swq_field_type SpecialFieldTypes[SPECIAL_FIELD_COUNT] 
        = {SWQ_INTEGER, SWQ_STRING, SWQ_STRING, SWQ_STRING};
 
-So as to make this array accessible to the other files the followings
-will be added to ogr_p.h
+따라서 다른 파일들이 이 배열에 접근할 수 있게 하려면 :file:`ogr_p.h` 에 다음 내용을 추가합니다:
 
 ::
 
@@ -87,19 +70,16 @@ will be added to ogr_p.h
    extern char* SpecialFieldNames[SPECIAL_FIELD_COUNT];
    extern swq_field_type SpecialFieldTypes[SPECIAL_FIELD_COUNT];
 
-In ogrfeature.cpp the field accessor functions (GetFieldAsString,
-GetFieldAsInteger, GetFieldAsDouble) will be modified providing the
-values of the special fields by the field index
+필드 색인으로 특수 필드의 값을 지정해서 :file:`ogrfeature.cpp` 필드 접근자 함수(GetFieldAsInteger, GetFieldAsDouble, GetFieldAsString)를 수정할 것입니다.
 
-The following code will be added to the beginning of
-OGRFeature::GetFieldAsInteger:
+:cpp:func:`OGRFeature::GetFieldAsInteger` 의 시작 부분에 다음 코드를 추가합니다:
 
 ::
 
    int iSpecialField = iField - poDefn->GetFieldCount();
    if (iSpecialField >= 0)
    {
-   // special field value accessors
+   // 특수 필드 값 접근자
        switch (iSpecialField)
        {
        case SPF_FID:
@@ -109,15 +89,14 @@ OGRFeature::GetFieldAsInteger:
        }
    }
 
-The following code will be added to the beginning of
-OGRFeature::GetFieldAsDouble:
+:cpp:func:`OGRFeature::GetFieldAsDouble` 의 시작 부분에 다음 코드를 추가합니다:
 
 ::
 
    int iSpecialField = iField - poDefn->GetFieldCount();
    if (iSpecialField >= 0)
    {
-   // special field value accessors
+   // 특수 필드 값 접근자
        switch (iSpecialField)
        {
        case SPF_FID:
@@ -127,15 +106,14 @@ OGRFeature::GetFieldAsDouble:
        }
    }
 
-The following code will be added to the beginning of
-OGRFeature::GetFieldAsString:
+:cpp:func:`OGRFeature::GetFieldAsString` 의 시작 부분에 다음 코드를 추가합니다:
 
 ::
 
    int iSpecialField = iField - poDefn->GetFieldCount();
    if (iSpecialField >= 0)
    {
-   // special field value accessors
+   // 특수 필드 값 접근자
        switch (iSpecialField)
        {
        case SPF_FID:
@@ -157,33 +135,24 @@ OGRFeature::GetFieldAsString:
        }
    }
 
-The current implementation of OGRFeature::GetFieldAsString uses a static
-string to hold the const char\* return value that is highly avoidable
-and makes the code thread unsafe. In this regard the 'static char
-szTempBuffer[80]' will be changed to non static and a new member will be
-added to OGRFeature in ogrfeature.h as:
+현재 :cpp:func:`OGRFeature::GetFieldAsString` 구현은 코드 스레드를 안전하지 않게 만들기 때문에 피하는 편이 좋은 'const char\*' 반환값을 담기 위해 정적 문자열을 사용합니다. 이런 측면에서 'static char szTempBuffer[80]'을 비정적(non static)으로 변경하고 :file:`ogrfeature.h` 에 있는 :cpp:class:`OGRFeature` 에 새 멤버를 다음과 같이 추가할 것입니다:
 
 ::
 
    char * m_pszTmpFieldValue; 
 
-This member will be initialized to NULL at the constructor, and will be
-freed using CPLFree() at the destructor of OGRFeature.
+구성자(constructor)가 이 멤버를 NULL로 초기화할 것이며, :cpp:class:`OGRFeature` 의 삭제자(destructor)가 CPLFree() 함수를 이용해서 해제할 것입니다.
 
-In OGRFeature::GetFieldAsString all of the occurrences of 'return
-szTempBuffer;' will be changed to 'return m_pszTmpFieldValue =
-CPLStrdup( szTempBuffer );'
+:cpp:func:`OGRFeature::GetFieldAsString` 에서 'return szTempBuffer;'를 모두 'return m_pszTmpFieldValue = CPLStrdup( szTempBuffer );'로 변경할 것입니다.
 
-OGRFeature::GetFieldAsString is responsible to destroy the old value of
-m_pszTmpFieldValue at the beginning of the function:
+:cpp:func:`OGRFeature::GetFieldAsString` 은 함수 시작 부분에서 'm_pszTmpFieldValue'의 예전 값을 삭제해야 합니다:
 
 ::
 
    CPLFree(m_pszTmpFieldValue);
    m_pszTmpFieldValue = NULL; 
 
-In ogrfeaturequery.cpp we should change OGRFeatureQuery::Compile to add
-the special fields like:
+:file:`ogrfeaturequery.cpp` 에서 :cpp:func:`OGRFeatureQuery::Compile` 이 특수 필드를 추가하도록 다음과 같이 변경해야 합니다:
 
 ::
 
@@ -195,8 +164,7 @@ the special fields like:
        ++iField;
    }
 
-In ogrfeaturequery.cpp OGRFeatureQueryEvaluator() should be modifyed
-according to the field specific actions like
+:file:`ogrfeaturequery.cpp` 에서 필드 특화 액션에 따라 OGRFeatureQueryEvaluator()를 다음과 같이 수정해야 합니다:
 
 ::
 
@@ -223,8 +191,7 @@ according to the field specific actions like
    else
        psField = poFeature->GetRawFieldRef( op->field_index );
 
-In ogrfeaturequery.cpp OGRFeatureQuery::FieldCollector should be
-modifyed to add the field names like:
+:file:`ogrfeaturequery.cpp` 에서 :cpp:func:`OGRFeatureQuery::FieldCollector` 가 필드명을 추가하도록 다음과 같이 변경해야 합니다:
 
 ::
 
@@ -232,8 +199,7 @@ modifyed to add the field names like:
            && op->field_index < poTargetDefn->GetFieldCount() + SPECIAL_FIELD_COUNT) 
            pszFieldName = SpecialFieldNames[op->field_index];
 
-In ogrdatasource.cpp ExecuteSQL() will allocate the arrays according to
-the number of the special fields:
+:file:`ogrdatasource.cpp` 에서 ExecuteSQL() 함수가 특수 필드의 개수에 따라 배열들을 할당할 것입니다:
 
 ::
 
@@ -246,7 +212,7 @@ the number of the special fields:
    sFieldList.ids = (int *) 
            CPLMalloc( sizeof(int) * (nFieldCount+SPECIAL_FIELD_COUNT) );
 
-And the fields will be added as
+그러면 필드를 다음과 같이 추가할 것입니다:
 
 ::
 
@@ -259,9 +225,7 @@ And the fields will be added as
        sFieldList.count++;
    }
 
-For supporting the SQL based queries we should also modify the
-constructor of OGRGenSQLResultsLayer in ogr_gensql.cpp and set the field
-type properly:
+SQL 기반 쿼리를 지원하기 위해 :file:`ogr_gensql.cpp` 에 있는 :cpp:class:`OGRGenSQLResultsLayer` 의 구성자도 수정하고 필드 유형을 알맞게 설정해야 합니다:
 
 ::
 
@@ -281,18 +245,13 @@ type properly:
        }
    }
 
-Some of the queries will require to modify
-OGRGenSQLResultsLayer::PrepareSummary in ogr_gensql.cpp will be
-simplified (GetFieldAsString will be used in all cases to access the
-field values):
+일부 쿼리의 경우 :file:`ogr_gensql.cpp` 에 있는 :cpp:func:`OGRGenSQLResultsLayer::PrepareSummary` 를 수정해야 하기 때문에 단순화될 것입니다. (필드 값에 접근하기 위해 모든 경우에 GetFieldAsString을 사용할 것입니다):
 
 ::
 
-   pszError = swq_select_summarize( psSelectInfo, iField, 
-   poSrcFeature->GetFieldAsString( psColDef->field_index ) );
+   pszError = swq_select_summarize( psSelectInfo, iField, poSrcFeature->GetFieldAsString( psColDef->field_index ) );
 
-OGRGenSQLResultsLayer::TranslateFeature should also be modifyed when
-copying the fields from primary record to the destination feature
+기본 레코드(primary record)로부터 대상 피처로 필드를 복사하는 경우 :cpp:func:`OGRGenSQLResultsLayer::TranslateFeature` 도 수정해야 합니다:
 
 ::
 
@@ -308,11 +267,9 @@ copying the fields from primary record to the destination feature
        }
    }
 
-For supporting the 'order by' queries we should also modify
-OGRGenSQLResultsLayer::CreateOrderByIndex() as:
+'order by' 쿼리를 지원하려면, :cpp:func:`OGRGenSQLResultsLayer::CreateOrderByIndex` 도 다음과 같이 수정해야 합니다:
 
 ::
-
 
    if ( psKeyDef->field_index >= iFIDFieldIndex)
    {
@@ -329,15 +286,13 @@ OGRGenSQLResultsLayer::CreateOrderByIndex() as:
        continue;
    }
 
-All of the strings allocated previously should be deallocated later in
-the same function as:
+이전에 할당한 모든 문자열을 이후 동일한 함수에서 다음과 같이 할당 해제해야 합니다:
 
 ::
 
-
    if ( psKeyDef->field_index >= iFIDFieldIndex )
    {
-       /* warning: only special fields of type string should be deallocated */
+       /* 경고: 문자열 유형 특수 필드만 할당 해제해야 합니다. */
        if (SpecialFieldTypes[psKeyDef->field_index - iFIDFieldIndex] == SWQ_STRING)
        {
            for( i = 0; i < nIndexSize; i++ )
@@ -349,8 +304,7 @@ the same function as:
        continue;
    }
 
-When ordering by the field values the OGRGenSQLResultsLayer::Compare
-should also be modifyed:
+필드 값을 기준으로 정렬하는 경우 :cpp:func:`OGRGenSQLResultsLayer::Compare` 도 수정해야 합니다:
 
 ::
 
@@ -382,90 +336,67 @@ should also be modifyed:
        }
    }
 
-Adding New Special Fields
--------------------------
+새 특수 필드 추가하기
+---------------------
 
-Adding a new special field in a subsequent development phase is fairly
-straightforward and the following steps should be made:
+후속 개발 단계에서 새로운 특수 필드를 추가하는 것은 꽤 간단하며 다음 단계를 거쳐야 합니다:
 
-1. In ogr_p.h a new constant should be added with the value of the
-   SPECIAL_FIELD_COUNT and SPECIAL_FIELD_COUNT should be incremented by
-   one.
+1. :file:`ogr_p.h` 에 SPECIAL_FIELD_COUNT 값을 가진 새 상수를 추가하고 SPECIAL_FIELD_COUNT를 1만큼 증가시켜야 합니다.
 
-2. In ogrfeaturequery.cpp the special field string and the type should
-   be added to SpecialFieldNames and SpecialFieldTypes respectively
+2. :file:`ogrfeaturequery.cpp` 에서 SpecialFieldNames 및 SpecialFieldTypes에 특수 필드 문자열 및 그 유형을 각각 추가해야 합니다.
 
-3. The field value accessors (OGRFeature::GetFieldAsString,
-   OGRFeature::GetFieldAsInteger, OGRFeature::GetFieldAsDouble) should
-   be modifyed to provide the value of the new special field. All of
-   these functions provide const return values so GetFieldAsString
-   should retain the value in the m_pszTmpFieldValue member.
+3. 새 특수 필드의 값을 지정하려면 필드값 접근자(:cpp:func:`OGRFeature::GetFieldAsString`, :cpp:func:`OGRFeature::GetFieldAsInteger`, :cpp:func:`OGRFeature::GetFieldAsDouble`)를 수정해야 합니다. 이 모든 함수들은 상수 값을 반환하기 때문에 :cpp:func:`GetFieldAsString` 이 'm_pszTmpFieldValue' 멤버에 값을 유지해야 합니다.
 
-4. When adding a new value with a type other than SWQ_INTEGER and
-   SWQ_STRING the following functions might also be modified
-   accordingly:
+4. SWQ_INTEGER 및 SWQ_STRING 유형이 아닌 다른 유형의 새로운 값을 추가하는 경우 다음 함수들도 그에 따라 수정해야 할 수도 있습니다:
 
--  OGRGenSQLResultsLayer::OGRGenSQLResultsLayer
--  OGRGenSQLResultsLayer::TranslateFeature
--  OGRGenSQLResultsLayer::CreateOrderByIndex
--  OGRGenSQLResultsLayer::Compare
--  OGRFeatureQueryEvaluator
+-  :cpp:func:`OGRGenSQLResultsLayer::OGRGenSQLResultsLayer`
+-  :cpp:func:`OGRGenSQLResultsLayer::TranslateFeature`
+-  :cpp:func:`OGRGenSQLResultsLayer::CreateOrderByIndex`
+-  :cpp:func:`OGRGenSQLResultsLayer::Compare`
+-  :cpp:func:`OGRFeatureQueryEvaluator`
 
-Backward Compatibility
-----------------------
+하위 호환성
+-----------
 
-In most cases the backward compatibility of the OGR library will be
-retained. However the special fields will potentially conflict with
-regard fields with the given names. When accessing the field values the
-special fields will take pecedence over the other fields with the same
-names.
+대부분의 경우 OGR 라이브러리의 하위 호환성은 유지될 것입니다. 하지만 특수 필드가 명명된 이름을 가진 필드와 충돌을 일으킬 가능성은 있습니다. 필드값에 접근하는 경우 특수 필드가 동일한 이름을 가진 다른 필드보다 우선할 것입니다.
 
-When using OGRFeature::GetFieldAsString the returned value will be
-stored as a member variable instead of a static variable. The string
-will be deallocated and will no longer be usable after the destruction
-of the feature.
+:cpp:func:`OGRFeature::GetFieldAsString` 을 사용하는 경우 반환 값을 정적 변수 대신 멤버 변수로 저장할 것입니다. 피처 삭제 후 문자열을 할당 해제할 것이기 때문에 더 이상 사용할 수 없게 됩니다.
 
-Regression Testing
-------------------
+회귀 테스트
+-----------
 
-A new gdalautotest/ogr/ogr_sqlspecials.py script to test support for all
-special fields in the ExecuteSQL() call and with WHERE clauses.
+새로운 :file:`gdalautotest/ogr/ogr_sqlspecials.py` 스크립트가 ExecuteSQL() 호출 및 WHERE 절에 있는 모든 특수 필드에 대한 지원을 테스트합니다.
 
-Documentation
--------------
+문서화
+------
 
-The OGR SQL document will be updated to reflect the support for special
-fields.
+특수 필드에 대한 지원을 반영해서 OGR SQL 문서를 업데이트할 것입니다.
 
-Implementation Staffing
------------------------
+구현 인력
+---------
 
-Tamas Szekeres will implement the bulk of the RFC in time for GDAL/OGR
-1.4.0.
+세케레시 터마시가 GDAL/OGR 1.4.0 배포 시기에 맞춰 이 RFC 대부분을 구현할 것입니다.
 
-Frank Warmerdam will consider how the backward compatibility issues
-(with special regard to the modified lifespan of the GetFieldAsString
-returned value) will affect the other parts of the OGR project and will
-write the Python regression testing script.
+프랑크 바르메르담은 하위 호환성 문제가 (특히 :cpp:func:`GetFieldAsString` 반환값의 수정된 수명이라는 측면에서) OGR 프로젝트의 다른 부분들에 어떤 영향을 미칠지 고려해서 파이썬 회귀 테스트 스크립트를 작성할 것입니다.
 
-References
-----------
+참조
+----
 
--  Tracking bug for this feature (containing all of the proposed code
-   changes): #1333
+-  이 기능에 대한 버그 추적(제안 코드 변경 사항을 모두 담고 있습니다): #1333
 
--  MapServer related bugs:
+-  MapServer 관련 버그들:
 
-   -  `1129 <http://trac.osgeo.org/mapserver/ticket/1129>`__
-   -  `1438 <http://trac.osgeo.org/mapserver/ticket/1438>`__
+   -  `1129 <http://trac.osgeo.org/mapserver/ticket/1129>`_
+   -  `1438 <http://trac.osgeo.org/mapserver/ticket/1438>`_
 
-Voting History
---------------
+투표 이력
+---------
 
-Frank Warmerdam +1
+프랑크 바르메르담(Frank Warmerdam) +1
 
-Daniel Morissette +1
+대니얼 모리셋(Daniel Morissette) +1
 
-Howard Butler +0
+하워드 버틀러(Howard Butler) +0
 
-Andrey Kiselev +1
+안드레이 키셀레프(Andrey Kiselev) +1
+
