@@ -1,81 +1,57 @@
 .. _rfc-9:
 
 ===============================================
-RFC 9: GDAL Paid Maintainer Guidelines
+RFC 9: GDAL 급여 유지관리자 지침
 ===============================================
 
-Author: Frank Warmerdam
+저자: 프랑크 바르메르담
 
-Contact: warmerdam@pobox.com
+연락처: warmerdam@pobox.com
 
-Status: Approved, but superseded per :ref:`rfc-83`
+상태: 승인되었지만 :ref:`rfc-83` 으로 대체됨
 
-Purpose
--------
+목적
+----
 
-To formalize guidelines for the work of maintainers paid out of GDAL
-project sponsorship funds.
+GDAL 프로젝트 후원 기금에서 급여를 지불받는 유지관리자의 작업에 대한 지침을 공식화합니다.
 
-Responsibilities
-----------------
+책임
+----
 
-1. Analyse and where possible fix bugs reported against GDAL.
-2. Run, review and extend the test suite (via buildbot, etc).
-3. Maintain and extend documentation.
-4. Assist integrating new contributed features.
-5. Help maintain project infrastructure (mailing lists, buildbot, source
-   control, etc)
-6. Provide user support on the project mailing lists, and in other
-   venues.
-7. Develop new capabilities.
+1. GDAL을 대상으로 리포트된 버그를 분석하고 가능한 경우 수정합니다.
+2. 테스트 스위트를 (buildbot 등등을 통해) 실행, 검토 및 확장합니다.
+3. 문서를 유지/관리하고 확장합니다.
+4. 새로 기여된 기능을 통합하는 데 조력합니다.
+5. 프로젝트 인프라스트럭처(메일링 리스트, buildbot, 소스 제어 등등)를 유지/관리하는 데 조력합니다.
+6. 프로젝트 메일링 리스트 및 기타 영역에서 사용자를 지원합니다.
+7. 새로운 케이퍼빌리티를 개발합니다.
 
-Bug fixing and maintenance should be focused on GDAL/OGR, but as needed
-will extend into sub-projects such as libtiff, libgeotiff, Shapelib and
-MITAB as long it is to serve a need of the GDAL/OGR project.
+GDAL/OGR 상에서 버그 수정 및 유지/관리에 집중해야 하지만, GDAL/OGR 프로젝트에 필요하다면 libtiff, libgeotiff, Shapelib 및 MITAB 같은 하위 프로젝트로도 확장될 것입니다.
 
-In order to provide reasonable response times the maintainer is expected
-spend some time each week addressing new bugs and user support. If the
-maintainer will be unavailable for an extended period of time (vacation,
-etc) then the supervisor should be notified.
+합리적인 응답 시간을 제공하기 위해, 유지관리자는 매주 새로운 버그 처리 및 사용자 지원을 위해 일정 시간을 보내야 합니다. 유지관리자가 어느 정도의 기간 동안 (휴가 등으로) 활동하지 못 할 경우 관리자에게 알려야 합니다.
 
-Direction
----------
+감독
+----
 
-The maintainer is generally subject to the project PSC. However, for day
-to day decisions one PSC member will be designated as the supervisor for
-the maintainer. This supervisor will prioritize work via email, bug
-assignments, and IRC discussions.
+일반적으로 프로젝트 운영 위원회가 유지관리자를 관리합니다. 하지만 일상적인 결정의 경우 프로젝트 운영 위원회 멤버 한 명이 유지관리자의 관리자로 임명될 것입니다. 이 관리자가 이메일, 버그 할당 및 IRC 토의를 통해 작업의 우선 순위를 지정할 것입니다.
 
-The supervisor will try to keep the following in mind when prioritizing
-tasks.
+관리자는 작업 우선 순위를 결정할 때 다음을 염두에 두려 노력해야 할 것입니다.
 
--  Bug reports, and support needs of Sponsors should be given higher
-   priority than other tasks.
--  Areas of focus identified by the PSC (ie. multi-threading, SWIG
-   scripting) should be given higher priority than other tasks.
--  Bugs or needs that affect many users should have higher priority.
--  The maintainer should be used to take care of work that no one else
-   is willing and able to do (ie. fill the holes, rather than displacing
-   volunteers)
--  Try to avoid tying up the maintainer on one big task for many weeks
-   unless directed by the PSC.
--  The maintainer should not be directed to do work for which someone
-   else is getting paid.
+-  버그 리포트 및 후원사가 지원 요구 사항을 다른 작업보다 더 우선해야 합니다.
+-  프로젝트 운영 위원회가 식별한 집중 영역을 (예를 들어 멀티스레딩, SWIG 스크립트 작업 등을) 다른 작업보다 더 우선해야 합니다.
+-  많은 사용자에게 영향을 미치는 버그 또는 요구 사항을 더 우선해야 합니다.
+-  다른 사람이 할 의향이 없고 할 수 없는 작업을 처리하는 데 유지관리자를 투입해야 합니다. (예를 들면 자원봉사자를 대체하기보다 빈 자리를 채워야 합니다.)
+-  프로젝트 운영 위원회의 지시가 없는 이상 유지관리자가 여러 주 동안 하나의 큰 작업에 매여 있지 않도록 노력하십시오.
+-  유지관리자에게 다른 사람이 급여를 받는 작업을 수행하도록 지시해서는 안 됩니다.
 
-Substantial new development projects will only be taken on by the
-maintainer with the direction of a PSC motion (or possibly an RFC
-designating the maintainer to work on a change).
+유지관리자는 프로젝트 운영 위원회의 발의에 의한 지시에 의해서만 실질적인 신규 개발 프로젝트를 수행할 것입니다. (또는 프로젝트 운영 위원회가 유지관리자가 변경 사항에 대해 작업하도록 지명할 수도 있습니다.)
 
-Note that the maintainer and the maintainer supervisor are subject to
-the normal RFC process for any substantial change to GDAL.
+GDAL에 대한 상당한 모든 변경 사항에 대해 유지관리자와 유지관리자의 관리자는 일반적인 RFC 과정의 적용을 받는다는 사실을 기억하십시오.
 
-Reporting
----------
+리포트
+------
 
-The maintainer will produce a brief bi-weekly report to the gdal-dev
-list indicating tasks worked on, and a more detailed timesheet for the
-supervisor.
+유지관리자는 'gdal-dev' 메일링 리스트에 작업한 내용을 나타내는 간단한 보고서를 격주 간격으로 작성하고, 관리자에게 더 상세한 작업 시간표를 제출합니다.
 
-This is intended to provide visibility into status, accomplishments, and
-time allocation. It also gives an opportunity for the PSC to request a
-"course correction" fairly promptly.
+이는 작업 상태, 달성률, 그리고 시간 할당에 가시성을 부여하기 위한 것입니다. 또 프로젝트 운영 위원회가 "코스 수정"을 꽤 신속하게 요청할 수 있는 기회를 제공합니다.
+

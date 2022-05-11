@@ -392,11 +392,8 @@ SQL 기반 쿼리를 지원하기 위해 :file:`ogr_gensql.cpp` 에 있는 :cpp:
 투표 이력
 ---------
 
-프랑크 바르메르담(Frank Warmerdam) +1
-
-대니얼 모리셋(Daniel Morissette) +1
-
-하워드 버틀러(Howard Butler) +0
-
-안드레이 키셀레프(Andrey Kiselev) +1
+-  프랑크 바르메르담(Frank Warmerdam) +1
+-  대니얼 모리셋(Daniel Morissette) +1
+-  하워드 버틀러(Howard Butler) +0
+-  안드레이 키셀레프(Andrey Kiselev) +1
 
