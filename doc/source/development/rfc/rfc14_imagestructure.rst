@@ -1,90 +1,63 @@
 .. _rfc-14:
 
 ================================================================================
-RFC 14: Image Structure Metadata
+RFC 14: 이미지 구조 메타데이터
 ================================================================================
 
-Author: Frank Warmerdam
+저자: 프랑크 바르메르담
 
-Contact: warmerdam@pobox.com
+연락처: warmerdam@pobox.com
 
-Status: Adopted
+상태: 승인
 
-Summary
+요약
 -------
 
-This RFC attempts to formalize the semantics of the "IMAGE_STRUCTURE"
-domain of metadata. This metadata domain is used to hold structural
-information about image organization that would not normally be carried
-with an image when translated into another format. The IMAGE_STRUCTURE
-metadata may occur on the GDALDataset or on individual bands, and most
-items are meaningful in both contexts. When items like NBITS are found
-on the dataset it is assumed they apply to all bands of that dataset.
+이 RFC는 메타데이터의 "IMAGE_STRUCTURE" 도메인의 의미를 공식화하려 합니다. 이 메타데이터 도메인은 이미지를 또다른 포맷으로 변환할 때 일반적으로는 전달되지 않을 이미지 구조 관련 구조적 정보를 담기 위해 사용됩니다. IMAGE_STRUCTURE 메타데이터는 :cpp:class:`GDALDataset` 상에 또는 개별 밴드 상에 나타날 수도 있고, 이 두 맥락에서 대부분의 항목들이 의미를 가집니다. 데이터셋에서 NBITS 같은 항목이 발견되는 경우 해당 데이터셋의 모든 밴드에 적용된다고 가정합니다.
 
-IMAGE_STRUCTURE items
----------------------
-
-COMPRESSION:: The compression type used for this dataset or band. There
-is no fixed catalog of compression type names, but where a given format
-includes a COMPRESSION creation option, the same list of values should
-be used here as there.
-
-NBITS:: The actual number of bits used for this band, or the bands of
-this dataset. Normally only present when the number of bits is
-non-standard for the datatype, such as when a 1 bit TIFF is represented
-through GDAL as GDT_Byte.
-
-INTERLEAVE:: This only applies on datasets, and the value should be one
-of PIXEL, LINE or BAND. It can be used as a data access hint.
-
-PIXELTYPE:: This may appear on a GDT_Byte band (or the corresponding
-dataset) and have the value SIGNEDBYTE to indicate the unsigned byte
-values between 128 and 255 should be interpreted as being values between
--128 and -1 for applications that recognise the SIGNEDBYTE type.
-
-Compatibility Issues
+IMAGE_STRUCTURE 항목
 --------------------
 
-This RFC has two changes from existing practise that may cause
-compatibility issues:
+-  **COMPRESSION**:
+   해당 데이터셋 또는 밴드에 사용되는 압축 유형입니다. 압축 유형 이름들의 고정된 카탈로그는 없지만, 지정 포맷이 COMPRESSION 생성 옵션을 사용할 수 있는 경우 이 생성 옵션에 사용할 수 있는 값들과 동일한 값들을 여기에도 사용할 수 있습니다.
 
-1. Traditionally the NBITS metadata appeared in the default metadata
-   domain on datasets, instead of in the IMAGE_STRUCTURE domain.
-2. Traditionally the COMPRESSION metadata appeared only on the dataset,
-   never one the band.
+-  **NBITS**:
+   해당 밴드 또는 해당 데이터셋의 밴드들에 사용된 비트의 실제 개수입니다. GDAL이 1비트 TIFF를 GDT_Byte로 표현하는 경우와 같이 일반적으로 해당 데이터 유형에 비해 비트 개수가 표준 개수가 아닌 경우에만 NBITS가 존재합니다.
 
-I am only aware of one application previously making systematic use of
-these items, and it will be updated to reflect the new usage as GDAL
-1.5.0 is adopted.
+-  **INTERLEAVE**:
+   데이터셋에 대해서만 적용되며, 그 값은 PIXEL, LINE 또는 BAND 가운데 하나여야 합니다. 데이터 접근에 대한 힌트로 사용할 수 있습니다.
 
-Development
------------
+-  **PIXELTYPE**:
+   GDT_Byte 밴드 상에 (또는 대응하는 데이터셋 상에) 나타날 수도 있습니다. 128에서 255 사이의 부호 없는 바이트 값을 나타내는 SIGNEDBYTE 값을 가질 수도 있습니다. SIGNEDBYTE 유형을 인식하는 응용 프로그램의 경우 이 값을 -128에서 -1 사이의 값으로 해석해야 합니다.
 
-Beyond adopting the definition for the semantics of the IMAGE_STRUCTURE
-metadata, the following development steps will be taken:
+호환성 문제점
+-------------
 
-1. The PNG, GTiff, NITF and EHdr drivers will be updated to place NBITS
-   in the IMAGE_STRUCTURE metadata domain.
-2. The HFA driver will be updated to return NBITS metadata.
-3. The HFA, GTiff, JP2KAK, ECW, JPEG, and PNG drivers will be updated to
-   return INTERLEAVE metadata.
-4. The HFA and GTiff drivers will be updated to return PIXELTYPE
-   metadata.
+이 RFC는 기존 사용례로부터 호환성 문제를 일으킬 수 있는 두 가지 사항을 변경합니다:
 
-The development will be done by Frank Warmerdam in trunk in time for
-GDAL/OGR 1.5.0 release. Changes to other drivers that these definitions
-might be useful for while be done as time permits by interested
-developers - not necessarily in time for GDAL/OGR 1.5.0.
+1. 예전부터 NBITS 메타데이터는 IMAGE_STRUCTURE 도메인이 아니라 데이터셋 상의 기본 메타데이터 도메인에 나타납니다.
+2. 예전부터 COMPRESSION 메타데이터는 밴드 상에는 전혀 나타나지 않고 데이터셋 상에만 나타납니다.
 
-Notes
------
+이런 항목들을 시스템적으로 사용하는 응용 프로그램은 하나뿐이며, GDAL 1.5.0버전이 승인되는 대로 이 새로운 사용례를 반영하도록 업데이트될 것입니다.
 
--  The gdalinfo utility already reports IMAGE_STRUCTURE metadata when it
-   is available.
--  The GTiff, and HFA drivers CreateCopy() methods check the source for
-   NBITS, and PIXELTYPE metadata to create specialized output files
-   types.
--  The GTiff, HFA and default CreateCopy() implementations have been
-   reworked to use the new GDALDatasetCopyWholeRaster() function which
-   uses the INTERLEAVE metadata as a clue whether to do interleaved
-   copies if the source dataset is interleaved.
+개발
+----
+
+IMAGE_STRUCTURE 메타데이터의 의미를 위한 정의를 채택하는 것을 넘어, 다음 개발 단계를 밟아나갈 것입니다:
+
+1. PNG, GTiff, NITF 및 EHdr 드라이버가 IMAGE_STRUCTURE 메타데이터 도메인에 NBITS를 배치하도록 업데이트할 것입니다.
+2. HFA 드라이버가 NBITS 메타데이터를 반환하도록 업데이트할 것입니다.
+3. HFA, GTiff, JP2KAK, ECW, JPEG, 그리고 PNG 드라이버가 INTERLEAVE 메타데이터를 반환하도록 업데이트할 것입니다.
+4. HFA 및 GTiff 드라이버가 PIXELTYPE 메타데이터를 반환하도록 업데이트할 것입니다.
+
+프랑크 바르메르담이 GDAL/OGR 1.5.0 배포판을 위해 '트렁크'에 이 RFC를 개발할 것입니다. 이런 정의가 유용할 수 있는 다른 드라이버들을 위한 변경 사항은 관심 있는 개발자가 시간이 허락하는 한 수행할 것입니다 -- 반드시 GDAL/OGR 1.5.0 배포일에 맞출 필요는 없습니다.
+
+메모
+----
+
+-  gdalinfo 유틸리티는 이미 IMAGE_STRUCTURE 메타데이터를 가져올 수 있는 경우 IMAGE_STRUCTURE 메타데이터를 리포트하고 있습니다.
+
+-  GTiff 및 HFA 드라이버의 :cpp:func:`CreateCopy` 메소드는 소스에서 NBITS 및 PIXELTYPE 메타데이터를 확인해서 특화 산출 파일 유형을 생성합니다.
+
+-  INTERLEAVE 메타데이터를 소스 데이터셋이 교차삽입 형식인 경우 교차삽입 복사본을 생성해야 하는지 여부를 판단하기 위한 단서로 사용하는 새 :cpp:func:`GDALDatasetCopyWholeRaster` 함수를 사용하기 위해 GTiff, HFA 및 기본 :cpp:func:`CreateCopy` 구현을 재작업했습니다.
+
