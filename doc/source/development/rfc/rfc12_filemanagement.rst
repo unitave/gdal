@@ -1,208 +1,138 @@
 .. _rfc-12:
 
 ================================================================================
-RFC 12: Improved File Management
+RFC 12: 향상된 파일 관리
 ================================================================================
 
-Author: Frank Warmerdam
+저자: 프랑크 바르메르담
 
-Contact: warmerdam@pobox.com
+연락처: warmerdam@pobox.com
 
-Status: Adopted / Implemented
+상태: 승인 / 구현
 
-Summary
--------
+요약
+----
 
-Some applications using GDAL have a requirement to provide file
-management operations through the GUI. This includes deleting, renaming,
-moving and packaging up datasets which often requires operations on
-several associated files. This RFC introduces an operation on a
-GDALDataset to identify all the dataset files, and operations to move or
-copy them.
+GDAL을 사용하는 몇몇 응용 프로그램은 GUI를 통한 파일 관리 작업을 요구합니다. 이 작업에는 삭제, 재명명, 이동 및 관련 파일 여러 개에 대한 작업을 요구하는 경우가 많은 데이터셋 패키징 등이 포함됩니다. 이 RFC는 모든 데이터셋 파일들을 식별하기 위한 :cpp:class:`GDALDataset` 에 대한 작업 및 해당 파일들을 이동 또는 복사하는 작업을 도입합니다.
 
 GetFileList()
 -------------
 
-The following new virtual method is added on the GDALDataset class, with
-an analygous C function.
+:cpp:class:`GDALDataset` 클래스에 다음과 같은 새로운 가상 메소드를 유사한 C 함수와 함께 추가합니다:
 
 ::
 
       virtual char   **GDALDataset::GetFileList(void);
 
-The method is intended to return a list of files associated with this
-open dataset. The return is a NULL terminated string list which becomes
-owned by the caller and should be deallocated with CSLDestroy().
+이 메소드의 목적은 열려 있는 데이터셋과 연결된 파일들의 목록을 반환하는 것입니다. 이 반환값은 호출자가 소유하게 되는, NULL로 종료되는 문자열 목록으로 :cpp:func:`CSLDestroy` 로 할당 해제되어야 합니다.
 
-The default implementation tests the name of the datasource to see if it
-is a file, and if so it is returned otherwise an empty list is returned.
-If the default overview manager is active, and has overviews, those will
-also be included in the file list. The default implementation also
-checks for world files, but only those with extensions based on the
-original files extension (ie. .tfw or .tifw for .tif) but does not
-search for .wld since that is not very specific.
+이 기본 구현은 데이터소스가 파일인지 확인하기 위해 데이터소스의 이름을 테스트하고, 파일이라면 관련 파일 목록을 반환하고 아니라면 비어 있는 목록을 반환합니다. 기본 오버뷰 관리자가 활성화되어 있고 오버뷰를 가지고 있다면 파일 목록에 해당 오버뷰가 포함될 것입니다. 이 기본 구현은 월드 파일에 대해서도 확인하지만, 원본 파일 확장자를 기반으로 하는 확장자를 가진 (예: .tif 용 .tfw 또는 .tifw) 월드 파일에 대해서만 확인할 것입니다. .wld 확장자를 가진 파일은 포맷 특화 파일이 아니기 때문에 검색하지 않습니다.
 
-The GDALPamDataset::GetFileList() method will add the ability to find
-.aux and .aux.xml files associated with a dataset to the core default
-behavior.
+:cpp:func:`GDALPamDataset::GetFileList` 메소드의 핵심 기본 습성에 데이터셋과 연결된 .aux 및 .aux.xml 파일을 찾는 기능을 추가할 것입니다.
 
 pfnRename()
 -----------
 
-The following new function is added to the GDALDriver class.
+:cpp:class:`GDALDataset` 클래스에 다음 새로운 함수를 추가합니다:
 
 ::
 
        CPLErr       (*pfnRename)( const char *pszNewName, const char *pszOldName );
 
-Also a corresponding function is added to the C API.
+C API에 이에 대응하는 함수도 추가합니다:
 
 ::
 
        CPLErr        GDALRenameDataset( GDALDriverH hDriver, const char *pszNewName, const char *pszOldName );
 
-Note that renaming is done by the driver, but the dataset to be operated
-on should *not* be open at the time. GDALRenameDataset() will invoke
-pfnRename if it is non-NULL.
+드라이버가 재명명 작업을 수행하지만, 이때 작업 대상 데이터셋을 '열어서는 안 된다'는 사실을 기억하십시오. 'pfnRename'이 NULL이 아닌 경우 :cpp:func:`GDALRenameDataset` 이 'pfnRename'을 호출할 것입니다.
 
-If pfnRename is NULL the default implementation will be used which will
-open the dataset, fetch the file list, close the dataset, and then try
-to rename all the files (based on shared basenames). The default rename
-operation will fail if it is unable to establish a relationship between
-the files (ie. a common basename or stem) to indicate how the group of
-files should be rename to the new pattern.
+'pfnRename'이 NULL이라면 데이터셋을 열고, 파일 목록을 가져온 다음, 데이터셋을 종료하고, (공유 기본명을 기반으로) 모든 파일을 재명명하려 시도하는 기본 구현을 사용할 것입니다. 파일 그룹을 새 패턴으로 재명명해야 할 방법을 나타내는 파일들 간의 관계성을 (예를 들면 공통 기본명 또는 어간(stem)을) 판단할 수 없는 경우 기본 재명명 작업이 실패할 것입니다.
 
-Optionally a NULL hDriver argument may be passed in, in which case the
-appropriate driver will be selected by first opening the datasource.
+값이 NULL인 선택적 'hDriver' 인자가 전송되어 올 수도 있는데, 이 경우 먼저 데이터소스를 열어서 알맞은 드라이버를 선택할 것입니다.
 
 CPLMoveFile()
 -------------
 
-The POSIX rename() function on which VSIRename() is usually based does
-not normally allow renaming files between file systems or between
-different kinds of file systems (ie. /vsimem to C:/abc). In order to
-implement GDALRenameDataset() such that it works efficiently within a
-file system, but still works between file systems, a new operation will
-be added to gdal/port. This is the CPLMoveFile() function which will
-first try a VSIRename(). If that fails it will use CPLCopyFile() to copy
-the whole file and then VSIUnlink() to get rid of the old file.
+보통 :cpp:func:`VSIRename` 의 기반이 되는 포직스(POSIX) rename() 함수는 일반적으로 파일 시스템 간의 또는 서로 다른 유형의 파일 시스템 간의 (예: :file:`/vsimem` 을 :file:`C:/abc` 로) 파일 재명명을 허용하지 않습니다. :cpp:func:`GDALRenameDataset` 을 구현해서 파일 시스템 내에서 효율적으로, 그러나 파일 시스템 간에 계속 재명명 작업을 할 수 있도록 하기 위해 :file:`gdal/port` 에 새로운 작업을 추가할 것입니다. 바로 :cpp:func:`CPLMoveFile` 함수로, 이 함수는 먼저 :cpp:func:`VSIRename` 을 시도할 것입니다. 이 시도가 실패하면 :cpp:func:`CPLCopyFile` 을 사용해서 파일 전체를 복사한 다음 :cpp:func:`VSIUnlink` 를 사용해서 예전 파일을 제거할 것입니다.
 
 ::
 
      int CPLMoveFile( const char *pszNewFilename, const char *pszOldFilename );
 
-The return value will be zero on success, otherwise an errno style
-value.
+성공하는 경우 0 값을 반환하고, 실패하면 `errno <https://man7.org/linux/man-pages/man3/errno.3.html>`_ 스타일의 값을 반환할 것입니다.
 
-It should be noted that in some error conditions, such as the
-destination file system running out of space during a copy, it may
-happen that some files for a dataset get renamed, and some do not
-leaving things in an inconsistent state.
+복사하는 도중 대상 파일 시스템의 공간이 부족해지는 것 같은 몇몇 오류 조건에서는 데이터셋의 일부 파일은 재명명되고 일부 파일은 재명명되지 않아 일관성이 없는 상태로 남아 있을 수도 있다는 사실을 기억해야 합니다.
 
 pfnCopyFiles()
 --------------
 
-The following new function is added to the GDALDriver class.
+:cpp:class:`GDALDataset` 클래스에 다음 새로운 함수를 추가합니다:
 
 ::
 
        CPLErr       (*pfnCopyFiles)( const char *pszNewName, const char *pszOldName );
 
-Also a corresponding function is added to the C API.
+C API에 이에 대응하는 함수도 추가합니다:
 
 ::
 
        CPLErr        GDALCopyDatasetFiles( GDALDriverH hDriver, const char *pszNewName, const char *pszOldName );
 
-Note that copying is done by the driver. The dataset may be opened, but
-if opened in update mode it may be prudent to first do a flush to
-synchronize the in-process state with what is on disk.
-GDALCopyDatasetFiles() will invoke pfnCopyFiles if it is non-NULL.
+드라이버가 복사를 수행한다는 사실을 기억하십시오. 데이터셋을 열 수도 있지만, 업데이트 모드로 연 경우 먼저 플러싱을 수행해서 진행 중인 상태를 디스크 상에 있는 것과 동기화하는 것이 현명할 수도 있습니다. 'pfnCopyFiles'가 NULL이 아닌 경우 :cpp:func:`GDALCopyDatasetFiles` 가 'pfnCopyFiles'를 호출할 것입니다.
 
-If pfnCopy is NULL the default implementation will be used which will
-open the dataset, fetch the file list, close the dataset, and then try
-to copy all the files (based on shared basenames). The default copy
-operation will fail if it is unable to establish a relationship between
-the files (ie. a common basename or stem) to indicate how the group of
-files should be renamed to the new pattern.
+'pfnCopy'가 NULL이라면 데이터셋을 열고, 파일 목록을 가져온 다음, 데이터셋을 종료하고, (공유 기본명을 기반으로) 모든 파일을 복사하려 시도하는 기본 구현을 사용할 것입니다. 파일 그룹을 새 패턴으로 재명명해야 할 방법을 나타내는 파일들 간의 관계성을 (예를 들면 공통 기본명 또는 어간(stem)을) 판단할 수 없는 경우 기본 복사 작업이 실패할 것입니다.
 
-Optionally a NULL hDriver argument may be passed in, in which case the
-appropriate driver will be selected by first opening the datasource.
+값이 NULL인 선택적 'hDriver' 인자가 전송되어 올 수도 있는데, 이 경우 먼저 데이터소스를 열어서 알맞은 드라이버를 선택할 것입니다.
 
-Copy is essentially the same as Rename, but the original files are
-unaltered. Note that this form of copy is distinct from CreateCopy() in
-that it preserves the exact binary files on disk in the new location
-while CreateCopy() just attempts to reproduce a new dataset with
-essentially the same data as modelled and carried through GDAL.
+복사는 본질적으로 재명명과 동일하지만, 원본 파일을 변경하지 않습니다. 이런 형식의 복사가 디스크 상에 있는 바이너리 파일을 새 위치에 그대로 보전하는 반면, :cpp:func:`CreateCopy` 는 GDAL을 통해 모델링되어 전송된 본질적으로 동일한 데이터를 가진 새 데이터셋을 생성하려 시도한다는 점에서 이런 형식의 복사와 :cpp:func:`CreateCopy` 메소드는 서로 다릅니다.
 
 pfnDelete()
 -----------
 
+삭제 작업 기본 구현을 :cpp:func:`GetFileList` 결과물을 사용하도록 확장할 것입니다.
 
-The delete operations default implementation will be extended to use the
-GetFileList() results.
+지원 함수
+---------
 
-Supporting Functions
---------------------
+데이터셋 파일 관련 월드 파일, .aux 파일 및 .prj 파일을 더 쉽게 식별할 수 있게 해주는 일종의 지원 함수들을 제공해야 합니다.
 
-Some sort of supporting functions should be provided to make it easy to
-identify worldfiles, .aux files and .prj files associated with a file.
-
-Drivers Updated
----------------
-
-It is anticipated that a majority of the commonly used drivers will be
-updated with custom GetFileList() methods that account for world files
-and other idiosyncratic files. A particular emphasis will made to handle
-the various formats in gdal/frmts/raw that consist of a header file and
-a raw binary file.
-
-Drivers for "one file formats" that are not updated will still use the
-default logic which should work fairly well, but might neglect auxiliary
-world files.
-
--  VRT: I do not anticipate updating the VRT driver at this time since
-   it gets quite complicated to collect a file list for some kinds of
-   virtual files. It is also not exactly clear whether related files
-   should be considered "owned" by the virtual dataset or not.
--  AIGRID: I will implement a custom rename operation in an attempt to
-   handle this directory oriented format gracefully.
-
-Additional Notes
-----------------
-
--  Subdatasets will generally return an empty file list from
-   GetFileList(), and will not be manageable via Rename or Delete though
-   a very sophisticated driver could implement these operations.
--  There is no mechanism anticipated to ensure that files are closed
-   before they are removed. If an application does not ensure this
-   rename/move operations may fail on win32 since it doesn't allow
-   rename/delete operations on open files. Things could easily be left
-   in an inconsistent state.
--  Datasets without associated files in the file system will return an
-   empty file list. This essentially identifies them as "unmanagable".
-
-Implementation Plan
+업데이트된 드라이버
 -------------------
 
-This change will be implemented by Frank Warmerdam in trunk in time for
-the 1.5.0 release.
+흔히 사용되는 드라이버 대부분은 월드 파일 및 기타 특이 파일들을 처리하는 사용자 지정 :cpp:func:`GetFileList` 메소드를 가지도록 업데이트될 것으로 예상됩니다. :file:`gdal/frmts/raw` 에 있는 헤더 파일과 원시 바이너리 파일로 이루어진 다양한 포맷들의 처리를 특별히 강조할 것입니다.
 
-SWIG Implications
------------------
+업데이트되지 않은 "단일 파일 포맷" 용 드라이버는 계속 꽤 잘 작동해야 할 기본 로직을 사용할 것이지만, 보조 월드 파일을 무시할 수도 있습니다.
 
-The GDALRenameDataset(), and GDALCopyDatasetFiles() operations on the
-driver, and the GetFileList() operation on the dataset will need to be
-exposed through SWIG.
+-  VRT:
+   현재 VRT 드라이버를 업데이트할 준비가 되어 있지 않습니다. 몇몇 가상 파일 유형의 파일 목록을 수집하는 일이 매우 복잡하기 때문입니다. 가상 데이터셋이 관련 파일들을 "소유"하는 것으로 간주해야 할지 여부도 명확하지 않습니다.
 
-Testing
--------
+-  AIGRID:
+   이 디렉터리 지향 포맷을 매끄럽게 처리하려는 시도의 일환으로 사용자 지정 재명명 작업을 구현할 것입니다.
 
-Rename and CopyFiles testing will be added to the regression tests for a
-few representative formats. These rename operations will be between one
-directory and another, and will not test cross file system copying which
-will have to be tested manually.
+추가 메모
+---------
 
-A small gdalmanage utility will be implemented allowing use and testing
-of the identify, rename, copy and delete operations from the commandline
-in a convenient fashion.
+-  :cpp:func:`GetFileList` 는 일반적으로 하위 데이터셋으로부터 비어 있는 파일 목록을 반환할 것이며, :cpp:func:`Rename` 또는 :cpp:func:`Delete` 메소드를 통해 하위 데이터셋을 관리할 수 없을 것입니다. 다만 매우 복잡한 드라이버라면 이런 작업들을 구현할 수 있습니다.
+
+-  파일을 제거하기 전에 파일을 종료하는 것을 보장한다고 예상되는 메커니즘이 없습니다. 응용 프로그램이 이를 보장하지 않는 경우 재명명/복사 작업이 Win32 상에서 실패할 수도 있습니다. Win32 시스템이 열려 있는 파일에 대한 재명명/복사 작업을 허용하지 않기 때문입니다. 일관성이 없는 상태로 남게 될 가능성이 높습니다.
+
+-  파일 시스템에 관련 파일을 가지지 않은 데이터셋은 비어 있는 파일 목록을 반환할 것입니다. 이런 데이터셋은 실질적으로 "관리 불가능"한 것으로 식별됩니다.
+
+구현 계획
+---------
+
+프랑크 바르메르담이 GDAL/OGR 1.5.0 배포판을 위해 '트렁크'에 이 변경 사항을 구현할 것입니다.
+
+SWIG 구현
+---------
+
+드라이버에 대한 :cpp:func:`GDALRenameDataset` 및 :cpp:func:`GDALCopyDatasetFiles` 함수, 그리고 데이터셋에 대한 :cpp:func:`GetFileList` 함수를 SWIG을 통해 노출시켜야 할 것입니다.
+
+테스트
+------
+
+대표적인 몇몇 포맷의 경우 회귀 테스트에 :cpp:func:`Rename` 및 :cpp:func:`CopyFiles` 테스트를 추가할 것입니다. 이런 재명명 작업 테스트는 한 디렉터리와 다른 디렉터리 간에 이루어질 것이며, 서로 다른 파일 시스템 간의 재명명 작업은 테스트하지 않을 것입니다. 이런 경우 사용자가 직접 테스트해야 할 것입니다.
+
+명령줄에서 식별, 재명명, 복사 및 삭제 작업을 편리한 방식으로 수행하고 테스트 할 수 있게 해주는 gdalmanage 유틸리티가 구현될 것입니다.
+

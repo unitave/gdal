@@ -1,105 +1,66 @@
 .. _rfc-11:
 
 ================================================================================
-RFC 11: Fast Format Identification
+RFC 11: 빠른 포맷 식별
 ================================================================================
 
-Author: Frank Warmerdam
+저자: 프랑크 바르메르담
 
-Contact: warmerdam@pobox.com
+연락처: warmerdam@pobox.com
 
-Status: Adopted (and Implemented)
+상태: 승인 / 구현
 
-Summary
--------
+요약
+----
 
-This RFC aims to add the ability for applications to quickly identify
-what files in the file system are GDAL supported file formats without
-necessarily opening any of them. It is mainly intended to allow GUI file
-browsers based on file types.
+이 RFC의 목표는 응용 프로그램이 파일 시스템에 있는 파일들을 열어볼 필요없이 어떤 파일이 GDAL이 지원하는 파일 포맷인지 빠르게 식별할 수 있는 기능을 추가하는 것입니다. 주로 파일 유형 기반 GUI 파일 탐색기를 사용할 수 있게 하려는 목적입니다.
 
-This is accomplished by extending the GDALOpenInfo structure to hold
-more directory context, and by adding an Identify() method on the
-GDALDriver which a driver can implement to quickly identify that a file
-is of a given format without doing a more expensive Open() operation.
+:cpp:class:`GDALOpenInfo` 클래스 구조를 더 많은 디렉터리 맥락을 담을 수 있도록 확장하고, :cpp:class:`GDALDriver` 클래스에 드라이버가 더 많은 리소스를 사용하는 :cpp:func:`Open` 작업을 하지 않고 어떤 파일이 지정한 포맷인지 빠르게 식별할 수 있도록 구현할 수 있는 :cpp:func:`Identify` 메소드를 추가해서 이를 달성합니다.
 
 GDALOpenInfo
 ------------
 
-The Open() (or Identify()) methods of many drivers need to probe for
-files associated with the target file in order to open or identify a
-file as being of a particular format. For instance, in order to open an
-ESRI BIL file (EHDR driver) it is necessary to probe for a driver with
-the same basename as the target file, but the extension .hdr. Currently
-this is typically accomplished with VSIFStatL() calls or similar which
-can be fairly expensive.
+많은 드라이버들의 :cpp:func:`Open` (또는 :cpp:func:`Identify`) 메소드는 어떤 파일을 특정 포맷으로 열거나 식별하려면 대상 파일 관련 파일들을 조사해야 합니다. 예를 들어, ESRI BIL 파일(EHdr 드라이버)을 열려면 드라이버가 대상 파일과 동일한 기본명을 가지지만 .hdr 확장자를 가진 파일을 조사해야 합니다. 현재 이 조사는 일반적으로 상당한 리소스를 사용할 수도 있는 :cpp:func:`VSIFStatL` 또는 이와 유사한 메소드를 호출해서 이루어집니다.
 
-In order to reduce the need for such searches touch the operating system
-file system machinery, the GDALOpenInfo structure will be extended to
-hold an optional list of files. This is the list of all files at the
-same level in the file system as the target file, including the target
-file. The filenames will *not* include any path components, are an
-essentially just the output of CPLReadDir() on the parent directory. If
-the target object does not have filesystem semantics then the file list
-should be NULL.
+이렇게 운영 체제 파일 시스템 기작을 건드리는 검색을 해야 할 필요성을 줄이기 위해, 선택적인 파일 목록을 담을 수 있도록 :cpp:class:`GDALOpenInfo` 구조를 확장할 것입니다. 이 목록은 파일 시스템에서 대상 파일과 동일한 수준에 있는 모든 파일들의 목록으로, 대상 파일을 포함합니다. 어떤 경로 구성요소에도 파일명은 포함되지 '않을' 것이며, 파일명은 본질적으로 상위 디렉터리에 대한 :cpp:func:`CPLReadDir` 의 산출물일 뿐입니다. 대상 객체가 파일 시스템 의미(semantics)를 가지고 있지 않은 경우 파일 목록은 NULL이어야 합니다.
 
-The following is added to GDALOpenInfo:
+:cpp:class:`GDALOpenInfo` 에 다음을 추가합니다:
 
 ::
 
               GDALOpenInfo( const char * pszFile, GDALAccess eAccessIn, char **papszSiblings );
        char **papszSiblingFiles;
 
-The new constructor allows the file list to be passed in to populate the
-papszSiblingFiles member (the argument will be copied). The existing
-default constructor will use CPLGetDirname() to get the directory of the
-passed pszFile, and CPLReadDir() to read the corresponding file list.
-The new constructor is primarily aimed at efficient implementation of
-the later GDALIdentifyDriver() function, avoiding re-reading the file
-list for each file to be tested.
+새 구성자가 파일 목록이 전송되어 'papszSiblingFiles' 멤버를 채우도록 해줍니다. (인자를 복사할 것입니다.) 기존 기본 구성자는 :cpp:func:`CPLGetDirname` 을 사용해서 전송된 'pszFile'의 디렉터리를 가져오고, :cpp:func:`CPLReadDir` 를 이용해서 대응하는 파일 목록을 읽어옵니다. 새 구성자는 각 파일을 테스트할 때마다 파일 목록을 다시 읽어오지 않아도 되는 최신 :cpp:func:`GDALIdentifyDriver` 함수의 효율적인 구현을 우선합니다.
 
 Identify()
 ----------
 
-The GDALDriver class will be extended with the following function:
+:cpp:class:`GDALDriver` 를 다음 함수로 확장할 것입니다:
 
 ::
 
      int      (*pfnIdentify)( GDALOpenInfo * );
 
-When implemented by a driver, the function is intended to return TRUE
-(non-zero) if the driver determines that the file passed in via
-GDALOpenInfo appears to be of the format the driver is implemented for.
-To call this applications should call the new function:
+드라이버로 구현할 때, 이 함수의 목적은 드라이버가 :cpp:class:`GDALOpenInfo` 를 통해 전송된 파일이 해당 드라이버가 구현된 대상인 포맷으로 보인다고 판단하는 경우 TRUE(0이 아닌 값)를 반환하는 것입니다.
+이 함수를 호출하려면 응용 프로그램이 새 함수를 호출해야 합니다:
 
 ::
 
      GDALDriverH *GDALIdentifyDriver( const char *pszDatasource, const char **papszDirFiles );
 
-Internally GDALIdentifyDriver() will do the following
+내부적으로 :cpp:func:`GDALIdentifyDriver` 함수는 다음을 수행할 것입니다:
 
-1. A GDALOpenInfo structure will be initialized based on pszDatasource
-   and papszDirFiles.
-2. It will iterate over all drivers similarly to GDALOpen(). For each
-   driver it will use the pfnIdentify function if available, otherwise
-   it will use the pfnOpen() method to establish if the driver supports
-   the file.
-3. It will return the driver handle for the first driver to respond
-   positively or NULL if none accept it.
+1. :cpp:class:`GDALOpenInfo` 구조를 'pszDatasource' 및 'papszDirFiles'를 기반으로 초기화할 것입니다.
+2. :cpp:func:`GDALOpen` 과 유사하게 모든 드라이버를 반복할 것입니다. 해당 드라이버가 해당 파일을 지원하는지 판단하기 위해, 사용할 수 있는 경우 각 드라이버에 :cpp:func:`pfnIdentify` 함수를 사용할 것이며 사용할 수 없다면 :cpp:func:`pfnOpen` 메소드를 사용할 것입니다.
+3. 긍정적으로 응답하는 첫 번째 드라이버에 대해 드라이버 핸들을 반환할 것이고, 또는 해당 파일을 지원하는 드라이버가 없는 경우 NULL을 반환할 것입니다.
 
-Driver Changes
---------------
+드라이버 변경
+-------------
 
-In theory it is not necessary for any drivers to be modified, since
-GDALIdentifyDriver() will fallback to using the pfnOpen function to
-test. But in practice, no optimization is achieved unless at least some
-drivers (hopefully those for which Open can be very expensive) are
-updated. Part of the ongoing effort then is to implement identify
-functions for GDAL drivers.
+이론적으로는 어떤 드라이버도 수정할 필요가 없습니다. :cpp:func:`GDALIdentifyDriver` 가 다시 :cpp:func:`pfnOpen` 함수로 돌아가 테스트를 계속할 것이기 때문입니다. 그러나 실사용 시 최소한 몇몇 드라이버를 (바라건대 :cpp:func:`Open` 메소드가 아주 많은 리소스를 사용할 수도 있는 드라이버들을) 업데이트하지 않고서는 최적화를 달성할 수 없습니다. 이제 GDAL 드라이버에 식별 함수를 구현하는 노력을 계속해야 합니다.
 
-Generally speaking it should be easy to craft an identify function from
-the initial test logic in the open function. For instance, the GeoTIFF
-driver might be changed like this:
+일반적으로 :cpp:func:`Open` 함수에 있는 초기 테스트 로직으로부터 식별 함수를 구성하는 것은 쉬운 일입니다. 예를 들어 GeoTIFF 드라이버를 다음과 같이 변경할 수도 있습니다:
 
 ::
 
@@ -107,15 +68,14 @@ driver might be changed like this:
 
    {
    /* -------------------------------------------------------------------- */
-   /*      We have a special hook for handling opening a specific          */
-   /*      directory of a TIFF file.                                       */
+   /*      TIFF 파일의 특정 디렉터리 열기를 처리하기 위한                  */
+   /*      특수 후크(hook)가 있습니다.                                     */
    /* -------------------------------------------------------------------- */
        if( EQUALN(poOpenInfo->pszFilename,"GTIFF_DIR:",10) )
            return TRUE;
 
    /* -------------------------------------------------------------------- */
-   /*  First we check to see if the file has the expected header   */
-   /*  bytes.                              */    
+   /*  먼저 이 파일이 예상 헤더 바이트를 가지는지 확인합니다               */
    /* -------------------------------------------------------------------- */
        if( poOpenInfo->nHeaderBytes < 2 )
            return FALSE;
@@ -124,7 +84,7 @@ driver might be changed like this:
            && (poOpenInfo->pabyHeader[0] != 'M' || poOpenInfo->pabyHeader[1] != 'M'))
            return FALSE;
 
-       // We can't support BigTIFF files for now. 
+       // 현재 BigTIFF 파일은 지원하지 못 합니다.
        if( poOpenInfo->pabyHeader[2] == 43 && poOpenInfo->pabyHeader[3] == 0 )
            return FALSE;
     
@@ -136,8 +96,7 @@ driver might be changed like this:
        return TRUE;
    }
 
-The open might then be modified to use the identify function to avoid
-duplicating the test logic.
+그 다음 테스트 로직을 복제하는 일을 피하기 위해 :cpp:func:`Open` 함수가 식별 함수를 사용하도록 수정할 수도 있습니다:
 
 ::
 
@@ -150,8 +109,8 @@ duplicating the test logic.
            return NULL;
 
    /* -------------------------------------------------------------------- */
-   /*      We have a special hook for handling opening a specific          */
-   /*      directory of a TIFF file.                                       */
+   /*      TIFF 파일의 특정 디렉터리 열기를 처리하기 위한                  */
+   /*      특수 후크(hook)가 있습니다.                                     */
    /* -------------------------------------------------------------------- */
        if( EQUALN(poOpenInfo->pszFilename,"GTIFF_DIR:",10) )
            return OpenDir( poOpenInfo->pszFilename );
@@ -159,8 +118,7 @@ duplicating the test logic.
        GTiffOneTimeInit();
    ...
 
-Drivers which require header files such as the EHdr driver might
-implement Identify() like this:
+EHdr 드라이버처럼 헤더 파일을 요구하는 드라이버는 :cpp:func:`Identify` 함수를 다음과 같이 구현할 수도 있습니다:
 
 ::
 
@@ -171,14 +129,13 @@ implement Identify() like this:
        const char  *pszHDRFilename;
        
    /* -------------------------------------------------------------------- */
-   /*  We assume the user is pointing to the binary (ie. .bil) file.   */
+   /*  사용자가 바이너리(예: .bil) 파일을 가리키고 있다고 가정합니다.      */
    /* -------------------------------------------------------------------- */
        if( poOpenInfo->nHeaderBytes < 2 )
            return FALSE;
 
    /* -------------------------------------------------------------------- */
-   /*      Now we need to tear apart the filename to form a .HDR           */
-   /*      filename.                                                       */
+   /*      이제 파일명을 분해해서 .HDR 파일명을 형성해야 합니다.           */
    /* -------------------------------------------------------------------- */
        CPLString osBasename = CPLGetBasename( poOpenInfo->pszFilename );
        pszHDRFilename = CPLFormCIFilename( "", osBasename, "hdr" );
@@ -189,10 +146,7 @@ implement Identify() like this:
            return FALSE;
    }
 
-During the initial implementation a variety of drivers will be updated,
-including the following. As well some performance and file system
-activity logging will be done to identify drivers that are currently
-expensive.
+초기 구현을 하는 동안 다음 드라이버들을 포함, 다양한 드라이버를 업데이트할 것입니다. 뿐만 아니라 현재 리소스를 많이 사용하는 드라이버를 식별하기 위해 몇몇 성능 및 파일 시스템 활동 로그 작업도 업데이트할 것입니다.
 
 -  HFA
 -  GTiff
@@ -211,53 +165,34 @@ expensive.
 CPLReadDir()
 ------------
 
-Currently the VSIMemFilesystemHandler implemented in cpl_vsi_mem.cpp
-which provides "filesystem like" access to objects in memory does not
-implement directory reading services. In order to properly populate the
-directory listing this will need to be added.
+현재 메모리에 있는 객체에 "파일 시스템과 비슷한" 접근을 제공하는 :file:`cpl_vsi_mem.cpp` 에 구현된 :cpp:class:`VSIMemFilesystemHandler` 클래스는 디렉터리 읽기 서비스를 구현하고 있지 않습니다. 디렉터리 목록을 제대로 채워넣으려면 디렉터리 읽기 서비스를 추가해야 할 것입니다.
 
-To do this the CPLReadDir() function will also need to be reimplemented
-to use VSIFilesystemHandler::ReadDir() instead of direct implementation
-in cpl_dir.cpp. The win32 and unix/posix implementations of
-VSIFilesystemHandler::ReadDir() already exist. This should essentially
-complete the virtualization of filesystem access services.
+이를 위해 :cpp:func:`CPLReadDir` 함수도 :file:`cpl_dir.cpp` 에 직접 구현된 디렉터리 읽기 서비스 대신 :cpp:func:`VSIFilesystemHandler::ReadDir` 메소드를 사용하도록 다시 구현해야 할 것입니다. 이미 Win32 및 유닉스/포직스(POSIX) 용으로 구현된 :cpp:func:`VSIFilesystemHandler::ReadDir` 함수가 존재합니다. 이 함수가 파일 시스템 접근 서비스 가상화를 실질적으로 완성할 것입니다.
 
-CPLReadDir() will also be renamed VSIReadDir() but with a stub under the
-old name available for backward compatibility.
+:cpp:func:`CPLReadDir` 도 :cpp:func:`VSIReadDir` 로 재명명하지만, 하위 호환성을 위해 예전 이름 아래 스텁(stub)을 포함할 것입니다.
 
-Compatibility
--------------
+호환성
+------
 
-There are no anticipated backward compatibility problems. However
-forward compatibility will be affected, in that drivers updated in trunk
-with the Identify function will not be able to be ported back into 1.4
-builds and used their. Unmodified drivers, and externally maintained
-drivers should not be impacted by this development.
+예상되는 하위 호환성 문제는 없습니다. 하지만 상위 호환성은 영향을 받을 것입니다. 트렁크에서 :cpp:func:`Identify` 함수를 가지도록 업데이트된 드라이버를 1.4버전 빌드로 포팅할 수 없으므로 1.4버전 :cpp:func:`Identify` 함수를 사용할 수 없을 것이기 때문입니다. 이 RFC 개발은 수정되지 않는 드라이버 및 외부에서 유지/관리되는 드라이버에 영향을 미치지 않을 것입니다.
 
-SWIG Implications
------------------
+SWIG 구현
+---------
 
-The GDALIdentifyDriver() and VSIReadDir() functions will need to be
-exposed via SWIG.
+:cpp:func:`GDALIdentifyDriver` 및 :cpp:func:`VSIReadDir` 함수를 SWIG을 통해 노출시켜야 합니다.
 
-Regression Testing
-------------------
+회귀 테스트
+-----------
 
-A test script for the Identify() function will be added to the
-autotest/gcore directory. It will include testing of identify in a
-/vsimem memory collection.
+:file:`autotest/gcore` 디렉터리에 :cpp:func:`Identify` 함수에 대한 테스트 스크립트를 추가할 것입니다. 이 스크립트는 :file:`/vsimem` 메모리 선택 집합에 있는 파일을 식별하는 테스트도 포함할 것입니다.
 
-Implementation Plan
--------------------
+구현 계획
+---------
 
-The new features will be implemented by Frank Warmerdam in *trunk* for
-the GDAL/OGR 1.5.0 release.
+프랑크 바르메르담이 GDAL/OGR 1.5.0 배포판을 위해 '트렁크'에 이 새 기능을 구현할 것입니다.
 
-Performance Tests
------------------
+성능 테스트
+-----------
 
-A very quick test introducing the Identify without actually opening
-changed the time to identify all files in a directory with 70 TIFF files
-(on an NFS share) from 2 seconds to 0.5 seconds. So saving the overhead
-of actually opening files can be significant for some formats, including
-very common ones like GeoTIFF.
+실제로 파일을 열지 않는 :cpp:func:`Identify` 함수를 도입한 아주 간단한 테스트에서, (NFS 공유 상에서) TIFF 파일 70개를 가진 디렉터리에 있는 모든 파일을 식별하는 데 걸리는 시간이 2초에서 0.5초로 줄었습니다. 즉 GeoTIFF처럼 널리 사용되는 포맷을 포함하는 몇몇 포맷의 경우 실제로 파일을 여는 오버헤드를 상당히 절약할 수 있습니다.
+
