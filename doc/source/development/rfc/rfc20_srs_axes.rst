@@ -32,7 +32,7 @@ WKT Axis Representation
 The OGC WKT SRS format (per OGC 01-???) already indicates a way of
 defining coordinate system axes as shown in this example:
 
-::
+.. code-block:: wkt
 
    GEOGCS["WGS 84",
        DATUM["WGS_1984",
