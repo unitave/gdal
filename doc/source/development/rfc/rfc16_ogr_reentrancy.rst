@@ -1,45 +1,38 @@
 .. _rfc-16:
 
 ================================================================================
-RFC 16: OGR Thread Safety
+RFC 16: OGR 스레드 보안
 ================================================================================
 
-Author: Frank Warmerdam
+저자: 프랑크 바르메르담
 
-Contact: warmerdam@pobox.com
+연락처: warmerdam@pobox.com
 
-Status: Development
+상태: 개발 중
 
-Summary
--------
+요약
+----
 
-In an effort to better support thread safety in OGR some methods are
-added as internal infrastructure is updated.
+OGR에서 스레드 보안을 더 잘 지원하기 위해 내부 인프라스트럭처를 업데이트하면서 메소드 몇 개를 추가합니다.
 
-Definitions
------------
+정의
+----
 
-*Reentrant*: A reentrant function can be called simultaneously by
-multiple threads provided that each invocation of the function
-references unique data.
+-  **Reentrant**:
+   함수의 호출이 각각 유일 데이터를 참조하는 경우 스레드 여러 개가 재진입(reentrant) 함수를 동시에 호출할 수 있습니다.
 
-*Thread-safe*: A thread-safe function can be called simultaneously by
-multiple threads when each invocation references shared data. All access
-to the shared data is serialized.
+-  **Thread-safe**:
+   함수의 호출이 각각 공유 데이터를 참조하는 경우 스레드 여러 개가 스레드 안전(thread-safe) 함수를 동시에 호출할 수 있습니다.
 
-Objective
----------
+목표
+----
 
-To make all of the OGR core and selected drivers reentrant, and to make
-the driver registrar, drivers and datasources at least potentially
-thread-safe.
+모든 OGR 코어와 선택된 드라이버들이 재진입할 수 있도록 만들고, 드라이버 등록자(registrar), 드라이버 및 데이터소스가 적어도 잠재적으로 스레드 안전하도록 만듭니다.
 
 TestCapability()
 ----------------
 
-The TestCapability() method on the driver, and datasource will be
-extended to include ways of testing for reentrancy and thread safety on
-particular instances. The following macros will be added:
+드라이버 및 데이터소스에 대한 :cpp:func:`TestCapability` 메소드가 특정 인스턴스에 대해 재진입성 및 스레드 보안을 테스트하는 방법을 포함하도록 확장할 것입니다. 다음 매크로들을 추가할 것입니다:
 
 ::
 
@@ -48,97 +41,67 @@ particular instances. The following macros will be added:
    #define ODsCReentrant   "Reentrant"
    #define ODsCThreadSafe  "Threadsafe"
 
-Meaning:
+이때:
 
--  OLCReentrant: The layer class is reentrant. Multiple threads can
-   operate on distinct instances of this class - including different
-   layers on a single datasource.
--  ODsCReentrant: The datasource class is reentrant. Multiple threads
-   can operate on distinct instances of this class.
--  ODsCThreadSafe: The datasource class is thread-safe. Multiple threads
-   can operate on a single instance of this class.
--  ODsCLayerClones: The OGRDataSource::GetLayerClone() method is
-   supported, and returns a layer instance with distinct state from the
-   default layer returned by GetLayer().
+-  OLCReentrant:
+   이 레이어 클래스가 재진입할 수 있습니다. 스레드 여러 개가 이 클래스의 -- 단일 데이터소스에 있는 서로 다른 레이어를 포함하는 -- 개별 인스턴스들을 작업할 수 있습니다.
 
-Note that a single layer instance cannot be threadsafe as long as layer
-feature reading status is implicit in the layer object. The default
-return value for all test values is FALSE, as is normal for the
-TestCapability() method, but specific drivers can return TRUE after
-determining that the driver datasources or layers are in fact reentrant
-and/or threadsafe.
+-  ODsCReentrant:
+   이 데이터소스 클래스가 재진입할 수 있습니다. 스레드 여러 개가 이 클래스의 개별 인스턴스들을 작업할 수 있습니다.
+
+-  ODsCThreadSafe:
+   이 데이터소스 클래스는 스레드 안전합니다. 스레드 여러 개가 이 클래스의 단일 인스턴스를 작업할 수 있습니다.
+
+-  ODsCLayerClones:
+   :cpp:func:`OGRDataSource::GetLayerClone` 메소드를 지원하며, :cpp:func:`GetLayer` 가 반환하는 기본 레이어로부터 나온 개별 상태(distinct state)를 가진 레이어 인스턴스를 반환합니다.
+
+레이어 피처 읽기 상태가 레이어 객체에 내재되어 있는 한 단일 레이어 인스턴스가 스레드 안전할 수 없다는 사실을 기억하십시오.
+모든 테스트 값에 대한 기본 반환값은 FALSE입니다. 이는 :cpp:func:`TestCapability` 메소드의 경우 일반적인 습성이지만, 드라이버 데이터소스 또는 레이어가 사실상 재진입 가능하고 그리고/또는 스레드 안전하다고 결정한 특정 드라이버들은 TRUE를 반환할 수 있습니다.
 
 OGRSFDriverRegistrar
 --------------------
 
-Various changes have already been made to make the driver registrar
-thread safe, primarily by protecting operations on it with a mutex.
+주로 드라이버 등록자에 대한 작업을 뮤텍스(mutex)로 보호함으로써 드라이버 등록자를 스레드 안전하게 만들기 위한 여러 가지 변경 사항들이 이미 적용되어 있습니다.
 
 OGRSFDriver
 -----------
 
-No changes are required to the OGRSFDriver base class for thread safety,
-primarily because it does almost nothing.
+스레드 안전을 위해 :cpp:class:`OGRSFDriver` 기반 클래스를 변경할 필요는 없습니다. 이 클래스가 거의 아무 일도 하지 않기 때문입니다.
 
 OGRDataSource
 -------------
 
-This class has been modified to include an m_hMutex class data member
-which is a mutex used to ensure thread safe access to internal
-datastructures such as the layer list. Classes derived from
-OGRDataSource that wish to implement threadsafe operation should use
-this mutex when exclusivity is required.
+:cpp:class:`OGRDataSource` 클래스가 'm_hMutex' 클래스 데이터 멤버를 포함하도록 수정되었습니다. 'm_hMutex' 멤버는 레이어 목록 같은 내부 데이터 구조에 스레드 안전하게 접근하기 위해 사용되는 뮤텍스입니다. :cpp:class:`OGRDataSource` 로부터 파생된, 스레드 안전 작업을 구현하려는 클래스들은 배타성(exclusivity)이 요구되는 경우 이 뮤텍스를 사용해야 합니다.
 
-A new method is added to this class:
+이 클래스에 새 메소드를 추가합니다:
 
 ::
 
      OGRLayer *GetLayerClone( int i );
 
-The default implementation of this method returns NULL. If the
-ODsCLayerClones capability is true for the datasource, this method must
-return duplicates of the requested layer that have distinct feature
-reading state. That is they can have their own spatial and attribute
-filter settings, and the internal feature iterator (for GetNextFeature()
-and ResetReading()) is distinct from other OGRLayer instances
-referencing the same underlying datasource layer.
+이 메소드의 기본 구현은 NULL을 반환합니다. 데이터소스에 대해 :cpp:class:`ODsCLayerClones` 케이퍼빌리티가 참인 경우, 이 메소드는 개별 피처 읽기 상태를 가지고 있는 요청 레이어의 복제본을 반환해야만 합니다.
+즉 이 복제본이 자신만의 공간 및 속성 필터 설정을 가질 수 있으며, (:cpp:func:`GetNextFeature` 및 :cpp:func:`ResetReading` 메소드를 위한) 내부 피처 반복자(iterator)가 동일한 기저 데이터소스 레이어를 참조하는 다른 :cpp:class:`OGRLayer` 인스턴스와 구분된다는 의미입니다.
 
-The intention of this method in the multi-threaded context is that
-different threads can have clones of a layer with distinct read state. A
-sort of poor-mans threadsafety, even though in fact it is just
-reentrancy.
+멀티스레딩 맥락에서 이 메소드의 목적은 서로 다른 스레드들이 개별 읽기 상태를 가진 레이어의 복제본을 가질 수 있게 하는 것입니다. 실제로는 재진입성에 불과하지만, 일종의 빈약한 스레드 안전성입니다.
 
-Layers return by GetLayerClone() should be released with the
-OGRDataSource::ReleaseResultSet() method, much like layers returned by
-ExecuteSQL().
+:cpp:func:`ExecuteSQL` 이 반환한 레이어와 마찬가지로, :cpp:func:`GetLayerClone` 이 반환한 레이어를 :cpp:func:`OGRDataSource::ReleaseResultSet` 메소드로 해제해야 합니다.
 
 ExecuteSQL()
 ------------
 
-The default OGR implementation of OGRDataSource::ExecuteSQL() internally
-uses and modifies the layer state (feature iterators and filters) and as
-such is not appropriate to use on a datasource that is attempting to be
-threadsafe even though it is understood that individual layers are not
-threadsafe.
+:cpp:func:`OGRDataSource::ExecuteSQL` 의 기본 OGR 구현은 내부적으로 레이어 상태(피처 반복자 및 필터)를 사용하고 수정합니다. 따라서 자신의 개별 레이어가 스레드 안전하지 않다는 것을 알고 있더라도 스레드 안전하도록 시도하는 데이터소스에 이 구현을 사용하는 것은 적절하지 않습니다.
 
-The proposed solution is that this code will be modified to use
-GetLayerClone() if the datasource supports GetLayerClone().
+데이터소스가 :cpp:func:`GetLayerClone` 을 지원하는 경우 이 코드가 :cpp:func:`GetLayerClone` 을 사용하도록 수정할 것을 제안합니다.
 
-Testing
--------
+테스트
+------
 
-A multi-threaded C++ test harnass will be implemented for read-only
-stress testing of datasources claiming to support reentrancy and
-threadsafety.
+재진입성 및 스레드 안전을 지원한다고 주장하는 데이터소스의 읽기 전용 스트레스 테스트를 위해 멀티스레딩 C++ 테스트 코드를 구현할 것입니다.
 
-No testing of reentrancy and threadsafety will be incorporated into the
-regression test suite (gdalautotest) as it does not appear to be
-practical.
+회귀 테스트 스위트(gdalautotest)에는 어떤 재진입성 및 스레드 안전 테스트도 통합하지 않을 것입니다. 실용성이 없는 것으로 보이기 때문입니다.
 
-Implementation
---------------
+구현
+----
 
-Frank Warmerdam will implement all the core features of this RFC for the
-GDAL/OGR 1.5.0 release. As well the Shapefile, Personal Geodatabase,
-ODBC and Oracle drivers will implement OLCReentrant, ODsCLayerClones,
-ODsCReentrant and ODsThreadSafe.
+프랑크 바르메르담이 GDAL/OGR 1.5.0버전 배포판을 위해 이 RFC의 모든 핵심 기능을 구현할 것입니다. 또한 Shapefile, 개인 지리 데이터베이스(Personal Geodatabase), ODBC 및 Oracle 드라이버에도 :cpp:class:`OLCReentrant`, :cpp:class:`ODsCLayerClones`, :cpp:class:`ODsCReentrant` 및 :cpp:class:`ODsThreadSafe` 를 구현할 것입니다.
+

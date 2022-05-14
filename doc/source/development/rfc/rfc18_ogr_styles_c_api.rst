@@ -1,31 +1,26 @@
 .. _rfc-18:
 
 ================================================================================
-RFC 18: OGR Style Support in C API
+RFC 18: C API에서의 OGR 스타일 지원
 ================================================================================
 
-Author: Daniel Morissette
+저자: 대니얼 모리셋(Daniel Morissette)
 
-Contact: dmorissette@mapgears.com
+연락처: dmorissette@mapgears.com
 
-Status: Adopted (2007-12-05)
+상태: 승인 (2007년 12월 5일)
 
-Summary
--------
+요약
+----
 
-OGR has a number of C++ classes that deal with the encoding of style
-information and attaching that to features. More information is
-available in the :ref:`ogr_feature_style` document.
+OGR는 스타일 정보의 인코딩을 처리해서 피처에 추가하는 C++ 클래스 여러 개를 가지고 있습니다. 더 자세한 정보는 :ref:`ogr_feature_style` 문서에서 찾아볼 수 있습니다.
 
-With GDAL/OGR version 1.4.x and older, it was not possible to deal with
-style information using the C API. This RFC proposes the addition of
-functions to the C API to manipulate style information in GDAL/OGR 1.5.
+GDAL/OGR 1.4.x 이전 버전에서는 C API를 이용해서 스타일 정보를 처리할 수 없었습니다. 이 RFC는 GDAL/OGR 1.5버전에서 C API에 스타일 정보를 처리할 수 있는 함수들을 추가할 것을 제안합니다.
 
-Implementation Details
-----------------------
+구현 상세 사항
+--------------
 
--  The following enums will be moved from ogr_featurestyle.h to
-   ogr_core.h:
+-  다음 목록을 :file:`ogr_featurestyle.h` 로부터 :file:`ogr_core.h` 로 이동시킵니다:
 
 ::
 
@@ -36,8 +31,7 @@ Implementation Details
        OGRSTSymbolParam;
        OGRSTLabelParam;
 
--  The OGRStyleMgrH (corresponding to the OGRStyleMgr C++ class) will be
-   added to the C API:
+-  C API에 (:cpp:class:`OGRStyleMgr` C++ 클래스에 대응하는) :c:class:`OGRStyleMgrH` 클래스를 추가할 것입니다:
 
 ::
 
@@ -50,8 +44,7 @@ Implementation Details
        OGRStyleToolH OGR_SM_GetPart(OGRStyleMgrH hSM)
        int           OGR_SM_AddPart(OGRStyleMgrH hSM, OGRStyleTool *sPart)
 
--  The OGRStyleToolH (corresponding to the OGRStyleTool C++ class) will
-   be added to the C API:
+-  C API에 (:cpp:class:`OGRStyleTool` C++ 클래스에 대응하는) :c:class:`OGRStyleToolH` 클래스를 추가할 것입니다:
 
 ::
 
@@ -74,13 +67,9 @@ Implementation Details
         int           OGR_ST_GetRGBFromString(OGRStyleToolH hST, const char *pszColor, 
                                              int *nRed, int *nGreen, int *nBlue, int *nAlpha);
 
-Note: at implementation time, the OGR_ST_GetParamIsNull() has been
-removed and replaced by an 'int \*bValueIsNull' argument on all the
-OGR_ST_GetParam...() functions in order to map more closely to the C++
-methods.
+주의: 구현 시 C++ 메소드들에 더 근접하게 매핑하기 위해 모든 :c:func:`OGR_ST_GetParam...` 함수들 상에서 :c:func:`OGR_ST_GetParamIsNull` 을 제거하고 'int \*bValueIsNull' 인자로 대체했습니다.
 
--  NO wrappers will be needed for the following C++ classes which are
-   handled internally by the OGR\_ST\_\* wrappers above:
+-  앞의 :c:func:`OGR_ST_*` 래퍼(wrapper)들이 내부적으로 처리하는 다음 C++ 클래스들에 대한 래퍼는 필요없습니다:
 
 ::
 
@@ -89,34 +78,33 @@ methods.
        class OGRStyleSymbol : public OGRStyleTool
        class OGRStyleLabel : public OGRStyleTool
 
--  Note that ogr_featurestyle.h also contains a OGRSTVectorParam enum
-   and a corresponding OGRStyleVector class but this class is currently
-   unused and may eventually be removed, so we will not implement
-   support for it in the C API (and the OGRSTVectorParam enum will NOT
-   be moved to ogr_core.h).
+-  :file:`ogr_featurestyle.h` 파일이 :c:class:`OGRSTVectorParam` 목록 및 대응하는 :cpp:class:`OGRStyleVector` 클래스도 담고 있지만 이 클래스는 현재 사용되지 않기 때문에 향후 제거될 수도 있습니다. 따라서 C API에 :cpp:class:`OGRStyleVector` 클래스를 위한 지원을 구현하지 않을 것입니다. (또한 :c:class:`OGRSTVectorParam` 목록을 :file:`ogr_core.h` 로 이동시키지 않을 것입니다.)
 
-Python and other language bindings
-----------------------------------
+파이썬 및 기타 언어 바인딩
+--------------------------
 
-The initial implementation will be for the C API only and will not be
-ported/tested with the Python and other scripting language bindings.
-This will have to wait for a later release.
+이 초기 구현은 C API 전용이므로 파이썬 및 기타 스크립트 작업 언어 바인딩으로 이식 또는 테스트되지 않을 것입니다. 향후 배포판을 기다려야 할 것입니다.
 
-Implementation
---------------
+구현
+----
 
-Daniel Morissette will implement the changes to the C API described in
-this RFC for the GDAL/OGR 1.5.0 release.
+대니얼 모리셋이 GDAL/OGR 1.5.0버전 배포판을 위해 C API에 이 RFC에서 설명하는 변경 사항들을 구현할 것입니다.
 
-The first test of the new C API functions will be the conversion of
-MapServer's mapogr.cpp to use them.
+새 C API 함수들의 첫 번째 테스트는 MapServer의 :file:`mapogr.cpp` 가 새 함수들을 사용하도록 변환하는 것이 될 것입니다.
 
-Related Ticket(s)
------------------
+관련 티켓(들)
+-------------
 
 #2061
 
-Voting History
---------------
+투표 이력
+---------
 
-+1 from all PSC members (FrankW, DanielM, HowardB, TamasS, AndreyK)
+프로젝트 운영 위원회의 모든 멤버가 +1 투표
+
+-  프랑크 바르메르담
+-  대니얼 모리셋
+-  하워드 버틀러
+-  세케레시 터마시
+-  안드레이 키셀레프
+

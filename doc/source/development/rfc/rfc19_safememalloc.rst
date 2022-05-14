@@ -1,90 +1,94 @@
 .. _rfc-19:
 
 ================================================================================
-RFC 19: Safer memory allocation in GDAL
+RFC 19: GDAL에서 더 안전한 메모리 할당
 ================================================================================
 
-Author: Even Rouault
+저자: 이벤 루올(Even Rouault)
 
-Contact: even.rouault@spatialys.com
+연락처: even.rouault@spatialys.com
 
-Status: Adopted, implemented
+상태: 승인, 구현
 
-Summary
--------
+요약
+----
 
-This document contains proposal on how to make GDAL safer (prevent
-crashes) when doing memory allocations. The starting point of this
-discussion is ticket #2075.
+이 문서는 메모리 할당 시 GDAL을 더 안전하게 (크래시를 방지하게) 만드는 방법을 제안합니다. 이 논의의 시발점은 #2075 티켓입니다.
 
-Details
--------
+상세 사항
+---------
 
-In many places in GDAL source code, multiplications are done to compute
-the size of the memory buffer to allocate, like raster blocks,
-scanlines, whole image buffers, etc.. Currently no overflow checking is
-done, thus leading to potential allocation of not large enough buffers.
-Overflow can occur when raster dimensions are very large (this can be
-the case with a WMS raster source for example) or when a dataset is
-corrupted, intentionnaly or unintentionnaly. This can lead to latter
-crash.
+GDAL 소스 코드의 많은 곳에서 래스터 블록, 스캔라인, 전체 이미지 버퍼 등등을 할당하기 위한 메모리 버퍼 크기를 계산하는 곱셈을 수행합니다. 현재 어떤 오버플로 검사도 하지 않기 때문에 버퍼가 충분히 크게 할당되지 않을 가능성이 있습니다. 래스터 크기가 매우 큰 경우 (예를 들어 WMS 래스터 소스가 그 사례가 될 수 있습니다) 또는 데이터소스에 의도적이든 의도적이지 않든 오류가 발생하는 경우 오버플로가 발생할 수 있습니다. 이렇게 되면 크래시로 이어질 수 있습니다.
 
-This RFC introduces new API to allocate memory when the computation of
-the size to allocate is based on multiplications. These new API report
-overflows when they occur. Overflows are detected by checking that
-((a*b)/b) == a. This does not require to make assumptions on the size of
-the variable types, their signedness, etc.
+이 RFC는 할당할 메모리 버퍼 크기 계산이 곱셈을 기반으로 하는 경우 메모리를 할당하기 위한 새 API를 도입합니다. 이 새 API는 오버플로 발생 시 이를 리포트합니다. ``((a*b)/b) == a`` 를 확인해서 오버플로를 탐지합니다. 이때 변수 유형의 크기, 변수의 부호 등을 가정할 필요가 없습니다.
 
-::
+.. code-block:: cpp
 
-   /**
-    VSIMalloc2 allocates (nSize1 * nSize2) bytes.
-    In case of overflow of the multiplication, or if memory allocation fails, a
-    NULL pointer is returned and a CE_Failure error is raised with CPLError().
-    If nSize1 == 0 || nSize2 == 0, a NULL pointer will also be returned.
-    CPLFree() or VSIFree() can be used to free memory allocated by this function.
+   /*
+    VSIMalloc2가 (nSize1 * nSize2) 바이트를 할당합니다.
+    곱셈의 오버플로가 발생하는 경우, 또는 메모리 할당이 실패하는 경우
+    NULL 포인터를 반환하고 CPLError()로 CE_Failure 오류를 발생시킵니다.
+    'nSize1 == 0 || nSize2 == 0'인 경우에도 NULL 포인터를 반환할 것입니다.
+    CPLFree() 또는 VSIFree()를 사용해서 이 함수가 할당한 메모리를 해제할 수 있습니다.
    */
    void CPL_DLL *VSIMalloc2( size_t nSize1, size_t nSize2 );
 
-   /**
-    VSIMalloc3 allocates (nSize1 * nSize2 * nSize3) bytes.
-    In case of overflow of the multiplication, or if memory allocation fails, a
-    NULL pointer is returned and a CE_Failure error is raised with CPLError().
-    If nSize1 == 0 || nSize2 == 0 || nSize3 == 0, a NULL pointer will also be returned.
-    CPLFree() or VSIFree() can be used to free memory allocated by this function.
+   /*
+    VSIMalloc3이 (nSize1 * nSize2 * nSize3) 바이트를 할당합니다.
+    곱셈의 오버플로가 발생하는 경우, 또는 메모리 할당이 실패하는 경우
+    NULL 포인터를 반환하고 CPLError()로 CE_Failure 오류를 발생시킵니다.
+    'nSize1 == 0 || nSize2 == 0 || nSize3 == 0'인 경우에도 NULL 포인터를 반환할 것입니다.
+    CPLFree() 또는 VSIFree()를 사용해서 이 함수가 할당한 메모리를 해제할 수 있습니다.
    */
    void CPL_DLL *VSIMalloc3( size_t nSize1, size_t nSize2, size_t nSize3 );
 
-The behavior of VSIMalloc2 and VSIMalloc3 is consistent with the
-behavior of VSIMalloc. Implementation of already existing memory
-allocation API (CPLMalloc, CPLCalloc, CPLRealloc, VSIMalloc, VSICalloc,
-VSIRealloc) will not be changed.
+:cpp:func:`VSIMalloc2` 및 :cpp:func:`VSIMalloc3` 의 습성은 :cpp:func:`VSIMalloc` 의 습성과 일치합니다. 기존 메모리 할당 API(:cpp:func:`CPLMalloc`, :cpp:func:`CPLCalloc`, :cpp:func:`CPLRealloc`, :cpp:func:`VSIMalloc`, :cpp:func:`VSICalloc`, :cpp:func:`VSIRealloc`)의 구현은 변경되지 않을 것입니다.
 
-:ref:`rfc-8` will be
-updated to promote new API for safer memory allocation. For example
-using VSIMalloc2(x, y) instead of doing CPLMalloc(x \* y) or VSIMalloc(x
-\* y).
+더 안전한 메모리 할당을 위한 새 API를 촉진하도록 :ref:`rfc-8` 을 업데이트할 것입니다. 예를 들면 ``CPLMalloc(x * y)`` 또는 ``VSIMalloc(x * y)`` 대신 ``VSIMalloc2(x, y)`` 를 사용하도록 업데이트할 것입니다.
 
-Implementation steps
---------------------
+구현 단계
+---------
 
-1. Introduce the new API in gdal/port
+1. :file:`gdal/port` 에 새 API를 도입합니다.
 
-2. Use the new API in GDAL core where it is relevant. The following
-   files have been identified as candidates :
-   gcore/gdalnodatamaskband.cpp, gcore/overview.cpp,
-   gcore/gdaldriver.cpp, gcore/gdalrasterblock.cpp
+2. GDAL 코어에서 관련이 있는 곳에 새 API를 사용합니다. 다음 파일들이 후보로 식별되었습니다:
 
-3. Use the new API in GDAL drivers. This step can be done incrementally.
-   Transition from CPL to VSI allocation can be necessary in some cases
-   too. Candidate drivers : Idrisi, PNG, GXF, BSB, VRT, MEM, JP2KAK,
-   RPFTOC, AIRSAIR, AIGRIB, XPM, USGDEM, BMP, GSG, HFA, AAIGRID. (See
-   gdal_svn_trunk_use_vsi_safe_mul_in_frmts.patch in ticket #2075)
+   * :file:`gcore/gdalnodatamaskband.cpp`
+   * :file:`gcore/overview.cpp`
+   * :file:`gcore/gdaldriver.cpp`
+   * :file:`gcore/gdalrasterblock.cpp`
 
-Even Rouault will implement the changes described in this RFC for the
-GDAL 1.6.0 release.
+3. GDAL 드라이버에 새 API를 사용합니다. 이 단계는 점진적으로 수행할 수 있습니다. 몇몇 드라이버의 경우 CPL 할당으로부터 VSI 할당으로 전이해야 할 수도 있습니다. 다음은 후보 드라이버 목록입니다:
 
-Voting history
---------------
+   * Idrisi
+   * PNG
+   * GXF
+   * BSB
+   * VRT
+   * MEM
+   * JP2KAK
+   * RPFTOC
+   * AIRSAIR
+   * AIGRIB
+   * XPM
+   * USGDEM
+   * BMP
+   * GSG
+   * HFA
+   * AAIGRID
+   
+   (#2075 티켓에 있는 :file:`gdal_svn_trunk_use_vsi_safe_mul_in_frmts.patch` 를 참조하십시오.)
 
-+1 from all PSC members (FrankW, DanielM, HowardB, TamasS, AndreyK)
+이벤 루올이 GDAL/OGR 1.6.0버전 배포판을 위해 이 RFC에서 설명하는 변경 사항들을 구현할 것입니다.
+
+투표 이력
+---------
+
+프로젝트 운영 위원회의 모든 멤버가 +1 투표
+
+-  프랑크 바르메르담
+-  대니얼 모리셋
+-  하워드 버틀러
+-  세케레시 터마시
+-  안드레이 키셀레프
+
