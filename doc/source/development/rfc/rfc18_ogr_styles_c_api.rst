@@ -20,7 +20,7 @@ GDAL/OGR 1.4.x 이전 버전에서는 C API를 이용해서 스타일 정보를 
 구현 상세 사항
 --------------
 
--  다음 목록을 :file:`ogr_featurestyle.h` 로부터 :file:`ogr_core.h` 로 이동시킵니다:
+-  다음 열거형(enum)을 :file:`ogr_featurestyle.h` 로부터 :file:`ogr_core.h` 로 이동시킵니다:
 
 ::
 
@@ -78,7 +78,7 @@ GDAL/OGR 1.4.x 이전 버전에서는 C API를 이용해서 스타일 정보를 
        class OGRStyleSymbol : public OGRStyleTool
        class OGRStyleLabel : public OGRStyleTool
 
--  :file:`ogr_featurestyle.h` 파일이 :c:class:`OGRSTVectorParam` 목록 및 대응하는 :cpp:class:`OGRStyleVector` 클래스도 담고 있지만 이 클래스는 현재 사용되지 않기 때문에 향후 제거될 수도 있습니다. 따라서 C API에 :cpp:class:`OGRStyleVector` 클래스를 위한 지원을 구현하지 않을 것입니다. (또한 :c:class:`OGRSTVectorParam` 목록을 :file:`ogr_core.h` 로 이동시키지 않을 것입니다.)
+-  :file:`ogr_featurestyle.h` 파일이 :c:class:`OGRSTVectorParam` 열거형 및 대응하는 :cpp:class:`OGRStyleVector` 클래스도 담고 있지만 이 클래스는 현재 사용되지 않기 때문에 향후 제거될 수도 있습니다. 따라서 C API에 :cpp:class:`OGRStyleVector` 클래스를 위한 지원을 구현하지 않을 것입니다. (또한 :c:class:`OGRSTVectorParam` 열거형을 :file:`ogr_core.h` 로 이동시키지 않을 것입니다.)
 
 파이썬 및 기타 언어 바인딩
 --------------------------
