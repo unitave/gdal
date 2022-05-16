@@ -1,46 +1,35 @@
 .. _rfc-23:
 
 ================================================================================
-RFC 23.1: Unicode support in OGR
+RFC 23.1: OGR에서의 유니코드 지원
 ================================================================================
 
-Authors: Frank Warmerdam
+저자: 프랑크 바르메르담
 
-Contact: warmerdam@pobox.com
+연락처: warmerdam@pobox.com
 
-Status: Adopted (implemented)
+상태: 승인, 구현
 
-Summary
--------
+요약
+----
 
-This document proposes preliminary steps towards GDAL/OGR handling
-strings internally in UTF-8, and supporting conversion between different
-encodings.
+이 RFC는 GDAL/OGR가 문자열을 내부적으로 UTF-8 인코딩으로 처리하고 서로 다른 인코딩들 사이의 변환을 지원하도록 하기 위한 예비 단계를 제안합니다.
 
-Main concepts
--------------
+주요 개념
+---------
 
-GDAL should be modified in a way to support three following main ideas:
+다음 세 가지 주요 아이디어를 지원하는 방향으로 GDAL을 수정해야 합니다:
 
-1. C Functions will be provided to support a variety of encoding
-   conversions, including conversion between representations (ie. UTF-8
-   to UCS-16/wchar_t).
-2. Character encodings will be identified by iconv() style strings.
-3. OFTString/OFTStringList feature attributes in OGR will be treated as
-   being in UTF-8.
+1. 표현들 사이의 (예를 들면 UTF-8을 UCS-16/wchar_t로) 변환을 포함, 다양한 인코딩 변환을 지원하는 C 함수들을 제공할 것입니다.
+2. iconv() 스타일 문자열이 문자 인코딩을 식별할 것입니다.
+3. OGR의 OFTString/OFTStringList 피처 속성을 UTF-8 인코딩으로 취급할 것입니다.
 
-This RFC specifically does not attempt to address issues of using
-non-ascii filenames. It also does not attempt to make definitions about
-the encoding of other strings used in GDAL/OGR (such as field names,
-metadata, etc). These would presumably be addressed in a later RFC
-building on this one.
+이 RFC는 아스키가 아닌 파일명을 사용하는 문제점을 지적하려 시도하지 않습니다. GDAL/OGR에서 사용되는 (필드 이름, 메타데이터 등등 같은) 기타 문자열의 인코딩에 관해 정의하려 시도하지도 않습니다. 이런 문제점들은 아마 향후 이에 대한 RFC 작성 시 다루어질 것입니다.
 
 CPLRecode API
 -------------
 
-The following three C callable functions will be introduced for recoding
-strings, and for converting between wchar_t (wide character) and char
-(multi-byte) formats:
+문자열 재(再)코딩 및 wchar_t(확장 문자) 및 char(멀티바이트) 포맷들 간의 변환을 위한 다음 C 호출 가능 함수 3개를 도입할 것입니다:
 
 ::
 
@@ -54,136 +43,89 @@ strings, and for converting between wchar_t (wide character) and char
                               const char *pszSrcEncoding, 
                               const char *pszDstEncoding );
 
-In each case the returned string is zero terminated, as is the input
-string, and the returned string should be deallocated with CPLFree(). In
-case of error the returned string will be NULL, and the function will
-issue a CPLError(). The functions will be marked with CPL_DLL and
-considered part of the public GDAL/OGR API for use of applications as
-well as internal use.
+각 함수는 입력 문자열과 마찬가지로 0으로 종료되는 문자열을 반환하며 반환 문자열은 CPLFree() 함수로 할당 해제되어야 합니다. 오류가 발생하는 경우 반환 문자열은 NULL일 것이고, 해당 함수는 CPLError()를 발행할 것입니다. 이 함수들은 CPL_DLL로 표시되며, 내부 사용은 물론 응용 프로그램 사용에 대해서도 공개 GDAL/OGR API의 일부분으로 간주될 것입니다.
 
-Encoding Names
---------------
+인코딩 이름
+-----------
 
-It is proposed that the encoding names will be the same sorts of names
-used by iconv(). So stuff like "UTF-8", "LATIN5", "CP850" and
-"ISO_8859-1". It does not appear that these names for encodings are a
-1:1 match with C library locale names (like "en_CA.utf8" for instance)
-which may cause some issues.
+iconv() 함수가 사용하는 인코딩 이름과 동일한 종류의 인코딩 이름을 사용할 것을 제안합니다. 즉 "UTF-8", "LATIN5", "CP850" 및 "ISO_8859-1" 같은 이름들을 사용합니다. 이런 인코딩 이름들이 (예를 들면 "en_CA.utf8" 같은) C 라이브러리 로케일 이름과 1:1로 일치하지 않는 것으로 보이기 때문에 어떤 문제를 일으킬 수도 있습니다.
 
-Some particular names of interest:
+다음은 흥미있는 몇몇 특정 이름들입니다:
 
--  "": The current locale. Use this when converting from/to the users
-   locale.
--  "UTF-8": Unicode in multi-byte encoding. Most of the time this will
-   be our internal linga-franca.
--  "POSIX": I think this is roughly ASCII (perhaps with some extended
-   characters?).
--  "UCS-2": Two byte unicode. This is a wide character format and only
-   suitable for use with the wchar_t methods.
+-  "":
+   현재 로케일입니다. 사용자 로케일 간의 변환 시 이 비어 있는 문자열을 사용하십시오.
+-  "UTF-8":
+   멀티바이트 인코딩으로 된 유니코드입니다. 대부분의 경우 UTF-8이 내부 `링구아 프랑카 <https://ko.wikipedia.org/wiki/%EB%A7%81%EA%B5%AC%EC%95%84_%ED%94%84%EB%9E%91%EC%B9%B4>`_ 가 될 것입니다.
+-  "POSIX":
+   대략 (아마도 몇몇 확장 문자를 가진?) 아스키로 간주됩니다.
+-  "UCS-2":
+   2바이트 유니코드입니다. 확장 문자(wide character) 포맷으로 wchar_t 메소드를 사용하는 경우에만 적합합니다.
 
-On some systems you can use "iconv --list" to get a list of supported
-encodings.
+몇몇 시스템 상에서 ``iconv --list`` 명령을 사용하면 지원 인코딩 목록을 볼 수 있습니다.
 
 iconv()
 -------
 
-It is proposed to implement the CPLRecode() method using the iconv() and
-related functions when available.
+사용할 수 있는 경우 iconv() 및 관련 함수들을 사용하는 CPLRecode() 메소드를 구현할 것을 제안합니다.
 
-There is an excellent implementation of this API as GNU libiconv(),
-which is used by the C libraries on Linux. Also some operating systems
-provide the iconv() API as part of the C library (all unix?); however,
-the system iconv() often has a restricted set of conversions supported
-so it may be desirable to use libiconv in preference to the system
-iconv() even when it is available.
+이 API는 리눅스 상에서 C 라이브러리가 사용하는 GNU libiconv()로 멋지게 구현되어 있습니다. 또한 몇몇 운영 체제는 (모두 유닉스 계열?) iconv() API를 C 라이브러리의 일부분으로 제공합니다. 하지만 시스템 iconv()는 지원하는 변환 종류가 제한되어 있기 때문에, 사용할 수 있는 경우 시스템 iconv()보다 libiconv()를 사용하는 편이 더 좋습니다.
 
-If iconv() is not available, a stub implementation of the recode
-services will be provided which:
+iconv()를 사용할 수 없는 경우, 재(再)코딩 토막(stub) 구현을 제공할 것인데 이는:
 
--  implements UCS-2 / UTF-8 interconversion using either mbtowc/wctomb,
-   or an implementation derived from
-   `http://www.cl.cam.ac.uk/~mgk25/unicode.html <http://www.cl.cam.ac.uk/~mgk25/unicode.html>`__.
--  Implements recoding from "" to and from "UTF-8" by doing nothing, but
-   issuing a warning on the first use if the current locale does not
-   appear to be the "C" locale.
--  Implements recoding from "ASCII" to "UTF-8" as a null operation.
--  Implements recoding from "UTF-8" to "ASCII" by turning all non-ASCII
-   multi-byte characters to '?'.
+-  mbtowc/wctomb, 또는 `유닉스/리눅스의 UTF-8 및 유니코드 FAQ <https://www.cl.cam.ac.uk/~mgk25/unicode.html>`_ 로부터 파생된 구현을 사용하는 UCS-2/UTF-8 상호 변환을 구현합니다.
+-  아무것도 하지 않고 "" 와 "UTF-8" 간에 재(再)코딩을 하지만 현재 로케일이 "C" 로케일로 보이지 않는 경우 첫 번째 사용 시 경고를 발하도록 구현합니다.
+-  "ASCII"로부터 "UTF-8"로의 재(再)코딩을 NULL 작업으로 구현합니다.
+-  "UTF-8"로부터 "ASCII"로의 재(再)코딩을 아스키가 아닌 모든 멀티바이트 문자를 '?'로 바꿔서 구현합니다.
 
-This hopefully gives us a weak operational status when built without
-iconv(), but full operation when it is available.
+이렇게 구현하면 iconv() 없이 빌드하는 경우 불충분한 작업 상태를 가지게 되지만, iconv()를 사용할 수 있는 경우 완전한 작업을 할 수 있을 것입니다.
 
-The --with-iconv= option will be added to configure. The argument can be
-the path to a libiconv installation or the special value 'system'
-indicating that the system lib should be used. Alternatively,
---without-iconv can be used to avoid using iconv.
+환경설정에 ``--with-iconv=`` 옵션을 추가할 것입니다. 이 옵션의 인자는 libiconv 설치본을 가리키는 경로 또는 시스템 라이브러리를 사용해야 한다는 사실을 나타내는 특수값 'system' 가운데 하나일 수 있습니다. 아니면 ``--without-iconv`` 를 이용해서 iconv()를 사용하지 않을 수도 있습니다.
 
-OFTString/OFTStringList Fields
-------------------------------
+OFTString/OFTStringList 필드
+----------------------------
 
-It is declared that OGR string attribute values will be in UTF-8. This
-means that OGR drivers are responsible for translating format specific
-representations to UTF-8 when reading, and back to the format specific
-representation when writing. In many cases (of simple ASCII text) this
-requires no transformation.
+OGR 문자열 속성값은 UTF-8 인코딩일 것이라고 선언되었습니다. 즉 OGR 드라이버가 읽기 작업 시 포맷 특화 표현을 UTF-8로 변환하고 쓰기 작업 시 다시 포맷 특화 표현으로 변환해야 한다는 뜻입니다. 대부분의 경우 이 (대부분의 경우 단순 아스키 텍스트의) 작업에는 변환이 필요하지 않습니다.
 
-This implies that the arguments to methods like OGRFeature::SetField(
-int i, const char \*) should be UTF-8, and that GetFieldAsString() will
-return UTF-8.
+다시 말해 ``OGRFeature::SetField(int i, const char \*)`` 같은 메소드의 인자들이 UTF-8이어야 하고, :cpp:func:`GetFieldAsString` 이 UTF-8 인코딩 문자열을 반환할 것이라는 의미입니다.
 
-The same issues apply to OFTStringList lists of strings. Each string
-will be assumed to be UTF-8.
+OFTStringList 문자열 목록도 동일한 문제점을 가지고 있습니다. 각 문자열을 UTF-8 인코딩으로 가정할 것입니다.
 
-OLCStringsAsUTF8 Capability Flag
---------------------------------
+OLCStringsAsUTF8 케이퍼빌리티 플래그
+------------------------------------
 
-Some drivers (ie. CSV) can effectively not know the encoding of their
-inputs. Therefore, it isn't always practical to turn things into UTF-8
-in a guaranteed way. So, the new layer level capability called
-"StringsAsUTF8" represented with the macro "OLCStringsAsUTF8" will be
-testable at the layer level with TestCapability(). Drivers which are
-certain to return string attributes as UTF-8 should return TRUE, while
-drivers that do not know the encoding they return should return FALSE.
-Any driver which knows it's encoding should convert to UTF-8.
+(CSV 드라이버 같은) 일부 드라이버는 입력물의 인코딩을 사실상 모를 수 있습니다. 따라서 보장된 방법으로 문자열을 UTF-8 인코딩으로 변환하는 것이 항상 실용적이지는 않습니다. 즉 "OLCStringsAsUTF8" 매크로를 가진 "StringsAsUTF8"이라는 새로운 레이어 수준 케이퍼빌리티를 레이어 수준에서 :cpp:func:`TestCapability` 로 테스트할 수 있을 것입니다. 문자열 속성을 UTF-8로 반환하는 것이 확실한 드라이버는 TRUE를 반환해야 하는 반면, 자신이 반환하는 인코딩을 모르는 드라이버는 FALSE를 반환해야 합니다. 자신의 인코딩을 알고 있는 모든 드라이버는 UTF-8로 변환해야 합니다.
 
-OGR Driver Updates
-------------------
+OGR 드라이버 업데이트
+---------------------
 
-The following OGR drivers could benefit immediately from recoding to
-UTF-8 support in one way or another.
+어떤 방식으로든 UTF-8 지원으로 재(再)코딩하면, 다음 OGR 드라이버들은 즉시 혜택을 볼 수 있습니다.
 
--  ODBC (add support for wchar_t / NVARSHAR fields)
+-  ODBC (wchar_t / NVARSHAR 필드에 대한 지원 추가)
 -  Shapefile
--  GML (I'm not sure how the XML encoding values all map to our concept
-   of encoding)
--  Postgres
+-  GML (XML 인코딩 값 모두를 어떻게 이 RFC의 인코딩 개념과 매핑할지 확실하지 않습니다)
+-  PostgreSQL
 
-I'm sure a number of the other drivers, particularly the RDBMS drivers,
-could benefit from an update.
+다른 여러 드라이버들도, 특히 RDBMS 드라이버를 업데이트하면 혜택을 볼 수 있을 것입니다.
 
-Implementation
---------------
+구현
+----
 
-Frank Warmerdam will implement the core iconv() capabilities, the
-CPLRecode() additions and update the ODBC driver. Other OGR drivers
-would be updated as time and demand mandates to conform to the
-definitions in this RFC by interested developers.
+프랑크 바르메르담이 핵심 iconv() 케이퍼빌리티 및 CPLRecode() 추가 사항을 구현하고 ODBC 드라이버를 업데이트할 것입니다. 관심 있는 개발자들이 다른 OGR 드라이버들이 이 RFC의 정의를 준수하도록 요구할 때 다른 OGR 드라이버들을 업데이트할 것입니다.
 
-The core work will be completed for GDAL/OGR 1.6.0 release.
+GDAL/OGR 1.6.0버전 배포판에 맞춰 핵심 작업을 완료할 것입니다.
 
-References
-----------
+참조
+----
 
--  `The Unicode Standard, Version 4.0 - Implementation
-   Guidelines <http://unicode.org/versions/Unicode4.0.0/ch05.pdf>`__ -
-   Chapter 5 (PDF)
--  FAQ on how to use Unicode in software:
-   `http://www.cl.cam.ac.uk/~mgk25/unicode.html <http://www.cl.cam.ac.uk/~mgk25/unicode.html>`__
--  FLTK implementation of string conversion functions:
-   `http://svn.easysw.com/public/fltk/fltk/trunk/src/utf.c <http://svn.easysw.com/public/fltk/fltk/trunk/src/utf.c>`__
--  `http://www.easysw.com/~mike/fltk/doc-2.0/html/utf_8h.html <http://www.easysw.com/~mike/fltk/doc-2.0/html/utf_8h.html>`__
--  Ticket #1494 : UTF-8 encoding for GML output.
+-  `유니코드 표준 4.0버전 - 구현 지침 <http://unicode.org/versions/Unicode4.0.0/ch05.pdf>`_ 제5장 (PDF)
+-  소프트웨어에서 유니코드를 사용하는 방법에 대한 FAQ:
+   `http://www.cl.cam.ac.uk/~mgk25/unicode.html <http://www.cl.cam.ac.uk/~mgk25/unicode.html>`_
+-  문자열 변환 함수의 FLTK 구현:
+   `http://svn.easysw.com/public/fltk/fltk/trunk/src/utf.c <http://svn.easysw.com/public/fltk/fltk/trunk/src/utf.c>`_
+-  `http://www.easysw.com/~mike/fltk/doc-2.0/html/utf_8h.html <http://www.easysw.com/~mike/fltk/doc-2.0/html/utf_8h.html>`_
+-  #1494 티켓: GML 산출물에 대한 UTF-8 인코딩
 -  Libiconv:
-   `http://www.gnu.org/software/libiconv/ <http://www.gnu.org/software/libiconv/>`__
--  ICU (another i18n library):
-   `http://www.icu-project.org/ <http://www.icu-project.org/>`__
+   `http://www.gnu.org/software/libiconv/ <http://www.gnu.org/software/libiconv/>`_
+-  ICU (또다른 i18n 라이브러리):
+   `http://www.icu-project.org/ <http://www.icu-project.org/>`_
+

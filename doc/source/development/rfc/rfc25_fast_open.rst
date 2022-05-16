@@ -1,117 +1,78 @@
 .. _rfc-25:
 
 ================================================================================
-RFC 25: Fast Open (withdrawn)
+RFC 25: 빨리 열기 (철회)
 ================================================================================
 
-Authors: Frank Warmerdam
+저자: 프랑크 바르메르담
 
-Contact: warmerdam@pobox.com
+연락처: warmerdam@pobox.com
 
-Status: Withdrawn (in favor of some specific improvements in #2957 - rfc
-may be renewed at a later date)
+상태: 철회 (#2957 티켓에서 향상된 몇몇 특정 사항을 위해서 철회되었습니다 -- 이 RFC는 향후 재개될 수도 있습니다)
 
-Summary
--------
+요약
+----
 
-This document proposes a mechanism for application to indicate a desire
-for the fastest possible open of a raster file, even if a variety of
-metadata and supporting information may not be available. It is
-primarily intended to optimize applications working with catalogs
-containing many raster files.
+이 문서는 다양한 메타데이터 및 지원 정보를 사용할 수 없을 수도 있는 경우에도 래스터 파일을 가능한 한 가장 빨리 열 수 있게 해주는 응용 프로그램 용 메커니즘을 제안합니다. 이 제안의 목적은 주로 수많은 래스터 파일을 담고 있는 카탈로그를 작업하는 응용 프로그램을 최적화하는 것입니다.
 
-Implementation
---------------
+구현
+----
 
-An application can request fast open mode by setting the
-"GDAL_FAST_OPEN" configuration option to "YES" - the default is assumed
-to be no. When this option is set to YES selected drivers can operate
-differently so as to optimize the speed of opening a dataset.
-Acceleration options include:
+"GDAL_FAST_OPEN" 환경설정 옵션을 YES로 설정해서 응용 프로그램이 빨리 열기 모드를 요청할 수 있도록 합니다. 이 환경설정 옵션의 기본값은 NO로 가정합니다. 이 옵션을 YES로 설정하는 경우 데이터셋 열기 속도를 최적화할 수 있도록 선택한 드라이버가 다르게 동작할 수 있습니다. 가속 옵션은 다음을 포함합니다:
 
--  Skip establishing a coordinate system - particularly helpful if it
-   avoids an EPSG lookup.
--  Skip probing for supporting .aux.xml, world files and other files.
+-  좌표계 확정 건너뛰기 -- 드라이버가 EPSG 검색을 하지 않을 수 있다면 특히 유용합니다.
+-  지원하는 .aux.xml 파일, 월드 파일 및 기타 관련 파일 찾기를 건너뜁니다.
 
-It is anticipated that fast open mode will be used primarily for fast
-raster display from datasets where required metadata is already provided
-by a catalog of some sort. Because of this it is essential that in fast
-open mode datasets will still accurately return a list of bands, their
-datatypes, and their overviews.
+주로 필수 메타데이터가 일종의 카탈로그로 이미 제공된 경우 데이터셋으로부터 래스터를 빠르게 출력하기 위해 이 빨리 열기 모드를 사용할 것으로 예상됩니다. 때문에 빨리 열기 모드에서도 데이터셋이 밴드 목록, 밴드 데이터 유형, 그리고 오버뷰를 정확하게 반환하는 것이 필수입니다.
 
-Thread Local Configuration Options
-----------------------------------
+스레드 로컬 환경설정 옵션
+-------------------------
 
-In multi-threaded applications use of a process-global configuration
-option - turned on just while calling GDALOpen() - may not be
-appropriate. In particular, it is hard to ensure that this configuration
-option won't affect GDALOpen()'s in other threads of the same process.
-This problem also affects other configuration options that. To resolve
-this problem it is intended to add a new function to set "thread local"
-configuration options.
+멀티스레딩 응용 프로그램에서 :cpp:func:`GDALOpen` 을 호출하는 동안에만 활성화되는 전체 프로세스 수준 환경설정 옵션을 사용하는 것은 적절하지 않습니다. 특히 이런 환경설정 옵션이 동일 프로세스의 다른 스레드에 있는 :cpp:func:`GDALOpen` 메소드에 영향을 미치지 않을 것이라고 보장하기가 어렵기 때문입니다. 이 문제는 다른 환경설정 옵션에도 영향을 미칩니다. 이 문제를 해결하려면 "스레드 로컬" 환경설정 옵션을 설정하는 새 함수를 추가해야 합니다:
 
 ::
 
-     void CPLSetThreadLocalConfigOption( const char *pszKey, const char *pszValue );
+   void CPLSetThreadLocalConfigOption( const char *pszKey, const char *pszValue );
 
-This mechanism will be implemented using normal thread local data
-handling (CPLGetTLS(), etc).
+일반 스레드 로컬 데이터 처리(CPLGetTLS() 등등)를 이용해서 이 메커니즘을 활성화할 것입니다.
 
-It should be noted that CPLSetConfigOption() will continue to set
-configuration options to apply to all threads. CPLGetConfigOption() will
-first search thread local values, then process global values and then
-the environment.
+:cpp:func:`CPLSetConfigOption` 이 모든 스레드에 적용될 환경설정 옵션을 계속 설정할 것이라는 사실을 기억해야 합니다. 먼저 :cpp:func:`CPLGetConfigOption` 이 스레드 로컬 값을 검색하고, 그 다음 전체 프로세스 수준 값을 검색하고, 그 다음 환경 수준의 값을 검색할 것입니다.
 
-Work Plan
+작업 계획
 ---------
 
-For the time being the following changes will be made to drivers to
-accelerate them in fast open mode.
+빨리 열기 모드에서 드라이버를 가속시키기 위해 당분간 다음과 같은 변경 사항을 적용할 것입니다:
 
--  GDALOpenInfo will avoid loading a list of all files in a directory.
--  GTIFF driver will avoid collecting a coordinate systems.
+-  :cpp:class:`GDALOpenInfo` 가 디렉터리에 있는 모든 파일의 목록을 불러오지 않을 것입니다.
+-  GTIFF 드라이버가 좌표계를 수집하지 않을 것입니다.
 
-This work will be completed in trunk in time for the GDAL 1.7.0 release
-by Frank Warmerdam.
+프랑크 바르메르담이 GDAL 1.7.0버전 배포 시기에 맞춰 트렁크에 이 작업을 완료할 것입니다.
 
-Utilization
------------
+활용
+----
 
-There is no plan to do this immediately, but the GDAL VRT driver would
-be a good candidate to utilize this mechanism.
+당장 구현할 계획은 없지만, GDAL VRT 드라이버가 이 메커니즘을 활용하기에 적합한 후보일 것입니다.
 
-In theory, it would also be desirable for MapServer to utilize this mode
-for tileindexed rasters - except that MapServer depends on the
-geotransform coming from the underlying raster file rather than coming
-from the raster catalog. MapServer also assumes the color table, and
-nodata values will be available.
+이론적으로, MapServer도 타일 색인화 래스터에 대해 이 모드를 활용하면 좋을 것입니다 -- MapServer가 래스터 카탈로그가 아닌 기저 래스터 파일로부터 나온 지리변환(geotransform)에 의존한다는 점을 제외하면 말입니다. MapServer는 또한 색상표와 NODATA 값을 사용할 수 있을 것이라고 가정합니다.
 
-ArcGIS is also expected to utilize this feature.
+ArcGIS도 이 기능을 활용할 것으로 예상됩니다.
 
-Backward Compatibility Issues
------------------------------
+하위 호환성 문제점
+------------------
 
-There are no known backward compatibility issues. However, there may be
-forward compatibility issues if we are not precise and consistent from
-version to version on what supporting info is allowed to be omitted in
-fast open mode.
+알려진 하위 호환성 문제점은 없습니다. 하지만 빨리 열기 모드에서 어떤 지원 정보를 생략할 수 있는지에 대해 버전별로 정확하게 일관성을 지키지 않는 경우 상위 호환성 문제점이 발생할 수도 있습니다.
 
-Testing
--------
-
--  Tests would be added to the appropriate driver test scripts to test
-   fast open mode - confirming that expected information is discarded,
-   and kept.
-
-Issues
+테스트
 ------
 
--  Potentially desirable things like ignoring .aux.xml files are not
-   possible as they are also sometimes the source of overview
-   information.
--  Potentially discarding all metadata including color tables, nodata
-   values, and geotransforms makes this mode not useful for applications
-   like MapServer that don't keep such information in their catalog.
--  This RFC does not discuss a way of accelerating GDALOpen() by
-   skipping unnecessary drivers, though that would also potentially help
-   quite a bit.
+-  적절한 드라이버 테스트 스크립트에 빨리 열기 모드를 테스트하기 위해 예상한 정보를 폐기하고 유지하는지를 확인하는 스크립트를 추가할 것입니다.
+
+문제점
+------
+
+-  .aux.xml 파일이 오버뷰 정보의 소스인 경우도 있기 때문에 잠재적으로 바람직한 .aux.xml 파일 무시가 불가능합니다.
+
+-  색상표, NODATA 값 및 지리변형을 포함하는 모든 메타데이터를 잠재적으로 폐기하기 때문에, 이 모드는 카탈로그에 이런 정보를 저장하지 않는 MapServer 같은 응용 프로그램에는 유용하지 않습니다.
+
+-  이 RFC는 필요하지 않은 드라이버를 건너뛰어서 :cpp:func:`GDALOpen` 을 가속시키는 방법을 논의하지 않습니다. 다만 그렇게 한다면 꽤 도움이 될 수도 있습니다.
+
