@@ -1,30 +1,20 @@
 .. _rfc-28:
 
 ================================================================================
-RFC 28: OGR SQL Generalized Expressions
+RFC 28: OGR SQL 일반화 표현식
 ================================================================================
 
-Author: Frank Warmerdam
+저자: 프랑크 바르메르담
 
-Contact: warmerdam@pobox.com
+연락처: warmerdam@pobox.com
 
-Status: Adopted, Implemented
+상태: 승인, 구현
 
-Summary
--------
+요약
+----
 
-The OGR SQL evaluation engine currently does not allow general purpose
-functions to be applied to columns in SELECT statements. Some special
-purpose functions are supported (ie. CAST, COUNT, AVG, MAX, MIN, and
-SUM), but not as part of more general expressions and generally in very
-constrained arrangements. It is the intent of this work item to extend
-the OGR SQL engine to support fairly general purpose expression
-evaluation in the output field list of OGR SQL SELECT statements and to
-implement a few preliminary processing functions in a fashion compatible
-with standard SQL. As well, expressions used in WHERE clauses will be
-generalized to support evaluation of non-logical operations, such as
-math and functions. For example, after implementation it is intended the
-following could be evaluated.
+OGR SQL 평가 엔진은 현재 SELECT 문에서 열에 일반 목적 함수를 적용하지 못 합니다. 몇몇 특수 목적 함수들을 (예: CAST, COUNT, AVG, MAX, MIN, 및 SUM) 지원하지만 좀 더 일반적인 표현식들의 일부로서 지원하는 것은 아니며, 일반적으로 매우 제한된 준비가 필요합니다. 이 작업 항목의 목적은 OGR SQL SELECT 문의 산출 필드 목록에서 일반 목적 표현식 평가를 상당하게 지원할 수 있도록 OGR SQL 엔진을 확장하고, 표준 SQL과 호환되는 방식으로 몇몇 예비 처리 함수를 구현하는 것입니다. 마찬가지로 WHERE 절에 사용되는 표현식도 산술 및 함수 같은 비논리 연산의 평가를 지원하도록 일반화할 것입니다.
+예를 들면 구현 이후 다음과 같은 SQL 문도 평가할 수 있게 하려 합니다:
 
 ::
 
@@ -32,43 +22,31 @@ following could be evaluated.
    SELECT id, "Regional Road" AS roadtypename FROM roads where roadtype=3
    SELECT (subtotal+salestax) as totalcost from invoice_info where 100 <= (subtotal+salestax)
 
-A prototype implementation is now available for review in
-`http://svn.osgeo.org/gdal/sandbox/warmerdam/gdal-rfc28 <http://svn.osgeo.org/gdal/sandbox/warmerdam/gdal-rfc28>`__
+`https://svn.osgeo.org/gdal/sandbox/warmerdam/gdal-rfc28/ <https://svn.osgeo.org/gdal/sandbox/warmerdam/gdal-rfc28/>`_ 에서 구현 프로토타입을 살펴볼 수 있습니다.
 
-Technical Approach
-------------------
+기술적 접근
+-----------
 
-Currently logical expressions take a very constrained format with the
-base elements having to be of the form * <constant_value>*. As part of
-the generalization non-logical expressions will be supported and the
-left and right side of operators will be equally treated. The current
-OGR SQL parser is ad hoc and cannot be practically extended to this
-generalized form of expression. So at this point we will move to a
-yacc/bison based parser grammar for expressions.
+현재 논리 표현식은 기반 요소가 <constant_value> 형식이어야 하는 매우 제한된 서식을 입력받습니다. 일반화 작업의 일환으로, 비논리 표현식을 지원하고 연산자의 왼쪽 및 오른쪽도 동일하게 취급할 것입니다. 현재 OGR SQL 파서(parser)는 그때그때 즉석에서(ad hoc) 처리하기 때문에 이렇게 일반화된 형식의 표현식으로 실질적으로 확장할 수 없습니다. 그렇기 때문에 이 지점에서 표현식을 위한 Yacc/bison 기반 파서 문법으로 넘어갈 것입니다.
 
-Since it is not really practical to continue to use the existing ad hoc
-SELECT parsing when parts of the SELECT statement are expressions, the
-yacc/bison based parser will also be used to parse the whole SELECT
-statement.
+SELECT 문의 일부가 표현식인 경우 기존 즉석(ad hoc) SELECT 파싱을 계속해서 사용하는 것은 별로 실용적이지 않기 때문에, SELECT 문 전체를 파싱하는 데 Yacc/bison 기반 파서도 사용할 것입니다.
 
-The current expression node will be generalized to have 0-n children
-(for arguments to functions), and to treat field references and constant
-values as distinct leaf nodes rather than embedding this information in
-a node defining an operation.
+현재 표현식 노드가 (함수의 인자에 대해) 0개에서 n개 사이의(0-n) 하위 노드를 가지도록, 그리고 필드 참조 및 상수값을 연산을 정의하는 노드에 내장하는 대신 개별 리프(leaf) 노드로 취급하도록 일반화할 것입니다.
 
-It should be noted that as a side effect WHERE clauses will also support
-more general expressions - not just logical comparisons. For instance:
+이에 따른 부작용으로 WHERE 절도 논리 비교뿐만이 아니라 좀 더 일반적인 표현식을 지원할 것입니다. 다음은 그 예시입니다:
 
-SELECT \* WHERE (subtotal+salestax) > 100.0
+::
 
-New Functions
--------------
+   SELECT * WHERE (subtotal+salestax) > 100.0
 
--  Math: +, -, \*, /, \*\*
--  String: CONCAT, SUBSTR
+새 함수
+-------
 
-SELECT Rules
-------------
+-  산술: ``+``, ``-``, ``*``, ``/``, ``**``
+-  문자열: CONCAT, SUBSTR
+
+SELECT 규칙
+-----------
 
 ::
 
@@ -116,19 +94,15 @@ SELECT Rules
 
    <field_ref>  ::= [<table_ref>.]field_name
 
-Special Notes
--------------
+특별 메모
+---------
 
-The existing CAST, and column summary functions COUNT, AVG, MIN, MAX and
-SUM will be treated more-or-less as functions but constrained to be root
-operations on column definitions and treated as a special case (still).
+기존 CAST, 그리고 열 요약 함수 COUNT, AVG, MIN, MAX 및 SUM을 거의 함수처럼 취급할 것이지만, 열 정의에 대한 루트 연산(root operation)으로 제한되며 (여전히) 특수 사례로 취급할 것입니다.
 
-Compatibility Implications
---------------------------
+호환성에 미치는 영향
+--------------------
 
-Some identifiers that were previously allowed as unquoted field names
-will likely now have to be quoted as they will be keywords in the
-grammar. The keyword set is:
+예전에는 따옴표 없는 필드 이름으로 사용할 수 있었던 몇몇 식별자를 이제는 따옴표로 감싸야 할 것입니다. 이 문법에서 식별자가 키워드일 것이기 때문입니다. 이 키워드 집합은 다음과 같습니다:
 
 -  IN
 -  LIKE
@@ -148,38 +122,28 @@ grammar. The keyword set is:
 -  DISTINCT
 -  CAST
 
-The previous implementation was written in C and avoided all use of
-GDAL/OGR services so that it could be easily used in other contexts,
-including as the where clause evaluator of the OGDI library. After this
-update the code is C++, and direct use of CPL error and other services
-has been directly incorporated. This means the implementation used by
-GDAL and OGDI will diverge.
+예전 구현은 C로 작성되었고, OGDI 라이브러리의 WHERE 절 평가자를 포함하는 다른 맥락에서 쉽게 사용할 수 있도록 GDAL/OGR 서비스를 하나도 사용하지 않았습니다. 이 업데이트 이후 C++로 코드를 작성하고, CPL 오류 및 다른 서비스들을 직접 사용하도록 통합합니다. 즉 GDAL과 OGDI가 사용하는 구현이 갈라질 것이라는 의미입니다.
 
-For the most part the change results in some OGR SQL statements to work
-that would previously have generated an error.
+대부분의 경우 예전에는 오류를 발생시켰을 몇몇 OGR SQL 선언문이 작동하게 될 것입니다.
 
-Performance Implications
-------------------------
+성능에 미치는 영향
+------------------
 
-I am hopeful that the evaluation speed will not be significantly
-different for simple selections, but each output field will need to be
-evaluated as an expression (with presumably one value-from-field node).
+단순 SELECT 문의 경우 평가 속도가 크게 달라지지 않을 것으로 기대하지만, 각 산출 필드를 (아마도 필드로부터 나온 값을 가진 노드가 하나 있는) 표현식으로 평가해야 할 것입니다.
 
-Implementation Plan
--------------------
+구현 계획
+---------
 
-Frank Warmerdam will implement, test and document for the GDAL/OGR 1.8
-release.
+프랑크 바르메르담이 GDAL/OGR 1.8버전 배포판에 맞춰 이 RFC를 구현, 테스트 및 문서화할 것입니다.
 
-Testing
--------
+테스트
+------
 
-All existing OGR SQL test suite tests should pass. A new
-autotest/ogr/ogr_sql_rfc28.py script will be introduced to test new
-functionality.
+기존 OGR SQL 테스트 스위트의 모든 테스트를 통과할 것입니다.
+새 기능을 테스트하기 위해 새로운 :file:`autotest/ogr/ogr_sql_rfc28.py` 스크립트를 도입할 것입니다.
 
-Documentation
--------------
+문서화
+------
 
-The :ref:`OGR SQL <ogr_sql_dialect>` document will be
-extended to describe the new capabilities.
+새 기능을 설명하기 위해 :ref:`OGR SQL <ogr_sql_dialect>` 문서를 업데이트할 것입니다.
+

@@ -1,33 +1,27 @@
 .. _rfc-30:
 
 ================================================================================
-RFC 30: Unicode Filenames
+RFC 30: 유니코드 파일명
 ================================================================================
 
-Authors: Frank Warmerdam
+저자: 프랑크 바르메르담
 
-Contact: warmerdam@pobox.com
+연락처: warmerdam@pobox.com
 
-Status: Adopted
+상태: 승인
 
-Summary
--------
+요약
+----
 
-This document describes steps to generally handle filenames as UTF-8
-strings in GDAL/OGR. In brief it will be assumed that filenames passed
-into and returned by GDAL/OGR interfaces are UTF-8. On some operating
-systems, notably Windows, this will require use of "wide character"
-interfaces in the low level VSI*L API.
+이 문서는 GDAL/OGR에서 파일명을 일반적으로 UTF-8 문자열로 처리하는 단계를 설명합니다. 간단하게 요약하자면 GDAL/OGR 인터페이스에 전송되어 오는 그리고 GDAL/OGR 인터페이스가 반환하는 파일명을 UTF-8 인코딩으로 가정할 것입니다. 일부 운영 체제, 특히 윈도우 상에서는 저수준 VSI*L API에서 "확장 문자(wide character)" 인터페이스를 사용해야 할 것입니다.
 
-Key Interfaces
---------------
+주요 인터페이스
+---------------
 
 VSI*L API
 ~~~~~~~~~
 
-All filenames in the VSI*L API will be treated as UTF-8, which means the
-cpl_vsil_win32.cpp implementation will need substantial updates to use
-wide character interfaces.
+VSI*L API에서는 모든 파일명을 UTF-8 인코딩으로 취급할 것입니다. 즉 확장 문자 인터페이스를 사용하기 위해 :file:`cpl_vsil_win32.cpp` 의 상당 부분을 업데이트해야 할 것이라는 뜻입니다.
 
 -  VSIFOpenL()
 -  VSIFStatL()
@@ -37,23 +31,18 @@ wide character interfaces.
 -  VSIUnlink()
 -  VSIRename()
 
-Old (small file) VSI API
-~~~~~~~~~~~~~~~~~~~~~~~~
+예전 (저용량 파일) VSI API
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The old VSIFOpen() function will be adapted to use \_wfopen() on windows
-instead of fopen() so that utf-8 filenames will be supported.
+윈도우 상에서 UTF-8 파일명을 지원하기 위해 fopen() 대신 \_wfopen()을 사용하도록 예전 VSIFOpen() 함수를 조정할 것입니다.
 
 -  VSIFOpen()
 -  VSIStat()
 
-Filename Parsing
-~~~~~~~~~~~~~~~~
+파일명 파싱
+~~~~~~~~~~~
 
-Because the path/extension delimiter characters '.', '', '/' and ':'
-will never appear in the non-ascii portion of utf-8 strings we can
-safely leave the existing path parsing functions working as they do now.
-They do not need to be aware of the real character boundaries for exotic
-characters in utf-8 paths. The following will be left unchanged.
+경로/확장자 구분자(delimiter) 문자 '.', '', '/' 및 ':'은 UTF-8 문자열의 아스키가 아닌 부분에 절대 나타나지 않기 때문에 기존 경로 파싱 함수가 현재 그대로 작동하도록 놔두어도 안전합니다. 기존 경로 파싱 함수가 UTF-8 경로에 있는 특수 문자에 대한 실제 문자 범위를 알아야 할 필요가 없습니다. 다음 함수들은 변경하지 않을 것입니다.
 
 -  CPLGetPath()
 -  CPLGetDirname()
@@ -62,53 +51,36 @@ characters in utf-8 paths. The following will be left unchanged.
 -  CPLGetExtension()
 -  CPLResetExtension()
 
-Other
-~~~~~
+기타
+~~~~
 
 -  CPLStat()
 -  CPLGetCurrentDir()
 -  GDALDataset::GetFileList()
 
-These will all also need to treat filenames as utf-8.
+이 함수들도 파일명을 UTF-8 인코딩으로 취급해야 할 것입니다.
 
-Windows
--------
+윈도우
+------
 
-Currently Windows's cpl_vsil_win32.cpp module uses CreateFile() with
-ascii filenames. It needs to be converted to use CreateFileW() and other
-wide character functions for stat(), rename, mkdir, etc. Prototype
-implementation already developed (r20620).
+현재 윈도우의 :file:`cpl_vsil_win32.cpp` 모듈은 :cpp:func:`CreateFile` 을 아스키 파일명으로 사용합니다. stat(), rename, mkdir 등등에 대해 CreateFileW() 및 다른 확장 문자 함수를 사용하도록 변환해야 합니다. 이미 구현 프로토타입을 개발(r20620)했습니다.
 
 .. _linux--unix--macos-x:
 
-Linux / Unix / MacOS X
-----------------------
+리눅스 / 유닉스 / macOS
+-----------------------
 
-On modern linux, unix and MacOS operating systems the fopen(), stat(),
-readdir() functions already support UTF-8 strings. It is not currently
-anticipated that any work will be needed on Linux/Unix/MacOS X though
-there is some question about this. It is considered permissible under
-the definition of this RFC for old, and substandard operating systems
-(WinCE?) to support only ASCII, not UTF-8 filenames.
+현대 리눅스, 유닉스 및 macOS 운영 체제 상에서 fopen(), stat(), readdir() 함수는 이미 UTF-8 문자열을 지원합니다. 현재 리눅스/유닉스/macOS 상에 어떤 작업도 필요하지 않을 것이라고 예상되긴 하지만 확실한 것은 아닙니다. 이 RFC의 정의에 따라 구식 운영 체제 및 하위 표준 운영 체제(WinCE?)의 경우 UTF-8 파일명이 아닌 아스키 파일명만 지원하도록 허용해도 된다고 간주합니다.
 
-Metadata
---------
+메타데이터
+----------
 
-There are a variety of places where general text may contain filenames.
-One obvious case is the subdataset filenames returned from the
-SUBDATASET domain. Previously these were just exposed as plain text and
-interpretation of the character set was undefined. As part of this RFC
-we state that such filenames should be considered to be in utf-8 format.
+다양한 위치에서 일반 텍스트가 파일명을 담고 있을 수도 있습니다. 한 가지 당연한 예를 들자면 SUBDATASET 도메인으로부터 반환되는 하위 데이터셋 파일명입니다. 예전에는 이 파일명을 그냥 평문 텍스트로 노출시켰고, 문자 집합의 해석을 정의하지 않았습니다. 이 RFC의 일환으로 이런 파일명도 UTF-8 포맷으로 되어 있다고 간주해야 한다고 선언합니다.
 
-Python Changes
---------------
+파이썬 변경 사항
+----------------
 
-I observe with Python 2.6 that functions like gdal.Open() do not accept
-unicode strings, but they do accept utf-8 string objects. One possible
-solution is to update the bindings in selective places to identify
-unicode strings passed in, and transform them to utf-8 strings.
-
-eg.
+파이썬 2.6버전의 경우 gdal.Open() 같은 함수들이 유니코드 문자열은 받아들이지 않지만, UTF-8 문자열 객체는 받아들이는 것으로 관찰됩니다. 가능한 해결책 한 가지는 몇몇 선별적인 위치에서 바인딩을 업데이트해서 전송되어 오는 유니코드 문자열을 식별할 수 있게 하고, 유니코드 문자열을 UTF-8 문자열로 변환하게 하는 것입니다. 다음은 그 예시입니다:
 
 ::
 
@@ -116,8 +88,7 @@ eg.
    if type(filename) == type(u'a'):
        filename = filename.encode('utf-8')
 
-I'm not sure what the easiest way is to accomplish this in the bindings.
-The key entries are:
+바인딩에서 이를 가장 쉽게 달성할 수 있는 방법은 불확실합니다. 주요 항목들은 다음과 같습니다:
 
 -  gdal.Open()
 -  ogr.Open()
@@ -126,83 +97,53 @@ The key entries are:
 -  gdal.FindFile()
 -  gdal.Unlink()
 
-Similarly all interfaces (ie. gdal.ReadDir()) that return filenames will
-hereafter return unicode objects rather than string objects.
+마찬가지로 파일명을 반환하는 (gdal.ReadDir() 같은) 모든 인터페이스는 이후 문자열 객체가 아니라 유니코드 객체를 반환할 것입니다.
 
-Also note that in Python 3.x strings are always unicode.
+Python 3.x 이후 버전의 문자열은 항상 유니코드라는 사실도 기억하십시오.
 
-C# Changes
-----------
-
-Tamas notes that in C# we normally convert the unicode C# strings into C
-string with the PtrToStringAnsi marshaller. Presumably we will need to
-use a utf-8 converter for all interface strings considered to be
-filenames. I would note this should also apploy to OGR string attribute
-values which are also intended to be treated as utf-8.
-
-(It is unclear who will take care of this aspect since the primary
-author (FrankW) is not C#-binding-competent.
-
-Perl Changes
+C# 변경 사항
 ------------
 
-The general rule in Perl is that all strings should be decoded before
-giving them to Perl and encoded when they are output. In practice things
-usually just work. To be sure, I (Ari) have added an explicit decode
-from utf8 to FindFile and ReadDir (#20800).
+C#에서 일반적으로 유니코드 C# 문자열을 PtrToStringAnsi 감독자를 가진 C 문자열로 변환한다고 세케레시 터마시가 언급했습니다. 아마도 파일명으로 간주되는 모든 인터페이스 문자열에 대해 UTF-8 변환기를 사용해야 할 것입니다. 마찬가지로 UTF-8 인코딩으로 취급하도록 의도된 OGR 문자열 속성값에도 이를 적용해야 할 것입니다.
 
-Java Changes
-------------
+(원저자(프랑크 바르메르담)가 C# 바인딩 전문이 아니기 때문에, 누가 이런 측면을 처리할 것인지는 불명확합니다.)
 
-No changes are needed for Java. Java strings are unicode, and they are
-already converted to utf-8 in the java swig bindings. That is, the java
-bindings already assumed passing and receiving utf-8 strings to/from
-GDAL/OGR.
-
-Commandline Issues
+펄(Perl) 변경 사항
 ------------------
 
-On windows argv[] as passed into main() will not generally be able to
-represent exotic filenames that can't be represented in the locale
-charset. It is possible to fetch the commandline and parse it as wide
-characters using GetCommandLineW() and CommandLinetoArgvW() to capture
-ucs-16 filenames (easily converted to utf-8); however, this interferes
-with the use of setargv.obj to expand wildcards on windows.
+펄에서의 일반 규칙은 펄에 전송하기 전에 모든 문자열을 디코딩하고 문자열을 산출할 때 인코딩해야 한다는 것입니다. 실제 상황에서는 보통 그냥 작동합니다. 확실하게 하기 위해, 아리 욜마(Ari Jolma)가 UTF-8로부터 FindFile 및 ReadDir로 명확하게 디코딩하도록 추가(#20800)했습니다.
 
-I have not been able to come up with a good solution, so for now I am
-not intending to make any changes to the GDAL/OGR commandline utilities
-to allow passing exotic filenames. So this RFC is mainly aimed at
-ensuring that other applications using GDAL/OGR can utilize exotic
-filenames.
-
-File Formats
-------------
-
-The proposed implementation really only addresses file format drivers
-that use VSIFOpenL(), VSIFOpen() and related functions. Some drivers
-dependent on external libraries (ie. netcdf) do not have a way to hook
-the file IO API and may not support utf-8 filenames. It might be nice to
-be able to distinguish these.
-
-At the very least any driver marked with GDAL_DCAP_VIRTUALIO as "YES"
-will support UTF-8. Perhaps this opportunity ought to be used to more
-uniformly apply this driver metadata (done).
-
-Test Suite
-----------
-
-We will need to introduce some test suite tests with multibyte utf-8
-filenames. In support of that aspects of the VSI*L API - particularly
-the rename, mkdir, rmdir, functions and VSIFOpenL itself have been
-exposed in python.
-
-Documentation
--------------
-
-Appropriate API entry points will be documented as taking and return
-UTF-8 strings.
-
-Implementation
+자바 변경 사항
 --------------
 
-Implementation is underway and being tracked in ticket #3766.
+자바의 경우 변경할 필요가 없습니다. 자바 문자열은 유니코드이며 자바 SWIG 바인딩에서 이미 UTF-8로 변환됩니다. 다시 말해 자바 바인딩은 이미 GDAL/OGR에서 UTF-8 문자열을 전송하고 전송받는다고 가정한다는 의미입니다.
+
+명령줄 문제점
+-------------
+
+윈도우 상에서는 일반적으로 main()으로 전송되는 'argv[]'가 로케일 문자 집합에서 표현할 수 없는 특수 문자를 사용하는 파일명을 표현할 수 없을 것입니다. (UTF-8로 쉽게 변환되는) UCS-16 파일명을 수집할 수 있는 GetCommandLineW() 및 CommandLinetoArgvW() 함수를 이용해서 명령줄을 가져와 확장 문자로 파싱할 수도 있습니다. 하지만 이렇게 하면 윈도우 상에서 :file:`setargv.obj` 를 사용해서 와일드카드 문자를 확장하는 것을 방해하게 됩니다.
+
+아직도 훌륭한 해결책이 떠오르지 않기 때문에, 지금으로서는 GDAL/OGR 명령줄 유틸리티가 특수 문자를 사용하는 파일명을 전송할 수 있게 해주는 어떤 변경 사항도 적용할 예정이 없습니다. 따라서 이 RFC의 주된 목적은 GDAL/OGR를 사용하는 다른 응용 프로그램들이 특수 문자를 사용하는 파일명을 활용할 수 있도록 보장하는 것입니다.
+
+파일 포맷
+---------
+
+이 제안을 구현하는 것은 실제로는 VSIFOpenL(), VSIFOpen() 및 관련 함수들을 사용하는 파일 포맷 드라이버들에만 국한됩니다. 외부 라이브러리에 의존하는 (예: NetCDF) 일부 드라이버들은 파일 I/O API와 연결할 수 있는 방법이 없기 때문에 UTF-8 파일명을 지원하지 못 할 수도 있습니다. 이런 드라이버들을 구별할 수 있다면 좋을 것 같습니다.
+
+적어도 GDAL_DCAP_VIRTUALIO 메타데이터 항목이 YES로 설정된 모든 드라이버는 UTF-8을 지원할 것입니다. 아마도 이번 기회에 이 드라이버 메타데이터를 좀 더 균등하게 적용해야 할 것입니다. (완료)
+
+테스트 스위트
+-------------
+
+테스트 스위트에 멀티바이트 UTF-8 파일명을 테스트할 수 있는 몇몇 테스트를 추가해야 할 것입니다. VSI*L API의 이런 측면을 지원하기 위해, 파이썬에 특히 rename, mkdir, rmdir 함수들 및 VSIFOpenL 자체를 노출시켰습니다.
+
+문서화
+------
+
+적절한 API 진입점(entry point)을 UTF-8 문자열을 가져오고 반환하는 것으로 문서화할 것입니다.
+
+구현
+----
+
+현재 구현 중이며 #3766 티켓에서 추적하고 있습니다.
+
