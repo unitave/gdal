@@ -1,61 +1,36 @@
 .. _rfc-27:
 
 ================================================================================
-RFC 27: Improved Supporting Data File Options
+RFC 27: 지원 데이터 파일 옵션 개선
 ================================================================================
 
-Author: Frank Warmerdam
+저자: 프랑크 바르메르담
 
-Contact: warmerdam@pobox.com
+연락처: warmerdam@pobox.com
 
-Status: Development
+상태: 개발 중
 
-Summary
--------
+요약
+----
 
-Currently GDAL depends on a variety of supporting data files from the
-`gdal data <http://svn.osgeo.org/gdal/trunk/gdal/data>`__ directory. The
-largest part of these are coordinate system dictionaries from EPSG and
-other sources. It also includes S-57 dictionaries, seed DGN and DXF
-files, and project logos. Uncompressed it currently comes to roughly
-1.8MB and it is expected to grow as additional dictionaries are added
-(for PCI and IAU coordinate systems for instance).
+GDAL은 현재 `gdal/data <https://svn.osgeo.org/gdal/trunk/gdal/data/>`_ 디렉터리에 있는 다양한 지원 데이터 파일에 의존하고 있습니다. 이 가운데 가장 큰 부분은 EPSG 및 다른 소스들의 좌표계 딕셔너리들입니다. S-57 딕셔너리, DGN 및 DXF 시드(seed) 파일, 그리고 프로젝트 로고도 포함하고 있습니다. 현재 압축하지 않은 지원 데이터 파일들의 용량은 약 1.8MB이며 (예를 들면 PCI 및 IAU 좌표계 같은) 추가적인 딕셔너리들이 추가되면서 더 커질 것으로 예상됩니다.
 
-It has also been a frequent problem at run time to find the data files
-when they are installed in unusual locations.
+이런 데이터 파일이 기본 위치가 아닌 위치에 설치된 경우 런타임 시 데이터 파일들을 찾지 못 하는 경우가 자주 발생하고 있습니다.
 
-This RFC aims to overhaul support file handling with two new major
-features.
+이 RFC의 목적은 다음 2개의 주요 기능으로 지원 파일 처리를 개선하는 것입니다.
 
-1. The ability to read from compressed data files to reduce the disk
-   footprint of GDAL.
-2. The ability to embed the data files with the GDAL DLL or shared
-   library to remove the "finding" problem.
+1. GDAL의 디스크 풋프린트(disk footprint)를 줄이기 위해 압축 데이터 파일로부터 읽어오는 기능
+2. "찾기" 문제를 해결하기 위해 GDAL DLL 또는 공유 라이브러리에 데이터 파일을 내장하는 기능
 
-CPL CSV Access via VSI*L
-------------------------
+VSI*L을 통한 CPL CSV 접근
+-------------------------
 
-The large majority of the support data file access is via the CPL CSV
-API (gdal/port/cpl_csv.cpp). Finding support data files is done via
-CPLFindFile(). It turns out these functions are still using the old VSI
-API which does not support special handlers (like /vsizip/), or in at
-least one case direct fopen() calls. So the first stage of this RFC is
-to convert these functions to all use the VSI*L API. A
-`patch <http://trac.osgeo.org/gdal/attachment/wiki/rfc27_supportdata/rfc27_csv_vsil.patch>`__
-has been prepared that demonstrates the bulk of the required changes.
-With this patch it is possible to access files from a GDAL_DATA setting
-like /vsizip//home/warmerda/gdal/data/gdaldata.zip.
+대다수 지원 데이터 파일 접근은 CPL CSV API(:file:`gdal/port/cpl_csv.cpp`)를 통해 이루어집니다. 지원 데이터 파일 찾기는 :cpp:func:`CPLFindFile` 메소드를 통해 수행됩니다. 이런 함수들은 아직도 (:file:`/vsizip/` 같은) 특수 핸들러를 지원하지 않는 예전 VSI API를, 또는 최소한 하나의 사례에서는 fopen() 호출을 직접 사용하고 있는 것으로 밝혀졌습니다.
+따라서 이 RFC의 첫 번째 단계는 이런 함수들이 모두 VSI*L API를 사용하도록 변환하는것입니다. 필요한 변경 사항들을 대부분 보여주는 `패치 <https://trac.osgeo.org/gdal/attachment/wiki/rfc27_supportdata/rfc27_csv_vsil.patch>`_ 를 준비했습니다. 이 패치를 사용하면 :file:`/vsizip//home/warmerda/gdal/data/gdaldata.zip` 같은 GDAL_DATA 설정으로부터 파일에 접근할 수 있습니다.
 
-Note that we are explicitly changing the contract about the nature of
-the FILE\* passed to functions like CSVReadParseLine() (real FILE\* vs.
-VSI\ *L style FILE*). It is possible, though relatively unlikely that
-application code, or private driver implementations will be using the SV
-functions and will need to be changed. This change should be noted in
-the GDAL 1.8 release notes.
+:cpp:func:`CSVReadParseLine` 같은 함수에 전송되는 ``FILE*`` 의 특성에 관한 계약을 (실제 ``FILE*`` 대 VSI*L 스타일 ``FILE*``) 명시적으로 변경한다는 사실을 기억하십시오. 응용 프로그램 코드 또는 상용 드라이버 구현이 SV 함수를 이용하도록 변경해야 할 수도 있지만, 그럴 가능성은 상대적으로 낮습니다. GDAL 1.8버전 배포판 메모에 이 변경 사항을 작성해야 할 것입니다.
 
-It is also unclear if there will be bad interactions with the cpl_csv
-implementation embedded in libgeotiff in some situations, such as when
-using libgeotiff as an external library. Some review will be needed.
+어떤 상황에서, 예를 들어 libgeotiff를 외부 라이브러리로 사용하는 경우 libgeotiff에 내장된 :file:`cpl_csv` 구현과 잘못된 상호 작용이 일어알 것인지 여부도 불분명합니다. 코드 리뷰가 필요할 것입니다.
 
-Another point to investigate is what the performance impact of doing all
-the file finding through the VSI*L API will be.
+또한 VSI*L API를 통해 모든 파일을 찾는 것이 성능에 어떤 영향을 미칠 것인지에 대해서 조사해야 합니다.
+
