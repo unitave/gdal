@@ -1,176 +1,109 @@
 .. _rfc-34:
 
 ================================================================================
-RFC 34: License Policy Enforcement
+RFC 34: 사용 허가 정책 시행
 ================================================================================
 
-Authors: Frank Warmerdam
+저자: 프랑크 바르메르담
 
-Contact: warmerdam@pobox.com
+연락처: warmerdam@pobox.com
 
-Status: Development
+상태: 개발 중
 
-Summary
--------
+요약
+----
 
-This document proposes the addition of a new mechanisms so that
-applications and end users can define a license policy, and so that GDAL
-can help avoid license conflicts between proprietary and reciprocally
-licensed applications and format drivers.
+이 RFC는 응용 프로그램 및 최종 사용자가 사용 허가(license) 정책을 정의할 수 있는, 그리고 GDAL이 독점 및 상호 사용 허가 응용 프로그램과 포맷 드라이버 간의 사용 허가 충돌을 방지하는 데 도움을 줄 수 있는 새 메커니즘을 추가할 것을 제안합니다.
 
-Definitions
------------
+정의
+----
 
-Reciprocal FOSS License: A open source software license, such as the
-GPL, that requires all other software components linked into the same
-executable and distributed beyond the creator to also be offered under
-open source terms.
+-  상호 자유-오픈 소스 소프트웨어(Free and open-source software; F/OSS 또는 FOSS) 사용 허가:
+   동일한 실행 파일에 연결되고 생성자를 넘어 배포되는 다른 모든 소프트웨어의 구성 요소들도 오픈 소스 조건에 따라 제공되어야 한다는 GNU 일반 공중 사용 허가서(GNU General Public License; GNU GPL 또는 GPL) 같은 오픈 소스 소프트웨어 사용 허가를 말합니다.
 
-Non-Reciprocal FOSS License: A open source software license, such as
-MIT, BSD or LGPL, that does not place any requirements on other linked
-components in the same executable at distribution time.
+-  비상호 FOSS 사용 허가:
+   배포 시 동일한 실행 파일에 연결된 다른 구성 요소들에 대해 어떤 요구도 하지 않는 MIT, BSD(Berkeley Software Distribution) 또는 GNU 약소 일반 공중 사용 허가서(GNU Lesser General Public License; LGPL) 같은 오픈 소스 소프트웨어 사용 허가를 말합니다.
 
-Proprietary License: Software provided under terms that do not adhere to
-the requirements of the open source definition, such as libraries from
-Oracle (OCI), Lizardtech (MrSID) and Erdas (ECW). While often offered
-for zero cost, these components are incompatible with reciprocal FOSS
-licenses and may place a variety of other restrictions on the
-distributor or end user.
+-  독점(proprietary) 사용 허가:
+   오라클(OCI), 리자드테크(MrSID) 및 Erdas(ECW)의 라이브러리들처럼 오픈 소스 정의의 요구 사항들을 준수하지 않는 조건에 따라 제공되는 소프트웨어 사용 허가를 말합니다. 무료로 제공되는 경우가 많지만, 이런 구성 요소들은 상호 FOSS 사용 허가와 호환되지 않으며 배포자 또는 최종 사용자에게 여러 가지 기타 제한들을 가할 수도 있습니다.
 
-Rationale
+근거
+----
+
+독점 및 오픈 소스 응용 프로그램이 GDAL/OGR를 사용할 수 있게 해주고 오픈 소스 포맷 드라이버와 함께 독점 포맷 드라이버를 포함할 수 있게 해주는 비상호 MIT 오픈 소스 사용 허가에 따라 GDAL/OGR를 배포합니다. 하지만 그렇다 하더라도 (QGIS 및 GRASS 같은) GDAL을 사용하는 상호 사용 허가된 응용 프로그램을 (MrSID, ECW 또는 오라클 드라이버 같은) 독점 사용 허가된 드라이버와 함께 배포하는 것은 사용 허가를 위반하는 것입니다. 마찬가지로, 독점 응용 프로그램을 GDAL GRASS 드라이버 또는 PDF 드라이버 같은 상호 사용 허가된 드라이버와 함께 배포하는 것 또한 사용 허가를 위반하는 것입니다.
+
+이 RFC 그리고 이 RFC가 시행하는 개성 사항들의 목적은 사용자, 응용 프로그램 및 드라이버가 의도하지 않은 사용 허가 위반을 방지할 수 있도록 사용 허가 정책을 쉽게 설정하고 준수할 수 있게 해주는 것입니다. `OSGeo4W <https://trac.osgeo.org/osgeo4w/>`_ 처럼 소프트웨어를 광범위하게 배포하는 분야에서 특히 도움이 될 수 있습니다.
+
+접근 방법
 ---------
 
-GDAL/OGR is distributed under the Non-Reciprocal MIT open source
-license which facilitates it's use by proprietary and open source
-applications, and facilitates the inclusion of proprietary format
-drivers along side the open source format drivers. However, it is still
-a license violation to distribute reciprocally licensed applications
-(like QGIS and GRASS) which use GDAL with proprietary licensed drivers
-(such as the MrSID, ECW or Oracle drivers). Likewise, it is a license
-violation to distribute proprietary applications with reciprocally
-licensed drivers such as the GDAL GRASS driver, or the PDF driver.
+드라이버가 자신의 사용 허가 카테고리를 선언하고, 응용 프로그램 및 최종 사용자가 어떤 종류의 드라이버를 함께 사용할 수 있는지를 선언하게 하는 일반 접근법을 제안합니다. 의도하지 않은 사용 허가 위반을 방지하기 위해 :cpp:class:`GDALDriverManager` 및 :cpp:class:`OGRDriverRegistrar` 클래스에 이 정보를 적용할 것입니다.
 
-This RFC, and the improvements it promotes are intended to facilitate
-users, applications and drivers setting and following license policies
-to avoid unintentional license violations. One area this can be
-particularly helpful is broad software distributions like
-`OSGeo4W <http://osgeo4w.osgeo.org>`__.
-
-Approach
+드라이버
 --------
 
-The general approach proposed is that drivers will declare their license
-category, and applications or end users will declare a policy for what
-sorts of drivers may be used in combination with them. The
-GDALDriverManager and OGRDriverRegistrar classes will apply this
-information to avoid unintentional license violations.
+드라이버는 자신의 "LICENSE_POLICY" (DMD_LICENSE_POLICY) 메타데이터 항목을 통해 다음 세 가지 드라이버 특화 사용 허가 정책 가운데 하나를 선언할 것입니다:
 
-Drivers
--------
+-  "RECIPROCAL":
+   GPL 같은 상호 FOSS 사용 허가에 따라 이 드라이버를 사용할 수 있고, 독점 드라이버 또는 응용 프로그램과 함께 사용해서는 안 됩니다.
 
-Drivers will declare one of these three driver specific licensing
-policies via the "LICENSE_POLICY" (DMD_LICENSE_POLICY) metadata item on
-the driver:
+-  "NONRECIPROCAL":
+   MIT 또는 LGPL 같은 비상호 FOSS 사용 허가에 따라 이 드라이버를 사용할 수 있습니다. 어떤 사용 허가 정책도 선언하지 않을 경우의 기본값으로, 외부 의존성을 가지지 않은 GDAL의 일부분으로서 제공되는 드라이버의 네이티브 정책입니다.
 
--  "RECIPROCAL": the driver is available under a reciprocal FOSS license
-   such as the GPL, and should not be mixed with proprietary drivers or
-   applications.
--  "NONRECIPROCAL": the driver is available under a non-reciprocal FOSS
-   license such as MIT, or LGPL. This is the default if no licensing
-   policy is declared and is the natural policy of drivers provided as
-   part of GDAL without outside dependencies.
--  "PROPRIETARY": the driver, usually due to use of proprietary
-   libraries, has some licensing restrictions which make it ineligible
-   for distribution with reciprocally licensed software. This would
-   include MrSID, ECW, and Oracle related drivers.
+-  "PROPRIETARY":
+   이 드라이버는 일반적으로 독점 라이브러리를 사용한다는 이유 때문에 상호 사용 허가된 소프트웨어와 함께 배포할 수 없도록 하는 사용 허가 제한 사항을 몇 가지 가지고 있습니다. MrSID, ECW 및 오라클 관련 드라이버가 포함됩니다.
 
-Application License Policy
---------------------------
-
-Applications are encouraged to set one of the following licensing
-policies reflective of the applications nature. The policy should be set
-as the value of the GDAL_APPLICATION_LICENSE_POLICY configuration
-variable, typically via a call to GDALSetConfigOption() *before* the
-call to GDALAllRegister() or OGRRegisterAll().
-
--  "RECIPROCAL": the application is licensed under a reciprocal license
-   such as the GPL, and no proprietary drivers should be loaded.
--  "PROPRIETARY": the application has some licensing restrictions which
-   make it ineligible for distribution with reciprocally licensed
-   software. Care will be taken to avoid loading reciprocally licensed
-   drivers, such as the GRASS and PDF drivers.
--  "DEFAULT": the application does not apply any licensing restrictions.
-   This is typical of non-GPL open source applications such as
-   MapServer, and will be the default policy if nothing is declared.
-
-User License Policy
--------------------
-
-The restrictions on mixing proprietary and reciprocally licensed
-software generally applies at the point of distribution. In particular,
-it is not intended to prevent the end user from assembling a variety of
-components for their own use as they see fit, for their own use. To that
-end it is important to provide a mechanism for the end user to
-deliberately override the restrictions on mixing reciprocally licensed,
-and proprietary components. This is accomplished via the
-GDAL_LICENSE_POLICY configuration variable which might typically be set
-via the environment or via the --config commandline switch to most GDAL
-applications. It may have the following values:
-
--  "USE_ALL": do not discard any drivers based on licensing
-   restrictions.
--  "PREFER_PROPRIETARY": If there is a conflict between proprietary and
-   reciprocally licensed drivers, use the proprietary ones.
--  "PREFER_RECIPROCAL": If there is a conflict between proprietary and
-   reciprocally licensed drivers, use the reciprocally licensed ones.
-
-In addition to setting this via config variables, there will also be a
-configure / nmake.opt declaration to alter the default
-GDAL_LICENSE_POLICY. Thus a local build could be configured to USE_ALL
-at build time instead of having to set environment variables or
-commandline switches. This would not be suitable for software that will
-be redistributed.
-
-Policy Logic
-------------
-
-1. If the user selected a GDAL_LICENSE_POLICY of "USE_ALL" then no
-   drivers are unloaded on the basis of licensing.
-2. If the user selected a GDAL_LICENSE_POLICY of "PREFER_PROPRIETARY" or
-   "PREFER_RECIPROCAL" then ignore the GDAL_APPLICATION_LICENSE_POLICY.
-3. if the application select a GDAL_APPLICATION_LICENSE_POLICY of
-   "PROPRIETARY" or "RECIPROCAL" then use that.
-4. In the absence of a user or application level policy, default to a
-   policy of "PREFER_PROPRIETARY".
-
-The policy will be applied in the GDALDriverManager::AutoSkipDrivers()
-method and in the newly introduced OGRSFDriverManager::AutoSkipDrivers()
-method. The AutoSkipDrivers() method is already used to unload drivers
-based on GDAL_SKIP (and soon OGR_SKIP) and is generally called after the
-preliminary registration of drivers.
-
-Strict Link Level Compliance
+응용 프로그램 사용 허가 정책
 ----------------------------
 
-The GPL, the leading reciprocal license, talks about distribution of GPL
-applications with proprietary code linked in. In a literal sense we may
-still have running processes with mixed code linked in. Instead of
-addressing the problem at the point of linking we are disabling use of
-incompatible components at runtime. There is some small risk that this
-may be considered not to be compliant with the requirements of the GPL
-license in a literal sense, though it is clear we are making every
-reasonable effort to enforce it in a practical sense.
+응용 프로그램에 해당 응용 프로그램의 본질을 반영하는 다음 사용 허가 정책들 가운데 하나를 설정하도록 권장합니다. 일반적으로 GDALAllRegister() 또는 OGRRegisterAll() 메소드를 호출하기 '전에' GDALSetConfigOption() 메소드를 호출해서 GDAL_APPLICATION_LICENSE_POLICY 환경설정 옵션의 값으로 정책을 설정해야 합니다.
 
-In the situation of standalone software packages being distributed with
-GDAL, it may still be best for those preparing the package to completely
-omit any components incompatible with the license of the applications.
-This RFC is primarily intended to support complex mixed-component
-distributions such as OSGeo4W.
+-  "RECIPROCAL":
+   GPL 같은 상호 사용 허가에 따라 이 응용 프로그램을 사용할 수 있고, 독점 드라이버를 불러와서는 안 됩니다.
 
-Drivers Affected
-----------------
+-  "PROPRIETARY":
+   이 응용 프로그램은 상호 사용 허가된 소프트웨어와 함께 배포할 수 없도록 하는 사용 허가 제한 사항을 몇 가지 가지고 있습니다. GRASS 및 PDF 드라이버 같은 상호 사용 허가된 드라이버를 불러오지 않도록 주의해야 합니다.
 
-I believe the following drivers should be marked as "PROPRIETARY":
+-  "DEFAULT":
+   이 응용 프로그램에 어떤 사용 허가 정책도 적용하지 않습니다. MapServer처럼 GPL을 따르지 않는 오픈 소스 응용 프로그램들의 전형적인 사례로, 아무것도 선언하지 않는 경우 기본 정책이 될 것입니다.
+
+사용자 사용 허가 정책
+---------------------
+
+배포 시점에 일반적으로 독점 소프트웨어와 상호 사용 허가된 소프트웨어를 함께 사용하지 못 하도록 제한합니다. 이런 제한 조건은 최종 사용자가 자신의 필요에 따라 자신에게 알맞도록 사용하기 위해 다양한 구성 요소들을 조합하는 일을 특별히 막으려는 의도가 아닙니다. 이를 위해, 최종 사용자에게 상호 사용 허가된 구성 요소와 독점 구성 요소를 함께 사용하는 것을 제한하는 조건을 의도적으로 무시할 수 있는 메커니즘을 제공하는 일이 중요합니다. 환경 변수를 통해 또는 일반적으로 대부분의 GDAL 응용 프로그램에 사용할 수 있는 ``--config`` 명령줄 스위치를 통해 설정할 수 있는 GDAL_LICENSE_POLICY 환경설정 옵션을 사용하면 됩니다. 이 옵션은 다음 값들 가운데 하나로 설정할 수 있습니다:
+
+-  "USE_ALL":
+   어떤 드라이버도 사용 허가 제한 조건을 기반으로 폐기하지 않습니다.
+
+-  "PREFER_PROPRIETARY":
+   독점 드라이버와 상호 사용 허가된 드라이버 사이에 충돌이 있을 경우 독점 드라이버를 사용합니다.
+
+-  "PREFER_RECIPROCAL":
+   독점 드라이버와 상호 사용 허가된 드라이버 사이에 충돌이 있을 경우 상호 사용 허가된 드라이버를 사용합니다.
+
+이 환경설정 옵션으로 사용자 사용 허가 정책을 설정할 수 있을 뿐만 아니라, 환경설정 또는 :file:`nmake.opt` 선언으로도 기본 GDAL_LICENSE_POLICY 환경설정 옵션을 변경할 수 있을 것입니다. 따라서 환경 변수 또는 명령줄 스위치를 설정할 필요없이 빌드 시 로컬 빌드를 "USE_ALL"로 환경설정할 수 있습니다. 다만 재배포되는 소프트웨어의 경우 이 방법을 사용할 수 없을 것입니다.
+
+정책 논리
+---------
+
+1. 사용자가 GDAL_LICENSE_POLICY 환경설정 옵션을 "USE_ALL"로 선택하는 경우 어떤 드라이버도 사용 허가를 기반으로 불러오기 해제하지 않습니다.
+2. 사용자가 GDAL_LICENSE_POLICY 옵션을 "PREFER_PROPRIETARY" 또는 "PREFER_RECIPROCAL"로 선택하는 경우 GDAL_APPLICATION_LICENSE_POLICY 환경설정 옵션을 무시합니다.
+3. 응용 프로그램이 GDAL_APPLICATION_LICENSE_POLICY 옵션을 "PROPRIETARY" 또는 "RECIPROCAL"으로 선택하는 경우 해당 정책을 사용합니다.
+4. 사용자 또는 응용 프로그램 수준에서 정책을 선택하지 않는 경우, 기본값은 "PREFER_PROPRIETARY" 정책입니다.
+
+:cpp:func:`GDALDriverManager::AutoSkipDrivers` 메소드 및 새로 도입된 :cpp:func:`OGRSFDriverManager::AutoSkipDrivers` 메소드에 사용 허가 정책을 적용할 것입니다. 이미 GDAL_SKIP(그리고 곧 OGR_SKIP)을 기반으로 드라이버를 불러오기 해제하기 위해 :cpp:func:`AutoSkipDrivers` 메소드를 사용하고 있는데, 일반적으로 드라이버 예비 등록 이후 호출합니다.
+
+엄격한 연결 수준 준수
+---------------------
+
+선두적인 상호 사용 허가인 GPL은 연결된 독점 코드를 가진 GPL 응용 프로그램에 관해 설명합니다. 문자 그대로, 연결된 혼합 코드를 가진 프로세스가 아직 실행 중일 수도 있습니다. 연결 시점에서 문제를 지적하는 대신, 런타임 시 호환되지 않는 구성 요소의 사용을 비활성화시킵니다. 이때 GPL 사용 허가의 요구 사항을 문자 그대로 준수하지 않는다고 간주될 수도 있는 위험이 조금 존재하지만, 실질적인 의미에서 GPL을 시행하기 위해 모든 합리적인 노력을 기울이고 있다는 사실 또한 분명합니다.
+
+독립형 소프트웨어 패키지를 GDAL과 함께 배포하는 상황이라면, 그래도 패키지 준비 도중 응용 프로그램의 사용 허가와 호환되지 않는 모든 구성 요소들을 완벽하게 생략하는 것이 최선일 수도 있습니다. 이 RFC의 주요 목적은 OSGeo4W 같은 복잡한 혼합 구성 요소 배포를 지원하는 것입니다.
+
+영향을 받는 드라이버
+--------------------
+
+다음 드라이버들을 "PROPRIETARY"로 표시해야 할 것으로 보입니다:
 
 -  ECW
 -  JP2ECW
@@ -184,52 +117,42 @@ I believe the following drivers should be marked as "PROPRIETARY":
 -  OCI
 -  FileGDB
 -  FME
--  ArcSDE (raster and vector)
+-  ArcSDE (래스터 및 벡터)
 
-I believe the following drivers should be marked as "RECIPROCAL":
+다음 드라이버들은 "RECIPROCAL"으로 표시해야 할 것으로 보입니다:
 
--  grass (raster and vector)
+-  GRASS (래스터 및 벡터)
 -  EPSILON
--  MySQL (depending on active license terms!)
+-  MySQL (활성 사용 허가 조건에 따라 다릅니다!)
 -  PDF
 
-Unresolved:
+판단 보류:
 
--  The OGR SOSI driver should probably be marked as proprietary
-   currently as it relies on linking with binary objects with unknown
-   licencing terms, even if apparently the ultimate goal seems to open
-   source them.
--  I'm a bit confused by :ref:`raster.msg`.
-   Seems that it relies on third party stuff with both proprietary and
-   GPL code.
--  I am unsure about the ODBC based drivers. I suppose PGEO and
-   MSSQLSPATIAL drivers ought to be marked proprietary too? Might it
-   depend on the actual license terms of the odbc library?
+-  OGR SOSI 드라이버가 알 수 없는 사용 허가 조건을 가진 바이너리 객체와의 연결에 의존하기 때문에, OGR SOSI 드라이버의 궁극적인 목표가 분명히 오픈 소스임에도 불구하고 아마도 현재로서는 독점으로 표시해야 할 것입니다.
+-  :ref:`raster.msg` 의 경우 판단할 수 없습니다. 이 드라이버는 독점 사용 허가 코드와 GPL 사용 허가 코드를 둘 다 가지고 있는 제3자 소프트웨어에 의존하고 있는 것으로 보입니다.
+-  ODBC 기반 드라이버에 대해서도 판단할 수 없습니다. PGEO 및 MSSQLSPATIAL 드라이버를 당연히 독점 드라이버로 표시해야 할까요? ODBC 라이브러리의 실제 사용 허가 조건에 따라 달라질 가능성이 있을까요?
 
-Please let me know of other drivers needing marking.
+표시해야 할 다른 드라이버가 있다면 알려주십시오.
 
-SWIG Bindings
+SWIG 바인딩
+-----------
+
+몇몇 (모든?) SWIG 바인딩은 바인딩을 불러오는 시점에 :cpp:func:`GDALAllRegister` 그리고/또는 :cpp:func:`OGRRegisterAll` 메소드를 자동적으로 호출하기 때문에, 스크립트에 드라이버를 등록하기 전에 응용 프로그램 수준 GDAL_LICENSE_POLICY 환경설정 옵션을 설정하기 어렵습니다.
+이 문제점을 수정하려면, SWIG을 통해 :cpp:func:`AutoSkipDrivers` 메소드를 노출시켜 스크립트가 정책을 설정한 다음 시행 중인 정책에 따라 드라이버를 "정리"할 수 있도록 해야 할 것입니다.
+
+테스트 스위트
 -------------
 
-Some (all?) swig bindings automatically call GDALAllRegister() and/or
-OGRRegisterAll() at the point the bindings are loaded making it hard to
-set the application level GDAL_LICENSE_POLICY in a script before the
-registration takes place. To address that I believe we should expose the
-AutoSkipDrivers() methods via SWIG so that scripts can set the policy
-and then "clean" the drivers based on the policy in force.
+테스트 방법은?
 
-Test Suite
-----------
+문서화
+------
 
-How to test?
+문서화 방법은?
 
-Documentation
--------------
+구현
+----
 
-How to document?
+프랑크 바르메르담이 트렁크에 핵심을 구현할 것입니다.
+드라이버 유지/관리자들은 특정 드라이버들의 메타데이터를 업데이트해야 할 수도 있습니다
 
-Implementation
---------------
-
-Frank Warmerdam will do the core implementation in trunk. Driver
-maintainers may need to update the metadata for particular drivers.

@@ -1,135 +1,77 @@
 .. _rfc-33:
 
 ================================================================================
-RFC 33: GTiff - Fixing PixelIsPoint Interpretation
+RFC 33: GTiff - PixelIsPoint 해석 수정
 ================================================================================
 
-Authors: Frank Warmerdam
+저자: 프랑크 바르메르담
 
-Contact: warmerdam@pobox.com
+연락처: warmerdam@pobox.com
 
-Status: Adopted
+상태: 승인
 
-Summary
--------
+요약
+----
 
-This document proposes changes in the GDAL GTiff (GeoTIFF) driver's
-interpretation of PixelIsPoint when constructing the geotransform and
-interpreting control points. An RFC is used due to the fundamental role
-of GeoTIFF in GDAL and the GDAL user community and the risk for
-significant backward compatibility problems with this adjustment.
+이 문서는 GDAL GTiff(GeoTIFF) 드라이버가 지리변환(geotransform)을 구성하고 기준점(control point)을 해석할 때 GTiff 드라이버의 PixelIsPoint 해석을 변경할 것을 제안합니다. GeoTIFF가 GDAL 및 GDAL 사용자 커뮤니티에서 차지하는 핵심적인 역할 및 이 조정 때문에 발생할 수 있는 중요한 하위 호환성 문제의 위험성 때문에 RFC라는 형식을 취했습니다.
 
-Rationale
----------
+근거
+----
 
-The GeoTIFF specification includes a data item, GTRasterTypeGeoKey,
-which may be set to either RasterPixelIsArea (the default), or
-RasterPixelIsPoint. RasterPixelIsArea defines that a pixel represents an
-area in the real world, while RasterPixelIsPoint defines a pixel to
-represent a point in the real world. Often this is useful to distinguish
-the behavior of optical sensors that average light values over an area
-vs. raster data which is point oriented like an elevation sample at a
-point.
+GeoTIFF 사양은 RasterPixelIsArea(기본값) 또는 RasterPixelIsPoint 가운데 하나로 설정할 수 있는 GTRasterTypeGeoKey 라는 데이터 항목을 포함하고 있습니다. RasterPixelIsArea는 픽셀이 실제 세계에 있는 면(area)을 표현한다고 정의하는 반면, RasterPixelIsPoint는 픽셀이 실제 세계에 있는 점(point)을 표현한다고 정의합니다. 이 데이터 항목은 어떤 영역에 걸쳐 광선(light) 값을 평균 내는 광학 센서의 습성과 어떤 점 위치에 있는 표고 샘플 같은 포인트 지향 래스터 데이터를 구별하는 데 유용한 경우가 많습니다.
 
-Traditionally GDAL has treated this flag as having no relevance to the
-georeferencing of the image despite disputes from a variety of other
-software developers and data producers. This was based on the authors
-interpretation of something said once by the GeoTIFF author. However, a
-recent review of section [`section
-2.5.2.2 <http://www.remotesensing.org/geotiff/spec/geotiff2.5.html#2.5.2.2>`__]
-of the GeoTIFF specificaiton has made it clear that GDAL behavior is
-incorrect and that PixelIsPoint georeferencing needs to be offset by a
-half a pixel when transformed to the GDAL georeferencing model. This
-issue is documented in the following tickets including #3837, #3838,
-....
+여러 소프트웨어 개발자들과 데이터 생산자들의 분쟁에도 불구하고, GeoTIFF 저자가 언젠가 한 번 말했던 내용을 GDAL 저자들이 해석한 내용에 기반해서 GDAL은 예전부터 이 플래그를 이미지의 지리참조 정보와 아무 관계도 없는 것으로 취급해왔습니다.
+하지만, GeoTIFF 사양 `2.5.2.2 단락 <http://geotiff.maptools.org/spec/geotiff2.5.html#2.5.2.2>`_ 의 최신 리뷰를 보면 GDAL의 습성이 틀렸으며 PixelIsPoint 지리참조 정보를 GDAL 지리참조 모델로 변환하는 경우 1/2 픽셀만큼 오프셋시켜야 한다는 사실이 분명해졌습니다. 이 문제점은 #3837, #3838 등등을 포함하는 티켓들에 문서화되어 있습니다.
 
-This RFC attempts to manage this transition with a minimum of disruption
-for the users of GDAL/OGR.
+이 RFC는 GDAL/OGR 사용자들의 불편을 최소화하면서 이 개념 변화를 관리하려 합니다.
 
-Planned Changes
----------------
+계획된 변경 사항
+----------------
 
-Interpretation of the raster space from the GeoTIFF tie points will be
-offset by half a pixel in the PixelIsPoint case in
-gdal/frmts/gtiff/geotiff.cpp. This will impact the formation of the
-geotransform and the formation of GCPs when there are multiple tie
-points. geotransmatrix conversion to geotransform will also be affected.
+:file:`gdal/frmts/gtiff/geotiff.cpp` 에 있는 PixelIsPoint 해석의 경우 GeoTIFF 매칭 기준점(tie point)으로부터 래스터 공간을 해석할 때 1/2 픽셀만큼 오프셋시킬 것입니다. 이렇게 되면 매칭 기준점이 여러 개 있는 경우 지리변환의 편성(formation) 및 GCP의 편성에 영향을 미칠 것입니다. 지리변환행렬(geotransmatrix)을 지리변환으로 변환하는 데에도 영향을 미칠 것입니다.
 
-Conversely if writing files with PixelIsPoint (as driven by the
-"AREA_OR_POINT" metadata item being set to "POINT") the written raster
-space coordinates would be offset by half a pixel.
+정반대로, ("AREA_OR_POINT" 메타데이터 항목을 POINT로 설정해서 강제로) 파일을 PixelIsPoint 해석으로 작성하는 경우 작성되는 래스터 공간 좌표가 1/2 픽셀만큼 오프셋될 것입니다.
 
-In trunk the above behavior may be disabled by setting the
-GTIFF_POINT_GEO_IGNORE configuration option to TRUE (it will default to
-FALSE).
+GTIFF_POINT_GEO_IGNORE 환경설정 옵션을 (기본값 FALSE가 아니라) TRUE로 설정하면 트렁크에서 이 습성을 비활성화시킬 수도 있습니다.
 
-In GDAL 1.7 and 1.6 branch the same changes will be applied, except the
-GTIFF_POINT_GEO_IGNORE configuration option will default to TRUE.
+GDAL 1.7 및 1.6버전 브랜치에도 동일한 변경 사항을 적용할 것입니다. 다만 GTIFF_POINT_GEO_IGNORE 환경설정 옵션의 기본값이 TRUE일 것입니다.
 
-Compatibility Issues
---------------------
-
-This change will alter the apparent georeferencing of all GeoTIFF files
-with PixelIsPoint set. It is not clear how large a proportion of GeoTIFF
-files this will apply to, but it is significant. This isn't too bad for
-files coming from non-GDAL sources as most other produces have made the
-correct interpretation of PixelIsPoint for years. However,
-unfortunately, files produced in the past by GDAL with PixelIsPoint will
-now be interpreted differently and the values will be off by half a
-pixel.
-
-In practice it was not particularly convenient or well documented how to
-produce PixelIsPoint GeoTIFF files with GDAL, so these files should be
-fairly rare. Thee easiest way to produce them was by copying from
-another PixelIsPoint GeoTIFF file in which the error on write just undid
-the error when reading the source GeoTIFF file.
-
-Reporting Extents
------------------
-
-Folks have at various points in the past requested that we report the
-extents differently for files with an AREA_OR_POINT value of POINT, much
-as listgeo does for GeoTIFF files that have a PixelIsPoint
-interpretation. I do *not* plan to do this, and for the purpose of GDAL
-the GCPs, RPCs and GeoTransform will always be based on an area
-interpretation of pixels. The AREA_OR_POINT will *only* be used to
-control setting of the PixelIsPoint value in GeoTIFF files, and as
-metadata about the physical interpretation of pixels.
-
-World Files
------------
-
-These changes will have no impact on how world files are treated or
-written. They are always based on the assumption of a area based pixel,
-but with the origin at the center of the top left pixel. This is
-effectively the same as the values for PixelIsPoint, but is not in any
-way tried to this metadata.
-
-Test Suite
-----------
-
-The 1.6 and 1.7 branch test suites will not be altered.
-
-The trunk branch test suite will be altered to check for the updated
-values and will be extended with a test to confirm that setting the
-config option GTIFF_POINT_GEO_IGNORE to TRUE suppresses the altered
-behavior.
-
-Documentation
+호환성 문제점
 -------------
 
-The situation will be noted in the 1.8.0, 1.7.4 and 1.6.4 release notes
-as well as in the GeoTIFF driver documentation in trunk.
+이 변경 사항은 당연히 PixelIsPoint로 설정된 모든 GeoTIFF 파일들의 지리참조를 변경시킬 것입니다. 이 변경 사항이 적용될 GeoTIFF 파일의 비율이 얼마나 클지는 불확실하지만, 상당할 것입니다. GDAL이 아닌 소스로부터 나온 GeoTIFF 파일의 경우 그렇게 나쁜 상황은 아닙니다. 다른 이들은 이미 수 년 전부터 정확한 해석을 적용했기 때문입니다. 하지만 안타깝게도. GDAL이 과거에 PixelIsPoint 해석으로 생성한 파일들은 이제부터 다르게 해석될 것이고, 값들도 1/2 픽셀만큼 다를 것입니다.
 
-The GeoTIFF web site GeoTIFF FAQ will be updated to clarify the
-interpretation of PixelIsPoint and note that up to GDAL 1.8 it was
-improperly interpreted by GDAL.
+실제로 GDAL을 이용해서 PixelIsPoint GeoTIFF 파일을 생성하는 방법이 그렇게 편리하지도 않고 잘 문서화되어 있지도 않기 때문에 이런 파일은 꽤 드물 것입니다. 이런 파일을 생성하는 가장 쉬운 방법은 또다른 PixelIsPoint GeoTIFF 파일로부터 복사하는 것이었습니다. 이때 쓰기에서 발생한 오류는 소스 GeoTIFF 파일을 읽어올 때 그냥 바로잡혔습니다.
 
-Implementation
---------------
+범위 리포트
+-----------
 
-All code implementation will be by Frank Warmerdam in the next few
-weeks.
+과거 다양한 시점에서, `listgeo <http://geotiff.maptools.org/listgeo.html>` 가 PixelIsPoint 해석을 가진 GeoTIFF 파일에 대해 리포트하는 것과 마찬가지로 GDAL이 AREA_OR_POINT 값이 POINT인 파일에 대해 범위를 다르게 리포트한다는 사실이 보고되었습니다. 저자는 이를 수정할 계획이 '없으며', GDAL의 목적을 위해 GCP, RPC 및 지리변환은 항상 픽셀의 면 해석을 기반으로 할 것입니다.
+AREA_OR_POINT는 GeoTIFF에 PixelIsPoint 값을 설정할지 여부를 제어하기 위해서'만' 사용될 것이고, 픽셀의 실제 해석에 관한 메타데이터로서 사용될 것입니다.
 
-Applied in trunk (r21158), 1.7 (r21159), 1.6 (r21160) and 1.6-esri
-(r21161).
+월드 파일
+---------
+
+이런 변경 사항들은 월드 파일의 취급 방식이나 작성 방식에 어떤 영향도 미치지 않을 것입니다. 월드 파일은 언제나 면 기반 픽셀이라는 가정을 기반으로 하지만, 좌상단 픽셀의 중심을 원점으로 삼습니다. 이는 PixelIsPoint에 대한 값과 사실상 동일하지만 어떤 방식으로든 이 메타데이터에 PixelIsPoint를 시도하지는 않습니다.
+
+테스트 스위트
+-------------
+
+GDAL 1.6 및 1.7버전 브랜치의 테스트 스위트를 변경하지 않을 것입니다.
+
+트렁크의 테스트 스위트를 업데이트된 값을 확인하도록 변경하고, GTIFF_POINT_GEO_IGNORE 환경설정 옵션을 TRUE로 설정하면 변경된 습성을 억제하는지 확인하는 테스트를 추가할 것입니다.
+
+문서화
+------
+
+GDAL 1.8.0, 1.7.4 및 1.6.4버전 배포판 노트는 물론 트렁크에 있는 GeoTIFF 드라이버 문서에도 이 상황을 작성할 것입니다.
+
+GeoTIFF 웹사이트에 있는 GeoTIFF FAQ를 PixelIsPoint를 명확하게 해석하도록 업데이트하고 GDAL 1.8버전 이전까지 GDAL이 정확하지 않게 해석했다는 사실을 명시할 것입니다.
+
+구현
+----
+
+프랑크 바르메르담이 다음 몇 주 동안 모든 코드를 구현할 것입니다.
+
+트렁크(r21158), 1.7버전(r21159), 1.6버전(r21160) 및 1.6-esri(r21161)에 적용했습니다.
+
