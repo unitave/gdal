@@ -1,90 +1,69 @@
 .. _rfc-38:
 
 =========================================================================
-RFC 38: OGR Faster Open (withdrawn)
+RFC 38: OGR 빨리 열기 (철회)
 =========================================================================
 
-Author: Even Rouault
+저자: 이벤 루올
 
-Contact: even dot rouault at spatialys.com
+연락처: even.rouault@spatialys.com
 
-Status: Withdrawn.
+상태: 철회
 
-Covered by `RFC 46: GDAL/OGR unification <./rfc46_gdal_ogr_unification>`__
+`RFC 46: GDAL/OGR 통합 <./rfc46_gdal_ogr_unification>`_ 이 커버합니다.
 
-Summary
--------
+요약
+----
 
-It is proposed that the OGR datasource opening mechanism relies on the
-GDALOpenInfo class, already used by GDAL drivers, to speed-up datasource
-opening. The speed-up is due to the fact that the file passed to
-OGROpen() will be opened and stat'ed only once, whereas currently, it is
-opened and closed as many times as there are OGR drivers. This should be
-particularly beneficial for network filesystems, or when trying to open
-a file that is not a OGR datasource at all.
+OGR 데이터소스 열기 메커니즘이 데이터소스 열기 속도를 향상시키기 위해 GDAL 드라이버들이 이미 사용 중인 :cpp:class:`GDALOpenInfo` 클래스에 의존할 것을 제안합니다. 속도가 향상되는 이유는, 현재 OGR 드라이버마다 데이터소스를 열고 종료하는 반면 OGROpen()으로 전송되는 파일을 한 번만 열어 통계를 낼 것이기 때문입니다. 네트워크 파일 시스템, 또는 OGR 데이터소스가 아닌 파일을 열려고 시도하는 경우 특히 유용할 것입니다.
 
-E.g., trying to open a file that is not a OGR datasource currently
-requires 45 file opening or stat operations :
+예를 들어 현재 OGR 데이터소스가 아닌 파일을 열려고 시도하면 파일 열기 또는 통계 작업을 45번 수행합니다:
 
 ::
 
    $ strace ogrinfo -ro NEWS 2>&1 | grep NEWS | wc -l
    45
 
-It is expected that if/once all drivers are migrated, it will decrease
-to 2 operations only.
+모든 드라이버를 마이그레이션하고 나면 작업 두 번으로 줄어들 것으로 예상됩니다.
 
-Implementation
---------------
+구현
+----
 
-Similarly to GDALDriver, the OGRSFDriver class is extended to have a
-pfnOpen member, that drivers will set to point to their own Open method.
+:cpp:class:`GDALDriver` 와 마찬가지로, :cpp:class:`OGRSFDriver` 클래스가 'pfnOpen' 멤버를 가지도록 확장하고 드라이버마다 각자의 :cpp:func:`Open` 메소드를 가리키도록 설정할 것입니다.
 
 ::
 
    /* -------------------------------------------------------------------- */
-   /*      The following are semiprivate, not intended to be accessed      */
-   /*      by anyone but the formats instantiating and populating the      */
-   /*      drivers.                                                        */
+   /*      다음은 드라이버를 인스턴스화하고 채우는 포맷을 제외한           */
+   /*      다른 포맷이 접근할 수 없도록 설계된 준전용(semiprivate)         */
+   /*      클래스입니다.                                                   */
    /* -------------------------------------------------------------------- */
        OGRDataSource       *(*pfnOpen)( GDALOpenInfo * );
 
-The OGRSFDriverRegistrar::Open() method is updated to call pfnOpen when
-iterating over the drivers. When pfnOpen is not set, it will try to call
-the Open() method of OGRSFDriver (which enables a progressive migration
-of drivers).
+드라이버를 반복할 때 :cpp:func:`OGRSFDriverRegistrar::Open` 메소드가 'pfnOpen' 멤버를 호출하도록 업데이트합니다. 'pfnOpen'이 설정되지 않은 경우, (드라이버들의 점진적 마이그레이션을 활성화하는) :cpp:class:`OGRSFDriver` 의 :cpp:func:`Open` 메소드를 호출하려 시도할 것입니다.
 
-Mainly for compatibility reasons, the virtual method Open() of
-OGRSFDriver that is currently pure virtual, will now be a regular
-virtual method, that will have a default implementation, that will try
-to call pfnOpen.
+주로 호환성 이유 때문에, 현재 순수 가상 메소드인 :cpp:class:`OGRSFDriver` 의 :cpp:func:`Open` 메소드가 이제 기본 구현을 가진 정규 가상 메소드가 되어 'pfnOpen' 멤버를 호출할 것입니다.
 
-The patch with the changes to OGR core is attached to this page.
+이 페이지에 OGR 코어에 적용될 변경 사항을 가진 패치를 추가합니다.
 
-Backward Compatibility
+하위 호환성
+-----------
+
+제안하는 추가 사항들은 C 바이너리 호환성에 어떤 영향도 미치지 않을 것입니다.
+
+C++ 바이너리 인터페이스는 망가질 것입니다. (:cpp:class:`OGRSFDriver` 클래스에 새 멤버를 추가하고 :cpp:func:`Open` 메소드를 순수 가상 메소드에서 정규 가상 메소드로 변경하기 때문입니다.)
+
+제3자 OGR 드라이버의 경우 소스 수준 호환성이 유지될 것입니다.
+
+드라이버에 미치는 영향
 ----------------------
 
-Proposed additions will not have any impact on C binary compatibility.
+기존 드라이버들을 RFC 38로 마이그레이션시킬 필요는 '없지만' 마이그레이션시킬 것을 강력하게 권장합니다. 새 드라이버들은 전체적인 빨리 열기를 유지할 수 있도록 RFC 38 메커니즘을 사용'해야' 합니다.
 
-C++ binary interface will be broken (due to the addition of a new member
-in OGRSFDriver class and the Open() method changed from pure virtual to
-virtual).
+이 페이지에 몇몇 드라이버들의 마이그레이션 예시를 추가합니다.
 
-Source level compatibility will be preserved for third-party OGR
-drivers.
-
-Impact on drivers
------------------
-
-Existing drivers are *not* required to migrate to RFC38, but are
-strongly encouraged to. New drivers *should* use RFC38 mechanism to
-preserve the overall faster opening.
-
-An example of the migration for a few drivers is attached to this page.
-
-Timeline
+타임라인
 --------
 
-Even Rouault is responsible to implement this proposal. New API will be
-available in GDAL 2.0. Most in-tree OGR drivers will be migrated to the
-new mechanism.
+이벤 루올이 이 제안의 구현을 책임집니다. GDAL 2.0버전에서 새 API를 사용할 수 있을 것입니다. 인트리(in-tree) OGR 드라이버 대부분이 새 메커니즘으로 마이그레이션될 것입니다.
+

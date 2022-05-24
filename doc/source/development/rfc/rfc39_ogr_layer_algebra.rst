@@ -1,98 +1,73 @@
 .. _rfc-39:
 
 =========================================================================
-RFC 39: OGR Layer Algebra
+RFC 39: OGR 레이어 대수(algebra)
 =========================================================================
 
-Author: Ari Jolma
+저자: 아리 욜마(Ari Jolma)
 
-Contact: ari dot jolma at aalto dot fi
+연락처: ari.jolma@aalto.fi
 
-Status: Adopted, implemented in GDAL 1.10
+상태: 승인, GDAL 1.10버전에 구현
 
-Summary
--------
+요약
+----
 
-It is proposed that the OGR layer class and the C API contains methods
-for commonly needed overlay analysis methods.
+OGR 레이어 클래스와 C API에 공통적으로 필요한 중첩 분석 메소드들을 추가할 것을 제안합니다.
 
-The basic functionality for spatial analysis with GDAL is provided by
-GEOS. However, GEOS operates on geometries and typically people work
-with geospatial data layers. Vector data layers are represented in GDAL
-by OGRLayer objects. Thus, there is a need for spatial analaysis
-operations that work on layers.
+GEOS가 GDAL의 공간 분석 용 기본 기능을 제공합니다. 하지만 GEOS는 도형에 대해 작업하는데, 일반적으로 사람들은 지리공간 데이터 레이어를 작업합니다. GDAL에서는 벡터 데이터 레이어를 :cpp:class:`OGRLayer` 객체로 표현합니다. 따라서 레이어에 대해 작업하는 공간 분석 기능이 필요합니다.
 
-Unfortunately there is no standard for spatial analysis operations API,
-but it is possible to create a useful set by using existing software as
-example.
+안타깝게도 공간 분석 작업 API를 위한 표준은 없지만, 기존 소프트웨어를 예시로 삼아 유용한 공간 분석 작업 API 집합을 생성할 수는 있습니다.
 
-The methods are fundamentally dependent on comparison of all the
-features of two layers. There would possibly be huge performance
-improvements achievable with layer specific spatial indexes. This is
-considered out of the scope of these methods and belonging to the
-general problem of iterating features in a layer and accessing features
-randomly. For these reasons these methods should be only considered
-convenience methods and not replacements for analysis in relational
-databases for example.
+이 메소드들은 기본적으로 두 레이어의 모든 피처를 비교하는 데 의존합니다. 레이어 특화 공간 색인을 사용하면 성능을 크게 향상시킬 수도 있지만, 이는 이 메소드들의 범위를 벗어나며 레이어에 있는 피처를 반복하고 피처에 임의로 접근하는 일반적인 문제에 속한다고 간주됩니다. 이런 이유 때문에, 이 메소드들을 편의적인 메소드로만 간주해야 하며, 예를 들어 관계형 데이터베이스에서의 분석을 대체할 수 있다고 생각해서는 안 됩니다.
 
-Implementation
---------------
+구현
+----
 
-The methods are implemented by new methods in OGRLayer class
-(ogrsf_frmts.h and ogrlayer.cpp) and new calls in the C API (ogr_api.h).
-The Swig bindings (ogr.i) are also extended with these methods.
+:cpp:class:`OGRLayer` 클래스(:file:`ogrsf_frmts.h` 및 :file:`ogrlayer.cpp`)에 새 메소드들을 추가하고 C API(:file:`ogr_api.h`)에 새로운 호출들을 추가해서 이 메소드들을 구현합니다. SWIG 바인딩(:file:`ogr.i`)도 이 메소드들로 확장합니다.
 
-The patch with the changes to OGR core and to the Swig bindings is
-attached to this page. The patch has been superficially tested but it is
-not written or formatted according to the GDAL tradition.
+이 페이지에 OGR 코어 및 SWIG 바인딩에 적용할 변경 사항들을 가진 패치를 첨부합니다. 이 패치는 피상적으로 테스트되었으며 일반적인 GDAL 형식에 따라 작성되거나 일반적인 GDAL 서식을 따르지 않았습니다.
 
-Backward Compatibility
+하위 호환성
+-----------
+
+제안하는 추가 사항들이 C API를 변경하기 때문에 C 바이너리 호환성에 영향을 미칠 것입니다.
+
+C++ 바이너리 인터페이스가 망가질 것입니다. (:cpp:class:`OGRLayer` 클래스에 새 멤버를 추가하기 때문입니다.)
+
+이 변경 사항들은 순전히 확장 사양일 뿐이며 기존 코드에 어떤 영향도 미치지 않습니다.
+
+드라이버에 미치는 영향
 ----------------------
 
-Proposed additions will have an impact on C binary compatibility because
-they change the API.
+이 변경 사항은 드라이버에 어떤 영향도 미치지 않습니다.
 
-C++ binary interface will be broken (due to the addition of a new
-members in OGRLayer class).
-
-The changes are purely extensions and have no impact on existing code.
-
-Impact on drivers
------------------
-
-The changes do not have any impacts on drivers.
-
-Timeline
+타임라인
 --------
 
-Ari Jolma is responsible to implement this proposal. New API should be
-available in GDAL 1.11.
+아리 욜마가 이 제안을 구현할 책임을 집니다. GDAL 1.11버전에서 새 API를 사용할 수 있게 될 것입니다.
 
-There needs to be a discussion on the names of the methods and on the
-internal logic of the methods (this refers especially to the handling of
-attributes and error conditions).
+이 메소드들의 이름과 내부 로직에 대한 (특히 속성 처리 및 오류 조건에 대한) 논의가 필요합니다.
 
-In addition to the methods in the attached patch, there should be some
-discussion on additional methods. For example Append and Buffer methods
-could be easily added to the set. An illustration of what is currently
-available in the common software is for example this page:
-`http://courses.washington.edu/gis250/lessons/Model_Builder/ <http://courses.washington.edu/gis250/lessons/Model_Builder/>`__
+첨부한 패치에 있는 메소드들뿐만 아니라, 추가적인 메소드에 대해서도 논의해야 합니다. 예를 들어 이 새로운 메소드 집합에 Append 및 Buffer 메소드를 쉽게 추가할 수 있습니다. 예를 들어 현재 공통적인 소프트웨어에서 어떤 메소드들을 사용할 수 있는지에 대해 다음 페이지에서 설명하고 있습니다:
+`벡터 분석 2: 위상 중첩 <http://courses.washington.edu/gis250/lessons/Model_Builder/>`_
 
-Comments on performance
------------------------
+성능에 대한 메모
+----------------
 
-Profiling Intersection of a layer of 46288 line string features with a
-layer of one polygon feature (~1/3 of features within and many only
-partly within the one feature) showed that when the method layer was a
-Shapefile, most of the time was spent in reading the feature from the
-Shapefile. When the method layer was copied into memory, most of the
-time (83 %) was spent in OGRLineString::getEnvelope. The 6th version of
-the patch contains a test against a pre-computed layer envelope, which
-speeds up the computation in this case ~30% (from 2.44 s to 1.76 in my
-machine). Still the most of the time (82 %) is spent in
-OGRLineString::getEnvelope.
+46,288개의 라인스트링 피처를 가진 레이어와 1개의 폴리곤 피처를 가진 레이어의 교차(intersection)를 계산하는 경우 (라인스트링 피처의 1/3까지가 폴리곤 피처 내에 있고 그 중에서도 다수가 부분적으로만 교차하는 경우) 메소드 레이어가 shapefile일 때, shapefile로부터 피처를 읽어오는 데 대부분의 시간을 사용했습니다.
+메소드 레이어를 메모리로 복사한 경우, :cpp:func:`OGRLineString::getEnvelope` 함수 처리에 대부분의(83%) 시간을 사용했습니다.
+이 패치의 여섯 번째 버전은 사전 계산된 레이어 엔벨로프(envelope)에 대한 테스트를 담고 있습니다. 엔벨로프를 사전 계산한 경우 계산 시간이 30%까지 (저자의 컴퓨터에서 2.44초가 1.76초로) 향상됩니다.
+그래도 :cpp:func:`OGRLineString::getEnvelope` 함수 처리에 대부분의(82%) 시간을 사용했습니다.
 
-Voting history
---------------
+투표 이력
+---------
 
-(June 2012) +1 from Even, Frank, Howard, Tamas, Daniel
+2012년 6월
+
+-  이벤 루올 +1
+-  프랑크 바르메르담 +1
+-  하워드 버틀러 +1
+-  세케레시 터마시 +1
+-  대니얼 모리셋 +1
+
