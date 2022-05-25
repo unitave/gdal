@@ -1,72 +1,52 @@
 .. _rfc-41:
 
 ====================================================
-RFC 41 : Support for multiple geometry fields in OGR
+RFC 41 : OGR에서의 다중 도형 필드 지원
 ====================================================
 
-Summary
--------
+요약
+----
 
-Add read/write support in the OGR data model for features with multiple
-geometry fields.
+OGR 데이터 모델에 도형 필드를 여러 개 가지고 있는 피처를 위한 읽기/쓰기 지원을 추가합니다.
 
-Motivation
-----------
+동기
+----
 
-The OGR data model is currently tied to a single geometry field per
-feature, feature definition and layer. But a number of data formats
-support multiple geometry fields. The OGC Simple Feature Specifications
-also do not limit to one geometry field per layer (e.g. §7.1.4 of `OGC
-06-104r4 "OpenGIS® Implementation Standard for Geographic information -
-Simple feature access -Part 2: SQL
-option <http://portal.opengeospatial.org/files/?artifact_id=25354>`__).
+OGR 데이터 모델은 현대 피처, 피처 정의 및 레이어 당 단일 도형 필드로 묶여 있습니다. 그러나 여러 데이터 포맷들이 다중 도형 필드를 지원합니다. OGC 단순 피처 사양 또한 레이어 하나 당 도형 필드 하나로 제한하고 있지 않습니다. (예를 들면 `OGC 06-104r4 "지리 정보를 위한 OpenGIS® 구현 표준 - 단순 피처 접근 - 2부: SQL 옵션 <https://portal.ogc.org/files/?artifact_id=25354>`_ 의 §7.1.4 단락을 참조하십시오.)
 
-There are workarounds : using geometries of type GEOMETRYCOLLECTION, or
-advertizing as many layers as there are geometry columns in the layer
-(like currently done in the PostGIS or SQLite drivers). All those
-approach are at best workarounds that suffer from limitations :
+차선책은 있습니다 -- (현재 PostGIS 또는 SQLite 드라이버에서처럼) GEOMETRYCOLLECTION 도형 유형을 사용하거나 레이어에 있는 도형 열의 개수만큼의 레이어들을 노출시키는 것입니다. 이런 접근법들은 기껏해야 다음과 같은 한계를 가진 차선책들일 뿐입니다:
 
--  GEOMETRYCOLLECTION approach : no way to know the name/semantics of
-   each sub-geometry. All sub-geometries must be expressed in the same
-   SRS. No way of guaranteeing that the GEOMETRYCOLLECTION has always
-   the same number of sub-geometries or that there are of a consistent
-   geometry type.
--  one layer per geometry column approach : only appropriate for
-   read-only scenarios. Cannot work in write scenarios.
+-  GEOMETRYCOLLECTION 접근법:
+   각 하위 도형의 이름/의미를 알 수 있는 방법이 없습니다. 모든 하위 도형이 동일한 공간 좌표계로 표현되어야만 합니다. GEOMETRYCOLLECTION에 항상 동일한 개수의 하위 도형들이 있거나 일관된 도형 유형이 있다고 보장할 수 있는 방법이 없습니다.
 
-The purpose of this RFC is to make support for multiple geometry fields
-per feature to be properly taken into account in the OGR data model.
+-  도형 열 1개 당 레이어 1개 접근법:
+   읽기 전용 시나리오인 경우에만 적절합니다. 쓰기 시나리오에서는 작동하지 않습니다.
 
-Proposed solution
------------------
+이 RFC의 목적은 OGR 데이터 모델이 피처 한 개 당 도형 열 여러 개를 제대로 지원하도록 만드는 것입니다.
 
-(Note: alternative solutions have also been studied. They are explained
-in a following section of this RFC.)
+제안 해결책
+-----------
 
-To sum it up, geometry fields will be treated similarly as attribute
-fields are handled at the OGRFeatureDefn and OGRFeature levels, but they
-will be kept separate. Attribute fields and geometry fields will have
-their own separate indexing in the feature definition.
+(주의: 대안 해결책들도 연구했습니다. 이 RFC의 다음 단락에서 대한 해결책들을 설명합니다.)
 
-This choice has been mainly made to maximize backward compatibility,
-while offering new capabilities.
+한 마디로 말하자면 :cpp:class:`OGRFeatureDefn` 및 :cpp:class:`OGRFeature` 수준에서 속성 필드를 처리하는 것과 비슷하게 도형 필드들을 취급하지만, 개별적으로 유지할 것입니다. 속성 필드 및 도형 필드는 피처 정의에 자신만의 개별 색인을 가질 것입니다.
 
-Its involves creating a OGRGeomFieldDefn class, and changes in
-OGRFieldDefn, OGRFeatureDefn, OGRFeature and OGRLayer classes.
+새 케이퍼빌리티를 제공하면서도 하위 호환성을 최대화하기 위해 이 해결책을 선택했습니다.
 
-OGRGeomFieldDefn class
-~~~~~~~~~~~~~~~~~~~~~~
+이를 위해 :cpp:class:`OGRGeomFieldDefn` 클래스를 생성하고, :cpp:class:`OGRFieldDefn`, :cpp:class:`OGRFeatureDefn`, :cpp:class:`OGRFeature` 및 :cpp:class:`OGRLayer` 클래스를 수정합니다.
 
-The OGRGeomFieldDefn is a new class. Its structure is directly inspired
-from the OGRFieldDefn class.
+OGRGeomFieldDefn 클래스
+~~~~~~~~~~~~~~~~~~~~~~~
 
-::
+:cpp:class:`OGRGeomFieldDefn` 은 새로운 클래스입니다. 그 구조는 :cpp:class:`OGRFieldDefn` 클래스로부터 직접 영감을 받았습니다:
+
+.. code-block:: cpp
 
    class CPL_DLL OGRGeomFieldDefn
    {
    protected:
            char                *pszName;
-           OGRwkbGeometryType   eGeomType; /* all values possible except wkbNone */
+           OGRwkbGeometryType   eGeomType; /* wkbNone을 제외한 모든 값을 사용 가능 */
            OGRSpatialReference* poSRS;
 
            int                 bIgnore;
@@ -89,28 +69,24 @@ from the OGRFieldDefn class.
            void                SetIgnored( int bIgnoreIn );
    };
 
-One can notice that the member variables were to be found at OGRLayer
-level previously.
+멤버 변수들이 예전에 :cpp:class:`OGRLayer` 수준에서 찾아볼 수 있던 멤버들이라는 사실을 알 수 있습니다.
 
-The SRS object is ref-counted. The reference count is increased in the
-constructor and in SetSpatialRef(), and decreased in the destructor.
+공간 좌표계 객체의 개수를 참조 개수로 셉니다. 참조 개수는 구성자(constructor) 및 SetSpatialRef()에서 증가하고 삭제자(destructor)에서 감소합니다.
 
-GetSpatialRef() is deliberately set virtual, so that lazy evaluation can
-be implemented (getting SRS can have a noticeable cost in some driver
-implementations, like reading an extra file, or issuing a SQL request).
+의도적으로 GetSpatialRef()를 가상으로 설정했기 때문에 지연 평가(lazy evaluation)를 구현할 수 있습니다. (공간 좌표계를 가져오는 것은 -- 추가 파일을 읽어오거나 SQL 요청을 발행하는 것처럼 -- 일부 드라이버 구현에서 상당한 리소스를 사용할 수 있습니다.)
 
-OGRFeatureDefn class
-~~~~~~~~~~~~~~~~~~~~
+OGRFeatureDefn 클래스
+~~~~~~~~~~~~~~~~~~~~~
 
-The OGRFeatureDefn class will be extended as the following :
+:cpp:class:`OGRFeatureDefn` 클래스를 다음과 같이 확장할 것입니다:
 
-::
+.. code-block:: cpp
 
    class CPL_DLL OGRFeatureDefn
    {
      protected:
-           // Remove OGRwkbGeometryType eGeomType and bIgnoreGeometry and
-           // add instead the following :
+           // OGRwkbGeometryType eGeomType 및 bIgnoreGeometry를 제거하고
+           // 그 대신 다음을 추가합니다:
 
            int nGeomFieldCount;
            OGRGeomFieldDefn* papoGeomFieldDefn;
@@ -122,52 +98,34 @@ The OGRFeatureDefn class will be extended as the following :
            virtual void        AddGeomFieldDefn( OGRGeomFieldDefn * );
            virtual OGRErr      DeleteGeomFieldDefn( int iGeomField );
 
-           // Route OGRwkbGeometryType GetGeomType() and void SetGeomType() 
-           // on the first geometry field definition.
+           // 첫 번째 도형 필드 정의에 OGRwkbGeometryType GetGeomType() 및
+           // void SetGeomType()을 전송(route)합니다.
 
-           // Same for IsGeometryIgnored() and SetGeometryIgnored()
+           // IsGeometryIgnored() 및 SetGeometryIgnored()에 대해서도 동일합니다.
    }
 
-At instantiation, OGRFeatureDefn would create a default geometry field
-definition of name "" and type wkbUnknown. If SetGeomType() is called,
-this will be routed on papoGeomFieldDefn[0]. If only one geometry field
-definition exists, SetGeomType(wkbNone) will remove it.
+인스턴스화 단계에서 :cpp:class:`OGRFeatureDefn` 클래스가 이름이 ""이고 유형이 wkbUnknown인 기본 도형 필드 정의를 생성할 것입니다. SetGeomType()을 호출하는 경우, 이 기본 도형 필드 정의를 'papoGeomFieldDefn[0]' 상으로 전송할 것입니다. 도형 필드 정의가 하나만 존재한다면 ``SetGeomType(wkbNone)`` 이 해당 도형 필드 정의를 제거할 것입니다.
 
-GetGeomType() will be routed on papoGeomFieldDefn[0] if it exists.
-Otherwise it will return wkbNone.
+도형 유형이 존재하는 경우 GetGeomType()이 'papoGeomFieldDefn[0]' 상으로 전송될 것입니다. 그렇지 않다면 wkbNone을 반환할 것입니다.
 
-It is strongly advised that there is name uniqueness among the combined
-set of regular field names and the geometry field names. Failing to do
-so will result in unspecified behavior in SQL queries. This advice will
-not be checked by the code (it is currently not done for regular
-fields).
+정규 필드 이름들과 도형 필드 이름들의 합집합에서 이름 유일성(uniqueness)이 존재해야 한다고 강력하게 권고합니다. 동일한 이름이 2개 이상 존재할 경우 SQL 쿼리에서 지정한 적 없는 동작이 발생할 것입니다. 코드 수준에서 이 권고를 확인하지는 않을 것입니다. (현재 정규 필드에 대해서도 확인하고 있지 않습니다.)
 
-Another change is to make all the existing methods of OGRFeatureDefn
-virtual (and change private visibility to protected), so this class can
-be subclassed if needed. This will enable lazy creation of the object.
-Justification: establishing the full feature definition can be costly.
-But applications may want to list all the layers of a datasource, and
-only present some information that is important, but cheap to establish.
-In the past, OGRLayer::GetName() and OGRLayer::GetGeomType() have been
-introduced in order to workaround for that.
+필요한 경우 :cpp:class:`OGRFeatureDefn` 가상 클래스를 하위 클래스화시킬 수 있도록 이 클래스의 모든 기존 메소드에도 또다른 변경 사항을 적용할 것입니다. (그리고 개인(private) 가시성을 보호(protected) 가시성으로 변경할 것입니다.) 이렇게 하면 객체를 지연 생성(lazy creation)할 수 있습니다. 타당성: 완전한 피처 정의를 확립하는 데 리소스가 많이 사용될 수 있기 때문입니다. 그러나 응용 프로그램이 데이터소스의 모든 레이어들을 목록화한 다음 중요한 정보 몇 가지만 출력하려 할 수도 있는데, 이 경우 피처 정의를 확립하는 데 리소스가 많이 들지 않습니다. 예전에는 차선책으로써 :cpp:func:`OGRLayer::GetName` 및 :cpp:func:`OGRLayer::GetGeomType` 을 도입했습니다.
 
-Note also that ReorderGeomFieldDefns() is not foreseen for the moment.
-It could be added in a later step, should the need arises.
-DeleteGeomFieldDefn() is mostly there for the own benefit of
-OGRFeatureDefn itself when calling SetGeomType(wkbNone).
+현재로서는 ReorderGeomFieldDefns()도 예상하고 있지 않는다는 사실을 기억하십시오. 이후 단계에서 추가할 수도 있지만, 먼저 그 필요성이 대두되어야 할 것입니다. DeleteGeomFieldDefn()은 주로 ``SetGeomType(wkbNone)`` 을 호출하는 경우 :cpp:class:`OGRFeatureDefn` 클래스 자체의 유용성을 위해 존재합니다.
 
-OGRFeature class
-~~~~~~~~~~~~~~~~
+OGRFeature 클래스
+~~~~~~~~~~~~~~~~~
 
-The OGRFeature class will be extended as following :
+:cpp:class:`OGRFeature` 클래스를 다음과 같이 확장할 것입니다:
 
-::
+.. code-block:: cpp
 
    class CPL_DLL OGRFeature
    {
      private:
-           // Remove poGeometry field and add instead
-           OGRGeometry** papoGeometries; /* size is given by poFDefn->GetGeomFieldCount() */
+           // poGeometry 필드를 제거하고 그 대신 OGRGeometry** papoGeometries를 추가합니다.
+           // poFDefn->GetGeomFieldCount()로 크기를 지정합니다.
 
      public:
 
@@ -179,40 +137,31 @@ The OGRFeature class will be extended as following :
            OGRErr              SetGeomFieldDirectly( int iField, OGRGeometry * );
            OGRErr              SetGeomField( int iField, OGRGeometry * );
 
-           // Route SetGeometryDirectly(), SetGeometry(), GetGeometryRef(), 
-           // StealGeometry() on the first geometry field in the array
+           // 배열에 있는 첫 번째 도형 필드에 SetGeometryDirectly(), SetGeometry(),
+           // GetGeometryRef(), StealGeometry()를 전송(route)합니다.
 
-           // Modify implementation of SetFrom() to replicate all geometries
+           // 모든 도형을 복제하기 위해 SetFrom()의 구현을 수정합니다.
    }
 
-Note: before RFC41, SetGeometry() or SetGeometryDirectly() could work on
-a feature whose feature definition had a GetGeomType() == wkbNone (which
-was inconsistent). This will be no longer the case since the size of the
-papoGeometries array is now based on GetGeomFieldCount(), and when
-GetGeomType() == wkbNone, the geometry field count is 0. The VRT and CSV
-drivers will be fixed to declare their geometry type consistently.
+주의: RFC 41 이전에는, SetGeometry() 또는 SetGeometryDirectly()가 피처 정의가 'GetGeomType() == wkbNone'인 (일관성이 없는) 피처 상에서 작동할 수 있었습니다. 이제 papoGeometries 배열의 크기가 GetGeomFieldCount()를 기반으로 하기 때문에 더 이상 작동하지 않을 것입니다. 'GetGeomType() == wkbNone'인 경우 도형 필드 개수는 0이 되기 때문입니다. VRT 및 CSV 드라이버가 자신의 도형 유형을 일관되게 선언하도록 수정할 것입니다.
 
-OGRLayer class
-~~~~~~~~~~~~~~
+OGRLayer 클래스
+~~~~~~~~~~~~~~~
 
-Impact on OGRLayer class :
+:cpp:class:`OGRLayer` 클래스에 미치는 영향:
 
--  Spatial filter: the option considered is to only allow one spatial
-   filter at the time.
+-  공간 필터:
+   고려되는 선택지는 한 번에 하나의 공간 필터만 허용하는 것입니다.
 
-   -  the need for spatial filters applied simultaneously on several
-      geometry fields is not obvious.
-   -  the m_poFilterGeom protected member is used more than 250 times in
-      the OGR code base, so turning it into an array would be a tedious
-      task...
+   -  도형 필드 여러 개에 공간 필터를 동시에 적용해야 할 필요성이 분명하지 않습니다.
+   -  OGR 코드베이스에서 'm_poFilterGeom' 보호(protected) 멤버를 250회 이상 사용하기 때문에 이를 전부 배열로 변환하는 작업이 매우 더딜 것입니다.
 
-   Additions:
+   추가 사항:
 
-::
+   .. code-block:: cpp
 
            protected:
-               int m_iGeomFieldFilter // specify the index on which the spatial
-                                      // filter is active.
+               int m_iGeomFieldFilter // 공간 필터를 활성화할 색인을 지정합니다.
 
            public:
                virtual void        SetSpatialFilter( int iGeomField, OGRGeometry * );
@@ -220,113 +169,75 @@ Impact on OGRLayer class :
                                                        double dfMinX, double dfMinY,
                                                        double dfMaxX, double dfMaxY );
 
-::
+-  GetNextFeature(): 
+   도형 필드를 바르게 선택하려면 이 메소드의 구현이 m_iGeomFieldFilter 색인을 확인해야만 합니다.
 
-   GetNextFeature() implementation must check the m_iGeomFieldFilter index
-   in order to select the appropriate geometry field.
+-  GetGeomType():
+   변경하지 않습니다. 다른 필드들의 경우, GetLayerDefn()->GetGeomField(i)->GetType()을 사용하십시오.
 
--  GetGeomType() : unchanged. For other fields, use
-   GetLayerDefn()->GetGeomField(i)->GetType()
+-  GetSpatialRef():
+   기본 구현은 현재 NULL을 반환합니다. (도형 필드가 적어도 하나 이상 있는 경우) GetLayerDefn()->GetGeomField(0)->GetSpatialRef()를 반환하도록 변경할 것입니다. 새로운 드라이버들이 더 이상 GetSpatialRef()만 한정해서 사용하지 않고 첫 번째 도형 필드의 공간 좌표계를 적절하게 설정하도록 권장합니다.
+   다른 필드들의 경우, GetLayerDefn()->GetGeomField(i)->GetSpatialRef()를 사용하십시오.
 
--  GetSpatialRef(): Currently the default implementation returns NULL.
-   It will be changed to return
-   GetLayerDefn()->GetGeomField(0)->GetSpatialRef() (if there is at
-   least one geometry field). New drivers are encouraged not to
-   specialize GetSpatialRef() anymore, but to appropriately set the SRS
-   of their first geometry field. For other fields, use
-   GetLayerDefn()->GetGeomField(i)->GetSpatialRef().
+   주의할 점: 이전에 :cpp:class:`OGRFeatureDefn` 수준에서 공간 좌표계를 저장하지 않았기 때문에, 업데이트하지 않는 경우 GetGeomField(0)->GetSpatialRef()가 NULL을 반환하게 될 것입니다. test_ogrsf 유틸리티가 이를 확인하고 경고할 것입니다. 기존 드라이버들의 업데이트는 점진적으로 진행될 것입니다. 그 동안 첫 번째 도형 필드의 공간 좌표계를 신뢰할 수 있는 방식으로 가져오려면 :cpp:func:`OGRLayer::GetSpatialRef` 메소드를 사용할 것을 권고합니다.
 
-   Caveat: as SRS wasn't previously stored at the OGRFeatureDefn level,
-   all existing drivers, if not updated, will have
-   GetGeomField(0)->GetSpatialRef() returning NULL. The test_ogrsf
-   utility will check and warn about this. Update of existing drivers
-   will be made progressively. In the mean time, using
-   OGRLayer::GetSpatialRef() will be advized to get the SRS of the first
-   geometry field in a reliable way.
+-  추가 사항:
 
--  add :
-
-::
+   .. code-block:: cpp
 
            virtual OGRErr GetExtent(int iGeomField, OGREnvelope *psExtent,
                                     int bForce = TRUE);
 
-::
+   'iGeomField == 0'인 경우 기본 구현이 GetExtent()를 호출할 것입니다.
 
-   Default implementation would call GetExtent() if iGeomField == 0
+-  추가 사항:
 
--  add :
-
-::
+   .. code-block:: cpp
 
            virtual OGRErr CreateGeomField(OGRGeomFieldDefn *poField);
 
--  no DeleteGeomField(), ReorderGeomFields() or AlterGeomFieldDefn() for
-   now. Could be added later if the need arises.
+-  현재 DeleteGeomField(), ReorderGeomFields() 또는 AlterGeomFieldDefn()을 추가하지 않을 것입니다. 필요성이 대두되는 경우 향후 추가할 수 있습니다.
 
--  GetGeometryColumn() : unchanged. Routed onto the first geometry
-   field. For other fields, use
-   GetLayerDefn()->GetGeomField(i)->GetNameRef()
+-  GetGeometryColumn():
+   변경하지 않습니다. 첫 번째 도형 필드 상으로 전송합니다. 다른 필드들의 경우, GetLayerDefn()->GetGeomField(i)->GetNameRef()를 사용하십시오.
 
--  SetIgnoredFields() : iterate over the geometry fields in addition to
-   regular fields. The special "OGR_GEOMETRY" value will only apply to
-   the first geometry field.
+-  SetIgnoredFields():
+   정규 필드들은 물론이고 도형 필드들도 반복합니다. 첫 번째 도형 필드에만 "OGR_GEOMETRY" 특수 값을 적용할 것입니다.
 
--  Intersection(), Union(), etc... : unchanged. Later improvements could
-   use the papszOptions parameter to specify an alternate geometry field
+-  Intersection(), Union() 등등:
+   변경하지 않습니다. 향후 대안 도형 필드를 지정하기 위해 papszOptions 파라미터를 사용하도록 개선할 수 있습니다.
 
--  TestCapability(): add a OLCCreateGeomField capability to inform if
-   CreateGeomField() is implemented.
+-  TestCapability():
+   CreateGeomField()를 구현했는지 여부를 알려주기 위한 OLCCreateGeomField 케이퍼빌리티를 추가합니다.
 
-OGRDataSource class
-~~~~~~~~~~~~~~~~~~~
+OGRDataSource 클래스
+~~~~~~~~~~~~~~~~~~~~
 
-Impact on OGRDataSource class :
+:cpp:class:`OGRDataSource` 클래스에 미치는 영향:
 
--  CreateLayer() : signature will be unchanged. If more than one
-   geometry fields are needed, OGRLayer::CreateGeomField() must be used.
-   If the name of the first geometry field must be specified, for
-   datasources supporting ODsCCreateGeomFieldAfterCreateLayer, using
-   code should call CreateLayer() with eGType = wkbNone and then add all
-   geometry fields with OGRLayer::CreateGeomField().
+-  CreateLayer():
+   서명을 변경하지 않을 것입니다. 하나 이상의 도형 필드가 필요한 경우, :cpp:func:`OGRLayer::CreateGeomField` 를 사용해야만 합니다. ODsCCreateGeomFieldAfterCreateLayer를 지원하는 데이터소스를 위해 첫 번째 도형 필드의 이름을 지정해야만 하는 경우, CreateLayer()를 'eGType = wkbNone'으로 호출한 다음 :cpp:func:`OGRLayer::CreateGeomField` 를 이용해서 모든 도형 필드를 추가하는 코드를 사용해야 합니다.
 
--  CopyLayer() : adapted to replicate all geometry fields (if supported
-   by target layer)
+-  CopyLayer():
+   (대상 레이어가 지원하는 경우) 모든 도형 필드를 복제하도록 수정합니다.
 
--  ExecuteSQL() : takes a spatial filter. In the case of the generic OGR
-   SQL implementation, this filter is a facility. It could also as well
-   be applied on the returned layer object. So there is no real need for
-   adding a way of specifying the geometry field at the ExecuteSQL() API
-   level.
+-  ExecuteSQL():
+   공간 필터를 입력받을 수 있게 변경합니다. 일반 OGR SQL 구현의 경우, 이 필터는 기능(facility)입니다. 반환되는 레이어 객체에 대해서도 적용할 수 있습니다. 즉 ExecuteSQL() API 수준에서 도형 필드를 지정하는 방법을 추가해야 할 필요가 없습니다.
 
--  TestCapability(): add a ODsCCreateGeomFieldAfterCreateLayer
-   capability to inform if CreateGeomField() is implemented after layer
-   creation and that CreateLayer() can be safely called with eGType =
-   wkbNone.
+-  TestCapability():
+   레이어 생성 후 CreateGeomField()를 구현했는지 그리고 CreateLayer()를 'eGType = wkbNone'으로 안전하게 호출할 수 있는지 여부를 알려주는 ODsCCreateGeomFieldAfterCreateLayer 케이퍼빌리티를 추가합니다.
 
-Explored alternative solutions
-------------------------------
+대안 해결책 탐색
+----------------
 
-( This paragraph can be skipped if you are totally convinced by the
-proposed approach detailed above :-) )
+(앞에서 자세히 설명한 제안 접근법을 완전히 확신한다면 이 단락을 건너뛰어도 상관없습니다. :-) )
 
-A possible alternative solution would have been to extend the existing
-OGRFieldDefn object with information related to the geometry. That would
-have involved adding a OFTGeometry value in the OGRFieldType
-enumeration, and adding the OGRwkbGeometryType eGeomType and
-OGRSpatialReference\* poSRS members to OGRFieldDefn. At OGRFeature class
-level, the OGRField union could have been extended with a OGRGeometry\*
-field. Similarly at OGRLayer level, CreateField() could have been used
-to create new geometry fields.
+가능한 대안 해결책 가운데 하나는 기존 :cpp:class:`OGRFieldDefn` 객체를 도형 관련 정보로 확장하는 것일 것입니다. 이를 위해 :cpp:class:`OGRFieldType` 열거형(enumeration)에 OFTGeometry 값을 추가하고 :cpp:class:`OGRFieldDefn` 클래스에  OGRwkbGeometryType eGeomType 및 OGRSpatialReference\* poSRS 멤버를 추가해야 합니다.
+:cpp:class:`OGRFeature` 클래스 수준에서 OGRField 합집합(union)을 OGRGeometry\* 필드로 확장할 수 있습니다. 마찬가지로 :cpp:class:`OGRLayer` 클래스 수준에서 CreateField()를 사용, 새 도형 필드를 생성할 수도 있습니다.
 
-The main drawback of this approach, which seems the most natural way, is
-backward compatibility. This would have affected all places in OGR own
-code or external code where fields are retrieved and geometry is not
-expected. For example, in code like the following (very common in the
-CreateFeature() of most drivers, or in user code consuming features
-returned by GetNextFeature()) :
+가장 네이티브한 방식으로 보이는 이 접근법의 주요 단점은 하위 호환성입니다. 이 접근법은 OGR 자체 코드 또는 외부 코드에서 필드를 검색하고 도형을 예상할 수 없는 모든 지점에 영향을 미칠 것입니다. 예를 들어 (대부분의 드라이버에 있는 CreateFeature()에서 또는 GetNextFeature()가 반환하는 피처를 입력받는 사용자 코드에서 매우 흔히 사용되는) 다음과 같은 코드에서 말입니다:
 
-::
+.. code-block:: cpp
 
    switch( poFieldDefn->GetType() )
    {
@@ -335,37 +246,20 @@ returned by GetNextFeature()) :
            default: something3(poField->GetFieldAsString()); break;
    }
 
-This would lead, for legacy code, to geometry being handled as regular
-field. We could imagine that GetFieldAsString() converts the geometry as
-WKT, but it is doubtfull that this would really be desired.
-Fundamentally, the handling of attribute and geometry fields is
-different in most use cases.
+레거시 코드의 경우 이 접근법 때문에 도형을 정규 필드로 처리하게 되었을 것입니다. GetFieldAsString()를 이용해서 도형을 WKT로 변환시키면 된다고 상상해볼 수 있겠지만, 그것이 과연 바람직한지에 대해서는 의심할 수밖에 없습니다. 근본적으로, 거의 모든 사용례에서 속성 처리와 도형 필드 처리는 서로 다릅니다.
 
-(On the other side, if we introduce 64bit integer as a OGR type (this is
-an RFC that is waiting for implementation...), the above code would
-still produce a meaningful result. The string reprentation of a 64bit
-integer is not that bad as a default behavior.)
+(다른 한 편으로 64비트 정수형을 OGR 유형으로 도입하는 경우 (해당 RFC는 구현 대기중입니다) 앞의 코드가 그래도 의미 있는 결과물을 생성할 것입니다. 64비트 정수형의 문자열 표현이 기본 습성만큼 나쁘지는 않기 때문입니다.)
 
-GetFieldCount() would also take into account geometry fields, but in
-most cases, you would need to subtract them.
+GetFieldCount()도 도형 필드를 연산에 넣긴 하지만, 대부분의 경우 도형 필드는 제외해야 합니다.
 
-A possible way of avoiding the above compatibility issue would be to
-have 2 sets of API at OGRFeatureDefn and OGRFeature level. The current
-one, that would ignore the geometry fields, and an "extended" one that
-would take them into account. For example,
-OGRFeatureDefn::GetFieldCountEx(), OGRFeatureDefn::GetFieldIndexEx(),
-OGRFeatureDefn::GetFieldDefnEx(), OGRFeature::GetFieldEx(),
-OGRFeature::SetFieldAsXXXEx() would take into account both attribute and
-geometry fields. The annoying thing with that approach is the
-duplication of the ~ 20 methods GetField() and SetFieldXXX() in
-OGRFeature.
+앞에서 말한 호환성 문제점을 막을 수 있는 방법은 :cpp:class:`OGRFeatureDefn` 및 :cpp:class:`OGRFeature` 수준에서 도형 필드를 무시하는 현재 사용 중인 API와 도형 필드를 연산에 넣는 "확장" API 2개를 사용하는 것입니다. 예를 들면, :cpp:func:`OGRFeatureDefn::GetFieldCountEx`, :cpp:func:`OGRFeatureDefn::GetFieldIndexEx`, :cpp:func:`OGRFeatureDefn::GetFieldDefnEx`, :cpp:func:`OGRFeature::GetFieldEx`, :cpp:func:`OGRFeature::SetFieldAsXXXEx` 메소드들은 속성 필드와 도형 필드 둘 다 연산에 넣을 것입니다. 이 접근법의 짜증나는 점은 :cpp:class:`OGRFeature` 클래스에서 GetField() 및 SetFieldXXX() 메소드를 20개까지 복제한다는 점입니다.
 
 C API
 -----
 
-The following functions are added to the C API :
+C API에 다음 함수들을 추가합니다:
 
-::
+.. code-block:: c
 
    /* OGRGeomFieldDefnH */
 
@@ -416,104 +310,92 @@ The following functions are added to the C API :
                                        OGREnvelope *psExtent, int bForce );
    OGRErr   CPL_DLL OGR_L_CreateGeomField( OGRLayerH, OGRGeomFieldDefnH hFieldDefn );
 
-OGR SQL engine
---------------
+OGR SQL 엔진
+------------
 
-Currently, "SELECT fieldname1[, ...fieldnameN] FROM layername" returns
-the specified fields, as well as the associated geometry. This behavior
-is clearly not following the behavior of spatial RDBMS where the
-geometry field must be explicitly specified.
+현재 ``SELECT fieldname1[, ...fieldnameN] FROM layername`` 이 지정한 필드는 물론 관련 도형까지 반환합니다. 이 습성은 도형 필드를 명확하게 지정해야만 하는 공간 RDBMS의 습성을 명백하게 따르고 있지 않습니다.
 
-The following compromise between backward compatibility and the new
-capabilities of this RFC is adopted :
+하위 호환성과 이 RFC의 새로운 케이퍼빌리티 간에 다음과 같은 절충안을 채택했습니다:
 
--  if no geometry field is explicitly specified in the SELECT clause,
-   and there is only one geometry fields associated with the layer, then
-   return it implicitly
--  otherwise, only return the explicitly mentioned geometry fields (or
-   all geometry fields if "*" is used).
+-  SELECT 절에서 어떤 도형 필드도 명확하게 지정하지 않고 레이어와 연결된 도형 필드가 하나뿐인 경우 암묵적으로 해당 도형 필드를 반환합니다.
+-  그렇지 않은 경우 명확하게 지정한 도형 필드만 (또는 ``*`` 를 사용한 경우 모든 도형 필드를) 반환합니다.
 
-Limitations
-~~~~~~~~~~~
+제한 사항
+~~~~~~~~~
 
--  Geometries from joined layers will not be fetched, as currently.
--  UNION ALL will only handle the default geometry, as currently. (could
-   be extended in later work.)
--  The special fields OGR_GEOMETRY, OGR_GEOM_WKT and OGR_GEOM_AREA will
-   operate on the first geometry field. It does not seem wise to extend
-   this ad-hoc syntax. A better alternative will be the OGR SQLite
-   dialect (with Spatialite support), once it is updated to support
-   multi-geometry (not in the scope of this RFC)
+-  현재로서는 결합(joined) 레이어들로부터 도형을 가져오지 않을 것입니다.
 
-Drivers
--------
+-  현재로서는 ``UNION ALL`` 이 기본 도형만 처리할 것입니다. (향후 작업을 통해 확장될 수 있습니다.)
 
-Updated drivers in the context of this RFC
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-  OGR_GEOMETRY, OGR_GEOM_WKT 및 OGR_GEOM_AREA 특수 필드는 첫 번째 도형 필드 상에서 작업할 것입니다. 이 임시(ad-hoc) 문법을 확장하는 것은 현명하지 않을 듯합니다. 더 나은 대안은 (Spatialite를 지원하는) OGR SQLite 방언일 것입니다. 이 방언이 다중 도형 테이블을 지원하도록 업데이트한 다음에 말입니다. (이 업데이트는 이 RFC의 범위를 벗어납니다.)
+
+드라이버
+--------
+
+이 RFC의 맥락에서 업데이트된 드라이버
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  PostGIS:
 
-   -  a ad-hoc form of support already exists. Tables with multiple
-      geometries are reported currently as layers called
-      "table_name(geometry_col_name)" (as many layers as geometry
-      columns). This behavior will be changed so that the table is
-      reported only once as a OGR layer.
+   -  임시 지원 형식이 이미 존재합니다. 현재 도형 필드를 여러 개 가진 테이블을 (도형 열 개수만큼 많은) "table_name(geometry_col_name)" 이라는 레이어들로 리포트합니다. 이 습성은 테이블을 OGR 레이어 하나로 한 번만 리포트하도록 변경될 것입니다.
 
 -  PGDump:
 
-   -  add write support for multi-geometry tables.
+   -  다중 도형 테이블에 대한 쓰기 지원을 추가할 것입니다.
 
 -  Memory:
 
-   -  updated as a simple illustration of the new capabilities.
+   -  새 케이퍼빌리티의 간단한 설명(illustration)으로 업데이트될 것입니다.
 
 -  Interlis:
 
-   -  updated to support multiple geometry fields (as well as other
-      changes unrelated to this RFC)
+   -  도형 필드 여러 개를 지원하도록 (이 RFC와 관련없는 다른 변경 사항들과 함께) 업데이트될 것입니다.
 
-Other candidate drivers (upgrade not originally covered by this RFC)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+기타 후보 드라이버 (이 RFC가 원래 커버하지 않는 업그레이드)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  GML driver : currently, only one geometry per feature reported.
-   Possibility of changing this by hand-editing of the .gfs file -->
-   implemented post RFC in GDAL 1.11
--  SQLite driver :
+-  GML:
+   현재, 피처 하나당 도형 하나만 리포트합니다. .gfs 파일을 직접 편집해서 이를 변경할 수도 있습니다.
+   --> 이 RFC 이후 GDAL 1.11버전에 구현했습니다.
 
-   -  currently, same behavior as current PostGIS driver.
-   -  both the driver and the SQLite dialect could be updated to support
-      multi-geometry layers. --> implemented post RFC in GDAL 2.0
+-  SQLite:
 
--  Google Fusion Tables driver : currently, only the first found
-   geometry column used. Possibility of specifying
-   "table_name(geometry_column_name)" as the layer name passed to
-   GetLayerByName().
--  VRT : some thoughts needed to find the syntax to support multiple
-   geometries. Impacted XML syntax : . at OGRVRTLayer element level :
-   GeometryType, LayerSRS, GeomField, SrcRegion,
-   ExtentXMin/YMin/XMax/YMax, . at OGRVRTWarpedLayer element level : add
-   new element to select the geometry field . at OGRVRTUnionLayer
-   element level : GeometryType, LayerSRS, ExtentXMin/YMin/XMax/YMax -->
-   implemented post RFC in GDAL 1.11
--  CSV : currently, take geometries from column named "WKT". To be
-   extended to support multiple geometry columns. Not sure worth the
-   effort. Could be done with the extended VRT driver. --> implemented
-   post RFC in GDAL 1.11
--  WFS : currently, only single-geometry layers supported. The standard
-   allows multi-geometry. Would require GML driver support first.
--  Other RDBMS based drivers: MySQL ?, MSSQLSpatial ? Oracle Spatial ?
+   -  현재, 현재 PostGIS 드라이버와 동일한 습성을 보입니다.
+   -  드라이버 및 SQLite 방언 둘 다 다중 도형 레이어를 지원하도록 업데이트할 수 있습니다.
+      --> 이 RFC 이후 GDAL 2.0버전에 구현했습니다.
 
-Utilities
----------
+-  Google Fusion Tables:
+   현재, 가장 처음 찾은 도형 열만 사용합니다.
+   GetLayerByName()에 전송되는 레이어 이름으로 "table_name(geometry_column_name)"을 지정할 수도 있습니다.
+
+-  VRT:
+   다중 도형 테이블을 지원하는 문법을 찾는 데 숙고가 필요합니다. 영향을 받을 XML 문법은:
+
+   -  OGRVRTLayer 요소 수준: GeometryType, LayerSRS, GeomField, SrcRegion, ExtentXMin/YMin/XMax/YMax
+   -  OGRVRTWarpedLayer 요소 수준: 도형 필드를 선택할 수 있는 새 요소를 추가해야 합니다.
+   -  OGRVRTUnionLayer 요소 수준: GeometryType, LayerSRS, ExtentXMin/YMin/XMax/YMax
+   
+   --> 이 RFC 이후 GDAL 1.11버전에 구현했습니다.
+
+-  CSV:
+   현재, "WKT"라는 이름의 열로부터 도형을 가져옵니다. 도형 열 여러 개를 지원하도록 확장해야 하는데 그럴 가치가 있는지 확실하지 않습니다. 확장된 VRT 드라이버로 지원할 수 있기 때문입니다.
+   --> 이 RFC 이후 GDAL 1.11버전에 구현했습니다.
+
+-  WFS:
+   현재 단일 도형 레이어만 지원합니다. 표준 사양은 다중 도형 레이어도 지원합니다. 먼저 GML 드라이버 지원이 필요할 것입니다.
+
+-  기타 RDBMS 기반 드라이버들:
+   MySQL? MSSQLSpatial? Oracle Spatial?
+
+유틸리티
+--------
 
 ogrinfo
 ~~~~~~~
 
-ogrinfo will be updated to report information related to multi-geometry
-support. Output is expected to be unchanged w.r.t current output in the
-case of single-geometry datasource.
+ogrinfo가 다중 도형 필드 지원 관련 정보를 리포트하도록 업데이트할 것입니다. 업데이트된 유틸리티의 산출물은 단일 도형 데이터소스의 경우 현재 산출물과 비교해서 변하지 않을 것으로 예상됩니다.
 
-Expected output for multi-geometry datasource:
+다중 도형 데이터소스의 경우 다음과 같은 산출물이 예상됩니다:
 
 ::
 
@@ -577,78 +459,69 @@ Expected output for multi-geometry datasource:
      polygon_geometry = POLYGON ((400000 4500000,400000 5000000,500000 5000000,500000 4500000,400000 4500000))
      centroid_geometry = POINT(2.5 48.5)
 
-A "-geomfield" option will be added to specify on which field the -spat
-option applies.
+"-spat" 옵션이 어떤 필드에 적용되는지 지정하는 "-geomfield" 옵션을 추가할 것입니다.
 
 ogr2ogr
 ~~~~~~~
 
-Enhancements :
+개선 사항:
 
--  will translate multi-geometry layers into multi-geometry layers if
-   supported by output layer (OLCCreateGeomField capability). In case it
-   is not supported, only translates the first geometry.
--  "-select" option. If only attribute field names are specified, all
-   input geometries will be implicitly selected (backward compatible
-   behavior). If one or several geometry field names are specified,
-   only those ones will be selected.
--  add a "-geomfield" option to specify on which field the -spat option
-   applies
--  the various geometry transformations (reprojection, clipping, etc.)
-   will be applied on all geometry fields.
+-  산출 레이어가 지원하는 경우 (OLCCreateGeomField 케이퍼빌리티) 다중 도형 레이어를 다중 도형 레이어로 변환할 것입니다. 지원하지 않는 경우, 첫 번째 도형만 변환합니다.
+
+-  "-select" 옵션을 개선해서 속성 필드 이름만 지정한 경우 모든 입력 도형을 암묵적으로 선택할 것입니다. (하위 호환을 위한 습성입니다.) 하나 이상의 도형 필드 이름을 지정한 경우, 지정한 필드들만 선택할 것입니다.
+
+-  "-spat" 옵션이 어떤 필드에 적용되는지 지정하는 "-geomfield" 옵션을 추가할 것입니다.
+
+-  모든 도형 필드에 다양한 도형 변환(재투영, 자르기 등등)을 적용할 것입니다.
 
 test_ogrsf
 ~~~~~~~~~~
 
-Will be enhanced with a few consistency checks :
+몇몇 일관성 검증으로 개선시킬 것입니다:
 
--  OGRLayer::GetSpatialRef() ==
-   OGRFeatureDefn::GetGeomField(0)->GetSpatialRef()
--  OGRLayer::GetGeomType() ==
-   OGRFeatureDefn::GetGeomField(0)->GetGeomType()
--  OGRLayer::GetGeometryColumn() ==
-   OGRFeatureDefn::GetGeomField(0)->GetNameRef()
+-  OGRLayer::GetSpatialRef() == OGRFeatureDefn::GetGeomField(0)->GetSpatialRef()
+-  OGRLayer::GetGeomType() == OGRFeatureDefn::GetGeomField(0)->GetGeomType()
+-  OGRLayer::GetGeometryColumn() == OGRFeatureDefn::GetGeomField(0)->GetNameRef()
 
-Spatial filtering tests will loop over all geometry fields.
+공간 필터 작업 테스트는 모든 도형 필드를 반복할 것입니다.
 
-Documentation
--------------
+문서화
+------
 
-In addition to function level documentation, the new capability will be
-documented in the :ref:`vector_data_model` and :ref:`vector_api_tut` documents.
+:ref:`vector_data_model` 및 :ref:`vector_api_tut` 문서에 함수 수준 문서화뿐만 아니라 새 케이퍼빌리티도 문서화될 것입니다.
 
-Python and other language bindings
-----------------------------------
+파이썬 및 기타 언어 바인딩
+--------------------------
 
-The new C API will be mapped to SWIG bindings. It will be only tested
-with the Python bindings. No new typemaps are expected, so this should
-work with other languages in a straightforward way.
+새로운 C API가 SWIG 바인딩에 매핑될 것입니다. 새 C API는 파이썬 바인딩과만 테스트될 것입니다. 새로운 유형 매핑(typemap)이 예상되지는 않기 때문에, 다른 언어들과도 단도직입적으로 작동할 것입니다.
 
-Compatibility
--------------
+호환성
+------
 
--  Changes are only additions to the existing API, and existing
-   behavior should be preserved, so this will be backwards compatible.
+-  이 변경 사항들은 기존 API에 추가될 뿐이고 기존 습성은 유지될 것이기 때문에, 하위 호환성을 보장할 것입니다.
 
--  C++ ABI changes
+-  C++ ABI가 변경될 것입니다.
 
--  Change of behavior in PostGIS driver w.r.t GDAL 1.10 for tables with
-   multiple geometries.
+-  GDAL 1.10버전과 관련해서, PostGIS 드라이버에서의 도형을 여러 개 가진 테이블에 대한 습성이 변경될 것입니다.
+Change of behavior in PostGIS driver w.r.t GDAL 1.10 for tables with multiple geometries.
 
-Implementation
---------------
+구현
+----
 
-Even Rouault will implement the above described changes for GDAL 1.11
-release, except the upgrade of the Interlis driver that will be done by
-Pirmin Kalberer.
+이벤 루올이 GDAL 1.11버전 배포판에 앞에서 설명한 변경 사항들을 구현할 것입니다.
+다만 Interlis 드라이버의 업그레이드는 피르민 칼베러(Pirmin Kalberer)가 수행할 것입니다.
 
-Funding
--------
+후원
+----
 
-This work is funded by the `Federal Office of Topography (swisstopo),
-COGIS <http://www.swisstopo.admin.ch/internet/swisstopo/en/home/swisstopo/org/kogis.html>`__
+`연방 지형 사무국(swisstopo), COGIS <https://www.swisstopo.admin.ch/en/swisstopo/organisation/cogis.html>`_ 이 이 작업을 후원했습니다.
 
 Voting history
 --------------
 
-+1 from EvenR, FrankW, HowardB, DanielM and TamasS
+-  이벤 루올 +1
+-  프랑크 바르메르담 +1
+-  하워드 버틀러 +1
+-  대니얼 모리셋 +1
+-  세케레시 터마시 +1
+
