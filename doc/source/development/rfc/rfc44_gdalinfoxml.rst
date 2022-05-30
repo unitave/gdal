@@ -1,44 +1,34 @@
 .. _rfc-44:
 
 =======================================================================================
-RFC 44: Add Parseable Output Formats for ogrinfo and gdalinfo
+RFC 44: ogrinfo 및 gdalinfo에 파싱 가능한 산출 서식 추가
 =======================================================================================
 
-Authors: Dan "Ducky" Little, Faza Mahamood
+저자: 댄 리틀(Dan "Ducky" Little), 파자 마하무드(Faza Mahamood)
 
-Contacts: danlittle at yahoo dot com, fazamhd at live dot com
+연락처: danlittle@yahoo.com, fazamhd@live.com
 
-Status: Development. gdalinfo -json implemented in GDAL 2.0
+상태: 개발 중, GDAL 2.0버전에 "gdalinfo -json" 구현
 
-Summary
--------
+요약
+----
 
-Add XML and JSON output to the ogrinfo and gdalinfo utilities.
+ogrinfo 및 gdalinfo 유틸리티에 XML과 JSON 산출물을 추가할 것을 제안합니다.
 
-Background
-----------
+배경
+----
 
-ogrinfo and gdalinfo are incredibly useful metadata gathering tools.
-Their native text-based output formats, however, are not easily
-parseable by common external tools. Both XML and JSON are easily parsed
-and adding those output formats would substantially increase the utility
-for those looking to add the ogrinfo and gdalinfo utilities to a
-scripting stack.
+ogrinfo 및 gdalinfo는 너무나도 유용한 메타데이터 수집 도구들입니다. 하지만 이 유틸리티들의 네이티브한 텍스트 기반 서식은 흔히 사용되는 외부 도구들로 쉽게 파싱할 수 없습니다. XML과 JSON은 둘 다 쉽게 파싱할 수 있는 서식으로, 이 산출 서식들을 추가하면 ogrinfo 및 gdalinfo 유틸리티를 스크립트 작업 스택에 추가하려는 사람들을 위한 활용성이 크게 증가할 것입니다.
 
-Implementation
---------------
+구현
+----
 
-An example implementation can be seen at the following github fork
-`https://github.com/theduckylittle/gdal/blob/trunk/gdal/apps/ogrinfo.cpp <https://github.com/theduckylittle/gdal/blob/trunk/gdal/apps/ogrinfo.cpp>`__
+`이 깃허브 포크 <https://github.com/theduckylittle/gdal/blob/trunk/gdal/apps/ogrinfo.cpp>`_ 에서 이 RFC의 구현 예시를 찾아볼 수 있습니다.
 
-To add the XML output to each utility will require "breaking up" the
-main loop into contingent chunks. All diagnostic messages will also need
-to be moved to STDERR to ensure that output on STDOUT is always
-parseable. The XML representation will be constructed using the MiniXML
-library built into GDAL.
+각 유틸리티에 XML 산출물을 추가하려면 주 루프(main loop)를 조건부 덩어리(contingent chunk)들로 "분할"해야 할 것입니다. STDOUT 상에서의 산출물을 항상 파싱할 수 있다는 사실을 보장하기 위해 모든 진단 메시지도 STDERR로 이동시켜야 할 것입니다. GDAL 안에 빌드된 MiniXML 라이브러리를 사용해서 XML 표현을 구성할 것입니다.
 
-Proposed json format for gdalinfo
----------------------------------
+gdalinfo에 대해 제안하는 JSON 서식
+----------------------------------
 
 ::
 
@@ -310,45 +300,39 @@ Proposed json format for gdalinfo
        ]
    }
 
-Impacted drivers
-----------------
+영향을 받는 드라이버
+--------------------
 
-None.
+없음.
 
-Impacted utilities
-------------------
+영향을 받는 유틸리티
+--------------------
 
-gdalinfo
+-  gdalinfo
 
--  Adds a "-xml" output option.
--  Adds a "-json" output option.
+   -  "-xml" 산출 옵션을 추가합니다.
+   -  "-json" 산출 옵션을 추가합니다.
 
-ogrinfo
+-  ogrinfo
 
--  Adds a "-xml" output option.
--  Adds a "-json" output option.
+   -  "-xml" 산출 옵션을 추가합니다.
+   -  "-json" 산출 옵션을 추가합니다.
 
-Backward Compatibility
-----------------------
+하위 호환성
+-----------
 
-This change has no impact on backward compatibility at the C API/ABI and
-C++ API/ABI levels. Default output will remain the same. The new XML
-output will only effect users who specify "-xml" or "-json" on the
-command line.
+이 변경 사항은 C API/ABI 및 C++ API/ABI 수준에서 하위 호환성에 어떤 영향도 미치지 않습니다. 기본 산출물은 그대로 유지될 것입니다. 새로운 XML 산출물은 명령줄에 "-xml" 또는 "-json"을 지정한 사용자들에게만 영향을 미칠 것입니다.
 
-Testing
--------
-
-The Python autotest suite will be extended to test the new XML/JSON
-outputs and existing tests will be modified to check STDERR for
-diagnostic messages.
-
-Ticket
+테스트
 ------
 
-No tickets.
+파이썬 자동 테스트 스위트가 새 XML/JSON 산출물을 테스트하도록 확장하고, 기존 테스트들이 진단(diagnostic) 메시지를 위해 STDERR를 확인하도록 수정할 것입니다.
 
-Voting history
---------------
+티켓
+----
 
-Proposed.
+없음.
+
+투표 이력
+---------
+
