@@ -1,187 +1,122 @@
 .. _rfc-45:
 
 =======================================================================================
-RFC 45: GDAL datasets and raster bands as virtual memory mappings
+RFC 45: 가상 메모리 매핑으로서의 GDAL 데이터셋 및 래스터 밴드
 =======================================================================================
 
-Authors: Even Rouault
+저자: 이벤 루올
 
-Contact: even dot rouault at spatialys.com
+연락처: even.rouault@spatialys.com
 
-Status: Adopted, implemented
+상태: 승인, 구현
 
-Summary
--------
+요약
+----
 
-This document proposes additions to GDAL so that image data of GDAL
-datasets and raster bands can be seen as virtual memory mappings, for
-hopefully simpler usage.
+이 RFC는 GDAL에 -- 바라건대 보다 단순한 사용례를 위해 -- GDAL 데이터셋 및 래스터 밴드의 이미지 데이터를 가상 메모리 매핑으로 표시할 수 있도록 해주는 추가 사항들을 제안합니다.
 
-Rationale
----------
+근거
+----
 
-When one wants to read or write image data from/into a GDAL dataset or
-raster band, one must use the RasterIO() interface for the regions of
-interest that are read or written. For small images, the most convenient
-solution is usually to read/write the whole image in a single request
-where the region of interest is the full raster extent. For larger
-images, particularly when they do not fit entirely in RAM, this is not
-possible, and if one wants to operate on the whole image, one must use a
-windowing strategy to avoid memory issues : typically by proceeding
-scanline (or group of scanlines) by scanline, or by blocks for tiled
-images. This can make the writing of algorithms more complicated when
-they need to access a neighbourhood of pixels around each pixel of
-interest, since the size of this extra window must be taken into
-account, leading to overlapping regions of interests. Nothing that
-cannot be solved, but that requires some additional thinking that
-distracts from the followed main purpose.
+GDAL 데이터셋 또는 래스터 밴드에서 이미지 데이터를 읽거나 쓰려면 읽거나 쓰는 관심 영역에 대해 RasterIO() 인터페이스를 사용해야만 합니다. 소용량 이미지의 경우, 가장 간편한 해결책은 일반적으로 관심 영역이 전체 래스터 범위인 단일 요청으로 전체 이미지를 읽기/쓰기 하는 것입니다. 대용량 이미지의 경우, 특히 이미지 데이터의 용량이 RAM을 초과하는 경우 이런 접근법이 불가능하며, 전체 이미지를 작업하려면 메모리 문제를 피하기 위해 창 작업 전략을 이용해야만 합니다: 일반적으로 스캔라인별로 (또는 스캔라인 그룹별로) 또는 타일화 이미지의 경우 블록별로 처리합니다. 이는 각 관심 픽셀 주변의 이웃 픽셀에 접근해야 하는 경우 알고리즘 작성을 더 복잡하게 만들 수 있습니다. 이 추가 창의 크기를 고려해야만 하기 때문에 관심 영역들이 중첩하게 되기 때문입니다. 해결할 수 없는 문제는 아니지만, 추구하는 주요 목적으로부터 주의를 분산시키는 추가적인 사고가 필요합니다.
 
-The proposed addition of this RFC is to make the image data appear as a
-single array accessed with a pointer, without being limited by the size
-of RAM with respect to the size of the dataset (excepted limitations
-imposed by the CPU architecture and the operating system)
+이 RFC가 제안하는 추가 사항은 (CPU 아키텍처 및 운영 체제가 부과하는 제한을 제외하고) 데이터셋 용량 대비 RAM 용량으로 제한받지 않고 포인터로 접근할 수 있는 단일 배열로 이미지 데이터를 표현하도록 합니다.
 
-Technical solution
-~~~~~~~~~~~~~~~~~~
+기술적 해결책
+~~~~~~~~~~~~~
 
-Low-level machinery : cpl_virtualmem.h
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+저수준 메커니즘: cpl_virtualmem.h
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The low-level machinery to support this new capability is a
-CPLVirtualMem object that represents an area of virtual memory ( on
-Linux, an area of virtual memory allocated by the mmap() function ).
-This virtual memory area is initially just reserved in terms of virtual
-memory space, but has no actual allocation in physical memory. This
-reserved virtual memory space is protected with an access permission
-that cause any attempt to access it to result in an exception - a page
-fault, that on POSIX systems triggers a SIGSEGV signal (segmentation
-fault). Fortunately, segmentation faults can be caught by the software
-with a signal handler. When such a segmentation fault occurs, our
-specialized signal handler will check if it occurs in a virtual memory
-region under its responsibility and, if so, it will proceed to fill the
-part (a "page") of the virtual memory area that has been accessed with
-sensible values (thanks to a user provided callback). It will then set
-appropriate permissions to the page (read-only or read-write), before
-attempting again the instruction that triggered the segmentation fault.
-From the point of view of the user code that accesses the memory
-mapping, this is completely transparent, and this is equivalent as if
-the whole virtual memory area had been filled from the start.
+이 새로운 케이퍼빌리티를 지원하는 저수준 메커니즘은 가상 메모리 영역(리눅스 상에서는 mmap() 함수가 할당하는 가상 메모리 영역)을 표현하는 CPLVirtualMem 객체입니다. 이 가상 메모리 영역은 초기에 가상 메모리 공간이라는 측면에서만 예약되어 있는데, 실제 메모리에는 할당되어 있지 않습니다. 이 예약된 가상 메모리 공간은 POSIX 시스템 상에서 가상 메모리 공간에 접근하려는 모든 시도가 SIGSEGV 신호(분할 폴트)를 촉발하는 예외 -- 페이지 폴트 -- 를 발생시키는 접근 권한으로 보호됩니다. 다행히 소프트웨어에서 신호 처리기(signal handler)를 사용해서 분할 폴트를 포착할 수 있습니다. 이런 분할 폴트가 방생하는 경우 특수 신호 처리기가 자신의 책임 하에 있는 가상 메모리 영역에서 분할 폴트가 발생하는지 확인하고, 그렇다면 접근한 가상 메모리 영역의 일부분("페이지")을 (사용자가 제공한 콜백 덕분에) 합리적인 값으로 채우는 작업을 처리할 것입니다. 그 다음 분할 폴트를 촉발한 명령을 다시 시도하기 전에 페이지에 대한 적절한 권한(읽기 전용 또는 읽기-쓰기)을 설정할 것입니다. 메모리 매핑에 접근하는 사용자 코드의 관점에서 보면 이 과정은 완전히 투명하며, 처음부터 전체 가상 메모리 영역을 채우는 것과 동일합니다.
 
-For very large mappings that are larger than RAM, this would still cause
-disk swapping to occur at a certain point. To avoid that, the
-segmentation fault handler will evict the least recently used pages,
-once a threshold defined at the creation of the CPLVirtualMem object has
-been reached.
+RAM 용량을 초과하는 대용량 매핑의 경우, 여전히 특정 시점에서 디스크 스왑 작업을 발생시킬 것입니다. 이를 피하기 위해, CPLVirtualMem 객체 생성 시 정의된 한계값에 도달하면 분할 폴트 처리기가 가장 최근에 사용된 페이지를 제거할 것입니다.
 
-For write support, another callback can be passed. It will be called
-before a page is evicted so that user code has a chance to flush its
-content to a more persistent storage.
+쓰기 지원의 경우 또다른 콜백을 전송하면 됩니다. 페이지를 제거하기 전에 콜백을 호출하기 때문에 사용자 코드가 자신의 콘텐츠를 보다 영구적인 저장소로 플러시할 수 있는 기회를 가지게 됩니다.
 
-We also offer an alternative way of creating a CPLVirtualMem object, by
-using memory file mapping mechanisms. This may be used by "raw" datasets
-(EHdr driver for example) where the organization of data on disk
-directly matches the organization of a in-memory array.
+또한 메모리 파일 매핑 메커니즘을 사용해서 CPLVirtualMem 객체를 생성하는 다른 방법도 제공합니다. 디스크 상에 있는 데이터의 구성이 인메모리 배열의 구성과 완전히 일치하는 "원시(raw)" 데이터셋이 (예를 들면 EHdr 드라이버에서) 이 방법을 사용할 수도 있습니다.
 
-High-level usage
-^^^^^^^^^^^^^^^^
+고수준 사용례
+^^^^^^^^^^^^^
 
-Four new API are introduced (detailed in further section):
+새 API 4개를 도입합니다(다른 단락에서 자세히 설명합니다):
 
--  GDALDatasetGetVirtualMem() : takes almost the same arguments as
-   GDALDatasetRasterIO(), with the notable exception of a pData buffer.
-   It returns a CPLVirtualMem\* object, from which the base address of
-   the virtual memory mapping can be obtained with
-   CPLVirtualMemGetAddr().
+-  :cpp:func:`GDALDatasetGetVirtualMem`:
+   주목할 만한 'pData' 버퍼를 제외하면, GDALDatasetRasterIO()와 거의 동일한 인자들을 입력받습니다. CPLVirtualMemGetAddr() 메소드를 사용해서 가상 메모리 매핑의 기반 주소를 가져올 수 있는 ``CPLVirtualMem*`` 객체를 반환합니다.
 
 .. image:: ../../../images/rfc45/rfc_2d_array.png
 
--  GDALRasterBandGetVirtualMem(): equivalent of
-   GDALDatasetGetVirtualMem() that operates on a raster band object
-   rather than a dataset object.
+-  :cpp:func:`GDALRasterBandGetVirtualMem`:
+   데이터셋 객체보다는 래스터 밴드 객체 상에서 작업하는 GDALDatasetGetVirtualMem()과 동일합니다.
 
--  GDALDatasetGetTiledVirtualMem(): this is a rather original API.
-   Instead of presenting a 2D view of the image data (i.e. organized
-   rows by rows), the mapping exposes it as an array of tiles, which is
-   more suitable, performance wise, when the dataset is itself tiled.
+-  :cpp:func:`GDALDatasetGetTiledVirtualMem`:
+   다소 독창적인 API입니다. 데이터셋 자체가 타일화되어 있는 경우, 매핑이 이미지 데이터의 (예를 들어 행별로 구성된) 2차원 뷰를 표현하는 대신 성능면에서 더 적합한 타일 배열로 노출시킵니다.
 
 .. image:: ../../../images/rfc45/rfc_tiled.png
 
-When they are several bands, 3 different organizations of band
-components are possible. To the best of our knowledge, there is no
-standard way of calling those organizations, which consequently will be
-best illustrated by the following schemas :
+밴드가 여러 개인 경우, 밴드 구성 요소들을 서로 다른 세 가지로 구성할 수 있습니다. 알려진 한도 내에서 이런 구성들을 부르는 표준적인 방법은 없기 때문에 결과적으로 다음과 같은 스키마들로 가장 잘 설명할 수 있을 것입니다:
 
-- TIP / Tile Interleaved by Pixel
+- TIP / 픽셀이 교차삽입된 타일(Tile Interleaved by Pixel)
 
 .. image:: ../../../images/rfc45/rfc_TIP.png
    :alt: TIP / Tile Interleaved by Pixel
 
-- BIT / Band Interleaved by Tile
+- BIT / 타일이 교차삽입된 밴드(Band Interleaved by Tile)
 
 .. image:: ../../../images/rfc45/rfc_BIT.png
    :alt: BIT / Band Interleaved by Tile
 
-- BSQ / Band SeQuential organization
+- BSQ / 밴드 순차 구성(Band SeQuential organization)
 
 .. image:: ../../../images/rfc45/rfc_BSQ.png
    :alt: BSQ / Band SeQuential organization
 
--  GDALRasterBandGetTiledVirtualMem(): equivalent of
-   GDALDatasetGetTiledVirtualMem() that operates on a raster band object
-   rather than a dataset object.
+-  :cpp:func:`GDALRasterBandGetTiledVirtualMem`:
+   데이터셋 객체보다는 래스터 밴드 객체 상에서 작업하는 GDALDatasetGetTiledVirtualMem()과 동일합니다.
 
--  GDALGetVirtualMemAuto(): simplified version of
-   GDALRasterBandGetVirtualMem() where the user only specifies the
-   access mode. The pixel spacing and line spacing are returned by the
-   function. This is implemented as a virtual method at the
-   GDALRasterBand level, so that drivers have a chance of overriding the
-   base implementation. The base implementation just uses
-   GDALRasterBandGetVirtualMem(). Overridden implementation may use the
-   memory file mapping mechanism instead. Such implementations will be
-   done in the RawRasterBand object and in the GeoTIFF driver.
+-  :cpp:func:`GDALGetVirtualMemAuto`:
+   사용자가 접근 모드만 지정하는 GDALRasterBandGetVirtualMem()를 단순화시킨 버전입니다. 이 함수는 픽셀 간격 및 줄 간격을 반환합니다. 이 함수는 :cpp:class:`GDALRasterBand` 클래스 수준에서 가상 메소드로 구현되기 때문에 드라이버가 GDALRasterBandGetVirtualMem()만 사용하는 기본 구현을 대체할 수 있는 기회를 가집니다. 대체 구현은 메모리 파일 매핑 메커니즘을 대신 사용할 수도 있습니다. RawRasterBand 객체 및 GeoTIFF 드라이버에서 이렇게 구현될 것입니다.
 
-Details of new API
+새 API의 상세 사항
 ------------------
 
 .. _implemented-by-cpl_virtualmemcpp:
 
-Implemented by cpl_virtualmem.cpp
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cpl_virtualmem.cpp로 구현
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
    /**
     * \file cpl_virtualmem.h
     *
-    * Virtual memory management.
+    * 가상 메모리 관리.
     *
-    * This file provides mechanism to define virtual memory mappings, whose content
-    * is allocated transparently and filled on-the-fly. Those virtual memory mappings
-    * can be much larger than the available RAM, but only parts of the virtual
-    * memory mapping, in the limit of the allowed the cache size, will actually be
-    * physically allocated.
+    * 이 파일은 그 내용을 투명하게 할당하고 실시간(on-the-fly)으로 채우는 가상 메모리
+    * 매핑을 정의하는 메커니즘을 제공합니다. 이런 가상 메모리 매핑은 사용할 수 있는
+    * RAM 용량을 훨씬 초과할 수 있지만, 허용된 캐시 용량 제한 내에서 가상 메모리 매핑의
+    * 일부만 실제로 할당됩니다.
     *
-    * This exploits low-level mechanisms of the operating system (virtual memory
-    * allocation, page protection and handler of virtual memory exceptions).
+    * 이 과정에서 운영 체제의 저수준 메커니즘(가상 메모리 할당, 페이지 보호 및
+    * 가상 메모리 예외 처리기)을 이용합니다.
     *
-    * It is also possible to create a virtual memory mapping from a file or part
-    * of a file.
+    * 파일 또는 파일의 일부분으로부터 가상 메모리 매핑을 생성할 수도 있습니다.
     *
-    * The current implementation is Linux only.
+    * 현재 구현은 리눅스 전용입니다.
     */
 
-   /** Opaque type that represents a virtual memory mapping. */
+   /** 가상 메모리 매핑을 표현하는 불투명(opaque) 데이터 유형입니다. */
    typedef struct CPLVirtualMem CPLVirtualMem;
 
-   /** Callback triggered when a still unmapped page of virtual memory is accessed.
-     * The callback has the responsibility of filling the page with relevant values
+   /** 가상 메모리의 아직 매핑되지 않은 페이지에 접근하는 경우 촉발되는 콜백입니다.
+     * 이 콜백은 페이지를 관련 값으로 채울 책임을 집니다.
      *
-     * @param ctxt virtual memory handle.
-     * @param nOffset offset of the page in the memory mapping.
-     * @param pPageToFill address of the page to fill. Note that the address might
-     *                    be a temporary location, and not at CPLVirtualMemGetAddr() + nOffset.
-     * @param nToFill number of bytes of the page.
-     * @param pUserData user data that was passed to CPLVirtualMemNew().
+     * @param ctxt 가상 메모리 핸들입니다.
+     * @param nOffset 메모리 매핑에서의 페이지 오프셋입니다.
+     * @param pPageToFill 채워야 할 페이지의 주소입니다. 이 주소가 CPLVirtualMemGetAddr()
+                          + nOffset 위치가 아니라 임시 위치일 수도 있다는 사실을 기억하십시오.
+     * @param nToFill 페이지의 바이트 개수입니다.
+     * @param pUserData CPLVirtualMemNew()에 전송된 사용자 데이터입니다.
      */
    typedef void (*CPLVirtualMemCachePageCbk)(CPLVirtualMem* ctxt,
                                        size_t nOffset,
@@ -189,15 +124,16 @@ Implemented by cpl_virtualmem.cpp
                                        size_t nToFill,
                                        void* pUserData);
 
-   /** Callback triggered when a dirty mapped page is going to be freed.
-     * (saturation of cache, or termination of the virtual memory mapping).
+   /** 지저분하게 매핑된(dirty mapped) 페이지를 해제하려 하는 경우 (캐시의 포화 또는
+     * 가상 메모리 매핑의 종료) 촉발되는 콜백입니다.
      *
-     * @param ctxt virtual memory handle.
-     * @param nOffset offset of the page in the memory mapping.
-     * @param pPageToBeEvicted address of the page that will be flushed. Note that the address might
-     *                    be a temporary location, and not at CPLVirtualMemGetAddr() + nOffset.
-     * @param nToBeEvicted number of bytes of the page.
-     * @param pUserData user data that was passed to CPLVirtualMemNew().
+     * @param ctxt 가상 메모리 핸들입니다.
+     * @param nOffset 메모리 매핑에서의 페이지 오프셋입니다.
+     * @param pPageToBeEvicted 플러시할 페이지의 주소입니다. 이 주소가 
+     *                         CPLVirtualMemGetAddr() + nOffset 위치가 아니라
+     *                         임시 위치일 수도 있다는 사실을 기억하십시오.
+     * @param nToBeEvicted 페이지의 바이트 개수입니다.
+     * @param pUserData CPLVirtualMemNew()에 전송된 사용자 데이터입니다.
      */
    typedef void (*CPLVirtualMemUnCachePageCbk)(CPLVirtualMem* ctxt,
                                          size_t nOffset,
@@ -205,74 +141,74 @@ Implemented by cpl_virtualmem.cpp
                                          size_t nToBeEvicted,
                                          void* pUserData);
 
-   /** Callback triggered when a virtual memory mapping is destroyed.
-     * @param pUserData user data that was passed to CPLVirtualMemNew().
+   /** 가상 메모리 매핑을 삭제(destroy)하는 경우 촉발되는 콜백입니다.
+     * @param pUserData CPLVirtualMemNew()에 전송된 사용자 데이터입니다.
     */
    typedef void (*CPLVirtualMemFreeUserData)(void* pUserData);
 
-   /** Access mode of a virtual memory mapping. */
+   /** 가상 메모리 매핑의 접근 모드입니다. */
    typedef enum
    {
-       /*! The mapping is meant at being read-only, but writes will not be prevented.
-           Note that any content written will be lost. */
+       /*! 매핑은 읽기 전용이지만 쓰기를 방지하지는 않을 것입니다.
+           작성된 내용은 모두 손실될 것이라는 사실을 기억하십시오. */
        VIRTUALMEM_READONLY,
-       /*! The mapping is meant at being read-only, and this will be enforced 
-           through the operating system page protection mechanism. */
+       /*! 매핑은 읽기 전용이며, 운영 체제 페이지 보호 메커니즘을 통해
+           이를 강제합니다. */
        VIRTUALMEM_READONLY_ENFORCED,
-       /*! The mapping is meant at being read-write, and modified pages can be saved
-           thanks to the pfnUnCachePage callback */
+       /*! 매핑은 읽기-쓰기이며, pfnUnCachePage 콜백 덕분에 수정한
+           페이지를 저장할 수 있습니다. */
        VIRTUALMEM_READWRITE
    } CPLVirtualMemAccessMode;
 
 
-   /** Return the size of a page of virtual memory.
+   /** 가상 메모리 페이지 용량을 반환합니다.
     *
-    * @return the page size.
+    * @return 페이지 용량을 반환합니다.
     *
     * @since GDAL 1.11
     */
    size_t CPL_DLL CPLGetPageSize(void);
 
-   /** Create a new virtual memory mapping.
+   /** 새로운 가상 메모리 매핑을 생성합니다.
     *
-    * This will reserve an area of virtual memory of size nSize, whose size
-    * might be potentially much larger than the physical memory available. Initially,
-    * no physical memory will be allocated. As soon as memory pages will be accessed,
-    * they will be allocated transparently and filled with the pfnCachePage callback.
-    * When the allowed cache size is reached, the least recently used pages will
-    * be unallocated.
+    * nSize 용량의 가상 메모리 영역을 예약할 것인데, 그 용량이 사용할 수 있는
+    * 실제 메모리를 훨씬 초과할 수도 있습니다. 초기에는 실제 메모리를 할당하지
+    * 않을 것입니다. 메모리 페이지에 접근하는 즉시 실제 메모리를 투명하게 할당하고
+    * pfnCachePage 콜백으로 채울 것입니다. 허용된 캐시 용량에 도달하면
+    * 가장 최근에 사용한 페이지를 할당 해제할 것입니다.
     *
-    * On Linux AMD64 platforms, the maximum value for nSize is 128 TB.
-    * On Linux x86 platforms, the maximum value for nSize is 2 GB.
+    * 리눅스 AMD64 플랫폼 상에서 nSize의 최대값은 128TB입니다.
+    * 리눅스 x86 플랫폼 상에서 nSize의 최대값은 2GB입니다.
     *
-    * Only supported on Linux for now.
+    * 현재 리눅스 상에서만 지원됩니다.
     *
-    * Note that on Linux, this function will install a SIGSEGV handler. The
-    * original handler will be restored by CPLVirtualMemManagerTerminate().
+    * 리눅스 상에서 이 함수는 SIGSEGV 처리기를 설치할 것입니다.
+    * CPLVirtualMemManagerTerminate()가 원본 처리기를 복원할 것입니다.
     *
-    * @param nSize size in bytes of the virtual memory mapping.
-    * @param nCacheSize   size in bytes of the maximum memory that will be really
-    *                     allocated (must ideally fit into RAM).
-    * @param nPageSizeHint hint for the page size. Must be a multiple of the
-    *                      system page size, returned by CPLGetPageSize().
-    *                      Minimum value is generally 4096. Might be set to 0 to
-    *                      let the function determine a default page size.
-    * @param bSingleThreadUsage set to TRUE if there will be no concurrent threads
-    *                           that will access the virtual memory mapping. This can
-    *                           optimize performance a bit.
-    * @param eAccessMode permission to use for the virtual memory mapping.
-    * @param pfnCachePage callback triggered when a still unmapped page of virtual
-    *                     memory is accessed. The callback has the responsibility
-    *                     of filling the page with relevant values.
-    * @param pfnUnCachePage callback triggered when a dirty mapped page is going to
-    *                       be freed (saturation of cache, or termination of the
-    *                       virtual memory mapping). Might be NULL.
-    * @param pfnFreeUserData callback that can be used to free pCbkUserData. Might be
-    *                        NULL
-    * @param pCbkUserData user data passed to pfnCachePage and pfnUnCachePage.
+    * @param nSize 가상 메모리 매핑의 바이트 단위 용량입니다.
+    * @param nCacheSize 실제로 할당될 바이트 단위 최대 메모리 용량입니다.
+    *                   (이상적으로는 RAM 용량 이하여야만 합니다.)
+    * @param nPageSizeHint 페이지 용량에 대한 힌트입니다. CPLGetPageSize()가
+    *                      반환한 시스템 페이지 용량의 배수여야만 합니다.
+    *                      일반적으로 최소값은 4096입니다. 함수가 기본 페이지
+    *                      용량을 결정하게 하려면 0으로 설정할 수도 있습니다.
+    * @param bSingleThreadUsage 가상 메모리 매핑에 동시에 접근할 스레드들이
+    *                           없는 경우 TRUE로 설정하십시오. 이렇게 하면
+    *                           성능을 조금 최적화할 수 있습니다.
+    * @param eAccessMode 가상 메모리 매핑에 사용할 권한입니다.
+    * @param pfnCachePage 가상 메모리의 아직 매핑되지 않은 페이지에 접근하는
+    *                     경우 촉발되는 콜백입니다.
+    *                     이 콜백은 페이지를 관련 값으로 채울 책임을 집니다.
+    * @param pfnUnCachePage 지저분하게 매핑된(dirty mapped) 페이지를 해제하려
+    *                       하는 경우 (캐시의 포화 또는 가상 메모리 매핑의 종료)
+    *                       촉발되는 콜백입니다. NULL일 수도 있습니다.
+    * @param pfnFreeUserData pCbkUserData를 해제하기 위해 사용할 수 있는
+    *                        콜백입니다. NULL일 수도 있습니다.
+    * @param pCbkUserData pfnCachePage 및 pfnUnCachePageuser에 전송되는
+    *                     사용자 데이터입니다.
     *
-    * @return a virtual memory object that must be freed by CPLVirtualMemFree(),
-    *         or NULL in case of failure.
+    * @return CPLVirtualMemFree()로 해제해야만 하는 가상 메모리 객체를,
+    *         또는 실패하는 경우 NULL을 반환합니다.
     *
     * @since GDAL 1.11
     */
@@ -288,35 +224,35 @@ Implemented by cpl_virtualmem.cpp
                                            void *pCbkUserData);
 
 
-   /** Return if virtual memory mapping of a file is available.
+   /** 파일의 가상 메모리 매핑을 사용할 수 있는지 여부를 반환합니다.
     *
-    * @return TRUE if virtual memory mapping of a file is available.
+    * @return 파일의 가상 메모리 매핑을 사용할 수 있는 경우 TRUE를 반환합니다.
     * @since GDAL 1.11
     */
    int CPL_DLL CPLIsVirtualMemFileMapAvailable(void);
 
-   /** Create a new virtual memory mapping from a file.
+   /** 파일로부터 새 가상 메모리 매핑을 생성합니다.
     *
-    * The file must be a "real" file recognized by the operating system, and not
-    * a VSI extended virtual file.
+    * 이 파일은 VSI 확장 가상 파일이 아니라 운영 체제가 인식하는
+    * "진짜" 파일이어야만 합니다.
     *
-    * In VIRTUALMEM_READWRITE mode, updates to the memory mapping will be written
-    * in the file.
+    * VIRTUALMEM_READWRITE 모드에서는, 파일에 메모리 매핑에 대한
+    * 업데이트를 작성할 것입니다.
     *
-    * On Linux AMD64 platforms, the maximum value for nLength is 128 TB.
-    * On Linux x86 platforms, the maximum value for nLength is 2 GB.
+    * 리눅스 AMD64 플랫폼 상에서 nLength의 최대값은 128TB입니다.
+    * 리눅스 x86 플랫폼 상에서 nLength의 최대값은 2GB입니다.
     *
-    * Only supported on Linux for now.
+    * 현재 리눅스 상에서만 지원됩니다.
     *
-    * @param  fp       Virtual file handle.
-    * @param  nOffset  Offset in the file to start the mapping from.
-    * @param  nLength  Length of the portion of the file to map into memory.
-    * @param eAccessMode Permission to use for the virtual memory mapping. This must
-    *                    be consistent with how the file has been opened.
-    * @param pfnFreeUserData callback that is called when the object is destroyed.
-    * @param pCbkUserData user data passed to pfnFreeUserData.
-    * @return a virtual memory object that must be freed by CPLVirtualMemFree(),
-    *         or NULL in case of failure.
+    * @param  fp       가상 파일 핸들입니다.
+    * @param  nOffset  파일에서 매핑을 시작할 오프셋입니다.
+    * @param  nLength  파일에서 메모리로 매핑할 부분의 길이입니다.
+    * @param eAccessMode 가상 메모리 매핑에 사용할 권한입니다.
+    *                    파일을 연 권한과 일관되어야만 합니다.
+    * @param pfnFreeUserData 객체를 삭제(destroy)할 때 호출하는 콜백입니다.
+    * @param pCbkUserData pfnFreeUserData로 전송되는 사용자 데이터입니다.
+    * @return CPLVirtualMemFree()로 해제해야만 하는 가상 메모리 객체를,
+    *         또는 실패하는 경우 NULL을 반환합니다.
     *
     * @since GDAL 1.11
     */
@@ -327,22 +263,19 @@ Implemented by cpl_virtualmem.cpp
                                                    CPLVirtualMemFreeUserData pfnFreeUserData,
                                                    void *pCbkUserData );
 
-   /** Create a new virtual memory mapping derived from an other virtual memory
-    *  mapping.
+   /** 다른 가상 메모리로부터 파생된 새 가상 메모리 매핑을 생성합니다.
     *
-    * This may be useful in case of creating mapping for pixel interleaved data.
+    * 픽셀 교차삽입 데이터에 대해 매핑을 생성하는 경우 유용할 수도 있습니다.
     *
-    * The new mapping takes a reference on the base mapping.
+    * 새 매핑은 기반 매핑을 참조합니다.
     *
-    * @param pVMemBase Base virtual memory mapping
-    * @param nOffset   Offset in the base virtual memory mapping from which to start
-    *                  the new mapping.
-    * @param nSize     Size of the base virtual memory mapping to expose in the
-    *                  the new mapping.
-    * @param pfnFreeUserData callback that is called when the object is destroyed.
-    * @param pCbkUserData user data passed to pfnFreeUserData.
-    * @return a virtual memory object that must be freed by CPLVirtualMemFree(),
-    *         or NULL in case of failure.
+    * @param pVMemBase 기반 가상 메모리 매핑입니다.
+    * @param nOffset   기반 가상 메모리 매핑에서 새 매핑을 시작할 오프셋입니다.
+    * @param nSize     새 매핑에 노출시킬 기반 가상 메모리 매핑의 용량입니다.
+    * @param pfnFreeUserData 객체를 삭제(destroy)할 때 호출하는 콜백입니다.
+    * @param pCbkUserData pfnFreeUserData로 전송되는 사용자 데이터입니다.
+    * @return CPLVirtualMemFree()로 해제해야만 하는 가상 메모리 객체를,
+    *         또는 실패하는 경우 NULL을 반환합니다.
     *
     * @since GDAL 1.11
     */
@@ -352,146 +285,142 @@ Implemented by cpl_virtualmem.cpp
                                                   CPLVirtualMemFreeUserData pfnFreeUserData,
                                                   void *pCbkUserData);
 
-   /** Free a virtual memory mapping.
+   /** 가상 메모리 매핑을 해제합니다.
     *
-    * The pointer returned by CPLVirtualMemGetAddr() will no longer be valid.
-    * If the virtual memory mapping was created with read/write permissions and that
-    * they are dirty (i.e. modified) pages, they will be flushed through the
-    * pfnUnCachePage callback before being freed.
+    * CPLVirtualMemGetAddr()가 반환하는 포인터가 더 이상 무결하지 않을 것입니다.
+    * 가상 메모리 매핑이 쓰기/읽기 권한으로 생성되었고 지저분한 (예를 들면 수정된)
+    * 페이지인 경우 해제되기 전에 pfnUnCachePage 콜백을 통해 플러시될 것입니다.
     *
-    * @param ctxt context returned by CPLVirtualMemNew().
+    * @param ctxt CPLVirtualMemNew()이 반환하는 맥락입니다.
     *
     * @since GDAL 1.11
     */
    void CPL_DLL CPLVirtualMemFree(CPLVirtualMem* ctxt);
 
-   /** Return the pointer to the start of a virtual memory mapping.
+   /** 가상 메모리 매핑의 시작을 가리키는 포인터를 반환합니다.
     *
-    * The bytes in the range [p:p+CPLVirtualMemGetSize()-1] where p is the pointer
-    * returned by this function will be valid, until CPLVirtualMemFree() is called.
+    * p가 이 함수가 반환한 포인터일 때, [p:p+CPLVirtualMemGetSize()-1] 범위 안에 있는
+    * 바이트들은 CPLVirtualMemFree()를 호출할 때까지 무결할 것입니다.
     *
-    * Note that if a range of bytes used as an argument of a system call
-    * (such as read() or write()) contains pages that have not been "realized", the
-    * system call will fail with EFAULT. CPLVirtualMemPin() can be used to work
-    * around this issue.
+    * (read() 또는 write() 같은) 시스템 호출의 인자로 사용되는 바이트 범위가
+    * "실체화되지 않은" 페이지를 담고 있는 경우 시스템 호출이 EFAULT와 함께
+    * 실패할 것입니다. 이 문제점을 피하려면 CPLVirtualMemPin()을 사용하면 됩니다.
     *
-    * @param ctxt context returned by CPLVirtualMemNew().
-    * @return the pointer to the start of a virtual memory mapping.
+    * @param ctxt CPLVirtualMemNew()이 반환하는 맥락입니다.
+    * @return 가상 메모리 매핑의 시작을 가리키는 포인터를 반환합니다.
     *
     * @since GDAL 1.11
     */
    void CPL_DLL *CPLVirtualMemGetAddr(CPLVirtualMem* ctxt);
 
-   /** Return the size of the virtual memory mapping.
+   /** 가상 메모리 매핑의 용량을 반환합니다.
     *
-    * @param ctxt context returned by CPLVirtualMemNew().
-    * @return the size of the virtual memory mapping.
+    * @param ctxt CPLVirtualMemNew()이 반환하는 맥락입니다.
+    * @return 가상 메모리 매핑의 용량을 반환합니다.
     *
     * @since GDAL 1.11
     */
    size_t CPL_DLL CPLVirtualMemGetSize(CPLVirtualMem* ctxt);
 
-   /** Return if the virtual memory mapping is a direct file mapping.
+   /** 가상 메모리 매핑이 직접 파일 매핑(direct file mapping)인지 여부를 반환합니다.
     *
-    * @param ctxt context returned by CPLVirtualMemNew().
-    * @return TRUE if the virtual memory mapping is a direct file mapping.
+    * @param ctxt CPLVirtualMemNew()이 반환하는 맥락입니다.
+    * @return 가상 메모리 매핑이 직접 파일 매핑인 경우 TRUE를 반환합니다.
     *
     * @since GDAL 1.11
     */
    int CPL_DLL CPLVirtualMemIsFileMapping(CPLVirtualMem* ctxt);
 
-   /** Return the access mode of the virtual memory mapping.
+   /** 가상 메모리 매핑의 접근 모드를 반환합니다.
     *
-    * @param ctxt context returned by CPLVirtualMemNew().
-    * @return the access mode of the virtual memory mapping.
+    * @param ctxt CPLVirtualMemNew()이 반환하는 맥락입니다.
+    * @return 가상 메모리 매핑의 접근 모드를 반환합니다.
     *
     * @since GDAL 1.11
     */
    CPLVirtualMemAccessMode CPL_DLL CPLVirtualMemGetAccessMode(CPLVirtualMem* ctxt);
 
-   /** Return the page size associated to a virtual memory mapping.
+   /** 가상 메모리 매핑에 연결된 페이지 용량을 반환합니다.
     *
-    * The value returned will be at least CPLGetPageSize(), but potentially
-    * larger.
+    * 반환 값이 최소한 CPLGetPageSize()일 것이며, 초과할 가능성도 있습니다.
     *
-    * @param ctxt context returned by CPLVirtualMemNew().
-    * @return the page size
+    * @param ctxt CPLVirtualMemNew()이 반환하는 맥락입니다.
+    * @return 페이지 용량을 반환합니다.
     *
     * @since GDAL 1.11
     */
    size_t CPL_DLL CPLVirtualMemGetPageSize(CPLVirtualMem* ctxt);
 
-   /** Return TRUE if this memory mapping can be accessed safely from concurrent
-    *  threads.
+   /** 동시(concurrent) 스레드들로부터 이 메모리 매핑에 안전하게 접근할 수
+    * 있는 경우 TRUE를 반환합니다.
     *
-    * The situation that can cause problems is when several threads try to access
-    * a page of the mapping that is not yet mapped.
+    * 문제가 발생할 수 있는 상황은 스레드 여러 개가 아직 매핑되지 않은
+    * 매핑 페이지에 접근하려 시도하는 경우입니다.
     *
-    * The return value of this function depends on whether bSingleThreadUsage has
-    * been set of not in CPLVirtualMemNew() and/or the implementation.
+    * 이 함수가 반환하는 값은 bSingleThreadUsage가 CPLVirtualMemNew()
+    * 그리고/또는 구현에 설정되지 않았는지 여부에 따라 달라집니다.
     *
-    * On Linux, this will always return TRUE if bSingleThreadUsage = FALSE.
+    * 리눅스 상에서 bSingleThreadUsage = FALSE인 경우
+    * 이 함수는 항상 TRUE를 반환합니다.
     *
-    * @param ctxt context returned by CPLVirtualMemNew().
-    * @return TRUE if this memory mapping can be accessed safely from concurrent
-    *         threads.
+    * @param ctxt CPLVirtualMemNew()이 반환하는 맥락입니다.
+    * @return 동시 스레드들로부터 이 메모리 매핑에 안전하게 접근할 수
+    * 있는 경우 TRUE를 반환합니다.
     *
     * @since GDAL 1.11
     */
    int CPL_DLL CPLVirtualMemIsAccessThreadSafe(CPLVirtualMem* ctxt);
 
-   /** Declare that a thread will access a virtual memory mapping.
+   /** 스레드가 가상 메모리 매핑에 접근할 것이라고 선언합니다.
     *
-    * This function must be called by a thread that wants to access the
-    * content of a virtual memory mapping, except if the virtual memory mapping has
-    * been created with bSingleThreadUsage = TRUE.
+    * 가상 메모리 매핑을 bSingleThreadUsage = TRUE로 생성한 경우를 제외하고,
+    * 가상 메모리 매핑의 콘텐츠에 접근하려는 스레드가 이 함수를 호출해야만 합니다.
     *
-    * This function must be paired with CPLVirtualMemUnDeclareThread().
+    * 이 함수는 CPLVirtualMemUnDeclareThread()과 쌍으로 사용해야만 합니다.
     *
-    * @param ctxt context returned by CPLVirtualMemNew().
+    * @param ctxt CPLVirtualMemNew()이 반환하는 맥락입니다.
     *
     * @since GDAL 1.11
     */
    void CPL_DLL CPLVirtualMemDeclareThread(CPLVirtualMem* ctxt);
 
-   /** Declare that a thread will stop accessing a virtual memory mapping.
+   /** 스레드가 가상 메모리 매핑에 접근을 종료할 것이라고 선언합니다.
     *
-    * This function must be called by a thread that will no longer access the
-    * content of a virtual memory mapping, except if the virtual memory mapping has
-    * been created with bSingleThreadUsage = TRUE.
+    * 가상 메모리 매핑을 bSingleThreadUsage = TRUE로 생성한 경우를 제외하고,
+    * 가상 메모리 매핑에 더 이상 접근하지 않을 스레드가 이 함수를 호출해야만 합니다.
     *
-    * This function must be paired with CPLVirtualMemDeclareThread().
+    * 이 함수는 CPLVirtualMemDeclareThread()과 쌍으로 사용해야만 합니다.
     *
-    * @param ctxt context returned by CPLVirtualMemNew().
+    * @param ctxt CPLVirtualMemNew()이 반환하는 맥락입니다.
     *
     * @since GDAL 1.11
     */
    void CPL_DLL CPLVirtualMemUnDeclareThread(CPLVirtualMem* ctxt);
 
-   /** Make sure that a region of virtual memory will be realized.
+   /** 가상 메모리 영역을 실체화할 것을 확인합니다.
     *
-    * Calling this function is not required, but might be useful when debugging
-    * a process with tools like gdb or valgrind that do not naturally like
-    * segmentation fault signals.
+    * 이 함수를 반드시 호출할 필요는 없지만, 분할 폴트 신호를 네이티브하게
+    * 받아들이지 못 하는 gdb 또는 valgrind 같은 도구를 사용해서 프로세스를
+    * 디버깅하는 경우 유용할 수도 있습니다.
     *
-    * It is also needed when wanting to provide part of virtual memory mapping
-    * to a system call such as read() or write(). If read() or write() is called
-    * on a memory region not yet realized, the call will fail with EFAULT.
+    * read() 또는 write() 같은 시스템 호출에 가상 메모리 매핑의 일부분을
+    * 제공하려는 경우에도 이 함수가 필요합니다. 아직 실체화되지 않은 메모리
+    * 영역에 대해 read() 또는 write()를 호출하는 경우,
+    * 호출이 EFAULT와 함께 실패할 것입니다.
     *
-    * @param ctxt context returned by CPLVirtualMemNew().
-    * @param pAddr the memory region to pin.
-    * @param nSize the size of the memory region.
-    * @param bWriteOp set to TRUE if the memory are will be accessed in write mode.
+    * @param ctxt CPLVirtualMemNew()이 반환하는 맥락입니다.
+    * @param pAddr 고정(pin)시킬 메모리 영역입니다.
+    * @param nSize 메모리 영역의 용량입니다.
+    * @param bWriteOp 메모리에 쓰기 모드로 접근할 경우 TRUE로 설정하십시오.
     *
     * @since GDAL 1.11
     */
    void CPL_DLL CPLVirtualMemPin(CPLVirtualMem* ctxt,
                                  void* pAddr, size_t nSize, int bWriteOp);
 
-   /** Cleanup any resource and handlers related to virtual memory.
+   /** 가상 메모리와 연결된 모든 리소스와 처리기들을 정리(cleanup)합니다.
     *
-    * This function must be called after the last CPLVirtualMem object has
-    * been freed.
+    * 마지막 CPLVirtualMem 객체를 해제한 다음 이 함수를 호출해야만 합니다.
     *
     * @since GDAL 1.11
     */
@@ -499,120 +428,122 @@ Implemented by cpl_virtualmem.cpp
 
 .. _implemented-by-gdalvirtualmemcpp:
 
-Implemented by gdalvirtualmem.cpp
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+gdalvirtualmem.cpp로 구현
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
 
-   /** Create a CPLVirtualMem object from a GDAL dataset object.
+   /** GDAL 데이터셋 객체로부터 CPLVirtualMem 객체를 생성합니다.
     *
-    * Only supported on Linux for now.
+    * 현재 리눅스 상에서만 지원됩니다.
     *
-    * This method allows creating a virtual memory object for a region of one
-    * or more GDALRasterBands from  this dataset. The content of the virtual
-    * memory object is automatically filled from dataset content when a virtual
-    * memory page is first accessed, and it is released (or flushed in case of a
-    * "dirty" page) when the cache size limit has been reached.
+    * 이 메소드를 사용하면 이 데이터셋으로부터 하나 이상의 GDALRasterBands의
+    * 한 영역에 대한 가상 메모리 객체를 생성할 수 있습니다. 가상 메모리 페이지에
+    * 처음 접근할 때 데이터셋 콘텐츠로부터 가상 메모리 객체의 콘텐츠를
+    * 자동으로 채우고, 캐시 용량 제한에 도달할 때 해제(또는 "지저분한"
+    * 페이지인 경우 플러시)합니다.
     *
-    * The pointer to access the virtual memory object is obtained with
-    * CPLVirtualMemGetAddr(). It remains valid until CPLVirtualMemFree() is called.
-    * CPLVirtualMemFree() must be called before the dataset object is destroyed.
+    * CPLVirtualMemGetAddr()를 사용해서 가상 메모리 객체에 접근하기 위한
+    * 포인터를 가져옵니다. 이 포인터는 CPLVirtualMemFree()를 호출할 때까지
+    * 무결합니다. 데이터셋 객체를 삭제(destroy)하기 전에 CPLVirtualMemFree()를
+    * 호출해야만 합니다.
     *
-    * If p is such a pointer and base_type the C type matching eBufType, for default
-    * values of spacing parameters, the element of image coordinates (x, y)
-    * (relative to xOff, yOff) for band b can be accessed with
-    * ((base_type*)p)[x + y * nBufXSize + (b-1)*nBufXSize*nBufYSize].
+    * 간격 파라미터의 기본값에서 p가 이런 포인터이고 base_type이 eBufType과
+    * 일치하는 C 유형인 경우, ((base_type*)p)[x + y * nBufXSize +
+    * (b-1)*nBufXSize*nBufYSize]로 밴드 b의 (xOff, yOff에 상대적인)
+    * 이미지 좌표 (x, y) 요소에 접근할 수 있습니다.
     *
-    * Note that the mechanism used to transparently fill memory pages when they are
-    * accessed is the same (but in a controlled way) than what occurs when a memory
-    * error occurs in a program. Debugging software will generally interrupt program
-    * execution when that happens. If needed, CPLVirtualMemPin() can be used to avoid
-    * that by ensuring memory pages are allocated before being accessed.
+    * 메모리 페이지에 접근할 때 메모리 페이지를 투명하게 채우기 위해
+    * 사용되는 메커니즘은 프로그램에서 메모리 오류가 발생할 때 일어나는 일과
+    * 동일하지만 좀 더 제어된 방식이라는 점을 기억하십시오. 이런 일이 일어나는
+    * 경우 디버깅 소프트웨어는 일반적으로 프로그램 실행을 중단할 것입니다.
+    * 필요한 경우 CPLVirtualMemPin()을 사용해서 메모리 페이지에 접근하기 전에
+    * 메모리 페이지를 할당하도록 보장하는 방식으로 이를 방지할 수 있습니다.
     *
-    * The size of the region that can be mapped as a virtual memory object depends
-    * on hardware and operating system limitations.
-    * On Linux AMD64 platforms, the maximum value is 128 TB.
-    * On Linux x86 platforms, the maximum value is 2 GB.
+    * 가상 메모리 객체로 매핑할 수 있는 영역의 용량은 하드웨어 및
+    * 운영 체제의 제한 사항에 따라 달라질 수 있습니다.
+    * 리눅스 AMD64 플랫폼 상에서 최대값은 128TB입니다.
+    * 리눅스 x86 플랫폼 상에서 최대값은 2GB입니다.
     *
-    * Data type translation is automatically done if the data type
-    * (eBufType) of the buffer is different than
-    * that of the GDALRasterBand.
+    * 버퍼의 데이터 유형(eBufType)이 GDALRasterBand의 버퍼 데이터 유형과
+    * 다른 경우 자동으로 데이터 유형 변환을 수행합니다.
     *
-    * Image decimation / replication is currently not supported, i.e. if the
-    * size of the region being accessed (nXSize x nYSize) is different from the
-    * buffer size (nBufXSize x nBufYSize).
+    * 현재, 예를 들어 접근 중인 영역의 용량(nXSize x nYSize)이
+    * 버퍼 용량(nBufXSize x nBufYSize)과 다를 경우
+    * 이미지 제거(decimation)/복제는 지원하지 않습니다.
     *
-    * The nPixelSpace, nLineSpace and nBandSpace parameters allow reading into or
-    * writing from various organization of buffers. Arbitrary values for the spacing
-    * parameters are not supported. Those values must be multiple of the size of the
-    * buffer data type, and must be either band sequential organization (typically
-    * nPixelSpace = GDALGetDataTypeSize(eBufType) / 8, nLineSpace = nPixelSpace * nBufXSize,
-    * nBandSpace = nLineSpace * nBufYSize), or pixel-interleaved organization
-    * (typically nPixelSpace = nBandSpace * nBandCount, nLineSpace = nPixelSpace * nBufXSize,
-    * nBandSpace = GDALGetDataTypeSize(eBufType) / 8)
+    * nPixelSpace, nLineSpace 및 nBandSpace 파라미터는 다양한 버퍼 구성으로의
+    * 읽기 및 다양한 버퍼 구성으로부터의 쓰기를 허용합니다. 간격 파라미터에
+    * 임의의 값을 사용하는 것은 지원하지 않습니다. 간격 파라미터의 값은
+    * 버퍼 데이터 유형의 용량의 배수여야만 하며, 밴드 순차 구성
+    * (일반적으로 nPixelSpace = GDALGetDataTypeSize(eBufType) / 8, nLineSpace =
+    * nPixelSpace * nBufXSize, nBandSpace = nLineSpace * nBufYSize) 또는
+    * 픽셀 교차삽입 구성(typically nPixelSpace = nBandSpace * nBandCount,
+    * nLineSpace = nPixelSpace * nBufXSize, nBandSpace =
+    * GDALGetDataTypeSize(eBufType) / 8) 가운데 하나여야만 합니다.
     *
-    * @param hDS Dataset object
+    * @param hDS 데이터셋 객체입니다.
     *
-    * @param eRWFlag Either GF_Read to read a region of data, or GF_Write to
-    * write a region of data.
+    * @param eRWFlag 데이터 영역을 읽기 위한 GF_Read 또는
+    *                데이터 영역을 쓰기 위한 GF_Write 가운데 하나입니다.
     *
-    * @param nXOff The pixel offset to the top left corner of the region
-    * of the band to be accessed.  This would be zero to start from the left side.
+    * @param nXOff 접근할 밴드 영역의 좌상단 모서리에 대한 픽셀 오프셋입니다.
+    *              좌측으로부터 시작하는 0일 것입니다.
     *
-    * @param nYOff The line offset to the top left corner of the region
-    * of the band to be accessed.  This would be zero to start from the top.
+    * @param nYOff 접근할 밴드 영역의 좌상단 모서리에 대한 줄 오프셋입니다.
+    *              상단으로부터 시작하는 0일 것입니다.
     *
-    * @param nXSize The width of the region of the band to be accessed in pixels.
+    * @param nXSize 접근할 밴드 영역의 픽셀 단위 너비입니다.
     *
-    * @param nYSize The height of the region of the band to be accessed in lines.
+    * @param nYSize 접근할 밴드 영역의 줄 단위 높이입니다.
     *
-    * @param nBufXSize the width of the buffer image into which the desired region
-    * is to be read, or from which it is to be written.
+    * @param nBufXSize 원하는 영역을 읽어들일, 또는 해당 버퍼로부터
+    *                  원하는 영역을 작성할 버퍼 이미지의 너비입니다.
     *
-    * @param nBufYSize the height of the buffer image into which the desired
-    * region is to be read, or from which it is to be written.
+    * @param nBufYSize 원하는 영역을 읽어들일, 또는 해당 버퍼로부터
+    *                  원하는 영역을 작성할 버퍼 이미지의 높이입니다.
     *
-    * @param eBufType the type of the pixel values in the data buffer. The
-    * pixel values will automatically be translated to/from the GDALRasterBand
-    * data type as needed.
+    * @param eBufType 데이터 버퍼에 있는 픽셀값의 유형입니다.
+    *                 GDALRasterBand 데이터 유형으로/부터 픽셀값을
+    *                 필요한 대로 자동 변환할 것입니다.
     *
-    * @param nBandCount the number of bands being read or written. 
+    * @param nBandCount 읽어올 또는 작성할 밴드의 번호입니다.
     *
-    * @param panBandMap the list of nBandCount band numbers being read/written.
-    * Note band numbers are 1 based. This may be NULL to select the first 
-    * nBandCount bands.
+    * @param panBandMap 읽어올 또는 작성할 nBandCount 밴드 번호 목록입니다.
+    *                   밴드 번호는 1부터 시작한다는 사실을 기억하십시오.
+    *                   첫 번째 nBandCount 밴드를 선택하기 위해 NULL일 수도 있습니다.
     *
-    * @param nPixelSpace The byte offset from the start of one pixel value in
-    * the buffer to the start of the next pixel value within a scanline. If defaulted
-    * (0) the size of the datatype eBufType is used.
+    * @param nPixelSpace 버퍼에 있는 한 픽셀값의 시작으로부터 같은 스캔라인에 있는
+    *                    다음 픽셀값의 시작까지의 바이트 오프셋입니다. 기본값 0으로
+    *                    설정하는 경우 eBufType 데이터 유형의 용량을 사용합니다.
     *
-    * @param nLineSpace The byte offset from the start of one scanline in
-    * the buffer to the start of the next. If defaulted (0) the size of the datatype
-    * eBufType * nBufXSize is used.
+    * @param nLineSpace 버퍼에 있는 한 스캔라인의 시작으로부터 다음 스캔라인의
+    *                   시작까지의 바이트 오프셋입니다. 기본값 0으로 설정하는 경우
+    *                   eBufType 데이터 유형의 용량을 nBufXSize로 곱한 값을 사용합니다.
     *
-    * @param nBandSpace the byte offset from the start of one bands data to the
-    * start of the next. If defaulted (0) the value will be 
-    * nLineSpace * nBufYSize implying band sequential organization
-    * of the data buffer.
+    * @param nBandSpace 한 밴드 데이터의 시작으로부터 다음 밴드 데이터의 시작까지의
+    *                   바이트 오프셋입니다. 기본값 0으로 설정하는 경우 데이터 버퍼가
+    *                   밴드 순차 구성이라는 사실을 암시하는 nLineSpace * nBufYSize
+    *                   값을 사용할 것입니다.
     *
-    * @param nCacheSize   size in bytes of the maximum memory that will be really
-    *                     allocated (must ideally fit into RAM)
+    * @param nCacheSize 실제로 할당될 바이트 단위 최대 메모리 용량입니다.
+    *                   (이상적으로는 RAM 용량 이하여야만 합니다.)
     *
-    * @param nPageSizeHint hint for the page size. Must be a multiple of the
-    *                      system page size, returned by CPLGetPageSize().
-    *                      Minimum value is generally 4096. Might be set to 0 to
-    *                      let the function determine a default page size.
+    * @param nPageSizeHint 페이지 용량에 대한 힌트입니다. CPLGetPageSize()가
+    *                      반환한 시스템 페이지 용량의 배수여야만 합니다.
+    *                      일반적으로 최소값은 4096입니다. 함수가 기본 페이지
+    *                      용량을 결정하게 하려면 0으로 설정할 수도 있습니다.
     *
-    * @param bSingleThreadUsage set to TRUE if there will be no concurrent threads
-    *                           that will access the virtual memory mapping. This can
-    *                           optimize performance a bit. If set to FALSE,
-    *                           CPLVirtualMemDeclareThread() must be called.
+    * @param bSingleThreadUsage 가상 메모리 매핑에 동시에 접근할 스레드들이
+    *                           없는 경우 TRUE로 설정하십시오. 이렇게 하면
+    *                           성능을 조금 최적화할 수 있습니다. FALSE로 설정하는 경우 
+    *                           CPLVirtualMemDeclareThread()를 반드시 호출해야만 합니다.
     *
-    * @param papszOptions NULL terminated list of options. Unused for now.
+    * @param papszOptions NULL로 종료되는 옵션 목록입니다. 현재 사용되지 않습니다.
     *
-    * @return a virtual memory object that must be freed by CPLVirtualMemFree(),
-    *         or NULL in case of failure.
+    * @return CPLVirtualMemFree()로 해제해야만 하는 가상 메모리 객체를,
+    *         또는 실패하는 경우 NULL을 반환합니다.
     *
     * @since GDAL 1.11
     */
@@ -632,99 +563,99 @@ Implemented by gdalvirtualmem.cpp
                                             int bSingleThreadUsage,
                                             char **papszOptions );
 
-   ** Create a CPLVirtualMem object from a GDAL raster band object.
+   /** GDAL 래스터 밴드 객체로부터 CPLVirtualMem 객체를 생성합니다.
     *
-    * Only supported on Linux for now.
+    * 현재 리눅스 상에서만 지원됩니다.
     *
-    * This method allows creating a virtual memory object for a region of a
-    * GDALRasterBand. The content of the virtual
-    * memory object is automatically filled from dataset content when a virtual
-    * memory page is first accessed, and it is released (or flushed in case of a
-    * "dirty" page) when the cache size limit has been reached.
+    * 이 메소드를 사용하면 한 GDALRasterBand의 한 영역에 대한 가상 메모리 객체를
+    * 생성할 수 있습니다. 가상 메모리 페이지에 처음 접근할 때 데이터셋
+    * 콘텐츠로부터 가상 메모리 객체의 콘텐츠를 자동으로 채우고, 캐시 용량 제한에
+    * 도달할 때 해제(또는 "지저분한" 페이지인 경우 플러시)합니다.
     *
-    * The pointer to access the virtual memory object is obtained with
-    * CPLVirtualMemGetAddr(). It remains valid until CPLVirtualMemFree() is called.
-    * CPLVirtualMemFree() must be called before the raster band object is destroyed.
+    * CPLVirtualMemGetAddr()를 사용해서 가상 메모리 객체에 접근하기 위한
+    * 포인터를 가져옵니다. 이 포인터는 CPLVirtualMemFree()를 호출할 때까지
+    * 무결합니다. 데이터셋 객체를 삭제(destroy)하기 전에 CPLVirtualMemFree()를
+    * 호출해야만 합니다.
     *
-    * If p is such a pointer and base_type the C type matching eBufType, for default
-    * values of spacing parameters, the element of image coordinates (x, y)
-    * (relative to xOff, yOff) can be accessed with
-    * ((base_type*)p)[x + y * nBufXSize].
+    * 간격 파라미터의 기본값에서 p가 이런 포인터이고 base_type이 eBufType과
+    * 일치하는 C 유형인 경우, ((base_type*)p)[x + y * nBufXSize]로 밴드 b의
+    * (xOff, yOff에 상대적인) 이미지 좌표 (x, y) 요소에 접근할 수 있습니다.
     *
-    * Note that the mechanism used to transparently fill memory pages when they are
-    * accessed is the same (but in a controlled way) than what occurs when a memory
-    * error occurs in a program. Debugging software will generally interrupt program
-    * execution when that happens. If needed, CPLVirtualMemPin() can be used to avoid
-    * that by ensuring memory pages are allocated before being accessed.
+    * 메모리 페이지에 접근할 때 메모리 페이지를 투명하게 채우기 위해
+    * 사용되는 메커니즘은 프로그램에서 메모리 오류가 발생할 때 일어나는 일과
+    * 동일하지만 좀 더 제어된 방식이라는 점을 기억하십시오. 이런 일이 일어나는
+    * 경우 디버깅 소프트웨어는 일반적으로 프로그램 실행을 중단할 것입니다.
+    * 필요한 경우 CPLVirtualMemPin()을 사용해서 메모리 페이지에 접근하기 전에
+    * 메모리 페이지를 할당하도록 보장하는 방식으로 이를 방지할 수 있습니다.
     *
-    * The size of the region that can be mapped as a virtual memory object depends
-    * on hardware and operating system limitations.
-    * On Linux AMD64 platforms, the maximum value is 128 TB.
-    * On Linux x86 platforms, the maximum value is 2 GB.
+    * 가상 메모리 객체로 매핑할 수 있는 영역의 용량은 하드웨어 및
+    * 운영 체제의 제한 사항에 따라 달라질 수 있습니다.
+    * 리눅스 AMD64 플랫폼 상에서 최대값은 128TB입니다.
+    * 리눅스 x86 플랫폼 상에서 최대값은 2GB입니다.
     *
-    * Data type translation is automatically done if the data type
-    * (eBufType) of the buffer is different than
-    * that of the GDALRasterBand.
+    * 버퍼의 데이터 유형(eBufType)이 GDALRasterBand의 버퍼 데이터 유형과
+    * 다른 경우 자동으로 데이터 유형 변환을 수행합니다.
     *
-    * Image decimation / replication is currently not supported, i.e. if the
-    * size of the region being accessed (nXSize x nYSize) is different from the
-    * buffer size (nBufXSize x nBufYSize).
+    * 현재, 예를 들어 접근 중인 영역의 용량(nXSize x nYSize)이
+    * 버퍼 용량(nBufXSize x nBufYSize)과 다를 경우
+    * 이미지 제거(decimation)/복제는 지원하지 않습니다.
     *
-    * The nPixelSpace and nLineSpace parameters allow reading into or
-    * writing from various organization of buffers. Arbitrary values for the spacing
-    * parameters are not supported. Those values must be multiple of the size of the
-    * buffer data type and must be such that nLineSpace >= nPixelSpace * nBufXSize.
+    * nPixelSpace 및 nLineSpace 파라미터는 다양한 버퍼 구성으로의
+    * 읽기 및 다양한 버퍼 구성으로부터의 쓰기를 허용합니다. 간격 파라미터에
+    * 임의의 값을 사용하는 것은 지원하지 않습니다. 간격 파라미터의 값은
+    * 버퍼 데이터 유형의 용량의 배수여야만 하며, nLineSpace의 값이
+    * nPixelSpace * nBufXSize 이상이어야만 합니다.
     *
-    * @param hBand Rasterband object
+    * @param hBand 래스터 밴드 객체입니다.
     *
-    * @param eRWFlag Either GF_Read to read a region of data, or GF_Write to
-    * write a region of data.
+    * @param eRWFlag 데이터 영역을 읽기 위한 GF_Read 또는
+    *                데이터 영역을 쓰기 위한 GF_Write 가운데 하나입니다.
     *
-    * @param nXOff The pixel offset to the top left corner of the region
-    * of the band to be accessed.  This would be zero to start from the left side.
+    * @param nXOff 접근할 밴드 영역의 좌상단 모서리에 대한 픽셀 오프셋입니다.
+    *              좌측으로부터 시작하는 0일 것입니다.
     *
-    * @param nYOff The line offset to the top left corner of the region
-    * of the band to be accessed.  This would be zero to start from the top.
+    * @param nYOff 접근할 밴드 영역의 좌상단 모서리에 대한 줄 오프셋입니다
+    *              상단으로부터 시작하는 0일 것입니다.
     *
-    * @param nXSize The width of the region of the band to be accessed in pixels.
+    * @param nXSize 접근할 밴드 영역의 픽셀 단위 너비입니다.
     *
-    * @param nYSize The height of the region of the band to be accessed in lines.
+    * @param nYSize 접근할 밴드 영역의 줄 단위 높이입니다.
     *
-    * @param nBufXSize the width of the buffer image into which the desired region
-    * is to be read, or from which it is to be written.
+    * @param nBufXSize 원하는 영역을 읽어들일, 또는 해당 버퍼로부터
+    *                  원하는 영역을 작성할 버퍼 이미지의 너비입니다.
     *
-    * @param nBufYSize the height of the buffer image into which the desired
-    * region is to be read, or from which it is to be written.
+    * @param nBufYSize 원하는 영역을 읽어들일, 또는 해당 버퍼로부터
+    *                  원하는 영역을 작성할 버퍼 이미지의 높이입니다.
     *
-    * @param eBufType the type of the pixel values in the data buffer. The
-    * pixel values will automatically be translated to/from the GDALRasterBand
-    * data type as needed.
+    * @param eBufType 데이터 버퍼에 있는 픽셀값의 유형입니다.
+    *                 GDALRasterBand 데이터 유형으로/부터 픽셀값을
+    *                 필요한 대로 자동 변환할 것입니다.
     *
-    * @param nPixelSpace The byte offset from the start of one pixel value in
-    * the buffer to the start of the next pixel value within a scanline. If defaulted
-    * (0) the size of the datatype eBufType is used.
+    * @param nPixelSpace 버퍼에 있는 한 픽셀값의 시작으로부터 같은 스캔라인에 있는
+    *                    다음 픽셀값의 시작까지의 바이트 오프셋입니다. 기본값 0으로
+    *                    설정하는 경우 eBufType 데이터 유형의 용량을 사용합니다.
     *
-    * @param nLineSpace The byte offset from the start of one scanline in
-    * the buffer to the start of the next. If defaulted (0) the size of the datatype
-    * eBufType * nBufXSize is used.
+    * @param nLineSpace 버퍼에 있는 한 스캔라인의 시작으로부터 다음 스캔라인의
+    *                   시작까지의 바이트 오프셋입니다. 기본값 0으로 설정하는 경우
+    *                   eBufType 데이터 유형의 용량을 nBufXSize로 곱한 값을 사용합니다.
     *
-    * @param nCacheSize   size in bytes of the maximum memory that will be really
-    *                     allocated (must ideally fit into RAM)
+    * @param nCacheSize 실제로 할당될 바이트 단위 최대 메모리 용량입니다.
+    *                   (이상적으로는 RAM 용량 이하여야만 합니다.)
     *
-    * @param nPageSizeHint hint for the page size. Must be a multiple of the
-    *                      system page size, returned by CPLGetPageSize().
-    *                      Minimum value is generally 4096. Might be set to 0 to
-    *                      let the function determine a default page size.
+    * @param nPageSizeHint 페이지 용량에 대한 힌트입니다. CPLGetPageSize()가
+    *                      반환한 시스템 페이지 용량의 배수여야만 합니다.
+    *                      일반적으로 최소값은 4096입니다. 함수가 기본 페이지
+    *                      용량을 결정하게 하려면 0으로 설정할 수도 있습니다.
     *
-    * @param bSingleThreadUsage set to TRUE if there will be no concurrent threads
-    *                           that will access the virtual memory mapping. This can
-    *                           optimize performance a bit. If set to FALSE,
-    *                           CPLVirtualMemDeclareThread() must be called.
+    * @param bSingleThreadUsage 가상 메모리 매핑에 동시에 접근할 스레드들이
+    *                           없는 경우 TRUE로 설정하십시오. 이렇게 하면
+    *                           성능을 조금 최적화할 수 있습니다. FALSE로 설정하는 경우 
+    *                           CPLVirtualMemDeclareThread()를 반드시 호출해야만 합니다.
     *
-    * @param papszOptions NULL terminated list of options. Unused for now.
+    * @param papszOptions NULL로 종료되는 옵션 목록입니다. 현재 사용되지 않습니다.
     *
-    * @return a virtual memory object that must be freed by CPLVirtualMemFree(),
-    *         or NULL in case of failure.
+    * @return CPLVirtualMemFree()로 해제해야만 하는 가상 메모리 객체를,
+    *         또는 실패하는 경우 NULL을 반환합니다.
     *
     * @since GDAL 1.11
     */
@@ -744,114 +675,116 @@ Implemented by gdalvirtualmem.cpp
 
    typedef enum
    {
-       /*! Tile Interleaved by Pixel: tile (0,0) with internal band interleaved
-           by pixel organization, tile (1, 0), ...  */
+       /*! 픽셀이 교차삽입된 타일(Tile Interleaved by Pixel):
+           픽셀 구성으로 교차삽입된 내부 밴드를 가진 타일 (0,0), 타일 (1,0), ... */
        GTO_TIP,
-       /*! Band Interleaved by Tile : tile (0,0) of first band, tile (0,0) of second
-           band, ... tile (1,0) of first band, tile (1,0) of second band, ... */
+       /*! 타일이 교차삽입된 밴드(Band Interleaved by Tile):
+           첫 번째 밴드의 타일 (0,0), 두 번째 밴드의 타일 (0,0), ...
+           첫 번째 밴드의 타일 (1,0), 두 번째 밴드의 타일 (1,0), ... */
        GTO_BIT,
-       /*! Band SeQuential : all the tiles of first band, all the tiles of following band... */
+       /*! 밴드 순차(Band SeQuential):
+           첫 번째 밴드의 모든 타일, 다음 밴드의 모든 타일, ... */
        GTO_BSQ
    } GDALTileOrganization;
 
-   /** Create a CPLVirtualMem object from a GDAL dataset object, with tiling
-    * organization
+   /** GDAL 데이터셋 객체로부터 타일 구성을 사용해서 CPLVirtualMem 객체를 생성합니다.
     *
-    * Only supported on Linux for now.
+    * 현재 리눅스 상에서만 지원됩니다.
     *
-    * This method allows creating a virtual memory object for a region of one
-    * or more GDALRasterBands from  this dataset. The content of the virtual
-    * memory object is automatically filled from dataset content when a virtual
-    * memory page is first accessed, and it is released (or flushed in case of a
-    * "dirty" page) when the cache size limit has been reached.
+    * 이 메소드를 사용하면 이 데이터셋으로부터 하나 이상의 GDALRasterBands의
+    * 한 영역에 대한 가상 메모리 객체를 생성할 수 있습니다. 가상 메모리 페이지에
+    * 처음 접근할 때 데이터셋 콘텐츠로부터 가상 메모리 객체의 콘텐츠를
+    * 자동으로 채우고, 캐시 용량 제한에 도달할 때 해제(또는 "지저분한"
+    * 페이지인 경우 플러시)합니다.
     *
-    * Contrary to GDALDatasetGetVirtualMem(), pixels will be organized by tiles
-    * instead of scanlines. Different ways of organizing pixel within/across tiles
-    * can be selected with the eTileOrganization parameter.
+    * GDALDatasetGetVirtualMem()과는 반대로, 스캔라인 대신 타일이 픽셀을 구성합니다.
+    * eTileOrganization 파라미터로 타일 내부 및 타일 전반의 서로 다른 픽셀 구성
+    * 방식을 선택할 수 있습니다.
     *
-    * If nXSize is not a multiple of nTileXSize or nYSize is not a multiple of
-    * nTileYSize, partial tiles will exists at the right and/or bottom of the region
-    * of interest. Those partial tiles will also have nTileXSize * nTileYSize dimension,
-    * with padding pixels.
+    * nXSize가 nTileXSize의 배수가 아니거나 nYSize가 nTileYSize의 배수가 아닌 경우,
+    * 관심 영역의 우측 그리고/또는 하단에 부분 타일들이 존재할 것입니다.
+    * 이런 부분 타일들 또한 채워넣기(padding) 픽셀로 nTileXSize * nTileYSize
+    * 크기를 가질 것입니다.
     *
-    * The pointer to access the virtual memory object is obtained with
-    * CPLVirtualMemGetAddr(). It remains valid until CPLVirtualMemFree() is called.
-    * CPLVirtualMemFree() must be called before the dataset object is destroyed.
+    * CPLVirtualMemGetAddr()를 사용해서 가상 메모리 객체에 접근하기 위한
+    * 포인터를 가져옵니다. 이 포인터는 CPLVirtualMemFree()를 호출할 때까지
+    * 무결합니다. 데이터셋 객체를 삭제(destroy)하기 전에 CPLVirtualMemFree()를
+    * 호출해야만 합니다.
     *
-    * If p is such a pointer and base_type the C type matching eBufType, for default
-    * values of spacing parameters, the element of image coordinates (x, y)
-    * (relative to xOff, yOff) for band b can be accessed with :
-    *  - for eTileOrganization = GTO_TIP, ((base_type*)p)[tile_number(x,y)*nBandCount*tile_size + offset_in_tile(x,y)*nBandCount + (b-1)].
-    *  - for eTileOrganization = GTO_BIT, ((base_type*)p)[(tile_number(x,y)*nBandCount + (b-1)) * tile_size + offset_in_tile(x,y)].
-    *  - for eTileOrganization = GTO_BSQ, ((base_type*)p)[(tile_number(x,y) + (b-1)*nTilesCount) * tile_size + offset_in_tile(x,y)].
+    * 간격 파라미터의 기본값에서 p가 이런 포인터이고 base_type이 eBufType과
+    * 일치하는 C 유형인 경우, 다음으로 밴드 b의 (xOff, yOff에 상대적인)
+    * 이미지 좌표 (x, y) 요소에 접근할 수 있습니다:
+    *  - eTileOrganization = GTO_TIP인 경우, ((base_type*)p)[tile_number(x,y)*nBandCount*tile_size + offset_in_tile(x,y)*nBandCount + (b-1)].
+    *  - eTileOrganization = GTO_BIT인 경우, ((base_type*)p)[(tile_number(x,y)*nBandCount + (b-1)) * tile_size + offset_in_tile(x,y)].
+    *  - eTileOrganization = GTO_BSQ인 경우, ((base_type*)p)[(tile_number(x,y) + (b-1)*nTilesCount) * tile_size + offset_in_tile(x,y)].
     *
-    * where nTilesPerRow = ceil(nXSize / nTileXSize)
-    *       nTilesPerCol = ceil(nYSize / nTileYSize)
-    *       nTilesCount = nTilesPerRow * nTilesPerCol
-    *       tile_number(x,y) = (y / nTileYSize) * nTilesPerRow + (x / nTileXSize)
-    *       offset_in_tile(x,y) = (y % nTileYSize) * nTileXSize  + (x % nTileXSize)
-    *       tile_size = nTileXSize * nTileYSize
+    * 이때 nTilesPerRow = ceil(nXSize / nTileXSize)
+    *      nTilesPerCol = ceil(nYSize / nTileYSize)
+    *      nTilesCount = nTilesPerRow * nTilesPerCol
+    *      tile_number(x,y) = (y / nTileYSize) * nTilesPerRow + (x / nTileXSize)
+    *      offset_in_tile(x,y) = (y % nTileYSize) * nTileXSize  + (x % nTileXSize)
+    *      tile_size = nTileXSize * nTileYSize
     *
-    * Note that for a single band request, all tile organizations are equivalent.
+    * 단일 밴드 요청의 경우 모든 타일 구성이 동등하다는 사실을 기억하십시오.
     *
-    * Note that the mechanism used to transparently fill memory pages when they are
-    * accessed is the same (but in a controlled way) than what occurs when a memory
-    * error occurs in a program. Debugging software will generally interrupt program
-    * execution when that happens. If needed, CPLVirtualMemPin() can be used to avoid
-    * that by ensuring memory pages are allocated before being accessed.
+    * 메모리 페이지에 접근할 때 메모리 페이지를 투명하게 채우기 위해
+    * 사용되는 메커니즘은 프로그램에서 메모리 오류가 발생할 때 일어나는 일과
+    * 동일하지만 좀 더 제어된 방식이라는 점을 기억하십시오. 이런 일이 일어나는
+    * 경우 디버깅 소프트웨어는 일반적으로 프로그램 실행을 중단할 것입니다.
+    * 필요한 경우 CPLVirtualMemPin()을 사용해서 메모리 페이지에 접근하기 전에
+    * 메모리 페이지를 할당하도록 보장하는 방식으로 이를 방지할 수 있습니다.
     *
-    * The size of the region that can be mapped as a virtual memory object depends
-    * on hardware and operating system limitations.
-    * On Linux AMD64 platforms, the maximum value is 128 TB.
-    * On Linux x86 platforms, the maximum value is 2 GB.
+    * 가상 메모리 객체로 매핑할 수 있는 영역의 용량은 하드웨어 및
+    * 운영 체제의 제한 사항에 따라 달라질 수 있습니다.
+    * 리눅스 AMD64 플랫폼 상에서 최대값은 128TB입니다.
+    * 리눅스 x86 플랫폼 상에서 최대값은 2GB입니다.
     *
-    * Data type translation is automatically done if the data type
-    * (eBufType) of the buffer is different than
-    * that of the GDALRasterBand.
+    * 버퍼의 데이터 유형(eBufType)이 GDALRasterBand의 버퍼 데이터 유형과
+    * 다른 경우 자동으로 데이터 유형 변환을 수행합니다.
     *
-    * @param hDS Dataset object
+    * @param hDS 데이터셋 객체입니다.
     *
-    * @param eRWFlag Either GF_Read to read a region of data, or GF_Write to
-    * write a region of data.
+    * @param eRWFlag 데이터 영역을 읽기 위한 GF_Read 또는
+    *                데이터 영역을 쓰기 위한 GF_Write 가운데 하나입니다.
     *
-    * @param nXOff The pixel offset to the top left corner of the region
-    * of the band to be accessed.  This would be zero to start from the left side.
+    * @param nXOff 접근할 밴드 영역의 좌상단 모서리에 대한 픽셀 오프셋입니다.
+    *              좌측으로부터 시작하는 0일 것입니다.
     *
-    * @param nYOff The line offset to the top left corner of the region
-    * of the band to be accessed.  This would be zero to start from the top.
+    * @param nYOff 접근할 밴드 영역의 좌상단 모서리에 대한 줄 오프셋입니다
+    *              상단으로부터 시작하는 0일 것입니다.
     *
-    * @param nXSize The width of the region of the band to be accessed in pixels.
+    * @param nXSize 접근할 밴드 영역의 픽셀 단위 너비입니다.
     *
-    * @param nYSize The height of the region of the band to be accessed in lines.
+    * @param nYSize 접근할 밴드 영역의 줄 단위 높이입니다.
     *
-    * @param nTileXSize the width of the tiles.
+    * @param nTileXSize 타일의 너비입니다.
     *
-    * @param nTileYSize the height of the tiles.
+    * @param nTileYSize 타일의 높이입니다.
     *
-    * @param eBufType the type of the pixel values in the data buffer. The
-    * pixel values will automatically be translated to/from the GDALRasterBand
-    * data type as needed.
+    * @param eBufType 데이터 버퍼에 있는 픽셀값의 유형입니다.
+    *                 GDALRasterBand 데이터 유형으로/부터 픽셀값을
+    *                 필요한 대로 자동 변환할 것입니다.
     *
-    * @param nBandCount the number of bands being read or written. 
+    * @param nBandCount 읽어올 또는 작성할 밴드의 번호입니다.
     *
-    * @param panBandMap the list of nBandCount band numbers being read/written.
-    * Note band numbers are 1 based. This may be NULL to select the first 
-    * nBandCount bands.
+    * @param panBandMap 읽어올 또는 작성할 nBandCount 밴드 번호 목록입니다.
+    *                   밴드 번호는 1부터 시작한다는 사실을 기억하십시오.
+    *                   첫 번째 nBandCount 밴드를 선택하기 위해 NULL일 수도 있습니다.
     *
-    * @param eTileOrganization tile organization.
+    * @param eTileOrganization 타일 구성입니다.
     *
-    * @param nCacheSize   size in bytes of the maximum memory that will be really
-    *                     allocated (must ideally fit into RAM)
+    * @param nCacheSize 실제로 할당될 바이트 단위 최대 메모리 용량입니다.
+    *                   (이상적으로는 RAM 용량 이하여야만 합니다.)
     *
-    * @param bSingleThreadUsage set to TRUE if there will be no concurrent threads
-    *                           that will access the virtual memory mapping. This can
-    *                           optimize performance a bit. If set to FALSE,
-    *                           CPLVirtualMemDeclareThread() must be called.
+    * @param bSingleThreadUsage 가상 메모리 매핑에 동시에 접근할 스레드들이
+    *                           없는 경우 TRUE로 설정하십시오. 이렇게 하면
+    *                           성능을 조금 최적화할 수 있습니다. FALSE로 설정하는 경우 
+    *                           CPLVirtualMemDeclareThread()를 반드시 호출해야만 합니다.
     *
-    * @param papszOptions NULL terminated list of options. Unused for now.
+    * @param papszOptions NULL로 종료되는 옵션 목록입니다. 현재 사용되지 않습니다.
     *
-    * @return a virtual memory object that must be freed by CPLVirtualMemFree(),
-    *         or NULL in case of failure.
+    * @return CPLVirtualMemFree()로 해제해야만 하는 가상 메모리 객체를,
+    *         또는 실패하는 경우 NULL을 반환합니다.
     *
     * @since GDAL 1.11
     */
@@ -868,90 +801,88 @@ Implemented by gdalvirtualmem.cpp
                                                  int bSingleThreadUsage,
                                                  char **papszOptions );
 
-   /** Create a CPLVirtualMem object from a GDAL rasterband object, with tiling
-    * organization
+   /** GDAL 데이터셋 객체로부터 타일 구성을 사용해서 CPLVirtualMem 객체를 생성합니다.
     *
-    * Only supported on Linux for now.
+    * 현재 리눅스 상에서만 지원됩니다.
     *
-    * This method allows creating a virtual memory object for a region of one
-    * GDALRasterBand. The content of the virtual
-    * memory object is automatically filled from dataset content when a virtual
-    * memory page is first accessed, and it is released (or flushed in case of a
-    * "dirty" page) when the cache size limit has been reached.
+    * 이 메소드를 사용하면 한 GDALRasterBand의 한 영역에 대한 가상 메모리 객체를
+    * 생성할 수 있습니다. 가상 메모리 페이지에 처음 접근할 때 데이터셋
+    * 콘텐츠로부터 가상 메모리 객체의 콘텐츠를 자동으로 채우고, 캐시 용량 제한에
+    * 도달할 때 해제(또는 "지저분한" 페이지인 경우 플러시)합니다.
     *
-    * Contrary to GDALDatasetGetVirtualMem(), pixels will be organized by tiles
-    * instead of scanlines.
+    * GDALDatasetGetVirtualMem()과는 반대로, 스캔라인 대신 타일이 픽셀을 구성합니다.
     *
-    * If nXSize is not a multiple of nTileXSize or nYSize is not a multiple of
-    * nTileYSize, partial tiles will exists at the right and/or bottom of the region
-    * of interest. Those partial tiles will also have nTileXSize * nTileYSize dimension,
-    * with padding pixels.
+    * nXSize가 nTileXSize의 배수가 아니거나 nYSize가 nTileYSize의 배수가 아닌 경우,
+    * 관심 영역의 우측 그리고/또는 하단에 부분 타일들이 존재할 것입니다.
+    * 이런 부분 타일들 또한 채워넣기(padding) 픽셀로 nTileXSize * nTileYSize
+    * 크기를 가질 것입니다.
     *
-    * The pointer to access the virtual memory object is obtained with
-    * CPLVirtualMemGetAddr(). It remains valid until CPLVirtualMemFree() is called.
-    * CPLVirtualMemFree() must be called before the raster band object is destroyed.
+    * CPLVirtualMemGetAddr()를 사용해서 가상 메모리 객체에 접근하기 위한
+    * 포인터를 가져옵니다. 이 포인터는 CPLVirtualMemFree()를 호출할 때까지
+    * 무결합니다. 데이터셋 객체를 삭제(destroy)하기 전에 CPLVirtualMemFree()를
+    * 호출해야만 합니다.
     *
-    * If p is such a pointer and base_type the C type matching eBufType, for default
-    * values of spacing parameters, the element of image coordinates (x, y)
-    * (relative to xOff, yOff) can be accessed with :
-    *  ((base_type*)p)[tile_number(x,y)*tile_size + offset_in_tile(x,y)].
+    * 간격 파라미터의 기본값에서 p가 이런 포인터이고 base_type이 eBufType과
+    * 일치하는 C 유형인 경우, 다음으로 밴드 b의 (xOff, yOff에 상대적인)
+    * 이미지 좌표 (x, y) 요소에 접근할 수 있습니다:
+    * ((base_type*)p)[tile_number(x,y)*tile_size + offset_in_tile(x,y)].
     *
-    * where nTilesPerRow = ceil(nXSize / nTileXSize)
-    *       nTilesCount = nTilesPerRow * nTilesPerCol
-    *       tile_number(x,y) = (y / nTileYSize) * nTilesPerRow + (x / nTileXSize)
-    *       offset_in_tile(x,y) = (y % nTileYSize) * nTileXSize  + (x % nTileXSize)
-    *       tile_size = nTileXSize * nTileYSize
+    * 이때 nTilesPerRow = ceil(nXSize / nTileXSize)
+    *      nTilesCount = nTilesPerRow * nTilesPerCol
+    *      tile_number(x,y) = (y / nTileYSize) * nTilesPerRow + (x / nTileXSize)
+    *      offset_in_tile(x,y) = (y % nTileYSize) * nTileXSize  + (x % nTileXSize)
+    *      tile_size = nTileXSize * nTileYSize
     *
-    * Note that the mechanism used to transparently fill memory pages when they are
-    * accessed is the same (but in a controlled way) than what occurs when a memory
-    * error occurs in a program. Debugging software will generally interrupt program
-    * execution when that happens. If needed, CPLVirtualMemPin() can be used to avoid
-    * that by ensuring memory pages are allocated before being accessed.
+    * 메모리 페이지에 접근할 때 메모리 페이지를 투명하게 채우기 위해
+    * 사용되는 메커니즘은 프로그램에서 메모리 오류가 발생할 때 일어나는 일과
+    * 동일하지만 좀 더 제어된 방식이라는 점을 기억하십시오. 이런 일이 일어나는
+    * 경우 디버깅 소프트웨어는 일반적으로 프로그램 실행을 중단할 것입니다.
+    * 필요한 경우 CPLVirtualMemPin()을 사용해서 메모리 페이지에 접근하기 전에
+    * 메모리 페이지를 할당하도록 보장하는 방식으로 이를 방지할 수 있습니다.
     *
-    * The size of the region that can be mapped as a virtual memory object depends
-    * on hardware and operating system limitations.
-    * On Linux AMD64 platforms, the maximum value is 128 TB.
-    * On Linux x86 platforms, the maximum value is 2 GB.
+    * 가상 메모리 객체로 매핑할 수 있는 영역의 용량은 하드웨어 및
+    * 운영 체제의 제한 사항에 따라 달라질 수 있습니다.
+    * 리눅스 AMD64 플랫폼 상에서 최대값은 128TB입니다.
+    * 리눅스 x86 플랫폼 상에서 최대값은 2GB입니다.
     *
-    * Data type translation is automatically done if the data type
-    * (eBufType) of the buffer is different than
-    * that of the GDALRasterBand.
+    * 버퍼의 데이터 유형(eBufType)이 GDALRasterBand의 버퍼 데이터 유형과
+    * 다른 경우 자동으로 데이터 유형 변환을 수행합니다.
     *
-    * @param hBand Rasterband object
+    * @param hBand 래스터 밴드 객체입니다.
     *
-    * @param eRWFlag Either GF_Read to read a region of data, or GF_Write to
-    * write a region of data.
+    * @param eRWFlag 데이터 영역을 읽기 위한 GF_Read 또는
+    *                데이터 영역을 쓰기 위한 GF_Write 가운데 하나입니다.
     *
-    * @param nXOff The pixel offset to the top left corner of the region
-    * of the band to be accessed.  This would be zero to start from the left side.
+    * @param nXOff 접근할 밴드 영역의 좌상단 모서리에 대한 픽셀 오프셋입니다.
+    *              좌측으로부터 시작하는 0일 것입니다.
     *
-    * @param nYOff The line offset to the top left corner of the region
-    * of the band to be accessed.  This would be zero to start from the top.
+    * @param nYOff 접근할 밴드 영역의 좌상단 모서리에 대한 줄 오프셋입니다
+    *              상단으로부터 시작하는 0일 것입니다.
     *
-    * @param nXSize The width of the region of the band to be accessed in pixels.
+    * @param nXSize 접근할 밴드 영역의 픽셀 단위 너비입니다.
     *
-    * @param nYSize The height of the region of the band to be accessed in lines.
+    * @param nYSize 접근할 밴드 영역의 줄 단위 높이입니다.
     *
-    * @param nTileXSize the width of the tiles.
+    * @param nTileXSize 타일의 너비입니다.
     *
-    * @param nTileYSize the height of the tiles.
+    * @param nTileYSize 타일의 높이입니다.
     *
-    * @param eBufType the type of the pixel values in the data buffer. The
-    * pixel values will automatically be translated to/from the GDALRasterBand
-    * data type as needed.
+    * @param eBufType 데이터 버퍼에 있는 픽셀값의 유형입니다.
+    *                 GDALRasterBand 데이터 유형으로/부터 픽셀값을
+    *                 필요한 대로 자동 변환할 것입니다.
     *
-    * @param nCacheSize   size in bytes of the maximum memory that will be really
-    *                     allocated (must ideally fit into RAM)
+    * @param nCacheSize 실제로 할당될 바이트 단위 최대 메모리 용량입니다.
+    *                   (이상적으로는 RAM 용량 이하여야만 합니다.)
     *
-    * @param bSingleThreadUsage set to TRUE if there will be no concurrent threads
-    *                           that will access the virtual memory mapping. This can
-    *                           optimize performance a bit. If set to FALSE,
-    *                           CPLVirtualMemDeclareThread() must be called.
+    * @param bSingleThreadUsage 가상 메모리 매핑에 동시에 접근할 스레드들이
+    *                           없는 경우 TRUE로 설정하십시오. 이렇게 하면
+    *                           성능을 조금 최적화할 수 있습니다. FALSE로 설정하는 경우 
+    *                           CPLVirtualMemDeclareThread()를 반드시 호출해야만 합니다.
     *
-    * @param papszOptions NULL terminated list of options. Unused for now.
+    * @param papszOptions NULL로 종료되는 옵션 목록입니다. 현재 사용되지 않습니다.
     *
-    * @return a virtual memory object that must be freed by CPLVirtualMemFree(),
-    *         or NULL in case of failure.
+    * @return CPLVirtualMemFree()로 해제해야만 하는 가상 메모리 객체를,
+    *         또는 실패하는 경우 NULL을 반환합니다.
     *
     * @since GDAL 1.11
     */
@@ -968,23 +899,22 @@ Implemented by gdalvirtualmem.cpp
 
 .. _implemented-by-gdalrasterbandcpp:
 
-Implemented by gdalrasterband.cpp
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+gdalrasterband.cpp로 구현
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
 
-   /** \brief Create a CPLVirtualMem object from a GDAL raster band object.
+   /** \brief GDAL 래스터 밴드 객체로부터 CPLVirtualMem 객체를 생성합니다.
     *
-    * Only supported on Linux for now.
+    * 현재 리눅스 상에서만 지원됩니다.
     *
-    * This method allows creating a virtual memory object for a GDALRasterBand,
-    * that exposes the whole image data as a virtual array.
+    * 이 메소드를 사용하면 GDALRasterBand로부터 전체 이미지 데이터를 가상 배열로
+    * 노출시키는 가상 메모리 객체를 생성할 수 있습니다.
     *
-    * The default implementation relies on GDALRasterBandGetVirtualMem(), but specialized
-    * implementation, such as for raw files, may also directly use mechanisms of the
-    * operating system to create a view of the underlying file into virtual memory
-    * ( CPLVirtualMemFileMapNew() )
+    * 기본 구현은 GDALRasterBandGetVirtualMem()에 의존하지만, 원시 파일 용 같은
+    * 특수 구현은 기저 파일의 뷰를 가상 메모리로 생성하는 운영 체제의 메커니즘을
+    * ( CPLVirtualMemFileMapNew() ) 직접 이용할 수도 있습니다.
     *
     * At the time of writing, the GeoTIFF driver and "raw" drivers (EHdr, ...) offer
     * a specialized implementation with direct file mapping, provided that some
@@ -1001,8 +931,8 @@ Implemented by gdalrasterband.cpp
     * The pointer returned remains valid until CPLVirtualMemFree() is called.
     * CPLVirtualMemFree() must be called before the raster band object is destroyed.
     *
-    * If p is such a pointer and base_type the type matching GDALGetRasterDataType(),
-    * the element of image coordinates (x, y) can be accessed with
+    * p가 이런 포인터이고 base_type이 GDALGetRasterDataType()과 일치하는
+    * 유형인 경우, 다음으로 이미지 좌표 (x, y) 요소에 접근할 수 있습니다:
     * *(base_type*) ((GByte*)p + x * *pnPixelSpace + y * *pnLineSpace)
     *
     * This method is the same as the C GDALGetVirtualMemAuto() function.
@@ -1010,13 +940,14 @@ Implemented by gdalrasterband.cpp
     * @param eRWFlag Either GF_Read to read the band, or GF_Write to
     * read/write the band.
     *
-    * @param pnPixelSpace Output parameter giving the byte offset from the start of one pixel value in
-    * the buffer to the start of the next pixel value within a scanline.
+    * @param pnPixelSpace 버퍼에 있는 한 픽셀값의 시작으로부터 같은 스캔라인에 있는
+    *                     다음 픽셀값의 시작까지의 바이트 오프셋을 지정하는 
+    *                     산출 파라미터입니다.
     *
-    * @param pnLineSpace Output parameter giving the byte offset from the start of one scanline in
-    * the buffer to the start of the next.
+    * @param pnLineSpace 버퍼에 있는 한 스캔라인의 시작으로부터 다음 스캔라인의
+    *                    시작까지의 바이트 오프셋을 지정하는 산출 파라미터입니다.
     *
-    * @param papszOptions NULL terminated list of options.
+    * @param papszOptions NULL로 종료되는 옵션 목록입니다.
     *                     If a specialized implementation exists, defining USE_DEFAULT_IMPLEMENTATION=YES
     *                     will cause the default implementation to be used.
     *                     When requiring or falling back to the default implementation, the following
@@ -1024,8 +955,8 @@ Implemented by gdalrasterband.cpp
     *                     PAGE_SIZE_HINT (in bytes),
     *                     SINGLE_THREAD ("FALSE" / "TRUE", defaults to FALSE)
     *
-    * @return a virtual memory object that must be unreferenced by CPLVirtualMemFree(),
-    *         or NULL in case of failure.
+    * @return CPLVirtualMemFree()로 해제해야만 하는 가상 메모리 객체를,
+    *         또는 실패하는 경우 NULL을 반환합니다.
     *
     * @since GDAL 1.11
     */
@@ -1041,8 +972,8 @@ Implemented by gdalrasterband.cpp
                                                  GIntBig *pnLineSpace,
                                                  char **papszOptions );
 
-Portability
------------
+이식성
+------
 
 The CPLVirtualMem low-level machinery is only implemented for Linux now.
 It assumes that returning from a SIGSEGV handler is possible, which is a
@@ -1056,7 +987,7 @@ POSIX API with VirtualAlloc(), VirtualProtect() and
 SetUnhandledExceptionFilter(), although the porting would undoubtly
 require more effort.
 
-The existence of `libsigsegv <http://www.gnu.org/software/libsigsegv>`__
+The existence of `libsigsegv <http://www.gnu.org/software/libsigsegv>`_
 that run on various OS is an evidence on its capacity of being ported to
 other platforms.
 
@@ -1085,8 +1016,8 @@ POSIX systems with mmap() should be portable. Windows has
 CreateFileMapping() and MapViewOfFile() API that have similar
 capabilities as mmap().
 
-Performance
------------
+성능
+----
 
 No miraculous performance gain should be expected from this new
 capability, when compared to code that carefully uses GDALRasterIO().
@@ -1109,8 +1040,8 @@ when using the memory file mapping, should be lesser than the manual
 management of page faults. However, GDAL has no control of the strategy
 used by the operating system to cache pages.
 
-Limitations
------------
+제한 사항
+---------
 
 The maximum size of the virtual memory space (and thus a virtual memory
 mapping) depends on the CPU architecture and OS limitations :
@@ -1126,12 +1057,12 @@ platforms.
 On a Linux AMD64 machine with 4 GB RAM, the Python binding of
 GDALDatasetGetTiledVirtualMem() has been successfully used to access
 random points on the new `Europe 3'' DEM
-dataset <http://www.eea.europa.eu/data-and-maps/data/eu-dem/#tab-original-data>`__,
+dataset <http://www.eea.europa.eu/data-and-maps/data/eu-dem/#tab-original-data>`_,
 which is a 20 GB compressed GeoTIFF ( and 288000 \* 180000 \* 4 = 193 GB
 uncompressed )
 
-Related thoughts
-----------------
+관련 메모
+---------
 
 Some issues with system calls such as read() or write(), or easier
 multi-threading could potentially be solved by making a FUSE (File
@@ -1141,31 +1072,27 @@ available on POSIX OS, and need root privilege to be mounted (a FUSE
 filesystem does not need root privilege to run, but the mounting
 operation does).
 
-Open questions
---------------
+질문
+----
 
-Due to the fact that it currently only works on Linux, should we mark
-the API as experimental for now ?
+현재 리눅스 상에서만 작동한다는 사실로 인해 현재로서는 이 API를 실험적인 것으로 표시해야 하는지?
 
-Backward compatibility issues
------------------------------
+하위 호환성 문제점
+------------------
 
-C/C++ API --> compatible (new API). C ABI --> compatible (new API). C++
-ABI --> incompatibility because GDALRasterBand has a new virtual method.
+-  C/C++ API --> 호환 가능 (새 API)
+-  C ABI --> 호환 가능 (새 API)
+-  C++ ABI --> :cpp:class:`GDALRasterBand` 클래스에 새 가상 메소드가 추가되었기 때문에 호환 불가능
 
-Updated drivers
----------------
+업데이트된 드라이버들
+---------------------
 
-The RawRasterBand object and GeoTIFF drivers will be updated to
-implement GetVirtualMemAuto() and offer memory file mapping when
-possible (see above documented restrictions on when this is possible).
+RawRasterBand 객체 및 GeoTIFF 드라이버가 GetVirtualMemAuto() 메소드를 구현하고, 가능한 경우 메모리 파일 매핑을 제공하도록 업데이트할 것입니다. (가능한 경우에 대해서는 앞에 작성한 제한 사항을 참조하십시오.)
 
-In future steps, other drivers such as the VRT driver (for
-VRTRawRasterBand) could also offer a specialized implementation of
-GetVirtualMemAuto().
+향후 단계에서 (VRTRawRasterBand를 위한) VRT 드라이버 같은 다른 드라이버들도 GetVirtualMemAuto() 메소드의 특수 구현을 제공할 수 있을 것입니다.
 
-SWIG bindings
--------------
+SWIG 바인딩
+-----------
 
 The high level API (dataset and raster band) API is available in Python
 bindings.
@@ -1245,8 +1172,8 @@ method that returns a Python memoryview object (Python 2.7 or later
 required). However, using such object does not seem practical for
 non-Byte data types.
 
-Test Suite
-----------
+테스트 스위트
+-------------
 
 The autotest suite will be extended to test the Python API of this RFC.
 It will also test the specialized implementations of GetVirtualMemAuto()
@@ -1254,14 +1181,17 @@ in RawRasterBand and the GeoTIFF drivers. In autotest/cpp, a
 test_virtualmem.cpp file tests concurrent access to the same pages by 2
 threads.
 
-Implementation
---------------
+구현
+----
 
-Implementation will be done by Even Rouault in GDAL/OGR trunk. The
-proposed implementation is attached as a
-`patch <http://trac.osgeo.org/gdal/attachment/wiki/rfc45_virtualmem/virtualmem.patch>`__.
+이벤 루올이 GDAL/OGR 트렁크에 이 RFC를 구현할 것입니다.
+제안한 구현을 `패치 <https://trac.osgeo.org/gdal/attachment/wiki/rfc45_virtualmem/virtualmem.patch>`_ 로 첨부했습니다.
 
-Voting history
---------------
+투표 이력
+---------
 
-+1 from EvenR, FrankW, DanielM and JukkaR
+-  이벤 루올 +1
+-  프랑크 바르메르담 +1
+-  대니얼 모리셋 +1
+-  유카 라흐코넨 +1
+
