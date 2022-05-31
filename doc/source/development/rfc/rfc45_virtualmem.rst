@@ -28,9 +28,9 @@ GDAL 데이터셋 또는 래스터 밴드에서 이미지 데이터를 읽거나
 저수준 메커니즘: cpl_virtualmem.h
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-이 새로운 케이퍼빌리티를 지원하는 저수준 메커니즘은 가상 메모리 영역(리눅스 상에서는 mmap() 함수가 할당하는 가상 메모리 영역)을 표현하는 CPLVirtualMem 객체입니다. 이 가상 메모리 영역은 초기에 가상 메모리 공간이라는 측면에서만 예약되어 있는데, 실제 메모리에는 할당되어 있지 않습니다. 이 예약된 가상 메모리 공간은 POSIX 시스템 상에서 가상 메모리 공간에 접근하려는 모든 시도가 SIGSEGV 신호(분할 폴트)를 촉발하는 예외 -- 페이지 폴트 -- 를 발생시키는 접근 권한으로 보호됩니다. 다행히 소프트웨어에서 신호 처리기(signal handler)를 사용해서 분할 폴트를 포착할 수 있습니다. 이런 분할 폴트가 방생하는 경우 특수 신호 처리기가 자신의 책임 하에 있는 가상 메모리 영역에서 분할 폴트가 발생하는지 확인하고, 그렇다면 접근한 가상 메모리 영역의 일부분("페이지")을 (사용자가 제공한 콜백 덕분에) 합리적인 값으로 채우는 작업을 처리할 것입니다. 그 다음 분할 폴트를 촉발한 명령을 다시 시도하기 전에 페이지에 대한 적절한 권한(읽기 전용 또는 읽기-쓰기)을 설정할 것입니다. 메모리 매핑에 접근하는 사용자 코드의 관점에서 보면 이 과정은 완전히 투명하며, 처음부터 전체 가상 메모리 영역을 채우는 것과 동일합니다.
+이 새로운 케이퍼빌리티를 지원하는 저수준 메커니즘은 가상 메모리 영역(리눅스 상에서는 mmap() 함수가 할당하는 가상 메모리 영역)을 표현하는 CPLVirtualMem 객체입니다. 이 가상 메모리 영역은 초기에 가상 메모리 공간이라는 측면에서만 예약되어 있는데, 실제 메모리에는 할당되어 있지 않습니다. 이 예약된 가상 메모리 공간은 POSIX 시스템 상에서 가상 메모리 공간에 접근하려는 모든 시도가 SIGSEGV 신호(세그폴트)를 촉발하는 예외 -- 페이지 폴트 -- 를 발생시키는 접근 권한으로 보호됩니다. 다행히 소프트웨어에서 신호 처리기(signal handler)를 사용해서 세그폴트(segfault; segmentation fault)를 포착할 수 있습니다. 이런 세그폴트가 발생하는 경우 특수 신호 처리기가 자신의 책임 하에 있는 가상 메모리 영역에서 세그폴트가 발생하는지 확인하고, 그렇다면 접근한 가상 메모리 영역의 일부분("페이지")을 (사용자가 제공한 콜백 덕분에) 합리적인 값으로 채우는 작업을 처리할 것입니다. 그 다음 세그폴트를 촉발한 명령을 다시 시도하기 전에 페이지에 대한 적절한 권한(읽기 전용 또는 읽기-쓰기)을 설정할 것입니다. 메모리 매핑에 접근하는 사용자 코드의 관점에서 보면 이 과정은 완전히 투명하며, 처음부터 전체 가상 메모리 영역을 채우는 것과 동일합니다.
 
-RAM 용량을 초과하는 대용량 매핑의 경우, 여전히 특정 시점에서 디스크 스왑 작업을 발생시킬 것입니다. 이를 피하기 위해, CPLVirtualMem 객체 생성 시 정의된 한계값에 도달하면 분할 폴트 처리기가 가장 최근에 사용된 페이지를 제거할 것입니다.
+RAM 용량을 초과하는 대용량 매핑의 경우, 여전히 특정 시점에서 디스크 스왑 작업을 발생시킬 것입니다. 이를 피하기 위해, CPLVirtualMem 객체 생성 시 정의된 한계값에 도달하면 세그폴트 처리기가 가장 최근에 사용된 페이지를 제거할 것입니다.
 
 쓰기 지원의 경우 또다른 콜백을 전송하면 됩니다. 페이지를 제거하기 전에 콜백을 호출하기 때문에 사용자 코드가 자신의 콘텐츠를 보다 영구적인 저장소로 플러시할 수 있는 기회를 가지게 됩니다.
 
@@ -399,7 +399,7 @@ cpl_virtualmem.cpp로 구현
 
    /** 가상 메모리 영역을 실체화할 것을 확인합니다.
     *
-    * 이 함수를 반드시 호출할 필요는 없지만, 분할 폴트 신호를 네이티브하게
+    * 이 함수를 반드시 호출할 필요는 없지만, 세그폴트 신호를 네이티브하게
     * 받아들이지 못 하는 gdb 또는 valgrind 같은 도구를 사용해서 프로세스를
     * 디버깅하는 경우 유용할 수도 있습니다.
     *
@@ -975,7 +975,7 @@ gdalrasterband.cpp로 구현
 이식성
 ------
 
-현재 CPLVirtualMem 저수준 메커니즘은 리눅스에서만 구현되어 있습니다. 이 메커니즘은 SIGSEGV 처리기로부터 반환이 가능하다고 가정하는데, 이는 노골적인 POSIX 위반이지만 실제로는 대부분의 POSIX (그리고 윈도우 같은 비 POSIX) 시스템이 분할 폴트 이후 실행을 재개할 수 있어야 할 것으로 보입니다.
+현재 CPLVirtualMem 저수준 메커니즘은 리눅스에서만 구현되어 있습니다. 이 메커니즘은 SIGSEGV 처리기로부터 반환이 가능하다고 가정하는데, 이는 노골적인 POSIX 위반이지만 실제로는 대부분의 POSIX (그리고 윈도우 같은 비 POSIX) 시스템이 세그폴트 이후 실행을 재개할 수 있어야 할 것으로 보입니다.
 
 적당한 노력으로 macOS 같은 다른 POSIX 운영 체제로 이식할 수 있어야 합니다. 윈도우에는 POSIX API와 유사한 케이퍼빌리티를 제공하는, VirtualAlloc(), VirtualProtect() 및 SetUnhandledExceptionFilter()가 포함된 API가 있지만 윈도우로 이식하려면 의심할 여지 없이 더 많은 노력이 필요합니다.
 
@@ -989,58 +989,30 @@ CPLVirtualMemFileMapNew()에 관한 한, POSIX 시스템 상에서 mmap()을 사
 성능
 ----
 
-No miraculous performance gain should be expected from this new
-capability, when compared to code that carefully uses GDALRasterIO().
-Handling segmentation faults has a cost ( the operating system catches a
-hardware exception, then calls the user program segmentation fault
-handler, which does the normal GDAL I/O operations, and plays with page
-mappings and permissions which invalidate some CPU caches, etc... ).
-However, when a page has been realized, access to it should be really
-fast, so with appropriate access patterns and cache size, good
-performance should be expected.
+GDALRasterIO()를 주의 깊게 사용하는 코드와 비교할 때, 이 새 케이퍼빌리티로부터 기적적인 성능 향상을 기대해서는 안 됩니다. 세그폴트를 처리하는 데에는 (운영 체제가 하드웨어 예외를 포착한 다음, 정규 GDAL I/O 작업을 수행하는 사용자 프로그램 세그폴트 처리기를 호출하고, 일부 CPU 캐시를 무효화하는 페이지 매핑 및 권한을 여러모로 활용하고 등등) 리소스가 사용되기 때문입니다. 하지만 페이지를 실체화하고 접근하는 것은 매우 빠를 것이기 때문에, 적절한 접근 패턴 및 캐시 용량을 지정하면 훌륭한 성능을 예상할 수 있을 것입니다.
 
-It should also be noted that in the current implementation, the
-realization of pages is done in a serialized way, that is to say if 2
-threads which use 2 different memory mappings cause a segmentation fault
-at the same time, they will not be dealt by 2 different threads, but one
-after the other one.
+현재 구현에서 페이지의 실체화가 직렬화된 방식으로 수행된다는 사실도 기억해야 합니다. 다시 말해 서로 다른 메모리 매핑 2개를 사용하는 스레드 2개가 동시에 세그폴트를 발생시키는 경우, 서로 다른 스레드 2개로 처리되지 않고 하나씩 차례로 처리될 것입니다.
 
-The overhead of virtual memory objects returned by GetVirtualMemAuto(),
-when using the memory file mapping, should be lesser than the manual
-management of page faults. However, GDAL has no control of the strategy
-used by the operating system to cache pages.
+메모리 파일 매핑을 사용하는 경우 GetVirtualMemAuto()가 반환하는 가상 메모리 객체의 오버헤드는 페이지 폴트를 직접 관리하는 경우보다 작을 것입니다. 하지만 GDAL은 운영 체제가 페이지를 캐시하기 위해 사용하는 전략을 제어할 수 없습니다.
 
 제한 사항
 ---------
 
-The maximum size of the virtual memory space (and thus a virtual memory
-mapping) depends on the CPU architecture and OS limitations :
+가상 메모리 공간(및 따라서 가상 메모리 매핑)의 최대 용량은 CPU 아키텍처 및 운영 체제 제한 사항에 따라 달라집니다:
 
--  on Linux AMD64, 128 TB.
--  on Linux x86, 2 GB.
--  On Windows AMD64 (unsupported by the current implementation), 8 TB.
--  On Windows x86 (unsupported by the current implementation), 2 GB.
+-  리눅스 AMD64 플랫폼 상에서는 128TB입니다.
+-  리눅스 x86 플랫폼 상에서는 2GB입니다.
+-  (현재 구현이 지원하지 않는) 윈도우 AMD64 플랫폼 상에서는 8TB입니다.
+-  (현재 구현이 지원하지 않는) 윈도우 x86 플랫폼 상에서는 2GB입니다.
 
-Clearly, the main interest of this new functionality is for AMD64
-platforms.
+이 새로운 기능으로 가장 관심을 끄는 것이 AMD64 플랫폼이라는 사실은 명확합니다.
 
-On a Linux AMD64 machine with 4 GB RAM, the Python binding of
-GDALDatasetGetTiledVirtualMem() has been successfully used to access
-random points on the new `Europe 3'' DEM
-dataset <http://www.eea.europa.eu/data-and-maps/data/eu-dem/#tab-original-data>`_,
-which is a 20 GB compressed GeoTIFF ( and 288000 \* 180000 \* 4 = 193 GB
-uncompressed )
+4GB RAM을 가진 리눅스 AMD64 컴퓨터 상에서 GDALDatasetGetTiledVirtualMem()의 파이썬 바인딩을 사용해서 새로운 `유럽 3" DEM 데이터셋 <https://www.eea.europa.eu/data-and-maps/data/copernicus-land-monitoring-service-eu-dem>`_ 에 있는 임의의 포인트들에 접근하는 데 성공했습니다. 이 데이터셋은 20GB 용량의 압축 (그리고 288000 \* 180000 \* 4 = 193GB 용량의 비압축) GeoTIFF 파일입니다.
 
 관련 메모
 ---------
 
-Some issues with system calls such as read() or write(), or easier
-multi-threading could potentially be solved by making a FUSE (File
-system in USEr space) driver that would expose a GDAL dataset as a file,
-and the mmap()'ing the file itself. However FUSE drivers are only
-available on POSIX OS, and need root privilege to be mounted (a FUSE
-filesystem does not need root privilege to run, but the mounting
-operation does).
+GDAL 데이터셋을 파일로 노출시키고 파일 자체를 mmap()으로 처리할 FUSE(File system in USEr space) 드라이버를 생성하면 read() 또는 write() 같은 시스템 호출, 또는 더 쉬운 멀티스레딩 관련 몇몇 문제점들이 해결될 수도 있습니다. 하지만 오직 POSIX 운영 체제 상에서만 FUSE 드라이버를 사용할 수 있고, 드라이버를 마운트하려면 루트 권한이 필요합니다. (FUSE 파일 시스템을 실행하는 데에는 루트 권한이 필요없지만, 마운트 작업에는 필요합니다.)
 
 질문
 ----
@@ -1064,11 +1036,9 @@ RawRasterBand 객체 및 GeoTIFF 드라이버가 GetVirtualMemAuto() 메소드�
 SWIG 바인딩
 -----------
 
-The high level API (dataset and raster band) API is available in Python
-bindings.
+파이썬 바인딩에서 고수준 (데이터셋 및 래스터 밴드) API를 사용할 수 있습니다.
 
-GDALDatasetGetVirtualMem() is mapped as Dataset.GetVirtualArray(), which
-returns a NumPy array.
+GDALDatasetGetVirtualMem()은 NumPy 배열을 반환하는 Dataset.GetVirtualArray()로 매핑됩니다.
 
 ::
 
@@ -1086,7 +1056,7 @@ returns a NumPy array.
               related dataset is also dropped.
            """
 
-Similarly for GDALDatasetGetTiledVirtualMem() :
+마찬가지로 GDALDatasetGetTiledVirtualMem()의 경우:
 
 ::
 
@@ -1107,7 +1077,7 @@ Similarly for GDALDatasetGetTiledVirtualMem() :
               related dataset is also dropped.
            """
 
-And the Band object has the following 3 methods :
+그리고 밴드 객체는 다음 세 가지 메소드를 가집니다:
 
 ::
 
@@ -1136,20 +1106,12 @@ And the Band object has the following 3 methods :
               related dataset is also dropped.
            """
 
-Note: dataset/Band.GetVirtualMem()/GetTiledVirtualMem() methods are also
-available. They return a VirtualMem python object that has a GetAddr()
-method that returns a Python memoryview object (Python 2.7 or later
-required). However, using such object does not seem practical for
-non-Byte data types.
+주의: ``dataset/Band.GetVirtualMem()/GetTiledVirtualMem()`` 메소드도 사용할 수 있습니다. 이 메소드들은 (파이썬 2.7 이상 버전을 필요로 하는) 파이썬 memoryview 객체를 반환하는 GetAddr() 메소드를 가진 VirtualMem 파이썬 객체를 반환합니다. 하지만 바이트 유형이 아닌 데이터 유형의 경우 이런 객체를 사용하는 것은 실용적이지 않은 것으로 보입니다.
 
 테스트 스위트
 -------------
 
-The autotest suite will be extended to test the Python API of this RFC.
-It will also test the specialized implementations of GetVirtualMemAuto()
-in RawRasterBand and the GeoTIFF drivers. In autotest/cpp, a
-test_virtualmem.cpp file tests concurrent access to the same pages by 2
-threads.
+자동 테스트 스위트에 이 RFC의 파이썬 API 테스트를 추가할 것입니다. 또한 RawRasterBand 및 GeoTIFF 드라이버에 있는 GetVirtualMemAuto()의 특수 구현도 테스트할 것입니다. :file:`autotest/cpp` 에 있는 :file:`test_virtualmem.cpp` 파일은 스레드 2개가 동일한 페이지에 동시 접근하는 것을 테스트합니다.
 
 구현
 ----
