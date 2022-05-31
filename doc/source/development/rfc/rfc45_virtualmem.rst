@@ -916,29 +916,29 @@ gdalrasterband.cpp로 구현
     * 특수 구현은 기저 파일의 뷰를 가상 메모리로 생성하는 운영 체제의 메커니즘을
     * ( CPLVirtualMemFileMapNew() ) 직접 이용할 수도 있습니다.
     *
-    * At the time of writing, the GeoTIFF driver and "raw" drivers (EHdr, ...) offer
-    * a specialized implementation with direct file mapping, provided that some
-    * requirements are met :
-    *   - for all drivers, the dataset must be backed by a "real" file in the file
-    *     system, and the byte ordering of multi-byte datatypes (Int16, etc.)
-    *     must match the native ordering of the CPU.
-    *   - in addition, for the GeoTIFF driver, the GeoTIFF file must be uncompressed, scanline
-    *     oriented (i.e. not tiled). Strips must be organized in the file in sequential
-    *     order, and be equally spaced (which is generally the case). Only power-of-two
-    *     bit depths are supported (8 for GDT_Bye, 16 for GDT_Int16/GDT_UInt16,
-    *     32 for GDT_Float32 and 64 for GDT_Float64)
+    * 문서 작성 시점에서, GeoTIFF 드라이버 및 (EHdr 등등의) "원시(raw)" 드라이버들이
+    * 다음과 같은 요구 사항들을 만족한다는 가정 하에 직접 파일 매핑을 수행하는 특수 구현을
+    * 제공합니다:
+    *   - 모든 드라이버에 대해, 파일 시스템에 있는 "진짜" 파일이 데이터셋을 뒷받침해야
+    *     하며, (Int16 등등의) 다중 바이트 데이터 유형의 바이트 순서가 CPU의 네이티브
+    *     순서와 일치해야만 합니다.
+    *   - 뿐만 아니라, GeoTIFF 드라이버의 경우 GeoTIFF 파일이 비압축이고 스캔라인
+    *     지향(예: 타일화되지 않음)이어야만 합니다. 스트립(strip)은 파일 내에서 순차
+    *     순서로 구성되고 균등한 간격이어야만 합니다. (일반적으로 이렇게 되어 있습니다.)
+    *     2의 거듭제곱 비트 심도만 지원합니다. (GDT_Byte의 경우 8, GDT_Int16/GDT_UInt16의
+    *     경우 16, GDT_Float32의 경우 32 그리고 GDT_Float64의 경우 64)
     *
-    * The pointer returned remains valid until CPLVirtualMemFree() is called.
-    * CPLVirtualMemFree() must be called before the raster band object is destroyed.
+    * CPLVirtualMemFree()를 호출할 때까지 반환된 포인터는 무결하게 유지됩니다.
+    * 래스터 밴드 객체를 삭제(destroy)하기 전에 CPLVirtualMemFree()를 호출해야만 합니다.
     *
     * p가 이런 포인터이고 base_type이 GDALGetRasterDataType()과 일치하는
     * 유형인 경우, 다음으로 이미지 좌표 (x, y) 요소에 접근할 수 있습니다:
     * *(base_type*) ((GByte*)p + x * *pnPixelSpace + y * *pnLineSpace)
     *
-    * This method is the same as the C GDALGetVirtualMemAuto() function.
+    * 이 메소드는 GDALGetVirtualMemAuto() C 함수와 동등합니다.
     *
-    * @param eRWFlag Either GF_Read to read the band, or GF_Write to
-    * read/write the band.
+    * @param eRWFlag 밴드를 읽기 위한 GF_Read 또는
+    *                밴드를 읽거나 쓰기 위한 GF_Write 가운데 하나입니다.
     *
     * @param pnPixelSpace 버퍼에 있는 한 픽셀값의 시작으로부터 같은 스캔라인에 있는
     *                     다음 픽셀값의 시작까지의 바이트 오프셋을 지정하는 
@@ -948,12 +948,12 @@ gdalrasterband.cpp로 구현
     *                    시작까지의 바이트 오프셋을 지정하는 산출 파라미터입니다.
     *
     * @param papszOptions NULL로 종료되는 옵션 목록입니다.
-    *                     If a specialized implementation exists, defining USE_DEFAULT_IMPLEMENTATION=YES
-    *                     will cause the default implementation to be used.
-    *                     When requiring or falling back to the default implementation, the following
-    *                     options are available : CACHE_SIZE (in bytes, defaults to 40 MB),
-    *                     PAGE_SIZE_HINT (in bytes),
-    *                     SINGLE_THREAD ("FALSE" / "TRUE", defaults to FALSE)
+    *                     특수 구현이 존재하는 경우, USE_DEFAULT_IMPLEMENTATION을
+    *                     YES로 정의하면 기본 구현을 사용하게 될 것입니다.
+    *                     기본 구현이 필요하거나 기본 구현으로 되돌아가는 경우,
+    *                     다음 옵션들을 사용할 수 있습니다: CACHE_SIZE (바이트 단위, 기본값 40MB),
+    *                     PAGE_SIZE_HINT (바이트 단위),
+    *                     SINGLE_THREAD ("FALSE" / "TRUE", 기본값 FALSE)
     *
     * @return CPLVirtualMemFree()로 해제해야만 하는 가상 메모리 객체를,
     *         또는 실패하는 경우 NULL을 반환합니다.
