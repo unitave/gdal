@@ -975,46 +975,16 @@ gdalrasterband.cpp로 구현
 이식성
 ------
 
-The CPLVirtualMem low-level machinery is only implemented for Linux now.
-It assumes that returning from a SIGSEGV handler is possible, which is a
-blatant violation of POSIX, but in practice it seems that most POSIX
-(and non POSIX such as Windows) systems should be able to resume
-execution after a segmentation fault.
+현재 CPLVirtualMem 저수준 메커니즘은 리눅스에서만 구현되어 있습니다. 이 메커니즘은 SIGSEGV 처리기로부터 반환이 가능하다고 가정하는데, 이는 노골적인 POSIX 위반이지만 실제로는 대부분의 POSIX (그리고 윈도우 같은 비 POSIX) 시스템이 분할 폴트 이후 실행을 재개할 수 있어야 할 것으로 보입니다.
 
-Porting to other POSIX operating systems such as MacOSX should be doable
-with moderate effort. Windows has API that offer similar capabilities as
-POSIX API with VirtualAlloc(), VirtualProtect() and
-SetUnhandledExceptionFilter(), although the porting would undoubtly
-require more effort.
+적당한 노력으로 macOS 같은 다른 POSIX 운영 체제로 이식할 수 있어야 합니다. 윈도우에는 POSIX API와 유사한 케이퍼빌리티를 제공하는, VirtualAlloc(), VirtualProtect() 및 SetUnhandledExceptionFilter()가 포함된 API가 있지만 윈도우로 이식하려면 의심할 여지 없이 더 많은 노력이 필요합니다.
 
-The existence of `libsigsegv <http://www.gnu.org/software/libsigsegv>`_
-that run on various OS is an evidence on its capacity of being ported to
-other platforms.
+다양한 운영 체제 상에서 작동하는 `libsigsegv <http://www.gnu.org/software/libsigsegv>`_ 의 존재가 CPLVirtualMem 저수준 메커니즘이 다른 플랫폼들로 이식될 수 있다는 증거입니다.
 
-The trickiest part is ensuring that things will work reliably when two
-concurrent threads that try to access the same initially unmapped page.
-Without special care, one thread could manage to access the page that is
-being filled by the other thread, before it is completely filled. On
-Linux this can be easily avoided with the mremap() call. When a page is
-filled, we don't actually pass the target page to the user callback, but
-a temporary page. When the callback has finished its job, this temporary
-page is mremap()'ed to its target location, which is an atomic
-operation. An alternative implementation for POSIX systems that don't
-have this mremap() call has been tested : any declared threads that can
-access the memory mapping are paused before the temporary page is
-memcpy'ed to its target location, and are resumed afterwards. This
-requires threads to priorly declare their "interest" for a memory
-mapping with CPLVirtualMemDeclareThread(). Pausing a thread is
-interestingly non-obvious : the solution found to do so is to send it a
-SIGUSR1 signal and make it wait in a signal handler for this SIGUSR1
-signal... It has not been investigated if/how this could be done on
-Windows. CPLVirtualMemIsAccessThreadSafe() has been introduced for that
-purpose.
+가장 까다로운 부분은 동시 스레드 2개가 초기에 매핑되지 않은 동일한 페이지에 접근하려 시도할 때 안정적으로 작동하도록 보장하는 것입니다. 특별히 신경을 쓰지 않는다면, 한 스레드가 다른 스레드가 채우기를 완료하기 전에 다른 스레드가 채우고 있는 페이지에 접근할 수 있습니다. 리눅스 상에서는 mremap() 호출로 이를 쉽게 방지할 수 있습니다. 페이지가 채워지면 대상 페이지를 실제로 사용자 콜백으로 전송하는 것이 아니라 임시 페이지로 전송합니다. 콜백이 작업을 완료하면 mremap()을 호출해서 이 임시 페이지를 대상 위치로 전송하는데, 이 작업은 원자 조작(atomic operation)입니다.
+이 mremap()을 호출하지 않는 POSIX 시스템 용 대안 구현을 테스트했습니다: 메모리 매핑에 접근할 수 있는 선언된 모든 스레드가 임시 페이지가 memcpy()를 통해 대상 위치로 전송되기 전에 일시 정지하고, 전송된 다음 다시 재개됩니다. 이를 위해서는 스레드가 CPLVirtualMemDeclareThread()를 이용해서 메모리 매핑에 대한 "관심"을 미리 선언해야 합니다. 스레드를 일시 정지시키는 것은 흥미롭게도 명확하지 않습니다: 일시 정지를 위해 발견된 해결책은 스레드에 SIGUSR1 신호를 전송하고 이 SIGUSR1 신호에 대해 스레드를 신호 처리기에서 대기시키는 것입니다. 윈도우 상에서 이를 어떻게 수행할 수 있을지에 대해서는 조사되지 않았습니다. CPLVirtualMemIsAccessThreadSafe()는 이 목적으로 도입되었습니다.
 
-As far as CPLVirtualMemFileMapNew() is concerned, memory file mapping on
-POSIX systems with mmap() should be portable. Windows has
-CreateFileMapping() and MapViewOfFile() API that have similar
-capabilities as mmap().
+CPLVirtualMemFileMapNew()에 관한 한, POSIX 시스템 상에서 mmap()을 사용하는 메모리 파일 매핑은 이식 가능해야 합니다. 윈도우에는 POSIX mmap()과 유사한 케이퍼빌리티를 가진 reateFileMapping() 및 MapViewOfFile() API가 있습니다.
 
 성능
 ----
