@@ -1,127 +1,99 @@
 .. _rfc-46:
 
 =======================================================================================
-RFC 46: GDAL/OGR unification
+RFC 46: GDAL/OGR 통합
 =======================================================================================
 
-Author: Even Rouault
+저자: 이벤 루올
 
-Contact: even dot rouault at spatialys.com
+연락처: even.rouault@spatialys.com
 
-Status: Adopted, implemented in GDAL 2.0
+상태: 승인, GDAL 2.0버전에 구현
 
-Summary
--------
+요약
+----
 
-In the 1.X series of GDAL/OGR, the GDAL/raster and OGR/vector sides are
-quite different on some aspects even where there is no strong reason for
-them to be different, particularly in the structure of drivers. This RFC
-aims at unifying the OGR driver structure with the GDAL driver
-structure. The main advantages of using the GDAL driver structure are :
+GDAL/OGR 1.x버전에서, GDAL/래스터 및 OGR/벡터 두 쪽이 서로 달라야 할 뚜렷한 이유가 없는 분야에서도, 특히 드라이버의 구조를 포함하는 몇몇 측면에서 상당히 다릅니다. 이 RFC의 목적은 OGR 드라이버 구조를 GDAL 드라이버 구조와 통합하는 것입니다. GDAL 드라이버 구조를 사용하는 경우의 주요 장점은 다음과 같습니다:
 
--  metadata capabilities : description of driver, extensions, creation
-   options, virtual IO capability ...
--  efficient driver identification and opening.
+-  메타데이터 케이퍼빌리티:
+   드라이버 설명, 확장 사양, 생성 옵션, 가상 I/O 케이퍼빌리티, ...
 
-Similarly, OGR datasource and layer classes lack the metadata mechanisms
-offered by the corresponding GDAL dataset and raster band classes.
+-  효율적인 드라이버 식별 및 열기
 
-Another aspect is that the separation between GDAL "datasets" and OGR
-"datasources" is sometimes artificial. Various data containers can
-accept both data types. The list of drivers that have a GDAL side and
-OGR side is : SDTS, PDS, GRASS, KML, Spatialite/Rasterlite, GeoPackage
-(raster side not yet implemented), PostGIS/PostGIS Raster, PDF, PCIDSK,
-FileGDB (raster side not yet implemented). For applications that are
-interested in both, this currently means to open the file twice with
-different API. And for update mode, for file-based drivers, the updates
-must be done sequentially to avoid opening a file twice simultaneously
-in update mode and making conflicting changes.
+마찬가지로, OGR 데이터소스 및 레이어에도 대응하는 GDAL 데이터셋 및 래스터 밴드 클래스들이 제공하는 메타데이터 메커니즘이 부족합니다.
 
-Related RFCs
-------------
+또다른 측면은 GDAL "데이터셋"과 OGR "데이터소스"를 구분하는 것이 인위적인 경우가 있다는 것입니다. 다양한 데이터 컨테이너들이 두 데이터 유형을 모두 받아들일 수 있습니다. 다음은 GDAL 쪽과 OGR 쪽을 둘 다 가진 드라이버들의 목록입니다:
 
-There are a few related past RFCs that have never been adopted but
-strongly relate to RFC 46 :
+   -  SDTS
+   -  PDS
+   -  GRASS
+   -  KML
+   -  Spatialite/Rasterlite
+   -  GeoPackage (래스터 쪽은 아직 구현되지 않았습니다)
+   -  PostGIS/PostGIS Raster
+   -  PDF
+   -  PCIDSK
+   -  FileGDB (래스터 쪽은 아직 구현되지 않았습니다)
 
--  `RFC 10: OGR Open Parameters <./rfc10_ogropen>`__. All the
-   functionality described in RFC 10 is included in RFC 46, mainly the
-   GDALOpenEx() new API
--  `RFC 25: Fast Open <./rfc25_fast_open>`__. RFC 25 mentions avoiding
-   to systematically listing the sibling files to the file being opened.
-   This can now achieved in RFC 46 by lazy loading with
-   GDALOpenInfo::GetSiblingFiles(). At least Identify() should not
-   trigger GetSiblingFiles().
--  `RFC 36: Allow specification of intended on
-   GDALOpen <./rfc36_open_by_drivername>`__. The new GDALOpenEx()
-   accepts a list of a subset drivers that must be probed, as suggested
-   by RFC36. The specification of the drivers on the command line of
-   utilities could be easily done through a new option, but that's not in
-   the scope of RFC 46.
--  `RFC 38: OGR Faster Open <./rfc38_ogr_faster_open>`__ is completely
-   included in RFC 46 through the possibility of using
-   Open(GDALOpenInfo*) in OGR drivers
+두 데이터 유형 모두에 관심이 있는 응용 프로그램의 경우, 현재 상황은 파일을 서로 다른 API로 두 번 열어야 한다는 뜻입니다. 그리고 파일 기반 드라이버의 업데이트 모드의 경우, 업데이트 모드에서 파일을 동시에 두 번 열어서 서로 충돌하는 변경 사항들을 적용하는 일을 피하도록 업데이트를 순차적으로 수행해야만 합니다.
 
-Self-assigned development constraints
--------------------------------------
+관련 RFC
+--------
 
-The changes should have moderate impact on the existing GDAL/OGR code
-base, and particularly on most of its code, that lies in drivers.
-Existing users of the GDAL/OGR API should also be moderately impacted by
-the changes, if they do not need to use the new offered capabilities.
+예전 RFC 가운데 승인되지는 않았지만 RFC 46와 밀접한 관련이 있는 RFC가 몇 가지 있습니다:
 
-Core changes: summary
----------------------
+-  `RFC 10: OGR 열기 파라미터 <./rfc10_ogropen>`_:
+   RFC 10에서 설명하는 모든 기능이, 특히 새 GDALOpenEx() API가 RFC 46에 포함됩니다.
 
--  OGRSFDriver extends GDALDriver.
--  Vector drivers can be implemented as GDALDriver.
--  OGRSFDriverRegistrar is a compatibility wrapper around
-   GDALDriverManager for legacy OGRSFDriver.
--  OGRDataSource extends GDALDataSource.
--  GDALOpenEx() API is added to be able to open "mixed" datasets.
--  OGRLayer extends GDALMajorObject, thus adding metadata capability.
--  The methods of OGRDataSource related to layers are moved to
-   GDALDataset, making it both a raster and vector capable container.
--  Performance improvements in GDALOpenInfo() mechanism.
--  New driver metadata item to describe open options (i.e. deprecate the
-   use of configuration option).
--  New driver metadata item to describe layer creation options.
+-  `RFC 25: 빨리 열기 <./rfc25_fast_open>`_:
+   RFC 25에서 열려 있는 파일에 형제 파일(sibling file)을 시스템적으로 목록화하는 일을 피해야 한다고 언급했습니다. :cpp:func:`GDALOpenInfo::GetSiblingFiles` 를 이용해서 지연 불러오기(lazy loading)를 하면 RFC 46에서 이를 달성할 수 있습니다. 적어도 Identify()가 GetSiblingFiles()를 촉발해서는 안 됩니다.
 
-Core changes: details
----------------------
+-  `RFC 36: GDALOpen 상에서 의도한 드라이버 지정 허용 <./rfc36_open_by_drivername>`_:
+   새로운 GDALOpenEx()는 RFC 36에서 제안한 대로 탐지해야만 하는 드라이버 부분 집합 목록을 입력받습니다. 유틸리티에 새로운 옵션을 도입하면 명령줄 상에서 드라이버를 쉽게 지정할 수 있을 테지만, 이는 RFC 46의 범위에서 벗어납니다.
 
-Drivers and driver registration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-  `RFC 38: OGR 더 빨리 열기 <./rfc38_ogr_faster_open>`_:
+   OGR 드라이버에서 ``Open(GDALOpenInfo*)`` 를 사용한다는 가능성을 통해 RFC 38이 RFC 46에 완전히 포함됩니다.
 
--  The OGRSFDriver now extends GDALDriver and is meant as being a legacy
-   way of implementing a vector driver. It is kept mainbly because, in
-   the current implementation, not all drivers have been migrated to
-   being "pure" GDALDriver. The CopyDataSource() virtual method has been
-   removed since no in-tree drivers implement it. The inheritance to
-   GDALDriver make it possible to manage vector drivers by the
-   GDALDriverManager, and to be able to attach metadata to them, to
-   document driver long name, link to documentation, file extension,
-   datasource creation options with the existing GDAL\_DMD\_\* metadata
-   items.
+스스로 부여한 개발 제약 조건
+----------------------------
 
--  Drivers directly inheriting from GDALDriver (to be opposed to those
-   inheriting from OGRSFDriver) should : - declare SetMetadataItem(
-   GDAL_DCAP_VECTOR, "YES" ). - implement pfnOpen() for dataset opening
-   - optionally, implement pfnCreate() for dataset creation. For vector
-   drivers, the nBands parameter of Create() is supposed to be passed to
-   0. - optionally, implement pfnDelete() for dataset deletion
+변경 사항들이 기존 GDAL/OGR 코드베이스에, 특히 드라이버에 있는 GDAL/OGR 코드 대부분에 큰 영향을 미쳐서는 안 됩니다. 사용자들이 새로 제공되는 케이퍼빌리티를 사용해야 할 필요가 없는 경우, 변경 사항들은 GDAL/OGR API의 기존 사용자들에게도 큰 영향을 미쳐서는 안 됩니다.
 
--  The *C* OGR Driver API will still work with drivers that have been
-   converted as "pure" GDALDrivers (this is not true of the C++ OGR
-   Driver API). For example OGR_Dr_GetName() calls
-   GDALDriver::GetDescription(), OGR_Dr_CreateDatasource() calls
-   GDALDriver::Create(), etc...
+핵심 변경 사항: 요약
+--------------------
 
--  The C++ definition of GDALDriver is extended with the following
-   function pointers so that it can work with legacy OGRSFDriver.
+-  :cpp:class:`OGRSFDriver` 가 :cpp:class:`GDALDriver` 를 확장합니다.
+-  벡터 드라이버를 :cpp:class:`GDALDriver` 로 구현할 수 있습니다.
+-  :cpp:class:`OGRSFDriverRegistrar` 는 레거시 :cpp:class:`OGRSFDriver` 를 위해 :cpp:class:`GDALDriverManager` 를 감싸는 호환성 래퍼(wrapper)입니다.
+-  :cpp:class:`OGRDataSource` 가 :cpp:class:`GDALDataset` 을 확장합니다.
+-  "혼합" 데이터셋을 열 수 있도록 GDALOpenEx() API를 추가합니다.
+-  :cpp:class:`OGRLayer` 가 :cpp:class:`GDALMajorObject` 를 확장합니다. 즉 메타데이터 케이퍼빌리티를 추가합니다.
+-  :cpp:class:`OGRDataSource` 의 레이어 관련 메소드들을 :cpp:class:`GDALDataset` 으로 이동시켜 래스터와 벡터를 모두 처리할 수 있는 컨테이너로 만듭니다.
+-  GDALOpenInfo() 메커니즘의 성능을 개선합니다.
+-  열기 옵션을 설명하는 (예: 환경설정 옵션의 사용을 퇴출시킨다고 설명하는) 새 드라이버 메타데이터 항목을 추가합니다.
+-  레이어 생성 옵션을 설명하는 새 드라이버 메타데이터 항목을 추가합니다.
+
+핵심 변경 사항: 상세
+--------------------
+
+드라이버 및 드라이버 등록
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-  이제 :cpp:class:`OGRSFDriver` 가 :cpp:class:`GDALDriver` 를 확장하고 벡터 드라이버를 구현하는 레거시 방식이 됩니다. :cpp:class:`OGRSFDriver` 를 유지하는 주된 이유는 현재 구현에서 모든 드라이버가 "순수" :cpp:class:`GDALDriver` 로 마이그레이션되지는 않기 때문입니다. CopyDataSource() 가상 메소드를 제거한 이유는 어떤 인트리(in-tree) 드라이버도 이를 구현하지 않기 때문입니다. :cpp:class:`GDALDriver` 로의 상속은 :cpp:class:`GDALDriver` 가 :cpp:class:`GDALDriverManager` 를 이용해서 벡터 드라이버를 관리할 수 있게 해주기 때문에, 벡터 드라이버에 메타데이터를 추가하고 드라이버의 긴 이름을 문서화하고 문서, 파일 확장자, 데이터소스 생성 옵션을 기존 ``GDAL_DMD_*`` 메타데이터 항목들과 링크시킬 수 있습니다.
+
+-  (:cpp:class:`OGRSFDriver` 로부터 상속받는 드라이버들과는 반대로) :cpp:class:`GDALDriver` 로부터 직접 상속받는 드라이버들은:
+
+   -  ``SetMetadataItem(GDAL_DCAP_VECTOR, "YES")`` 를 선언해야 합니다 - 데이터셋 열기를 위해 pfnOpen()을 구현합니다.
+   -  선택적으로, 데이터셋 생성을 위해 pfnCreate()를 구현해야 합니다. 벡터 드라이버의 경우 Create()의 'nBands' 파라미터를 0으로 전송해야 합니다.
+   -  선택적으로, 데이터셋 삭제를 위해 pfnDelete()를 구현해야 합니다.
+
+-  *C* OGR 드라이버 API는 "순수" :cpp:class:`GDALDriver` 로 변환된 드라이버들과 계속 작동할 것입니다. (C++ OGR 드라이버 API의 경우는 그렇지 않습니다.) 예를 들어 OGR_Dr_GetName()은 :cpp:func:`GDALDriver::GetDescription` 을 호출하고, OGR_Dr_CreateDatasource()는 :cpp:func:`GDALDriver::Create` 를 호출하며, ...
+
+-  :cpp:class:`GDALDriver` 의 C++ 정의에 다음 함수 포인터들을 추가해서 레거시 :cpp:class:`OGRSFDriver` 와 작동할 수 있도록 확장합니다.
 
 ::
 
-       /* For legacy OGR drivers */
+       /* 레거시 OGR 드라이버 용 */
        GDALDataset         *(*pfnOpenWithDriverArg)( GDALDriver*, GDALOpenInfo * );
        GDALDataset         *(*pfnCreateVectorOnly)( GDALDriver*,
                                                     const char * pszName,
@@ -129,102 +101,47 @@ Drivers and driver registration
        CPLErr              (*pfnDeleteDataSource)( GDALDriver*,
                                                     const char * pszName );
 
-::
 
-   They are used by GDALOpenEx(), GDALDriver::Create() and GDALDriver::Delete()
-   if the pfnOpen, pfnCreate or pfnDelete pointers are NULL. The OGRSFDriverRegistrar
-   class has an implementation of those function pointers that calls the
-   legacy C++ OGRSFDriver::Open(), OGRSFDriver::CreateDataSource() and
-   OGRSFDriver::DeleteDataSource() virtual methods.
+'pfnOpen', 'pfnCreate' 또는 'pfnDelete' 포인터가 NULL인 경우 GDALOpenEx(), :cpp:func:`GDALDriver::Create` 및 :cpp:func:`GDALDriver::Delete` 가 이 함수 포인터들을 사용합니다. :cpp:class:`OGRSFDriverRegistrar` 클래스에 레거시 C++ :cpp:func:`OGRSFDriver::Open`, :cpp:func:`OGRSFDriver::CreateDataSource` 및 :cpp:func:`OGRSFDriver::DeleteDataSource` 가상 메소드를 호출하는 이 함수 포인터들을 구현합니다.
 
--  GDALDriver::Create() can accept nBands == 0 for a vector capable
-   driver.
+-  벡터 지원 드라이버의 경우 :cpp:func:`GDALDriver::Create` 가 ``nBands == 0`` 을 입력받을 수 있습니다.
 
--  GDALDriver::DefaultCreateCopy() can accept a dataset with 0 bands for
-   a vector capable driver, and if the output dataset has layer creation
-   capability and the source dataset has layers, it copies the layers
-   from the source dataset into the target dataset.
+-  벡터 지원 드라이버의 경우 :cpp:func:`GDALDriver::DefaultCreateCopy` 는 밴드가 0개인 데이터셋을 입력받을 수 있으며, 산출 데이터셋이 레이어 생성 케이퍼빌리티를 가지고 있고 소스 데이터셋이 레이어를 가지고 있다면 소스 데이터셋으로부터 대상 데이터셋으로 레이어를 복사합니다.
 
--  GDALDriver::Identify() now iterates over all kinds of drivers. It has
-   been modified to do a first pass on drivers that have an
-   implementation of Identify(). If no match is found, it does a second
-   pass on all drivers and use the potentially slower Open() as the
-   identification method.
+-  :cpp:func:`GDALDriver::Identify` 는 이제 모든 종류의 드라이버들을 반복합니다. Identify()를 구현한 드라이버들에 대해 첫 번째 패스(pass)를 수행하도록 수정했습니다. 일치하는 드라이버를 찾지 못 한 경우 더 느릴 가능성이 있는 Open()을 식별 메소드로 사용해서 모든 드라이버에 대해 두 번째 패스를 수행합니다.
 
--  Related to the above point, the implementations of
-   GDALDriver::pfnIdentify function pointer used to return a boolean
-   value to indicate if the passed GDALOpenInfo was a match for the
-   driver. For some drivers, this was too restrictive so that they were
-   able to implement Identify(). For example where the detection logic
-   can return "yes, I definitely recognize that file", "no, it is not
-   for me" or "I have not enough elements in GDALOpenInfo to be able to
-   tell". That last state can now be advertized with a negative return
-   value.
+-  앞의 요점과 관련해서, 전송된 GDALOpenInfo가 드라이버와 일치하는지를 나타내는 불(boolean) 값을 반환하는 데 사용되는 GDALDriver::pfnIdentify 함수 포인터를 구현합니다. 일부 드라이버의 경우 이 포인터 구현이 Identify()를 구현할 수 있을 정도로 너무 제한적이었습니다. 예를 들면 탐지 로직이 "네, 해당 파일을 분명하게 인식합니다", "아니오, 일치하지 않습니다" 또는 "인식하기에는 GDALOpenInfo에 있는 요소들이 충분하지 않습니다"를 반환할 수 있는 경우입니다. 이제 마지막 선언을 음의 반환값으로 나타낼 수 있습니다.
 
--  The OGRSFDriverRegistrar is trimmed down to be mostly a wrapper
-   around GDALDriverManager. In particular, it does not contain any
-   longer a list of drivers. The Open(), OpenShared(),
-   ReleaseDataSource(), DeregisterDriver() and AutoLoadDrivers() methods
-   are removed from the class. This change can have impact on C++ code.
-   A few adaptations in OGR utilities have been done to accommodate for
-   those changes. The RegisterDriver() API has been kept for legacy OGR
-   drivers and it automatically sets SetMetadataItem( GDAL_DCAP_VECTOR,
-   "YES" ). The GetDriverCount(), GetDriver() and GetDriverByName()
-   methods delegate to GDALDriverManager and make sure to only take into
-   account drivers that have the GDAL_DCAP_VECTOR capability. In the
-   case a driver has the same name as GDAL and OGR driver, the OGR
-   variant is internally prefixed with OGR\_, and GetDriverByName() will
-   first try the OGR\_ variant. The GetOpenDSCount() and GetOpenDS()
-   have now a dummy implementation returning 0/NULL. For reference,
-   neither MapServer nor QGIS use those functions.
+-  :cpp:class:`OGRSFDriverRegistrar` 를 주로 :cpp:class:`GDALDriverManager` 를 감싸는 래퍼(wrapper)로 줄였습니다. 특히, :cpp:class:`OGRSFDriverRegistrar` 클래스는 이제 더 이상 드라이버 목록을 담지 않으며 Open(), OpenShared(), ReleaseDataSource(), DeregisterDriver() 그리고 AutoLoadDrivers() 메소드들을 제거했습니다.
+   이 변경으로 인해 C++ 코드에 영향이 갈 수도 있습니다. 이 변경 사항들에 맞춰 OGR 유틸리티를 몇 군데 조정했습니다.
+   레거시 OGR 드라이버를 위해 RegisterDriver() API를 유지했는데 이 API는 ``SetMetadataItem(GDAL_DCAP_VECTOR, "YES")`` 를 자동으로 설정합니다. GetDriverCount(), GetDriver() 및 GetDriverByName() 메소드를 :cpp:class:`GDALDriverManager` 로 위임하고 GDAL_DCAP_VECTOR 케이퍼빌리티를 가진 드라이버들만 고려하도록 합니다.
+   드라이버가 GDAL 또는 OGR 드라이버와 동일한 이름을 가지고 있는 경우, 내부적으로 OGR 변이형에 ``OGR_`` 접두어를 붙이고 GetDriverByName()이 ``OGR_`` 변이형을 먼저 시도할 것입니다.
+   참고로, MapServer도 QGIS도 이 함수들을 사용하지 않습니다.
 
--  OGRRegisterAll() is now an alias of GDALAllRegister(). The past
-   OGRRegisterAll() is now renamed OGRRegisterAllInternal() and called
-   by GDALAllRegister(). So, GDALAllRegister() and OGRRegisterAll() are
-   now equivalent and register all drivers.
+-  OGRRegisterAll()은 이제 GDALAllRegister()의 별명입니다. 이제 예전 OGRRegisterAll()을 OGRRegisterAllInternal()로 재명명하고 GDALAllRegister()가 이를 호출합니다. 즉, GDALAllRegister()와 OGRRegisterAll()이 이제 동등하며 모든 드라이버를 등록합니다.
 
--  GDALDriverManager has received a few changes :
+-  :cpp:class:`GDALDriverManager` 에 몇 가지 변경 사항들을 적용했습니다:
 
-   -  use of a map from driver name to driver object to speed-up
-      GetDriverByName()
-   -  accept OGR_SKIP and OGR_DRIVER_PATH configuration options for
-      backward compatibility.
-   -  The recommended separator for driver names in GDAL_SKIP is now
-      comma instead of space (similarly to what OGR_SKIP does). This is
-      to make it possible to define OGR driver names in GDAL_SKIP that
-      have spaces in their names like "ESRI Shapefile" or "MapInfo
-      File". If there is no comma in the GDAL_SKIP value, then space
-      separator is assumed (backward compatibility).
-   -  removal of GetHome()/SetHome() methods whose purpose seemed to
-      define an alternate path for the search directory of plugins.
-      Those methods only existed at the C++ level, and are redundant
-      with GDAL_DRIVER_PATH configuration option
+   -  GetDriverByName()의 속도를 높이기 위해 드라이버 이름으로부터 드라이버 객체로의 매핑을 사용합니다.
 
--  Raster-capable drivers should declare SetMetadataItem(
-   GDAL_DCAP_RASTER, "YES" ). All in-tree GDAL drivers have been patched
-   to declare it. But the registration code detects if a driver does not
-   declare any of GDAL_DCAP_RASTER nor GDAL_DCAP_VECTOR, in which case
-   it declares GDAL_DCAP_RASTER on behalf of the un-patched driver, with
-   a debug message inviting to explicitly set it.
+   -  하위 호환성을 위해 OGR_SKIP 및 OGR_DRIVER_PATH 환경설정 옵션을 받아들입니다.
 
--  New metadata items :
+   -  GDAL_SKIP 환경설정 옵션에서 드라이버 이름의 추천 구분자가 이제 (OGR_SKIP과 마찬가지로) 공백이 아니라 쉼표입니다. 이는 GDAL_SKIP에서 "ESRI Shapefile" 또는 "MapInfo File"처럼 이름에 공백이 포함된 OGR 드라이버 이름을 정의할 수 있게 하기 위해서입니다. (하위 호환성을 위해) GDAL_SKIP 값에 쉼표가 없을 경우 공백 구분자로 가정합니다.
 
-   -  GDAL_DCAP_RASTER=YES / GDAL_DCAP_VECTOR=YES at driver level. To
-      declare that a driver has raster/vector capabilities. A driver can
-      declare both.
-   -  GDAL_DMD_EXTENSIONS (with a final S) at driver level. This is a
-      small evolution of GDAL_DMD_EXTENSION where one can specify
-      several extensions in the value string. The extensions are
-      space-separated. For example "shp dbf", "tab mif mid", etc... For
-      ease of use, GDALDriver::SetMetadataItem(GDAL_DMD_EXTENSION) also
-      sets the passed value as GDAL_DMD_EXTENSIONS, if it is not already
-      set. So new code can always use GDAL_DMD_EXTENSIONS.
-   -  GDAL_DMD_OPENOPTIONLIST at driver level. The value of this item is
-      an XML snippet with a format similar to creation options.
-      GDALOpenEx(), once it has identified with Identify() that a driver
-      accepts the file, will validate the passed open option list with
-      the authorized open option list. Below an example of such an
-      authorized open option list in the S57 driver
+   -  플러그인 검색 디렉터리의 대안 경로를 정의하는 것으로 보이는 GetHome()/SetHome() 메소드를 제거합니다. 이 메소드들은 오직 C++ 수준에서만 존재했는데, GDAL_DRIVER_PATH 환경설정 옵션으로 인해 쓸모가 없어졌기 때문입니다.
+
+-  래스터 지원 드라이버가 ``SetMetadataItem(GDAL_DCAP_RASTER, "YES")`` 를 선언해야 합니다. 모든 인트리 GDAL 드라이버가 이를 선언하도록 패치했습니다. 그러나 등록 코드가 드라이버가 GDAL_DCAP_RASTER 또는 GDAL_DCAP_VECTOR 둘 다 선언하지 않는지를 탐지하고, 둘 다 선언하지 않는 경우 GDAL_DCAP_RASTER를 명확하게 설정할 것을 제안하는 디버그 메시지와 함께 패치되지 않은 드라이버를 대신해서 GDAL_DCAP_RASTER를 선언합니다.
+
+-  새 메타데이터 항목들:
+
+   -  GDAL_DCAP_RASTER=YES / GDAL_DCAP_VECTOR=YES: 드라이버 수준.
+      드라이버가 래스터/벡터 케이퍼빌리티를 가지고 있다고 선언하기 위한 항목입니다. 드라이버가 둘 다 선언할 수 있습니다.
+
+   -  GDAL_DMD_EXTENSIONS: (끝에 S가 붙습니다) 드라이버 수준.
+      이 항목은 GDAL_DMD_EXTENSION의 진화형으로, 값 문자열에 확장자 여러 개를 지정할 수 있습니다. 확장자를 공백으로 구분합니다. 예를 들면 "shp dbf", "tab mif mid" 등등처럼 구분합니다. 좀 더 쉽게 사용할 수 있도록, GDAL_DMD_EXTENSIONS이 아직 설정되지 않은 경우 ``GDALDriver::SetMetadataItem(GDAL_DMD_EXTENSION)`` 도 전송된 값을 GDAL_DMD_EXTENSIONS로 설정합니다. 따라서 새로운 코드가 항상 GDAL_DMD_EXTENSIONS를 사용할 수 있습니다.
+
+   -  GDAL_DMD_OPENOPTIONLIST: 드라이버 수준.
+      이 항목의 값은 생성 옵션과 비슷한 서식을 가진 XML 조각(snippet)입니다. GDALOpenEx()가 Identify()를 이용해서 드라이버가 파일을 입력받는다는 사실을 식별하고 나면 인증된 열기 옵션 목록으로 전송된 열기 옵션 목록을 검증할 것입니다. 다음은 S57 드라이버에서의 이런 인증된 열기 옵션 목록의 예시입니다.
 
 ::
 
@@ -258,15 +175,10 @@ Drivers and driver registration
                    "encoding specified in the S57 DSSI record." default="NO" />
    </OpenOptionList>
 
-::
-
-   - GDAL_DS_LAYER_CREATIONOPTIONLIST at dataset level. But can also be set at
-     driver level because, in practice, layer creation options do not depend on the
-     dataset instance.
-     The value of this item is an XML snippet with a format similar to dataset creation
-     options. 
-     If specified, the passed creation options to CreateLayer() are validated
-     against that authorized creation option list.
+  -  GDAL_DS_LAYER_CREATIONOPTIONLIST: 데이터셋 수준.
+     But can also be set at driver level because, in practice, layer creation options do not depend on the dataset instance.
+     The value of this item is an XML snippet with a format similar to dataset creation options. 
+     If specified, the passed creation options to CreateLayer() are validated against that authorized creation option list.
      Below an example of such an authorized open option list in the Shapefile driver.
 
 ::
@@ -291,10 +203,10 @@ Drivers and driver registration
 
 .. _datasets--datasources:
 
-Datasets / Datasources
-~~~~~~~~~~~~~~~~~~~~~~
+데이터셋 / 데이터소스
+~~~~~~~~~~~~~~~~~~~~~
 
--  The main methods from OGRDataSource have been moved to GDALDataset :
+-  The main methods from :cpp:class:`OGRDataSource`  have been moved to :cpp:class:`GDALDataset`  :
 
 ::
 
@@ -379,7 +291,7 @@ Datasets / Datasources
    implementation of OGRDataSource::SyncToDisk(), i.e. iterate over all
    layers and call SyncToDisk() on them.
 
--  GDALDataset has now a protected ICreateLayer() method.
+-  :cpp:class:`GDALDataset`  has now a protected ICreateLayer() method.
 
 ::
 
@@ -492,18 +404,18 @@ Datasets / Datasources
       like GML or NAS, that must fetch a bit more bytes to be able to
       identify the file.
 
-Layer
-~~~~~
+레이어
+~~~~~~
 
--  OGRLayer extends GDALMajorObject. Drivers can now define layer
+-  :cpp:class:`OGRLayer`  extends :cpp:class:`GDALMajorObject` . Drivers can now define layer
    metadata items that can be retrieved with the usual
    GetMetadata()/GetMetadateItem() API.
 
 -  The GetInfo() method has been removed. It has never been implemented
    in any in-tree drivers and has been deprecated for a long time.
 
-Other
-~~~~~
+기타
+~~~~
 
 -  The deprecated and unused GDALProjDefH and GDALOptionDefinition types
    have been removed from gdal.h
@@ -522,7 +434,7 @@ Other
 -  OGRGeneralCmdLineProcessor() use GDALGeneralCmdLineProcessor()
    implementation, restricting --formats to vector capable drivers.
 
-Changes in drivers
+드라이버 변경 사항
 ------------------
 
 -  OGR PCIDSK driver has been merged into GDAL PCIDSK driver.
@@ -531,7 +443,7 @@ Changes in drivers
 
 -  A global pass has been made to in-tree OGR drivers that have to open
    a file to determine if they recognize it. They have been converted to
-   GDALDriver to accept a GDALOpenInfo argument and they now use its
+   :cpp:class:`GDALDriver`  to accept a GDALOpenInfo argument and they now use its
    pabyHeader field to examine the first bytes of files. The number of
    system calls realated to file access (open/stat), in order to
    determine that a file is not recognized by any OGR driver, has now
@@ -544,12 +456,12 @@ Changes in drivers
 
 -  Long driver description is set for most OGR drivers.
 
--  All classes deriving from OGRLayer have been modified to call
+-  All classes deriving from :cpp:class:`OGRLayer`  have been modified to call
    SetDescription() with the value of
    GetName()/poFeatureDefn->GetName(). test_ogrsf tests that it is
    properly set.
 
--  Following drivers are kept as OGRSFDriver, but their Open() method
+-  Following drivers are kept as :cpp:class:`OGRSFDriver` , but their Open() method
    does early extension/prefix testing to avoid datasource object to be
    instantiated : CartoDB, CouchDB, DXF, EDIGEO, GeoConcept, GFT, GME,
    IDRISI, OGDI, PCIDSK, PG, XPlane.
@@ -591,20 +503,20 @@ Changes in drivers
    FME, GRASS, IDB, OCI, MSSQLSpatial(compilation OK, but not runtime
    tested)
 
-Changes in utilities
---------------------
+유틸리티 변경 사항
+------------------
 
 -  gdalinfo accepts a -oo option to define open options
 -  ogrinfo accepts a -oo option to define open options
 -  ogr2ogr accepts a -oo option to define input dataset open options,
    and -doo to define destination dataset open options
 
-Changes in SWIG bindings
-------------------------
+SWIG 바인딩 변경 사항
+---------------------
 
 -  Python and Java bindings:
 
-   -  add new GDALDataset methods taken from OGRDataSource :
+   -  add new :cpp:class:`GDALDataset`  methods taken from :cpp:class:`OGRDataSource`  :
       CreateLayer(), CopyLayer(), DeleteLayer(), GetLayerCount(),
       GetLayerByIndex(), GetLayerByName(), TestCapability(),
       ExecuteSQL(), ReleaseResultSet(), GetStyleTable() and
@@ -616,8 +528,8 @@ Changes in SWIG bindings
    have to be done by their mainteners to be able to use the new
    capabilities
 
-Potential changes that are *NOT* included in this RFC
------------------------------------------------------
+이 RFC에 포함되지 '않은' 잠재적인 변경 사항들
+---------------------------------------------
 
 "Natural" evolutions of current RFC :
 
@@ -637,57 +549,59 @@ Further unification steps :
 -  Unification of some utilities : "gdal info XXX", "gdal convert XXX"
    that would work on all kind of datasets.
 
-Backward compatibility
-----------------------
+하위 호환성
+-----------
 
 GDALDriverManager::GetDriverCount(), GetDriver() now returns OGR
 drivers, as well as GDAL drivers
 
 The reference counting in GDAL datasets and GDAL 1.X OGR datasources was
 a bit different. It starts at 1 for GDAL datasets, and started at 0 for
-OGR datasources. Now that OGRDataSource is basically a GDALDataset, it
+OGR datasources. Now that :cpp:class:`OGRDataSource`  is basically a :cpp:class:`GDALDataset` , it
 starts at 1 for both cases. Hopefully there are very few users of the
 OGR_DS_GetRefCount() API. If it was deemed necessary we could restore
 the previous behavior at the C API, but that would not be possible at
 the C++ level. For reference, neither MapServer nor QGIS use
 OGR_DS_GetRefCount().
 
-Documentation
--------------
+문서화
+------
 
 A pass should be made on the documentation to check that all new methods
 are properly documented. The OGR general documentation (especially C++
 API Read/Write tutorial, Driver implementation tutorial and OGR
 architecture) should be updated to reflect the changes.
 
-Testing
--------
+테스트
+------
 
 Very few changes have been made so that the existing autotest suite
 still passes. Additions have been made to test the GDALOpenEx() API and
-the methods "imported" from OGRDataSource into GDALDataset.
+the methods "imported" from :cpp:class:`OGRDataSource`  into :cpp:class:`GDALDataset` .
 
-Version numbering
------------------
+버전 번호 매기기
+----------------
 
 Although the above describes changes should have very few impact on
 existing applications of the C API, some behavior changes, C++ level
 changes and the conceptual changes are thought to deserve a 2.0 version
 number.
 
-Implementation
---------------
+구현
+----
 
-Implementation will be done by Even Rouault.
+이벤 루올이 구현할 것입니다.
 
-The proposed implementation lies in the "unification" branch of the
-`https://github.com/rouault/gdal2/tree/unification <https://github.com/rouault/gdal2/tree/unification>`__
-repository.
+`"통합" 브랜치 <https://github.com/rouault/gdal2/tree/unification>`_ 저장소에 제안한 구현이 있습니다.
 
-The list of changes :
-`https://github.com/rouault/gdal2/compare/unification <https://github.com/rouault/gdal2/compare/unification>`__
+변경 사항 목록: `https://github.com/rouault/gdal2/compare/unification <https://github.com/rouault/gdal2/compare/unification>`_
 
-Voting history
---------------
+투표 이력
+---------
 
-+1 from JukkaR, FrankW, DanielM, TamasS and EvenR.
+-  유카 라흐코넨 +1
+-  프랑크 바르메르담 +1
+-  대니얼 모리셋 +1
+-  세케레시 터마시 +1
+-  이벤 루올 +1
+
