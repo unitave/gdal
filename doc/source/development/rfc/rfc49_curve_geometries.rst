@@ -1,199 +1,175 @@
 .. _rfc-49:
 
 =======================================================================================
-RFC 49: Curve geometries
+RFC 49: 만곡 도형
 =======================================================================================
 
-Author: Even Rouault
+저자: 이벤 루올
 
-Contact: even dot rouault at spatialys dot com
+연락처: even.rouault@spatialys.com
 
-Status: Adopted, implemented in GDAL 2.0
+상태: 승인, GDAL 2.0버전에 구현
 
-Summary
--------
+요약
+----
 
-The current geometry model in GDAL 1.X makes use of points, lines,
-polygons and aggregations of them (multipoints, multilines,
-multipolygons and geometry collections). It was modeled from the
-geometry class hierarchy of the "OpenGIS Simple Feature Access Part 1 :
-Common Architecture" (in its 1.1.0 version).
+현재 GDAL 1.x버전의 도형 모델은 포인트, 라인, 폴리곤과 그 조합(멀티포인트, 멀티라인, 멀티폴리곤 및 도형 집합)을 사용합니다. 이 모델은 "오픈GIS 단순 피처 접근 1부: 공통 아키텍처"(1.1.0버전)의 도형 클래스 계층으로부터 나왔습니다.
 
-This RFC covers the addition of new geometry types that have been added
-in ISO/IEC 13249 Part 3 Spatial (abbreviated as ISO SQL/MM Part 3):
+이 RFC는 `ISO/IEC 13249 Part 3 Spatial (약칭 ISO SQL/MM Part 3) <https://www.iso.org/standard/60343.html>`_ 에 추가된 새 도형 유형을 추가할 것을 제안합니다:
 
--  circular string: a circular arc, or a sequence of connected circular
-   arcs, each of them describe by 3 points: the first point of the arc,
-   an intermediate point and the final point
--  compound curve: a sequence of connected curves, either line strings
-   or circular strings
--  curve polygon: polygon consisting of one outer ring, and zero or more
-   inner ring. Each ring can be one of the curve implementations: line
-   strings, circular strings, compound curves.
--  multicurve: a collection of curves (line strings, circular strings,
-   compound curves)
--  multisurface: a collection of surfaces (polygons, curve polygons)
+-  원호 스트링(circular string):
+   원호의 첫 번째 포인트, 중간(intermediate) 포인트 그리고 마지막 포인트라는 3개의 포인트로 설명되는 원호(circular arc) 또는 연결된 원호의 순열(sequence)
 
-The scope of this RFC consists in :
+-  복합 곡선(compound curve):
+   연결된 곡선의 순열, 라인스트링 또는 원호 스트링 가운데 하나
 
--  adding the new geometry classes to the existing geometry class
-   hierarchy, with the corresponding importer and exporter of WKT (Well
-   Known Text) and WKB (Well Known Binary) encodings
--  adding methods to convert those curve geometries into their
-   approximated linear version, and to do the reverse operation
--  upgrading some of the drivers that can support such geometries : GML
-   (and indirectly NAS, WFS), PostGIS/PGDump, GeoPackage, SQLite, CSV,
-   VRT.
+-  만곡 폴리곤(curve polygon):
+   1개의 외곽 고리와 0개 이상의 내곽 고리로 이루어진 폴리곤. 각 고리는 라인스트링, 원호 스트링, 복합 곡선이라는 곡선 구현 가운데 하나일 수 있습니다.
 
-Reference documents
--------------------
+-  다중 곡선(multicurve):
+   곡선 집합 (라인스트링, 원호 스트링, 복합 곡선)
 
-The following documents have been used for the implementation :
+-  다중 면(multisurface):
+   면 집합 (폴리곤, 만곡 폴리곤)
 
--  `Old draft version of ISO/IEC 13249 Part 3 Spatial, dating from
-   2004-05-09 <http://jtc1sc32.org/doc/N1101-1150/32N1107-WD13249-3--spatial.pdf>`__,
-   a.k.a SQL/MM Part 3 : Caution the WKB codes given at page 137 and
-   following are not the latest ones used. Refer to SFA 1.2.1
+이 RFC의 범위는 다음으로 이루어져 있습니다:
 
--  `OpenGIS Simple Feature Access Part 1 : Common Architecture,v
-   1.2.1 <http://portal.opengeospatial.org/files/?artifact_id=25355>`__,
-   a.k.a. SFA 1.2.1
+-  기존 도형 클래스 계층에 새 도형 클래스들을 각각 대응하는 WKT(Well Known Text) 및 WKB(Well Known Binary) 인코딩으로 가져오기 기능(importer) 및 내보내기 기능(exporter)과 함께 추가하기
 
--  `BNF of WKT
-   encoding <https://github.com/postgis/postgis/blob/svn-trunk/doc/bnf-wkt.txt>`__:
-   extracted from SQL/MM Part 3
+-  이 만곡 도형들과 각각의 근사치의 선형 도형들을 각각 변환/역변환할 수 있는 메소드를 추가하기
 
--  `BNF of WKB
-   encoding <https://github.com/postgis/postgis/blob/svn-trunk/doc/bnf-wkb.txt>`__:
-   extracted from SQL/MM Part 3
+-  이런 도형들을 지원할 수 있는 몇몇 드라이버를 업그레이드하기:
 
-Core changes
-------------
+   -  GML (그리고 비간접적으로 NAS, WFS)
+   -  PostGIS/PGDump
+   -  GeoPackage
+   -  SQLite
+   -  CSV
+   -  VRT
 
-New cass hierarchy
-~~~~~~~~~~~~~~~~~~
+참조 문서
+---------
 
-The new class hierarchy is the following and is mostly consistent with
-SQL/MM Part 3
+이 RFC의 구현을 위해 다음 문서들을 사용했습니다:
+
+-  `2004년 5월 9일 작성된 ISO/IEC 13249 Part 3 Spatial(약칭 ISO SQL/MM Part 3)의 예전 초안 <http://jtc1sc32.org/doc/N1101-1150/32N1107-WD13249-3--spatial.pdf>`_:
+   137페이지부터 있는 WKB 코드가 최신 코드가 아니므로 주의하십시오. 단순 피처 접근(Simple Feature Access) 1.2.1버전을 참조하십시오.
+
+-  `오픈GIS 단순 피처 접근 1부: 공통 아키텍처 1.2.1버전, 약칭 SFA 1.2.1 <https://portal.ogc.org/files/?artifact_id=25355>`_
+
+-  `WKT 인코딩의 BNF(Backus–Naur form) <https://github.com/postgis/postgis/blob/svn-trunk/doc/bnf-wkt.txt>`_:
+   SQL/MM Part 3로부터 추출
+
+-  `WKB 인코딩의 BNF(Backus–Naur form) <https://github.com/postgis/postgis/blob/svn-trunk/doc/bnf-wkb.txt>`_:
+   SQL/MM Part 3로부터 추출
+
+핵심 변경 사항
+--------------
+
+새 클래스 계층
+~~~~~~~~~~~~~~
+
+새 클래스 계층은 다음과 같으며 대부분 SQL/MM Part 3와 일치합니다.
 
 .. image:: ../../../images/rfc49/classOGRGeometry.png
 
-The only exceptions are :
+유일한 예외는 다음과 같습니다:
 
--  OGRLinearRing: this class present in GDAL 1.X is kept for backward
-   compatibility and also because it is still present in SFA 1.2.1, even
-   if absent from SQL/MM Part 3
--  OGRSimpleCurve: this abstract class is an implementation detail in
-   OGR that simplifies the implementation of OGRCircularString, by
-   sharing code with what was in OGRLineString only.
+-  OGRLinearRing:
+   GDAL 1.x버전에 존재하는 이 클래스는 하위 호환성 때문에 그리고 SQL/MM Part 3에서는 빠졌지만 SFA 1.2.1버전에는 아직 존재하기 때문에 유지되었습니다.
 
-Geometry types
-~~~~~~~~~~~~~~
+-  OGRSimpleCurve:
+   이 추상 클래스는 :cpp:class:`OGRLineString` 에만 있던 코드를 공유해서 :cpp:class:`OGRCircularString` 의 구현을 단순화하는 OGR의 구현 세부 정보입니다.
 
-The OGRwkbGeometryType enumeration has been extended with the following
-values :
+도형 유형
+~~~~~~~~~
+
+OGRwkbGeometryType 열거형(enumeration)을 다음 값들로 확장했습니다:
 
 ::
 
-       wkbCircularString = 8,  /**< one or more circular arc segments connected end to end,
-                                *   ISO SQL/MM Part 3. GDAL >= 2.0 */
-       wkbCompoundCurve = 9,   /**< sequence of contiguous curves, ISO SQL/MM Part 3. GDAL >= 2.0 */
-       wkbCurvePolygon = 10,   /**< planar surface, defined by 1 exterior boundary
-                                *   and zero or more interior boundaries, that are curves.
-                                *    ISO SQL/MM Part 3. GDAL >= 2.0 */
-       wkbMultiCurve = 11,     /**< GeometryCollection of Curves, ISO SQL/MM Part 3. GDAL >= 2.0 */
-       wkbMultiSurface = 12,   /**< GeometryCollection of Surfaces, ISO SQL/MM Part 3. GDAL >= 2.0 */
+       wkbCircularString = 8,  /**< 끝과 끝이 연결된 하나 이상의 원호 선분들,
+                                *   ISO SQL/MM Part 3. GDAL 2.0버전 이상 */
+       wkbCompoundCurve = 9,   /**< 인접 곡선들의 순열, ISO SQL/MM Part 3. GDAL 2.0버전 이상 */
+       wkbCurvePolygon = 10,   /**< 평면, 곡선인 외곽 경계선과 0개 이상의 내곽 경계선으로 정의,
+                                *    ISO SQL/MM Part 3. GDAL 2.0버전 이상 */
+       wkbMultiCurve = 11,     /**< 곡선의 도형 집합(GeometryCollection of Curves),
+                                *   ISO SQL/MM Part 3. GDAL 2.0버전 이상 */
+       wkbMultiSurface = 12,   /**< 면의 도형집합, ISO SQL/MM Part 3. GDAL 2.0버전 이상 */
 
-       wkbCircularStringZ = 1008,  /**< wkbCircularString with Z component. ISO SQL/MM Part 3. GDAL >= 2.0 */
-       wkbCompoundCurveZ = 1009,   /**< wkbCompoundCurve with Z component. ISO SQL/MM Part 3. GDAL >= 2.0 */
-       wkbCurvePolygonZ = 1010,    /**< wkbCurvePolygon with Z component. ISO SQL/MM Part 3. GDAL >= 2.0 */
-       wkbMultiCurveZ = 1011,      /**< wkbMultiCurve with Z component. ISO SQL/MM Part 3. GDAL >= 2.0 */
-       wkbMultiSurfaceZ = 1012,    /**< wkbMultiSurface with Z component. ISO SQL/MM Part 3. GDAL >= 2.0 */
+       wkbCircularStringZ = 1008,  /**< Z 구성 요소를 가진 wkbCircularString,
+                                    *   ISO SQL/MM Part 3. GDAL 2.0버전 이상 */
+       wkbCompoundCurveZ = 1009,   /**< Z 구성 요소를 가진 wkbCompoundCurve,
+                                    *   ISO SQL/MM Part 3. GDAL 2.0버전 이상 */
+       wkbCurvePolygonZ = 1010,    /**< Z 구성 요소를 가진 wkbCurvePolygon,
+                                    *   ISO SQL/MM Part 3. GDAL 2.0버전 이상 */
+       wkbMultiCurveZ = 1011,      /**< Z 구성 요소를 가진 wkbMultiCurve,
+                                    *   ISO SQL/MM Part 3. GDAL 2.0버전 이상 */
+       wkbMultiSurfaceZ = 1012,    /**< Z 구성 요소를 가진 wkbMultiSurface,
+                                    *   ISO SQL/MM Part 3. GDAL 2.0버전 이상 */
 
-The codes have been taken from SFA 1.2.1, and are consistent with the
-PostGIS 2 implementation. Note that ISO SQL/MM Part 3 allows alternates
-values for wkbCircularString (8 or 1000001) : see Table 15 in the above
-mentioned draft. The values in the range 10000XX probably date back
-from an earlier draft version. OGR will import them, but will use the
-values from SFA 1.2.1 when exporting WKB.
+코드는 SFA 1.2.1버전에서 가져왔고, PostGIS 2버전 구현과 일치합니다. ISO SQL/MM Part 3이 wkbCircularString에 대해 대안 값을 (8 또는 1000001) 허용한다는 사실을 기억하십시오. 앞에서 언급한 초안에 있는 표 15를 참조하십시오. 10000XX 범위에 있는 값들은 아마도 더 예전의 초안으로부터 나온 값일 것입니다. OGR은 이 값들을 가져오지만, WKB로 내보낼 때에는 SFA 1.2.1버전의 값들을 사용할 것입니다.
 
-It has been considered if it would worth to modify the enumeration
-values of the existing 2.5D geometries (wkbPoint25D, etc...) to conform
-with the WKB codes of ISO SQL/MM Part 3 / SFA 1.2.1, but there was not a
-clear advantage in doing so, with respect to the impact on existing
-users of OGR API.
+ISO SQL/MM Part 3 / SFA 1.2.1의 WKB 코드를 준수하기 위해 기존 2.5차원 도형(wkbPoint25D 등등)의 열거형 값들을 수정할 가치가 있는지 고려해봤지만, OGR API의 기존 사용자들에 대한 영향이라는 측면에서 그렇게 할 만한 분명한 장점이 없었습니다.
 
-Note: the mix of different ways of expression the Z dimension (wkb25DBit
-bit for "old" geometry types, and +1000 for "new" geometry types) has no
-direct impact on the export of geometries as WKB. There is no direct
-coupling between the values of OGRwkbGeometryType and what goes to WKB
-geometries. The exportToWkb() method of OGRGeometry takes a wkbVariant
-parameter to select the variant of WKB that is wished.
+주의: Z 차원을 표현하는 서로 다른 방법들("예전" 도형 유형의 경우 wkb25DBit 비트, 그리고 "새로운" 도형 유형의 경우 +1000)을 혼합하는 것은 도형을 WKB로 내보내는 데 직접적으로 아무런 영향을 미치지 않습니다. OGRwkbGeometryType의 값과 WKB 도형으로 전송되는 값 사이에는 직접적인 관련이 없습니다. :cpp:class:`OGRGeometry` 의 exportToWkb() 메소드는 원하는 WKB 변이형을 선택하기 위해 'wkbVariant' 파라미터를 입력받습니다.
 
-The use of the wkb25DBit value (0x8000000) that was sometimes used to
-test if a geometry type was 3D is now clearly deprecated since it will
-not work for the new geometry type. The wkbHasZ() and wkbSetZ() have
-been added to respectively test if a geometry type is 3D, or modify a
-geometry type to be 3D. The wkb25DBit constant is now disabled for all
-code in GDAL (but still accessible by user code) and all drivers have
-been converted to use the new macros.
+도형 유형이 3차원인지 테스트하기 위해 가끔 사용되었던 wkb25DBit 값(0x8000000)은 새 도형 유형과 작동하지 않을 것이기 때문에 이제 분명하게 퇴출되었습니다. 각각 도형 유형이 3차원인지 테스트하기 위해 그리고 도형 유형을 3차원으로 수정하기 위해 wkbHasZ() 및 wkbSetZ() 메소드를 추가했습니다. wkb25DBit 상수는 이제 GDAL의 모든 코드에서 비활성화되었습니다. (그러나 사용자 코드로는 아직 접근할 수 있습니다.) 모든 드라이버도 새 매크로를 사용하도록 변환했습니다.
 
-A new family of functions have been used to operate on geometry types :
+도형 유형들에 대해 작업하는 데 새로운 함수 계열을 사용합니다:
 
 ::
 
    OGRwkbGeometryType CPL_DLL OGR_GT_Flatten( OGRwkbGeometryType eType );
-       --> Returns the 2D geometry type corresponding to the passed geometry type.
+       --> 전송된 도형 유형에 대응하는 2차원 도형 유형을 반환합니다.
 
    OGRwkbGeometryType CPL_DLL OGR_GT_SetZ( OGRwkbGeometryType eType );
-       --> Returns the 3D geometry type corresponding to the passed geometry type.
+       --> 전송된 도형 유형에 대응하는 3차원 도형 유형을 반환합니다.
 
    OGRwkbGeometryType CPL_DLL OGR_GT_SetModifier( OGRwkbGeometryType eType, int bSetZ, int bSetM );
-       --> Returns a 2D or 3D geometry type depending on parameter.
+       --> 파라미터에 따라 2차원 또는 3차원 도형 유형을 반환합니다.
 
    int                CPL_DLL OGR_GT_HasZ( OGRwkbGeometryType eType );
-       --> Return if the geometry type is a 3D geometry type.
+       --> 도형 유형이 3차원 도형 유형인지 여부를 반환합니다.
 
    int                CPL_DLL OGR_GT_IsSubClassOf( OGRwkbGeometryType eType,
                                                    OGRwkbGeometryType eSuperType );
-       --> Returns if a type is a subclass of another one
+       --> 도형 유형이 또다른 도형 유형의 하위 클래스인지 여부를 반환합니다.
 
    int                CPL_DLL OGR_GT_IsCurve( OGRwkbGeometryType );
-       -->  Return if a geometry type is an instance of Curve
-           (i.e. wkbLineString, wkbCircularString or wkbCompoundCurve)
+       -->  도형 유형이 곡선의 인스턴스인지 여부를 반환합니다.
+            (예: wkbLineString, wkbCircularString 또는 wkbCompoundCurve)
 
    int                CPL_DLL OGR_GT_IsSurface( OGRwkbGeometryType );
-       -->  Return if a geometry type is an instance of Surface
-           (i.e. wkbPolygon or wkbCurvePolygon)
+       -->  도형 유형이 면의 인스턴스인지 여부를 반환합니다.
+            (예: wkbPolygon 또는 wkbCurvePolygon)
 
    int                CPL_DLL OGR_GT_IsNonLinear( OGRwkbGeometryType );
-       --> Return if a geometry type is a non-linear geometry type.
-           Such geometry type are wkbCircularString, wkbCompoundCurve, wkbCurvePolygon,
-           wkbMultiCurve, wkbMultiSurface and their 3D variant.
+       --> 도형 유형이 비선형 도형 유형인지 여부를 반환합니다.
+           이런 도형 유형에는 wkbCircularString, wkbCompoundCurve, wkbCurvePolygon,
+           wkbMultiCurve, wkbMultiSurface 및 각각의 3차원 변이형들이 있습니다.
 
    OGRwkbGeometryType CPL_DLL OGR_GT_GetCollection( OGRwkbGeometryType eType );
-       -->  Returns the collection type that can contain the passed geometry type
+       -->  전송된 도형 유형을 담을 수 있는 집합 유형을 반환합니다.
 
    OGRwkbGeometryType CPL_DLL OGR_GT_GetCurve( OGRwkbGeometryType eType );
-       --> Returns the curve geometry type that can contain the passed geometry type.
-           Handled conversions are : wkbPolygon -> wkbCurvePolygon,
+       --> 전송된 도형 유형을 담을 수 있는 만곡 도형 유형을 반환합니다.
+           다음 변환을 처리할 수 있습니다: wkbPolygon -> wkbCurvePolygon,
            wkbLineString->wkbCompoundCurve, wkbMultiPolygon->wkbMultiSurface
-           and wkbMultiLineString->wkbMultiCurve.
+           그리고 wkbMultiLineString->wkbMultiCurve.
 
    OGRwkbGeometryType CPL_DLL OGR_GT_GetLinear( OGRwkbGeometryType eType );
-       --> Returns the non-curve geometry type that can contain the passed geometry type
-           Handled conversions are : wkbCurvePolygon -> wkbPolygon,
+       --> 전송된 도형 유형을 담을 수 있는 비만곡 도형 유형을 반환합니다.
+           다음 변환을 처리할 수 있습니다: wkbCurvePolygon -> wkbPolygon,
            wkbCircularString->wkbLineString, wkbCompoundCurve->wkbLineString,
-           wkbMultiSurface->wkbMultiPolygon and wkbMultiCurve->wkbMultiLineString.
+           wkbMultiSurface->wkbMultiPolygon 그리고 wkbMultiCurve->wkbMultiLineString.
 
-The existing wkbFlatten() is an alias of OGR_GT_Flatten(), the new
-wkbHasZ() an alias of OGR_GT_HasZ() and wkbSetZ() an alias of
-OGR_GT_SetZ().
+이제 기존 wkbFlatten()은 OGR_GT_Flatten()의 별명이고, 새 wkbHasZ()는 OGR_GT_HasZ()의 별명이며, wkbSetZ()는 OGR_GT_SetZ()의 별명입니다.
 
-New methods
-~~~~~~~~~~~
+새 메소드
+~~~~~~~~~
 
--  In OGRGeometry class :
+-  :cpp:class:`OGRGeometry` 클래스:
 
 ::
 
@@ -201,39 +177,38 @@ New methods
        virtual OGRBoolean hasCurveGeometry(int bLookForNonLinear = FALSE) const;
 
    /**
-    * \brief Returns if this geometry is or has curve geometry.
+    * \brief 이 도형이 만곡 도형인지 또는 만곡 도형을 가지고 있는지를 반환합니다.
     *
-    * Returns if a geometry is, contains or may contain a CIRCULARSTRING, COMPOUNDCURVE,
-    * CURVEPOLYGON, MULTICURVE or MULTISURFACE.
+    * 도형이 CIRCULARSTRING, COMPOUNDCURVE, CURVEPOLYGON, MULTICURVE 또는
+    * MULTISURFACE인지, 가지고 있는지 또는 가지고 있을 수도 있는지를 반환합니다.
     *
-    * If bLookForNonLinear is set to TRUE, it will be actually looked if the
-    * geometry or its subgeometries are or contain a non-linear geometry in them. In which
-    * case, if the method returns TRUE, it means that getLinearGeometry() would
-    * return an approximate version of the geometry. Otherwise, getLinearGeometry()
-    * would do a conversion, but with just converting container type, like
-    * COMPOUNDCURVE -> LINESTRING, MULTICURVE -> MULTILINESTRING or MULTISURFACE -> MULTIPOLYGON,
-    * resulting in a "loss-less" conversion.
+    * bLookForNonLinear를 TRUE로 설정한 경우, 도형 또는 그 하위 도형이 비선형
+    * 도형인지 또는 담고 있는지를 실제로 살펴볼 것입니다. 이 메소드가 TRUE를
+    * 반환하는 경우 getLinearGeometry()가 이 도형의 근사치 버전을 반환할 것입니다.
+    * 그렇지 않다면 getLinearGeometry()가 변환을 수행하지만 "비손실" 변환하도록
+    * COMPOUNDCURVE -> LINESTRING, MULTICURVE -> MULTILINESTRING 또는
+    * MULTISURFACE -> MULTIPOLYGON 처럼 컨테이너 유형만 변환할 것입니다.
     */
 
        virtual OGRGeometry* getCurveGeometry(const char* const* papszOptions = NULL) const;
 
    /**
-    * \brief Return curve version of this geometry.
+    * \brief 이 도형의 만곡 버전을 반환합니다.
     *
-    * Returns a geometry that has possibly CIRCULARSTRING, COMPOUNDCURVE, CURVEPOLYGON,
-    * MULTICURVE or MULTISURFACE in it, by de-approximating curve geometries.
+    * 만곡 도형의 역근사치를 계산해서 CIRCULARSTRING, COMPOUNDCURVE,
+    * CURVEPOLYGON, MULTICURVE 또는 MULTISURFACE를 담고 있을 수도 있는 도형을
+    * 반환합니다.
     *
-    * If the geometry has no curve portion, the returned geometry will be a clone
-    * of it.
+    * 도형에 만곡 부분이 없는 경우, 입력 도형의 복사본을 반환합니다.
     *
-    * The ownership of the returned geometry belongs to the caller.
+    * 호출자가 반환 도형을 소유합니다.
     *
-    * The reverse method is OGRGeometry::getLinearGeometry().
+    * 이 메소드의 역은 OGRGeometry::getLinearGeometry()입니다.
     *
-    * This function is the same as C function OGR_G_GetCurveGeometry().
+    * 이 함수는 C 함수 OGR_G_GetCurveGeometry()와 동일합니다.
     *
-    * @param papszOptions options as a null-terminated list of strings.
-    *                     Unused for now. Must be set to NULL.
+    * @param papszOptions NULL로 종료되는 문자열 목록 옵션입니다.
+    *                     현재 사용하지 않습니다. NULL로 설정해야만 합니다.
     */
 
        virtual OGRGeometry* getLinearGeometry(double dfMaxAngleStepSizeDegrees = 0,
@@ -241,24 +216,26 @@ New methods
 
 
    /**
-    * \brief Return, possibly approximate, non-curve version of this geometry.
+    * \brief 이 도형의 -- 근사치 버전일 수도 있는 -- 비만곡 버전을 반환합니다.
     *
-    * Returns a geometry that has no CIRCULARSTRING, COMPOUNDCURVE, CURVEPOLYGON,
-    * MULTICURVE or MULTISURFACE in it, by approximating curve geometries.
+    * 만곡 도형의 근사치를 계산해서 어떤 CIRCULARSTRING, COMPOUNDCURVE,
+    * CURVEPOLYGON, MULTICURVE 또는 MULTISURFACE도 담고 있지 않은 도형을
+    * 반환합니다.
     *
-    * The ownership of the returned geometry belongs to the caller.
+    * 호출자가 반환 도형을 소유합니다.
     *
-    * The reverse method is OGRGeometry::getCurveGeometry().
+    * 이 메소드의 역은 OGRGeometry::getCurveGeometry()입니다.
     *
-    * This method is the same as the C function OGR_G_GetLinearGeometry().
+    * 이 함수는 C 함수 OGR_G_GetLinearGeometry()와 동일합니다.
     *
-    * @param dfMaxAngleStepSizeDegrees the largest step in degrees along the
-    * arc, zero to use the default setting.
-    * @param papszOptions options as a null-terminated list of strings.
-    *                     See OGRGeometryFactory::curveToLineString() for valid options.
+    * @param dfMaxAngleStepSizeDegrees 원호를 따라 도 단위로 가장 큰 단계,
+    *                                  기본 설정을 사용하려면 0으로 설정하십시오.
+    * @param papszOptions NULL로 종료되는 문자열 목록 옵션입니다.
+    *                     무결한 옵션에 대해서는 OGRGeometryFactory::curveToLineString()을
+    *                     참조하십시오.
     */
 
--  In OGRGeometryFactory class :
+-  :cpp:class:`OGRGeometryFactory` 클래스:
 
 ::
 
@@ -271,110 +248,99 @@ New methods
                                                double dfMaxAngleStepSizeDegrees,
                                                const char*const* papszOptions )
    /**
-    * \brief Converts an arc circle into an approximate line string
+    * \brief 원호로 이루어진 원을 근사치 라인스트링으로 변환합니다.
     *
-    * The arc circle is defined by a first point, an intermediate point and a
-    * final point.
+    * 원호로 이루어진 원은 첫 번째 포인트, 중간(intermediate) 포인트 그리고
+    * 마지막 포인트라는 3개의 포인트로 정의됩니다.
     *
-    * The provided dfMaxAngleStepSizeDegrees is a hint. The discretization
-    * algorithm may pick a slightly different value.
+    * 제공된 dfMaxAngleStepSizeDegrees가 힌트입니다. 이산화(discretization)
+    * 알고리즘은 약간 다른 값을 선택할 수도 있습니다.
     *
-    * So as to avoid gaps when rendering curve polygons that share common arcs,
-    * this method is guaranteed to return a line with reversed vertex if called
-    * with inverted first and final point, and identical intermediate point.
+    * 공통 원호를 공유하는 만곡 폴리곤을 렌더링할 때 틈(gap)을 방지하기 위해
+    * 반전된 첫 번째 및 마지막 포인트와 동일한 중간 포인트로 호출하는 경우
+    * 이 메소드가 반전된 꼭짓점을 가진 라인을 반환하도록 보장합니다.
     *
-    * @param x0 x of first point
-    * @param y0 y of first point
-    * @param z0 z of first point
-    * @param x1 x of intermediate point
-    * @param y1 y of intermediate point
-    * @param z1 z of intermediate point
-    * @param x2 x of final point
-    * @param y2 y of final point
-    * @param z2 z of final point
-    * @param bHasZ TRUE if z must be taken into account
-    * @param dfMaxAngleStepSizeDegrees  the largest step in degrees along the
-    * arc, zero to use the default setting.
-    * @param papszOptions options as a null-terminated list of strings or NULL.
-    * Recognized options:
+    * @param x0 첫 번째 포인트의 x
+    * @param y0 첫 번째 포인트의 y
+    * @param z0 첫 번째 포인트의 z
+    * @param x1 중간 포인트의 x
+    * @param y1 중간 포인트의 y
+    * @param z1 중간 포인트의 z
+    * @param x2 마지막 포인트의 x
+    * @param y2 마지막 포인트의 y
+    * @param z2 마지막 포인트의 z
+    * @param bHasZ Z를 연산에 넣어야만 하는 경우 TRUE
+    * @param dfMaxAngleStepSizeDegrees 원호를 따라 도 단위로 가장 큰 단계,
+    *                                  기본 설정을 사용하려면 0으로 설정하십시오.
+    * @param papszOptions NULL로 종료되는 문자열 목록 옵션입니다.
+    * 인식하는 옵션:
     * <ul>
-    * <li>ADD_INTERMEDIATE_POINT=STEALTH/YES/NO (Default to STEALTH).
-    *         Determine if and how the intermediate point must be output in the linestring.
-    *         If set to STEALTH, no explicit intermediate point is added but its
-    *         properties are encoded in low significant bits of intermediate points
-    *         and OGRGeometryFactory::curveFromLineString() can decode them.
-    *         This is the best compromise for round-tripping in OGR and better results
-    *         with PostGIS <a href="http://postgis.org/docs/ST_LineToCurve.html">ST_LineToCurve()</a>
-    *         If set to YES, the intermediate point is explicitly added to the linestring.
-    *         If set to NO, the intermediate point is not explicitly added.
+    * <li>ADD_INTERMEDIATE_POINT=STEALTH/YES/NO: (기본값은 STEALTH)
+    *         중간 포인트를 라인스트링으로 산출해야만 하는지 그리고 어떻게
+    *         산출해야만 하는지 결정합니다.
+    *         STEALTH로 설정하는 경우, 어떤 명확한 중간 포인트도 추가하지
+    *         않지만 OGRGeometryFactory::curveFromLineString()이 그 속성을
+    *         디코딩할 수 있도록 속성을 중간 포인트의 하위 비트(low significant bit)로
+    *         인코딩합니다. 이는 OGR에서 차선책(roundtrip)에 대한 최상의 절충안이며
+    *         PostGIS <a href="http://postgis.org/docs/ST_LineToCurve.html">ST_LineToCurve()</a>
+    *         와 더 나은 결과를 보입니다.
+    *         YES로 설정하는 경우, 라인스트링에 중간 포인트를 명확하게 추가합니다.
+    *         NO로 설정하는 경우, 라인스트링에 중간 포인트를 추가하지 않습니다.
     * </li>
     * </ul>
     */
 
-   --> This method is used by OGRCircularString::getLinearGeometry()
+   --> OGRCircularString::getLinearGeometry()가 이 메소드를 사용합니다.
 
    OGRCurve* OGRGeometryFactory::curveFromLineString(const OGRLineString* poLS,
                                                      CPL_UNUSED const char*const* papszOptions)
 
    /**
-    * \brief Try to convert a linestring approximating curves into a curve.
+    * \brief 곡선과 근사치인 라인스트링을 곡선으로 변환하려 시도합니다.
     *
-    * This method can return a COMPOUNDCURVE, a CIRCULARSTRING or a LINESTRING.
+    * 이 메소드는 COMPOUNDCURVE, CIRCULARSTRING 또는 LINESTRING을 반환할 수 있습니다.
     *
-    * This method is the reverse of curveFromLineString().
+    * 이 메소드는 curveToLineString()의 역입니다.
     *
-    * @param poLS handle to the geometry to convert.
-    * @param papszOptions options as a null-terminated list of strings.
-    *                     Unused for now. Must be set to NULL.
+    * @param poLS 변환할 도형을 가리키는 핸들입니다.
+    * @param papszOptions NULL로 종료되는 문자열 목록 옵션입니다.
+    *                     현재 사용하지 않습니다. NULL로 설정해야만 합니다.
     */
 
-   --> This method is used by OGRLineString::getCurveGeometry()
+   --> OGRLineString::getCurveGeometry()가 이 메소드를 사용합니다.
 
 
    OGRGeometry* OGRGeometryFactory::forceTo( OGRGeometry* poGeom,
                                              OGRwkbGeometryType eTargetType,
                                              const char*const* papszOptions )
     *
-    * Tries to force the provided geometry to the specified geometry type.
+    * 입력 도형을 지정한 도형 유형으로 강제 변환하려 시도합니다.
     *
-    * It can promote 'single' geometry type to their corresponding collection type
-    * (see OGR_GT_GetCollection()) or the reverse. non-linear geometry type to
-    * their corresponding linear geometry type (see OGR_GT_GetLinear()), by
-    * possibly approximating circular arcs they may contain.
-    * Regarding conversion from linear geometry types to curve geometry types, only
-    * "wrapping" will be done. No attempt to retrieve potential circular arcs by
-    * de-approximating stroking will be done. For that, OGRGeometry::getCurveGeometry()
-    * can be used.
+    * '단일' 도형 유형을 대응하는 집합 유형(OGR_GT_GetCollection() 참조)으로
+    * 승격시키거나 그 반대로 변환할 수 있습니다. 비선형 도형이 담고 있을 수도
+    * 있는 원호의 근사치를 계산해서 비선형 도형 유형을 대응하는
+    * 선형 도형 유형(OGR_GT_GetLinear() 참조)으로 변환할 수 있습니다.
+    * 선형 도형 유형으로부터 만곡 도형 유형으로 변환하는 것과 관련해서,
+    * 오직 "래핑(wrapping)"만 수행할 것입니다. 역근사치를 계산해서 다듬기를
+    * 통해 잠재적인 원호를 가져오려 시도하지 않습니다. 그런 목적이라면
+    * OGRGeometry::getCurveGeometry()를 사용하면 됩니다.
     *
-    * The passed in geometry is consumed and a new one returned (or potentially the same one).
+    * 입력 도형을 소비해서 새 도형을 반환합니다. (또는 동일한 도형일 가능성도 있습니다.)
     *
-    * @param poGeom the input geometry - ownership is passed to the method.
-    * @param eTargetType target output geometry type.
-    * @param papszOptions options as a null-terminated list of strings or NULL.
-    * @return new geometry.
+    * @param poGeom 입력 도형 - 소유권이 메소드로 이전됩니다.
+    * @param eTargetType 대상 산출 도형 유형입니다.
+    * @param papszOptions NULL로 종료되는 문자열 목록 옵션 또는 NULL입니다.
+    * @return 새 도형을 반환합니다.
     */
 
-   --> This method generalizes the existing forceToPolygon(), forceToLineString(),
-   forceToMultiPolygon(), forceToMultiLineString(), that have been extended to
-   deal with the new geometry types. forceTo() and actually calls them if they
-   can be used for the requested conversion, and also deal with conversion between
-   linear and non-linear geometry types.
+   --> 이 메소드는 새 도형 유형들을 처리할 수 잇도록 기존 forceToPolygon(), forceToLineString(), forceToMultiPolygon(), forceToMultiLineString()을 확장해서 일반화한 것입니다. forceTo()는 요청받은 변환을 위해 사용할 수 있는 경우 기존 메소드를 실제로 호출하고, 선형 및 비선형 도형 유형들 간의 변환도 처리합니다.
 
-Implementation of existing OGRGeometry methods
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+기존 OGRGeometry 메소드 구현
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As GEOS does not support curve geometries for now, all GEOS related
-operations, the ones returning a boolean value such as Intersects(), or
-the ones returning a new geometry such as Intersection(), have been
-adapted so that non-linear geometries are first converted to their
-linear approximation (this might be revisited if GEOS supports curve
-geometries in the future) When GEOS returns a geometry, and that one of
-the input parameters was a non-linear geometry, the reverse operation is
-done to attempt retrieving as much as possible of the curve geometry. Of
-course, the result will not generally perfect, but it is better than
-nothing.
+현재 `GEOS <https://libgeos.org/>`_ 가 만곡 도형을 지원하지 않기 때문에, Intersects()처럼 불(boolean) 값을 반환하는 작업이나 Intersection()처럼 새 도형을 반환하는 작업과 같은 모든 GEOS 관련 작업들이 비선형 도형을 먼저 대응하는 선형 근사치로 변환하도록 수정했습니다. (향후 GEOS가 만곡 도형을 지원하게 되면 다시 수정해야 할 수도 있습니다.) GEOS가 도형을 반환하는데 입력 파라미터 가운데 하나가 비선형 도형인 경우, 만곡 도형을 가능한 한 많이 가져오려 시도하는 역작업을 수행합니다. 물론 일반적으로 결과물이 완벽하지는 않지만, 없는 것보다는 낫습니다.
 
-Simple example doing the union of 2 half-circles that are contiguous:
+다음은 인접한 2개의 반원을 통합(union)하는 간단한 예시입니다:
 
 ::
 
@@ -383,8 +349,7 @@ Simple example doing the union of 2 half-circles that are contiguous:
        g3 = g1.Union(g2)
        assert g3.ExportToWkt() == 'CURVEPOLYGON (CIRCULARSTRING (0 0,1 1,2 0,1 -1,0 0))'
 
-Or using GetCurveGeometry() explicitly on the result of a buffer
-operation:
+또는 버퍼 작업의 결과물에 대해 명확하게 GetCurveGeometry()를 사용하는 예시입니다:
 
 ::
 
@@ -393,239 +358,167 @@ operation:
        g3 = g2.GetCurveGeometry()
        assert g3.ExportToWkt() != 'CURVEPOLYGON (CIRCULARSTRING (1.5 2.0,0.5 2.0,1.5 2.0))'
 
-The Length() operation on OGRCircularString (and thus OGRCompoundCurve)
-uses circle geometry to compute the exact length, without falling back
-to linear approximation. The Area() operation on OGRCurvePolygon will
-generally need to go to linear approximation. When operating on a full
-circle, or a curve polygon that is convex, an optimization is done to
-avoid this (by computing the area of the polygon formed with all the
-vertex including in the circular parts of the description, and adding
-the area of the `circular
-segments <http://en.wikipedia.org/wiki/Circular_segment>`__)
+:cpp:class:`OGRCircularString` (그리고 따라서 :cpp:class:`OGRCompoundCurve`)에 대한 Length() 작업은 선형 근사치 계산으로 돌아가지 않고 원 도형을 사용해서 정확한 길이를 계산합니다. :cpp:class:`OGRCurvePolygon` 에 대한 Area() 작업은 일반적으로 선형 근사치 계산을 수행해야 할 것입니다. 완전한 원 또는 볼록한 만곡 폴리곤에 대해 작업하는 경우 이를 피하기 위해 최적화를 수행합니다. (설명의 원호 부분을 포함하는 모든 꼭짓점으로 형성된 꼭짓점의 면적을 계산하고 거기에 `원호 선분 <https://ko.wikipedia.org/wiki/%ED%99%9C%EA%BC%B4>`_ 의 면적을 더합니다.)
 
-C API changes
-~~~~~~~~~~~~~
+C API 변경 사항
+~~~~~~~~~~~~~~~
 
-Deprecation:
+설명:
 
--  wkb25DBit still present, but deprecated since incompatible with the
-   new geometry type. Use the wkbFlatten(), wkbHasZ(), wkbSetZ() macros
-   instead
+-  wkb25DBit가 여전히 존재하지만, 새 도형 유형과 호환되지 않기 때문에 퇴출되었습니다. wkbFlatten(), wkbHasZ(), wkbSetZ() 매크로를 대신 사용하십시오.
 
-Additions:
+추가 사항:
 
--  OGR_GT_xxxx (for Geometry Type): described above
--  OGRErr OGR_G_ExportToIsoWkb( OGRGeometryH, OGRwkbByteOrder, unsigned
-   char*) : Export geometry as WKB conforming to ISO SQL/MM Part 3.
--  OGRErr OGR_G_ExportToIsoWkt( OGRGeometryH, char \*\* ) : Export
-   geometry as WKT conforming to ISO SQL/MM Part 3, i.e. 2.5D geometries
-   names are suffixed by " Z", e.g. "POINT Z (1 2 3)".
--  OGRGeometryH OGR_G_Value( OGRGeometryH, double dfDistance ) : mapping
-   of existing OGRGeometry::Value()
+-  OGR_GT_xxxx (도형 유형 용): 앞에서 설명했습니다.
+
+-  OGRErr OGR_G_ExportToIsoWkb( OGRGeometryH, OGRwkbByteOrder, unsigned char*):
+   도형을 ISO SQL/MM Part 3를 준수하는 WKB로 내보냅니다.
+
+-  OGRErr OGR_G_ExportToIsoWkt( OGRGeometryH, char \*\* ):
+   도형을 ISO SQL/MM Part 3를 준수하는 WKT로 내보냅니다. 예를 들어 2.5차원 도형의 이름 뒤에 "POINT Z (1 2 3)"와 같이 " Z" 접미어를 붙입니다.
+
+-  OGRGeometryH OGR_G_Value( OGRGeometryH, double dfDistance ):
+   기존 :cpp:func:`OGRGeometry::Value` 의 매핑입니다.
+
 -  int OGR_G_HasCurveGeometry( OGRGeometryH, int bLookForNonLinear ) :
-   mapping of OGRGeometry::hasCurveGeometry()
--  OGRGeometryH OGR_G_GetLinearGeometry( OGRGeometryH hGeom, double
-   dfMaxAngleStepSizeDegrees, char*\* papszOptions) : mapping of
-   OGRGeometry::hasCurveGeometry()
--  OGRGeometryH OGR_G_GetCurveGeometry( OGRGeometryH hGeom, char*\*
-   papszOptions ) : mapping of OGRGeometry::hasCurveGeometry()
--  void OGRSetNonLinearGeometriesEnabledFlag(int bFlag) : discussed in
-   Backward compatibility section
--  int OGRGetNonLinearGeometriesEnabledFlag() : discussed in Backward
-   compatibility section
+   :cpp:func:`OGRGeometry::hasCurveGeometry` 의 매핑입니다.
 
-Changes in drivers
+-  OGRGeometryH OGR_G_GetLinearGeometry( OGRGeometryH hGeom, double dfMaxAngleStepSizeDegrees, char*\* papszOptions):
+   :cpp:func:`OGRGeometry::hasCurveGeometry` 의 매핑입니다.
+
+-  OGRGeometryH OGR_G_GetCurveGeometry( OGRGeometryH hGeom, char*\* papszOptions ):
+   :cpp:func:`OGRGeometry::hasCurveGeometry` 의 매핑입니다.
+
+-  void OGRSetNonLinearGeometriesEnabledFlag(int bFlag):
+   하위 호환성 단락에서 논의합니다.
+
+-  int OGRGetNonLinearGeometriesEnabledFlag():
+   하위 호환성 단락에서 논의합니다.
+
+드라이버 변경 사항
 ------------------
 
--  GML geometry importer: Arc, ArcString, ArcByBulge, ArcByCenterPoint,
-   Circle and CircleByCenterPoints GML elements will be returned as
-   circular string OGR geometries. If they are included in other GML
-   elements such as CurveComposite, MultiCurve, Surface, corresponding
-   non-linear OGR geometries will be returned as well. When reading
-   geometries that are made of or consist of Surface, MultiSurface,
-   Curve, MultiCurve, an effort is made to return the OGR geometry class
-   of a linear type as much as possible, i.e. OGRCurvePolygon,
-   OGRCompoundCurve, etc... will only be returned if there's a circular
-   string in the geometry.
+-  GML 도형 가져오기 기능(importer):
+   Arc, ArcString, ArcByBulge, ArcByCenterPoint, Circle 및 CircleByCenterPoints GML 요소들을 원호 스트링 OGR 도형들로 반환할 것입니다. 이 GML 요소들이 CurveComposite, MultiCurve, Surface 같은 다른 GML 요소에 포함되어 있는 경우 그에 대응하는 비선형 OGR 도형들도 반환할 것입니다. Surface, MultiSurface, Curve, MultiCurve로 만들어진 또는 구성된 도형을 읽어오는 경우 가능한 한 선형 유형 OGR 도형 클래스를 반환하려 노력합니다. 예를 들면 도형 안에 원호 스트링이 있는 경우에만 :cpp:class:`OGRCurvePolygon`, :cpp:class:`OGRCompoundCurve` 등등을 반환할 것입니다.
 
--  GML geometry exporter: can generate ArcString and Circle GML elements
-   when passed a geometry with circular string in it.
+-  GML 도형 내보내기 기능(xporter):
+   원호 스트링을 가진 도형을 전송하는 경우 ArcString 및 Circle GML 요소를 생성할 수 있습니다.
 
--  GML driver: Can read/write all the new geometry types. When reading
-   GML3 application schemas, declarations of geometry fields such as
-   CurvePropertyType, SurfacePropertyType, MultiCurvePropertyType or
-   MultiSurfacePropertyType will be also interpreted as being potential
-   non-linear geometries, and corresponding OGR geometry type will be
-   used for the layer geometry type, and the geometries of the feature
-   will also follow that layer geometry type. This can affect the WFS
-   drivers.
+-  GML 드라이버:
+   모든 새 도형 유형을 읽고 쓸 수 있습니다. GML3 응용 프로그램 스키마를 읽어올 때, CurvePropertyType, SurfacePropertyType, MultiCurvePropertyType 또는 MultiSurfacePropertyType 같은 도형 필드 선언도 잠재적인 비선형 도형으로 해석하고 대응하는 OGR 도형 유형을 레이어 도형 유형으로 사용하기 때문에 피처의 도형도 해당 레이어 도형 유형을 따를 것입니다. WFS 드라이버에 영향을 미칠 수 있습니다.
 
--  NAS driver: Can return the new geometry types. NAS layers will use
-   the new geometry types only if the NAS file contains arcs.
+-  NAS 드라이버:
+   새 도형 유형들을 반환할 수 있습니다. NAS 파일이 원호를 담고 있는 경우에만 NAS 레이어에 새 도형 유형을 사용할 것입니다.
 
--  PG/PostGIS: Can read/write all the new geometry types for both
-   PostGIS 2.X and PostGIS 1.X. For PostGIS 1.X compatibility, special
-   processing must be done in the importFromWkb()/exportToWkb() to deal
-   with the non standard codes used by PostGIS 1.X for curvepolygon,
-   multicurve and multisurface. This is done with a wkbVariantPostGIS1
-   value added to OGRwkbVariant enumeration used by those methods.
+-  PG/PostGIS 드라이버:
+   PostGIS 2.x 및 PostGIS 1.x 버전 둘 다 모든 새 도형 유형들을 읽고 쓸 수 있습니다. PostGIS 1.x 버전의 호환성을 위해 importFromWkb()/exportToWkb()가 PostGIS 1.x 버전이 만곡 폴리곤, 다중 곡선 및 다중 면에 사용하는 비표준 코드들을 처리할 수 있도록 특수 처리 과정을 수행해야만 합니다. 이를 위해 이 메소드들이 사용하는 OGRwkbVariant 열거형에 wkbVariantPostGIS1 값을 추가했습니다.
 
--  PGDump: Can write all new geometry types. Above remark related to the
-   differences among version make it important to specify correctly the
-   POSTGIS_VERSION dataset creation option.
+-  PGDump 드라이버:
+   모든 새 도형 유형들을 쓸 수 있습니다. 앞에서 버전 사이의 차이점에 관련한 내용 때문에 POSTGIS_VERSION 데이터셋 생성 옵션을 정확하게 지정하는 것이 중요합니다.
 
--  GeoPackage: Can read/write all the new geometry types. Note: this
-   isn't in the core of the GeoPackage specification, but it is still a
-   registered extension.
+-  GeoPackage:
+   모든 새 도형 유형들을 읽고 쓸 수 있습니다.
+   주의: 지오패키지 사양의 핵심은 아니지만, 그래도 등록된 확장 사양입니다.
 
--  SQLite: Can read/write all the new geometry types for databases that
-   are NOT Spatialite databases, since Spatialite does no support curve
-   geometry types. However an attempt (well a hack) is done so that the
-   SQLite SQL dialect can still be used. Basically when converting a OGR
-   geometry to Spatialite, if it is of one of the curve geometry type,
-   the resulting blob will first contain the spatialite compatible blob
-   of the linear geometry, and afterwards the WKB of the curve geometry.
-   Spatialite functions, if called with a ST\_ function for example,
-   will ignore the later one. When reading a blob from sqlite, if the
-   added WKB of the curve geometry is still there, it will be used.
-   Otherwise the spatialite geometry blob will be used. So SELECT
-   statement just selecting the geometry column without doing any
-   operation on it should preserve curve geometries.
+-  SQLite 드라이버:
+   SpatiaLite 데이터베이스가 '아닌' 데이터베이스에 모든 새 도형 유형들을 읽고 쓸 수 있습니다. SpatiaLite가 만곡 도형 유형을 지원하지 않기 때문입니다. 하지만 SQLite SQL 방언을 계속 사용할 수 있도록 시도(해킹)했습니다. 기본적으로 OGR 도형을 SpatiaLite로 변환할 때 OGR 도형이 만곡 도형 유형 가운데 하나인 경우, 산출되는 블랍(blob)이 처음에는 선형 도형의 SpatiaLite 호환 블랍을 담고 있다가 나중에는 만곡 도형의 WKB를 담고 있을 것입니다. SpatiaLite 함수는 -- 예를 들어 ``ST_*`` 함수로 호출하는 경우 -- 후자를 무시할 것입니다. SQLite로부터 블랍을 읽어올 때 추가된 만곡 도형 WKB가 블랍에 여전히 존재하는 경우 만곡 도형 WKB를 사용할 것입니다. 존재하지 않는다면 SpatiaLite 도형 블랍을 사용할 것입니다. 따라서 도형 열에 대해 아무 작업도 하지 않고 도형 열을 선택하기만 하는 SELECT 문은 만곡 도형을 보전할 것입니다.
 
--  MEM: Can read/write all the new geometry types.
+-  MEM 드라이버:
+   모든 새 도형 유형을 읽고 쓸 수 있습니다.
 
--  CSV: Can read/write all the new geometry types.
+-  CSV 드라이버:
+   모든 새 도형 유형을 읽고 쓸 수 있습니다.
 
--  VRT: Declared as compatible with all the new geometry types. Actual
-   capability will depend on the underlying layers wrapped by the VRT.
+-  VRT 드라이버:
+   모든 새 도형 유형과 호환된다고 선언합니다. 실제 케이퍼빌리티는 VRT가 감싸고(wrap) 있는 기저 레이어에 따라 달라집니다.
 
-Changes in utilities
---------------------
+유틸리티 변경 사항
+------------------
 
--  ogr2ogr: the new geometry names (CIRCULARSTRING, etc...) are
-   supported in the -nlt option. "-nlt CONVERT_TO_LINEAR" can also be
-   used to ask curve geometries to be converted into their linear
-   approximation ( what is used to do that is forceTo(xxx,
-   OGR_GT_GetLinear()) ). Note: this isn't strictly necessary as all
-   drivers should be able to deal with the non-linear geometry types
-   with the compatibility mechanism described in Backward compatibility.
-   But this might be useful to produce a PostGIS table or GeoPackage
-   database with linear geometry types even if the source contains
-   non-linear geometries. "-nlt CONVERT_TO_LINEAR" can be combined with
-   "-nlt PROMOTE_TO_MULTI".
+-  ogr2ogr:
+   "-nlt" 옵션에서 새 도형 이름(CIRCULARSTRING 등등)을 지원합니다. 만곡 도형을 대응하는 선형 근사치 버전으로 변환할 것을 요청하는 데 "-nlt CONVERT_TO_LINEAR" 같은 옵션도 사용할 수 있습니다. (이를 수행하기 위해 ``forceTo(xxx, OGR_GT_GetLinear())`` 가 사용됩니다.)
+   주의: 모든 드라이버가 하위 호환성 단락에서 설명하는 호환성 메커니즘으로 비선형 도형 유형을 처리할 수 있어야 하기 때문에 이 유틸리티가 반드시 필요하지는 않습니다. 그러나 소스가 비선형 도형을 담고 있는 경우에도 선형 도형 유형으로 PostGIS 테이블 또는 GeoPackage 데이터베이스를 생성하는 데 유용할 수도 있습니다.
+   "-nlt CONVERT_TO_LINEAR"를 "-nlt PROMOTE_TO_MULTI"와 결합할 수 있습니다.
 
-Changes in SWIG bindings
-------------------------
+SWIG 바인딩 변경 사항
+---------------------
 
-Addition of :
+다음을 추가합니다:
 
--  the new geometry types as ogr.wkbXXXXX
+-  ogr.wkbXXXXX로서의 새 도형 유형들
 -  ogr.ForceTo()
 -  Geometry.ExportToIsoWkt()
 -  Geometry.ExportToIsoWkb()
 -  Geometry.HasCurveGeometry(int bLookForCircular = FALSE)
--  Geometry.GetLinearGeometry(double dfMaxAngleStepSizeDegrees =
-   0.0,char*\* options = NULL)
+-  Geometry.GetLinearGeometry(double dfMaxAngleStepSizeDegrees = 0.0,char*\* options = NULL)
 -  Geometry.GetCurveGeometry(char*\* options = NULL)
 -  ogr.SetNonLinearGeometriesEnabledFlag(int bFlag)
 -  ogr.GetNonLinearGeometriesEnabledFlag()
--  ogr.GT_xxxxx functions
+-  ogr.GT_xxxxx 함수들
 
-Using ogr.wkb25DBit will issue a deprecation warning
+ogr.wkb25DBit를 사용하면 퇴출 관련 경고를 발할 것입니다.
 
-Related changes that are *NOT* included in this RFC
----------------------------------------------------
+이 RFC에 포함되지 '않은' 관련 변경 사항
+---------------------------------------
 
--  Support for other ISO SQL/MM geometries such as Polyhedral Surface,
-   Triangulated Irregular Network (TIN), Triangle.
--  Support for the M (Measure) dimension of geometries.
--  Upgrade of other drivers that could make use of curve geometries :
+-  다면체 표면(Polyhedral Surface), TIN(Triangulated Irregular Network), Triangle 같은 다른 ISO SQL/MM 도형에 대한 지원
+
+- 도형의 M(Measure) 차원에 대한 지원
+
+-  만곡 도형을 사용할 수 있는 다른 드라이버들의 업그레이드:
    MSSQL Spatial, Oracle Spatial, DXF, DWG, ...
--  Support for arbitrary new geometry types: Conceptually one could hope
-   that a new class extending OGRCurve (Bezier or Spline curve) for
-   example could be added without touching OGR core. This isn't
-   currently possible: changes in OGRGeometryFactory and the OGR_GT\_
-   functions would be needed to remove a few hardcoded assumptions.
 
-Backward compatibility
-----------------------
+-  임의의 새 도형 유형 지원:
+   개념적으로는, 예를 들어 :cpp:class:`OGRCurve` (베지어 곡선(Bezier Curve) 또는 스플라인 곡선(Spline Curve))를 확장하는 새 클래스를 OGR 코어를 건드리지 않은 채 추가할 수 있기를 바랄 수 있습니다. 하지만 현재 이는 불가능합니다. :cpp:class:`OGRGeometryFactory` 및 ``OGR_GT\_*`` 함수들을 변경하면 몇몇 하드코딩된 가정들을 제거해야 할 것이기 때문입니다.
 
-Regarding code using GDAL
+하위 호환성
+-----------
+
+GDAL을 사용하는 코드 측면
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Many applications will not be able to properly deal with the new
-geometry types that may now be returned by some drivers. If they don't
-want to test the geometry type and explicitly calling the conversion
-function, they can call OGRSetNonLinearGeometriesEnabledFlag(FALSE) (the
-default value is TRUE, i.e. non-linear geometries can be returned). In
-which case, they will be transformed into their closest linear geometry,
-by doing linear approximation, with OGR_G_ForceTo().
+많은 응용 프로그램들이 이제 몇몇 드라이버가 반환할 수도 있는 새 도형 유형을 제대로 처리할 수 없을 것입니다. 도형 유형을 테스트하거나 변환 함수를 명확하게 호출하기를 바라지 않는다면 응용 프로그램이 ``OGRSetNonLinearGeometriesEnabledFlag(FALSE)`` 를 호출하면 됩니다. (이 플래그의 기본값은 TRUE입니다. 이 경우 비선형 도형을 반환할 수 있게 됩니다.) FALSE로 호출한 경우 OGR_G_ForceTo()를 이용, 선형 근사치를 계산해서 만곡 도형 유형을 가장 가까운 선형 도형으로 변환할 것입니다.
 
-This flag has only an effect on the OGR_F_GetGeometryRef(),
-OGR_F_GetGeomFieldRef(), OGR_L_GetGeomType(), OGR_GFld_GetType() and
-OGR_FD_GetGeomType() C API, and corresponding methods in the SWIG
-bindings.
+이 플래그는 OGR_F_GetGeometryRef(), OGR_F_GetGeomFieldRef(), OGR_L_GetGeomType(), OGR_GFld_GetType() 및 OGR_FD_GetGeomType() C API 그리고 SWIG 바인딩에서 대응하는 메소드들에만 영향을 미칩니다.
 
-Libraries should generally *not* use that method, since that could
-interfere with other libraries or applications.
+라이브러리는 일반적으로 이 메소드를 사용해서는 '안 됩니다'. 다른 라이브러리 또는 응용 프로그램과 충돌할 수 있기 때문입니다.
 
-Note that it does *not* affect the behavior of the C++ API. It has been
-deemed dangerous/complicated to try doing that at the C++ level as it
-could confuse drivers since they might call GetGeomType() for example.
+이 메소드는 C++ API의 습성에 영향을 주지 '않는다'는 사실을 기억하십시오. 드라이버가 예를 들면 GetGeomType()을 호출할 수도 있기 때문에 드라이버를 혼동시킬 수 있으므로 C++ 수준에서 이를 시도하는 것은 위험하거나 복잡한 것으로 간주되었습니다.
 
-Regarding OGR drivers
-~~~~~~~~~~~~~~~~~~~~~
+OGR 드라이버 측면
+~~~~~~~~~~~~~~~~~
 
-Drivers that can deal with the new geometry types SHOULD declare the new
-dataset level ODsCCurveGeometries AND layer level OLCCurveGeometries
-capabilities. The virtual methods CreateFeature() and SetFeature()
-implemented by drivers have been renamed ICreateFeature() and
-ISetFeature(). OGRLayer has now a non-virtual CreateFeature() and
-SetFeature() that checks if the layer has curve geometry capability. If
-it has not, and that the passed feature has non-linear geometries, they
-will be transparently converted to their linear approximation before
-calling the driver ICreateFeature()/ISetFeature() method. Similarly the
-CreateLayer() method at datasource level will convert the passed
-geometry type to a non-linear corresponding type if necessary.
+새 도형 유형들을 처리할 수 있는 드라이버가 새로운 데이터셋 수준 ODsCCurveGeometries 케이퍼빌리티 그리고 레이어 수준 OLCCurveGeometries 케이퍼빌리티를 선언해야 합니다. 드라이버가 구현하는 CreateFeature() 및 SetFeature() 가상 메소드를 ICreateFeature() 및 ISetFeature()로 재명명했습니다.
+:cpp:class:`OGRLayer` 는 이제 레이어가 만곡 도형을 지원할 수 있는지 확인하는 CreateFeature() 및 SetFeature() 비가상 메소드를 가집니다. 이들을 가지고 있지 않고, 전송된 피처가 비선형 도형을 가진 경우, 드라이버의 ICreateFeature()/ISetFeature() 메소드를 호출하기 전에 비선형 도형을 대응하는 선형 근사치 버전으로 투명하게 변환할 것입니다. 마찬가지로 데이터소스 수준의 CreateLayer() 메소드도 필요한 경우 전송된 도형 유형을 대응하는 비선형 유형으로 변환할 것입니다.
 
-All in-tree drivers have been converted to switch from CreateFeature()
-to ICreateFeature() and SetFeature() to ISetFeature(). Out-of-tree
-drivers will have to be adapted similarly otherwise those methods will
-fails (the now non-virtual methods in OGRLayer class will try to create
-the default implementation of the same class, which will fail).
+모든 인트리(in-tree) 드라이버에서 CreateFeature()를 ICreateFeature()로 그리고 SetFeature()를 ISetFeature()로 변환했습니다. 트리에 없는 드라이버들도 마찬가지로 수정해야 합니다. 그렇지 않으면 이 메소드들이 실패할 것입니다. (:cpp:class:`OGRLayer` 의 이제 가상이 아닌 메소드들은 동일한 클래스의 기본 구현을 생성하려 시도하지만 실패할 것입니다.)
 
-Documentation
--------------
+문서화
+------
 
-All new methods and OGR geometry classes are documented. Driver
-documentation is updated when necessary. MIGRATION_GUIDE.TXT is updated
-with a summary of the text of this RFC.
+새로운 메소드들과 OGR 도형 클래스들 모두 문서화합니다.
+필요한 경우 드라이버 문서를 업데이트합니다.
+:file:`MIGRATION_GUIDE.TXT` 를 이 RFC를 요약한 내용으로 업데이트합니다.
 
-Testing
--------
+테스트
+------
 
-Very few changes have been made so that the existing autotest suite
-still passes. Very comprehensive testing of new geometry classes and
-conversion methods has been added to ogr_geom.py and ogr_gml_geom.py.
-Updated drivers have received new tests also.
+아주 적은 변경 사항만 적용했기 때문에 기존 자동 테스트 스위트는 계속 통과합니다.
+:file:`ogr_geom.py` 및 :file:`ogr_gml_geom.py` 에 새 도형 클래스들과 변환 메소드들에 대한 매우 포괄적인 테스트를 추가했습니다. 업데이트된 드라이버들도 새로운 테스트를 받았습니다.
 
-Implementation
---------------
+구현
+----
 
-Implementation will be done by Even Rouault. Coordinated with Sourcepole
-(see `QGIS Enhancement 8: Geometry
-redesign <https://github.com/mhugent/QGIS-Enhancement-Proposals/blob/master/QEP-8-geometry_redesign.rst>`__),
-sponsored by Swiss QGIS User Group.
+이벤 루올이 이 RFC를 구현할 것입니다. Sourcepole과 협력하고 (`QGIS 개선 8: 도형 재설계 <https://github.com/mhugent/QGIS-Enhancement-Proposals/blob/master/QEP-8-geometry_redesign.rst>`_ 참조) 스위스 QGIS 사용자 그룹의 후원을 받았습니다.
 
-The proposed implementation lies in the "curve_geometries" branch of the
-`https://github.com/rouault/gdal2/tree/curve_geometries <https://github.com/rouault/gdal2/tree/curve_geometries>`__
-repository.
+제안한 구현은 `"curve_geometries" 브랜치 <https://github.com/rouault/gdal2/tree/curve_geometries>`_ 저장소에 있습니다.
 
-The list of changes :
-`https://github.com/rouault/gdal2/compare/curve_geometries <https://github.com/rouault/gdal2/compare/curve_geometries>`__
+`변경 사항 목록 <https://github.com/rouault/gdal2/compare/curve_geometries>`_
 
-Voting history
---------------
+투표 이력
+---------
 
-+1 from TamasS, JukkaR and EvenR
+-  세케레시 터마시 +1
+-  유카 라흐코넨 +1
+-  이벤 루올 +1
 
