@@ -128,7 +128,7 @@ C++ 변경 사항
 :cpp:func:`GDALRasterBand::IRasterIO` 및 :cpp:func:`GDALDataset::BlockBasedRasterIO` 가 이제 사용할 수 있는 경우 진행 상황 콜백을 사용합니다.
 
 C API 변경 사항
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 다음 내용만 추가합니다:
 
@@ -151,8 +151,8 @@ C API 변경 사항
 
 이 메소드들은 마지막 ``GDALRasterIOExtraArg* psExtraArg`` 인자를 가진 기존 함수와 동일하며, 간격 파라미터는 GSpacing으로 승격되었습니다.
 
-드라이버 변경 사항Changes in drivers
-------------------
+드라이버 변경 사항
+--------------
 
 -  RasterIO()를 구현하거나 사용하는 모든 인트리 드라이버가 ``GDALRasterIOExtraArg* psExtraArg`` 파라미터를 받아들이고 필요한 경우 포워딩하도록 편집했습니다. 사용자 지정 RasterIO() 구현을 가졌던 드라이버는 이제 사용할 수 있는 경우 진행 상황 콜백을 사용합니다.
 
