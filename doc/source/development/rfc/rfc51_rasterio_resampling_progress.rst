@@ -157,7 +157,7 @@ C API 변경 사항
 -  RasterIO()를 구현하거나 사용하는 모든 인트리 드라이버가 ``GDALRasterIOExtraArg* psExtraArg`` 파라미터를 받아들이고 필요한 경우 포워딩하도록 편집했습니다. 사용자 지정 RasterIO() 구현을 가졌던 드라이버는 이제 사용할 수 있는 경우 진행 상황 콜백을 사용합니다.
 
 -  VRT:
-   'and' 요소가 'resampling' 속성을 받아들일 수 있습니다. VRT 드라이버는 또한 ``GDALRasterIOExtraArg*`` 의 dfXOff, dfYOff, dfXSize 및 dfYSize 필드가 소스 하위 픽셀 정확도를 가지도록 설정하기 때문에, :cpp:func:`GDALRasterBand::IRasterIO` 가 작은 관심 영역 또는 전체 래스터에 대해 작업할 때 일관된 결과를 얻게 됩니다. 그렇지 않은 경우 GDALDatasetCopyWholeRaster() 또는 다른 알고리즘에서 덩어리 작업을 수행했을 때 정수형 반올림 문제점 때문에 줄이 반복될 수 있습니다.
+   'band' 요소가 'resampling' 속성을 받아들일 수 있습니다. VRT 드라이버는 또한 ``GDALRasterIOExtraArg*`` 의 dfXOff, dfYOff, dfXSize 및 dfYSize 필드가 소스 하위 픽셀 정확도를 가지도록 설정하기 때문에, :cpp:func:`GDALRasterBand::IRasterIO` 가 작은 관심 영역 또는 전체 래스터에 대해 작업할 때 일관된 결과를 얻게 됩니다. 그렇지 않은 경우 GDALDatasetCopyWholeRaster() 또는 다른 알고리즘에서 덩어리 작업을 수행했을 때 정수형 반올림 문제점 때문에 줄이 반복될 수 있습니다.
 
 유틸리티 변경 사항
 ------------------
