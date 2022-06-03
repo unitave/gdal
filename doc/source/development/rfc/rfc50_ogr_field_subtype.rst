@@ -1,60 +1,54 @@
 .. _rfc-50:
 
 =======================================================================================
-RFC 50: OGR field subtypes
+RFC 50: OGR 필드 하위 유형
 =======================================================================================
 
-Author: Even Rouault
+저자: 이벤 루올
 
-Contact: even dot rouault at spatialys dot com
+연락처: even.rouault@spatialys.com
 
-Status: Adopted, implemented in GDAL 2.0
+상태: 승인, GDAL 2.0버전에 구현
 
-Summary
+요약
 -------
 
-This RFC aims at adding the capability of specifying sub-types to OGR
-fields, like boolean, 16 bit integers or 32 bit floating point values.
-The sub-type of a field definition is an additional attribute that
-specifies a hint or a restriction to the main type. The subtype can be
-used by applications and drivers that know how to handle it, and can
-generally be safely ignored by applications and drivers that do not.
+이 RFC의 목적은 OGR 필드에 불(boolean), 16비트 정수형 또는 32비트 부동소수점형 값 같은 하위 유형들을 지정하는 케이퍼빌리티를 추가하는 것입니다. 필드 정의 하위 유형은 주요 유형들에 힌트 또는 제약 조건을 지정하는 추가적인 속성입니다. 이런 하위 유형을 어떻게 처리하는지 알고 있는 응용 프로그램 및 드라이버가 하위 유형을 사용할 수 있으며, 알지 못 하는 응용 프로그램 및 드라이버는 일반적으로 안전하게 무시할 수 있습니다.
 
-Core changes
-------------
+핵심 변경 사항
+--------------
 
-Field subtypes
+필드 하위 유형
 ~~~~~~~~~~~~~~
 
-The OGRFieldSubType enumeration is added :
+OGRFieldSubType 열거형을 추가합니다:
 
 ::
 
    /**
-    * List of field subtypes. A subtype represents a hint, a restriction of the
-    * main type, that is not strictly necessary to consult.
-    * This list is likely to be extended in the
-    * future ... avoid coding applications based on the assumption that all
-    * field types can be known.
-    * Most subtypes only make sense for a restricted set of main types.
+    * 필드 하위 유형 목록입니다. 하위 유형은 주요 유형의 굳이 참고할 필요는 없는
+    * 힌트, 제약 조건을 표현합니다.
+    * 이 목록은 향후 확장될 가능성이 큽니다. 모든 필드 유형을 알 수 있다는 가정을
+    * 기반으로 응용 프로그램을 코딩하지 마십시오.
+    * 하위 유형 대부분은 주요 유형들의 제한된 집합에 대해서만 의미가 있습니다.
     * @since GDAL 2.0
     */
    typedef enum
    {
-       /** No subtype. This is the default value */        OFSTNone = 0,
-       /** Boolean integer. Only valid for OFTInteger and OFTIntegerList.*/
+       /** 하위 유형 없음. 기본값입니다. */                OFSTNone = 0,
+       /** 불 정수형입니다. OFTInteger 및 OFTIntegerList에 대해서만 무결합니다. */
                                                            OFSTBoolean = 1,
-       /** Signed 16-bit integer. Only valid for OFTInteger and OFTIntegerList. */
+       /** 부호 있는 16비트 정수형입니다. OFTInteger 및 OFTIntegerList에 대해서만 무결합니다. */
                                                            OFSTInt16 = 2,
-       /** Single precision (32 bit) floatint point. Only valid for OFTReal and OFTRealList. */
+       /** 단정밀도 (32비트) 부동소수점형입니다. OFTReal 및 OFTRealList에 대해서만 무결합니다. */
                                                            OFSTFloat32 = 3,
                                                            OFSTMaxSubType = 3
    } OGRFieldSubType;
 
-New attributes and methods
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+새로운 속성 및 메소드
+~~~~~~~~~~~~~~~~~~~~~
 
--  In OGRFieldDefn class :
+-  :cpp:class:`OGRFieldDefn` 클래스에 다음을 추가합니다:
 
 ::
 
@@ -64,14 +58,12 @@ New attributes and methods
        void                SetSubType( OGRFieldSubType eSubTypeIn );
        static const char  *GetFieldSubTypeName( OGRFieldSubType );
 
-OGRFeature::SetField() will check that the passed value is in the
-accepted range for boolean and int16 subtypes. If not, it will emit a
-warning and correct/clamp the value to fit the subtype.
+:cpp:func:`OGRFeature::SetField` 가 전송된 값이 불 및 16비트 정수형 하위 유형의 허용 범위 안에 들어가는지 확인할 것입니다. 들어가지 않는 경우, 경고를 발하고 하위 유형에 맞게 값을 수정/고정할 것입니다.
 
-C API changes
-~~~~~~~~~~~~~
+C API 변경 사항
+~~~~~~~~~~~~~~~
 
-Only additions :
+다음 내용만 추가합니다:
 
 ::
 
@@ -81,39 +73,47 @@ Only additions :
    int CPL_DLL OGR_AreTypeSubTypeCompatible( OGRFieldType eType,
                                              OGRFieldSubType eSubType );
 
-Changes in OGR SQL
+OGR SQL 변경 사항
+-----------------
+
+-  SELECT의 필드 목록에 필드명(또는 "\*")을 지정한 경우 하위 유형을 보전합니다.
+
+-  이제 ``CAST(xxx AS BOOLEAN)`` 및 ``CAST(xxx AS SMALLINT)`` 을 지원합니다.
+
+-  SELECT의 필드 목록이 이제 ``SELECT x IS NULL, x >= 5 FROM foo`` 같은 불 표현식을 받아들일 수 있습니다.
+
+-  SELECT의 WHERE 절이 이제 ``SELECT * FROM foo WHERE a_boolean_field`` 처럼 불 필드를 받아들일 수 있습니다.
+
+드라이버 변경 사항
 ------------------
 
--  Subtypes are preserved when a field name (or \*) is specified in the
-   list of fields of a SELECT
--  CAST(xxx AS BOOLEAN) and CAST(xxx AS SMALLINT) are now supported.
--  The field list of a SELECT can now accept boolean expressions, such
-   as "SELECT x IS NULL, x >= 5 FROM foo"
--  The WHERE clause of a SELECT can now accept boolean fields, such as
-   "SELECT \* FROM foo WHERE a_boolean_field"
+-  GeoJSON: OFSTBoolean을 읽고 쓸 수 있습니다.
 
-Changes in drivers
+-  GML: OFSTBoolean, OFSTInt16 및 OFSTFloat32를 읽고 쓸 수 있습니다.
+
+-  CSV: (명확하게 CSVT로 또는 자동 탐지로) OFSTBoolean, (명확하게 CSVT로) OFSTInt16 및 OFSTFloat32를 읽고 쓸 수 있습니다.
+
+-  PG: OFSTBoolean, OFSTInt16 및 OFSTFloat32를 읽고 쓸 수 있습니다.
+
+-  PGDump: OFSTBoolean, OFSTInt16 및 OFSTFloat32를 쓸 수 있습니다.
+
+-  GeoPackage: OFSTBoolean, OFSTInt16 및 OFSTFloat32를 읽고 쓸 수 있습니다.
+
+-  SQLite: OFSTBoolean and OFSTInt16를 읽고 쓸 수 있습니다.
+
+-  SQLite 방언: OFSTBoolean, OFSTInt16 및 OFSTFloat32를 읽고 쓸 수 있습니다.
+
+-  FileGDB: OFSTInt16 및 OFSTFloat32를 읽고 쓸 수 있습니다.
+
+-  OpenFileGDB: OFSTInt16 및 OFSTFloat32를 읽을 수 있습니다.
+
+-  VRT: 모든 하위 유형을 처리할 수 있도록 'subtype' 속성을 추가했습니다.
+
+유틸리티 변경 사항
 ------------------
 
--  GeoJSON: can read/write OFSTBoolean
--  GML: can read/write OFSTBoolean, OFSTInt16 and OFSTFloat32
--  CSV: can read/write OFSTBoolean (explicitly with CSVT or with
-   autodetection), OFSTInt16 and OFSTFloat32 (explicitly with CSVT)
--  PG: can read/write OFSTBoolean, OFSTInt16 and OFSTFloat32
--  PGDump: can write OFSTBoolean, OFSTInt16 and OFSTFloat32
--  GeoPackage: can read/write OFSTBoolean, OFSTInt16 and OFSTFloat32
--  SQLite: can read/write OFSTBoolean and OFSTInt16
--  SQLite dialect: can read/write OFSTBoolean, OFSTInt16 and OFSTFloat32
--  FileGDB: can read/write OFSTInt16 and OFSTFloat32
--  OpenFileGDB: can read OFSTInt16 and OFSTFloat32
--  VRT: 'subtype' property added to be able to handle any subtype.
-
-Changes in utilities
---------------------
-
--  ogrinfo: the output of ogrinfo is slightly modified in presence of a
-   subtype. A field with a non-default subtype will be described as
-   "field_type(field_subtype)". For example
+-  ogrinfo:
+   하위 유형이 존재하는 경우 ogrinfo의 산출물이 약간 수정됩니다. 기본값이 아닌 하위 유형을 가진 필드를 "field_type(field_subtype)"으로 서술할 것입니다. 다음은 그 예시입니다.
 
 ::
 
@@ -132,55 +132,51 @@ Changes in utilities
      short (Integer(Int16)) = -32768
      b (Integer(Boolean)) = 1
 
-Changes in SWIG bindings
-------------------------
+SWIG 바인딩 변경 사항
+---------------------
 
-Addition of :
+다음을 추가합니다:
 
--  ogr.OFSTNone, ogr.OFSTBoolean, ogr.OFSTInt16 and ogr.OFSTFloat32
+-  ogr.OFSTNone, ogr.OFSTBoolean, ogr.OFSTInt16 및 ogr.OFSTFloat32
 -  ogr.GetFieldSubTypeName()
 -  FieldDefn.GetSubType()
 -  FieldDefn.SetSubType()
 
-Compatibility
--------------
+호환성
+------
 
-This should have no impact on read-only operations done by applications.
-Update operations could be impacted if an out-of-range value for the
-subtype is written (but such a behavior probably already caused issues,
-either ignored or notified by the backend)
+이 변경 사항들은 응용 프로그램이 수행하는 읽기 전용 작업에 어떤 영향도 미치지 않습니다.
+하위 유형의 범위를 벗어나는 값을 작성하는 경우 업데이트 작업이 영향을 받을 수 있습니다. (그러나 이런 습성은 아마도 벌써 백엔드가 무시하거나 경고를 발하는 문제점을 발생시켰을 것입니다.)
 
-Documentation
--------------
+문서화
+------
 
-All new methods are documented. Driver documentation is updated when
-necessary.
+새로운 메소드들을 모두 문서화합니다.
+필요한 경우 드라이버 문서를 업데이트합니다.
 
-Testing
--------
+테스트
+------
 
-The various aspects of this RFC are tested:
+이 RFC의 여러 측면을 테스트합니다:
 
--  core changes
--  OGR SQL changes
--  driver changes
+-  핵심 변경 사항
+-  OGR SQL 변경 사항
+-  드라이버 변경 사항
 
-Implementation
---------------
+구현
+----
 
-Implementation will be done by Even Rouault
-(`Spatialys <http://spatialys.com>`__), and sponsored by
-`CartoDB <https://cartodb.com>`__.
+이벤 루올이 `CartoDB <https://cartodb.com>`_ 의 후원을 받아 이 RFC를 구현할 것입니다.
 
-The proposed implementation lies in the "ogr_field_subtype" branch of
-the
-`https://github.com/rouault/gdal2/tree/ogr_field_subtype <https://github.com/rouault/gdal2/tree/ogr_field_subtype>`__
-repository.
+제안한 구현은 `"ogr_field_subtype" 브랜치 <https://github.com/rouault/gdal2/tree/ogr_field_subtype>`_ 저장소에 있습니다.
 
-The list of changes :
-`https://github.com/rouault/gdal2/compare/ogr_field_subtype <https://github.com/rouault/gdal2/compare/ogr_field_subtype>`__
+`변경 사항 목록 <https://github.com/rouault/gdal2/compare/ogr_field_subtype>`_
 
-Voting history
---------------
+투표 이력
+---------
 
-+1 JukkaR, TamasS, FrankW and EvenR
+-  유카 라흐코넨 +1
+-  세케레시 터마시 +1
+-  프랑크 바르메르담 +1
+-  이벤 루올 +1
+
