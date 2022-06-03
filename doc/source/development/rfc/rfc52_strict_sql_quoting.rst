@@ -64,7 +64,7 @@ SQLite로 수행된 테스트는 SQLite가 인용 문자의 오용에 관대할 
 이와는 반대로, PostgreSQL은 ``SELECT "non_existing_column" FROM 'a_table'`` 을 받아들이지 않을 것입니다.
 인용 규칙을 단순하고 이해하기 쉽게 유지하기 위해 PostgreSQL의 더 엄격한 접근법을 따를 것을 제안합니다:
 
-.. quote::
+.. quote-block::
 
    문자열 리터럴을 작은따옴표로 인용하고, 식별자(열 이름, 테이블 이름)를 인용 처리하지 않거나 또는 큰따옴표 문자로 감싸야 합니다.
 
