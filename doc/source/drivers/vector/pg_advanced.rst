@@ -177,7 +177,7 @@ SetAttributeFilter() 또는 SetSpatialFilter() 메소드를 호출한다는 것�
    ds->CommitTransaction()            CLOSE cur1 (implicit)
                                       COMMIT
 
-   lyr1->GetNextFeature()             FETCH 1 IN cur1      ==> Error since the cursor was closed with the commit. Explicit ResetReading() required before
+   lyr1->GetNextFeature()             FETCH 1 IN cur1      ==> 커밋으로 커서를 종료했기 때문에 오류가 발생합니다. 종료하기 전에 명확하게 ResetReading()을 호출해야 합니다.
 
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
