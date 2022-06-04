@@ -1,102 +1,96 @@
 .. _rfc-55:
 
 =======================================================================================
-RFC 55: Refined SetFeature() and DeleteFeature() semantics
+RFC 55: SetFeature() 및 DeleteFeature() 의미 체계 개선
 =======================================================================================
 
-Authors: Even Rouault
+저자: 이벤 루올
 
-Contact: even dot rouault at spatialys.com
+연락처: even.rouault@spatialys.com
 
-Status: Adopted, implemented in GDAL 2.0
+상태: 승인, GDAL 2.0버전에 구현
 
-Summary
--------
+요약
+----
 
-This RFC refines the semantics of SetFeature() and DeleteFeature() so as
-to be able to distinguish nominal case, attempts of updating/deleting
-non-existing features, from failures to update/delete existing features.
+이 RFC는 존재하지 않는 피처를 업데이트/삭제하려 시도하는 명목상의 경우와 존재하는 피처의 업데이트/삭제 실패를 구분할 수 있도록 SetFeature() 및 DeleteFeature() 의미 체계를 개선합니다.
 
-Rationale
+근거
+----
+
+현재 드라이버에 따라 존재하지 않는 피처에 대해 SetFeature() 또는 DeleteFeature()를 호출하면 성공할 수도 있고 실패할 수도 있습니다. 대부분의 상황에서 이 함수들이 OGRERR_NONE 코드를 반환하는 것이 잘못된 입력이라는 신호일 수도 있기 때문에 일반적으로 바람직하지 않습니다. 따라서 드라이버가 호출 코드에 존재하지 않는 피처를 업데이트하거나 삭제하려고 시도했다는 사실을 알려줄 수 있도록 OGRERR_NON_EXISTING_FEATURE 반환 코드를 도입합니다.
+
+변경 사항
 ---------
 
-Currently, depending on the drivers, calling SetFeature() or
-DeleteFeature() on a non-existing feature may succeed, or fail. It is
-generally not desirable that those functions return the OGRERR_NONE
-code, as in most situations, it might be a sign of invalid input.
-Therefore the OGRERR_NON_EXISTING_FEATURE return code is introduced so
-that drivers can inform the calling code that it has attempted to update
-or delete a non-existing feature.
+:file:`ogr_core.h` 에 ``#define OGRERR_NON_EXISTING_FEATURE 9`` 를 추가합니다.
 
-Changes
--------
+업데이트된 드라이버
+~~~~~~~~~~~~~~~~~~~
 
-#define OGRERR_NON_EXISTING_FEATURE 9 is added to ogr_core.h
+다음 드라이버들이 새로운 의미 체계를 구현하도록 업데이트합니다:
 
-Updated drivers
-~~~~~~~~~~~~~~~
+   -  PostgreSQL
+   -  CartoDB
+   -  SQLite
+   -  GPKG
+   -  MySQL
+   -  OCI
+   -  FileGDB
+   -  Shapefile
+   -  MITAB
 
-The following drivers are updated to implement the new semantics:
-PostgreSQL, CartoDB, SQLite, GPKG, MySQL, OCI, FileGDB, Shape, MITAB
+메모: MSSQL 드라이버도 업데이트할 수 있습니다.
 
-Note: MSSQL could also likely be updated
+주의할 점
+~~~~~~~~~
 
-Caveats
-~~~~~~~
+Shapefile 드라이버의 습성은 SetFeature() 구현이 삭제되었던 피처를 재생성하도록 허용한다는 점에서 조금 특별합니다. (그리고 이 드라이버의 CreateFeature() 구현은 새 피처를 추가하기 위해 전송된 피처에 설정된 모든 FID를 무시합니다.)
+따라서 FID가 음의 값이거나 최대 피처 개수 이상인 경우에만 OGRERR_NON_EXISTING_FEATURE를 효과적으로 반환할 것입니다.
 
-The behavior of the shapefile driver is a bit particular, in that, its
-SetFeature() implementation accepts to recreate a feature that had been
-deleted (and its CreateFeature() implementation ignores any set FID on
-the passed feature to append a new feature). So
-OGRERR_NON_EXISTING_FEATURE will effictively been returned only if the
-FID is negative or greater or equal to the maximum feature count.
+SWIG 바인딩 (파이썬 / 자바 / C# / 펄) 변경 사항
+-----------------------------------------------
 
-SWIG bindings (Python / Java / C# / Perl) changes
--------------------------------------------------
+OGRERR_NON_EXISTING_FEATURE를 추가합니다.
+파이썬 바인딩에 모든 ``OGRERR_xxxx`` 상수를 노출시킵니다.
 
-OGRERR_NON_EXISTING_FEATURE is added. All OGRERR_xxxx constants are
-exposed to the Python bindings
+유틸리티
+--------
 
-Utilities
----------
+영향 없음.
 
-No impact
+문서화
+------
 
-Documentation
+SetFeature() 및 DeleteFeature() 문서에 새로운 오류 코드를 추가합니다.
+:file:`MIGRATION_GUIDE.TXT` 에 다음 호환성 문제점 단락에 대한 언급을 추가합니다.
+
+테스트 스위트
 -------------
 
-Documentation of SetFeature() and DeleteFeature() mentions the new error
-code. MIGRATION_GUIDE.TXT updated with mention to below compatibility
-issues.
+수정된 드라이버를 테스트하도록 테스트 스위트를 확장합니다.
+:file:`test_ogrsf` 가 존재하지 않는 피처를 업데이트/삭제하는 드라이버의 습성도 테스트합니다.
 
-Test Suite
-----------
+호환성 문제점
+-------------
 
-The test suite is extended to test the modified drivers. test_ogrsf also
-tests the behavior of drivers updating/deleting non-existing features.
+존재하지 않는 피처를 업데이트 또는 삭제할 때 성공할 것으로 예상되는 코드를 업데이트해야 할 것입니다.
 
-Compatibility Issues
---------------------
+구현
+----
 
-Code that expected update or deleting of non-existing features to
-succeed will have to be updated.
+이벤 루올(`Spatialys <http://spatialys.com>`_)이 `LINZ(Land Information New Zealand) <https://www.linz.govt.nz/>`_ 의 후원을 받아 이 RFC를 구현할 것입니다.
 
-Implementation
---------------
-
-Implementation will be done by Even Rouault
-(`Spatialys <http://spatialys.com>`__), and sponsored by `LINZ (Land
-Information New Zealand) <http://www.linz.govt.nz/>`__.
-
-The proposed implementation lies in the
-"rfc55_refined_setfeature_deletefeature_semantics" branch of the
-`https://github.com/rouault/gdal2/tree/rfc55_refined_setfeature_deletefeature_semantics <https://github.com/rouault/gdal2/tree/rfc55_refined_setfeature_deletefeature_semantics>`__
+제안한 구현은 `"rfc55_refined_setfeature_deletefeature_semantics" 브랜치 <https://github.com/rouault/gdal2/tree/rfc55_refined_setfeature_deletefeature_semantics>`_ 저장소에 있습니다.
 repository.
 
-The list of changes:
-`https://github.com/rouault/gdal2/compare/rfc55_refined_setfeature_deletefeature_semantics <https://github.com/rouault/gdal2/compare/rfc55_refined_setfeature_deletefeature_semantics>`__
+`변경 사항 목록 <https://github.com/rouault/gdal2/compare/rfc55_refined_setfeature_deletefeature_semantics>`_
 
-Voting history
---------------
+투표 이력
+---------
 
-+1 from from DanielM, HowardB, JukkaR and EvenR
+-  대니얼 모리셋 +1
+-  하워드 버틀러 +1
+-  유카 라흐코넨 +1
+-  이벤 루올 +1
+

@@ -1,34 +1,42 @@
 .. _rfc-56:
 
 =======================================================================================
-RFC 56: OFTTime/OFTDateTime millisecond accuracy
+RFC 56: OFTTime/OFTDateTime 밀리초 정확도
 =======================================================================================
 
-Author: Even Rouault
+저자: 이벤 루올
 
-Contact: even dot rouault at spatialys dot com
+연락처: even.rouault@spatialys.com
 
-Status: Adopted, implemented
+상태: 승인, GDAL 2.0버전에 구현
 
-Version: 2.0
+요약
+----
 
-Summary
--------
+이 RFC의 목적은 OFTTime 및 OFTDateTime 필드에 다수의 포맷이 명확하게 또는 암묵적으로 지원하는 밀리초 정확도를 추가하는 것입니다:
 
-This RFC aims at adding millisecond accuracy to OFTTime and OFTDateTime
-fields, as a number of formats support it explicitly or implicitly :
-MapInfo, GPX, Atom (GeoRSS driver), GeoPackage, SQLite, PostgreSQL, CSV,
-GeoJSON, ODS, XLSX, KML (potentially GML too)...
+   -  MapInfo
+   -  GPX
+   -  Atom (GeoRSS 드라이버)
+   -  GeoPackage
+   -  SQLite
+   -  PostgreSQL
+   -  CSV
+   -  GeoJSON
+   -  ODS
+   -  XLSX
+   -  KML (잠재적으로 GML도)
+   -  ...
 
-Core changes
-------------
+핵심 변경 사항
+--------------
 
-The OGRField enumeration is modified as such :
+OGRField 열거형(enumeration)을 다음과 같이 수정합니다:
 
 ::
 
    typedef union {
-       [... unchanged ... ]
+       [... 변경 사항 없음 ... ]
 
        struct {
            GInt16  Year;
@@ -36,55 +44,48 @@ The OGRField enumeration is modified as such :
            GByte   Day;
            GByte   Hour;
            GByte   Minute;
-           GByte   TZFlag; /* 0=unknown, 1=localtime(ambiguous), 
-                              100=GMT, 104=GMT+1, 80=GMT-5, etc */
-           GByte   Reserved; /* must be set to 0 */
-           float   Second; /* with millisecond accuracy. at the end of the structure, so as to keep it 12 bytes on 32 bit */
+           GByte   TZFlag; /* 0=알 수 없음, 1=현지시(모호함),
+                              100=GMT, 104=GMT+1, 80=GMT-5 등등 */
+           GByte   Reserved; /* 0으로 설정해야만 합니다. */
+           float   Second; /* 밀리초 정확도입니다. 구조의 마지막에 있는 이유는
+                              32비트 시스템 상에서 12바이트를 유지하기 위해서입니다. */
        } Date;
    } OGRField;
 
-So the "GByte Second" field is removed and replaced by a padding Byte
-reserved for potential later uses. A "float Second" field is added.
+즉 "GByte Second" 필드를 제거하고 향후 사용할 가능성 때문에 예약된 완충(padding) Byte 유형으로 대체합니다. "float Second" 필드를 추가합니다.
 
-On 32 bit builds, the size of OGRField is now 12 bytes instead of 8
-bytes. On 64 bit builds, the size of OGRField remains 16 bytes.
+32비트 빌드 상에서, OGRField의 용량은 이제 8바이트가 아니라 12바이트입니다. 64비트 빌드 상에서는 16바이트로 유지됩니다.
 
-New/modified methods
+새로운/수정된 메소드
 ~~~~~~~~~~~~~~~~~~~~
 
-OGRFeature::SetFieldAsDateTime() methods that took a int nSecond now
-take a float fSecond parameter. The GetFieldAsDateTime() method that
-took a int\* pnSecond is kept, and a new GetFieldAsDateTime() method
-that takes a float\* pfSecond is added.
+"int nSecond"를 입력받았던 :cpp:func:`OGRFeature::SetFieldAsDateTime` 메소드가 이제 "float fSecond" 파라미터를 입력받습니다. "int\* pnSecond"를 입력받던 GetFieldAsDateTime()은 그대로 유지하고, "float\* pfSecond" 를 입력받는 새 GetFieldAsDateTime() 메소드를 추가합니다.
 
--  In OGRFeature class :
+-  :cpp:class:`OGRFeature` 클래스에서:
 
 ::
 
        int                 GetFieldAsDateTime( int i, 
                                         int *pnYear, int *pnMonth, int *pnDay,
                                         int *pnHour, int *pnMinute, int *pnSecond, 
-                                        int *pnTZFlag ); /* unchanged from GDAL 1.X */
+                                        int *pnTZFlag ); /* GDAL 1.x버전과 동일 */
        int                 GetFieldAsDateTime( int i, 
                                         int *pnYear, int *pnMonth, int *pnDay,
                                         int *pnHour, int *pnMinute, float *pfSecond, 
-                                        int *pnTZFlag ); /* new */
+                                        int *pnTZFlag ); /* 새 메소드 */
        void                SetField( int i, int nYear, int nMonth, int nDay,
                                      int nHour=0, int nMinute=0, float fSecond=0.f, 
-                                     int nTZFlag = 0 ); /* modified */
+                                     int nTZFlag = 0 ); /* 수정됨 */
        void                SetField( const char *pszFName, 
                                      int nYear, int nMonth, int nDay,
                                      int nHour=0, int nMinute=0, float fSecond=0.f, 
-                                     int nTZFlag = 0 ); /* modified */
+                                     int nTZFlag = 0 ); /* 수정됨 */
 
-OGRFeature::GetFieldAsString() is modified to output milliseconds if the
-Second member of OGRField.Date is not integral
+OGRField.Date의 'Second' 멤버가 정수가 아닌 경우 :cpp:func:`OGRFeature::GetFieldAsString` 이 밀리초를 산출하도록 수정합니다.
 
-OGRParseDate() is modified to parse second as floating point number.
+OGRParseDate()가 초를 부동소수점형 숫자로 파싱하도록 수정합니다.
 
-The following utility functions have their signature modified to take a
-OGRField (instead of the full year, month, day, hour, minute, second,
-TZFlag decomposition) and accept decimal seconds as input/output :
+다음 유틸리티 함수들의 서명이 (연, 월, 일, 시, 분, 초, TZFlag를 완전히 분해하는 대신) OGRField를 입력받도록 그리고 십진수 초를 입력/산출할 수 있도록 수정합니다:
 
 ::
 
@@ -95,10 +96,10 @@ TZFlag decomposition) and accept decimal seconds as input/output :
    char CPL_DLL * OGRGetRFC822DateTime(const OGRField* psField);
    char CPL_DLL * OGRGetXMLDateTime(const OGRField* psField);
 
-C API changes
-~~~~~~~~~~~~~
+C API 변경 사항
+~~~~~~~~~~~~~~~
 
-Only additions :
+다음 함수만 추가합니다:
 
 ::
 
@@ -109,75 +110,69 @@ Only additions :
    void   CPL_DLL OGR_F_SetFieldDateTimeEx( OGRFeatureH, int, 
                                           int, int, int, int, int, float, int );
 
-Changes in drivers
+드라이버 변경 사항
 ------------------
 
-The following drivers now accept milliseconds as input/output :
+다음 드라이버들이 이제 밀리초를 입력받거나 산출할 수 있습니다:
 
 -  GeoJSON
 -  CSV
 -  PG
--  PGDump (output only)
+-  PGDump (산출만)
 -  CartoDB
 -  GeoPackage
 -  SQLite
--  MapInfo .tab and .mif
+-  MapInfo .tab 및 .mif
 -  LIBKML
 -  ODS
 -  XLSX
--  GeoRSS (Atom format)
+-  GeoRSS (Atom 포맷)
 -  GPX
 
-Changes in SWIG bindings
-------------------------
+SWIG 바인딩 변경 사항
+---------------------
 
-Feature.GetFieldAsDateTime() and Feature.SetFieldAsDateTime() now
-takes/returns a floating point number for seconds
+Feature.GetFieldAsDateTime() 및 Feature.SetFieldAsDateTime()이 이제 초에 대해 부동소수점형 숫자를 입력받고 반환합니다.
 
-Compatibility
--------------
+호환성
+------
 
-This modifies the C/C++ API and ABI.
+이 RFC는 C/C++ API 및 ABI를 수정합니다.
 
-Output of above mentioned drivers will now include milliseconds if a
-DateTime/Time field has such precision.
+날짜&시간/시간 유형 필드가 해당 정밀도를 가진 경우, 앞에서 언급한 드라이버들의 산출물이 이제 밀리초를 포함할 것입니다.
 
-Related ticket
---------------
+관련 티켓
+---------
 
-The need came from
-`http://trac.osgeo.org/gdal/ticket/2680 <http://trac.osgeo.org/gdal/ticket/2680>`__
-for MapInfo driver.
+이 RFC의 필요성은 MapInfo 드라이버에 대한 `#2680 티켓 <https://trac.osgeo.org/gdal/ticket/2680>`_ 으로부터 비롯되었습니다.
 
-Documentation
--------------
+문서화
+------
 
-All new/modified methods are documented. MIGRATION_GUIDE.TXT is updated
-with a new section for this RFC.
+새로운/수정된 메소드를 모두 문서화합니다.
+:file:`MIGRATION_GUIDE.TXT` 에 이 RFC에 대한 단락을 새로 추가합니다.
 
-Testing
--------
+테스트
+------
 
-The various aspects of this RFC are tested:
+이 RFC의 다양한 측면을 테스트합니다:
 
--  core changes
--  driver changes
+-  핵심 변경 사항
+-  드라이버 변경 사항
 
-Implementation
---------------
+구현
+----
 
-Implementation will be done by Even Rouault
-(`Spatialys <http://spatialys.com>`__).
+이벤 루올(`Spatialys <http://spatialys.com>`_)이 이 RFC를 구현할 것입니다.
 
-The proposed implementation lies in the "subsecond_accuracy" branch of
-the
-`https://github.com/rouault/gdal2/tree/subsecond_accuracy <https://github.com/rouault/gdal2/tree/subsecond_accuracy>`__
-repository.
+제안한 구현은 `"subsecond_accuracy" 브랜치 <https://github.com/rouault/gdal2/tree/subsecond_accuracy>`_ 저장소에 있습니다.
 
-The list of changes :
-`https://github.com/rouault/gdal2/compare/subsecond_accuracy <https://github.com/rouault/gdal2/compare/subsecond_accuracy>`__
+`변경 사항 목록 <https://github.com/rouault/gdal2/compare/subsecond_accuracy>`_
 
-Voting history
---------------
+투표 이력
+---------
 
-+1 from DanielM, JukkaR and EvenR
+-  대니얼 모리셋 +1
+-  유카 라흐코넨 +1
+-  이벤 루올 +1
+
