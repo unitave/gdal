@@ -1,46 +1,33 @@
 .. _rfc-59.1:
 
 =======================================================================================
-RFC 59.1 : GDAL/OGR utilities as a library
+RFC 59.1 : GDAL/OGR 유틸리티를 라이브러리로
 =======================================================================================
 
-Authors: Faza Mahamood, Even Rouault
+저자: 파자 마하무드, 이벤 루올
 
-Contact: fazamhd at gmail dot com, even.rouault at spatialys.com
+연락처: fazamhd@gmail.com, even.rouault@spatialys.com
 
-Status: Adopted, implemented
+상태: 승인, GDAL 2.1버전에 구현
 
-Implementation version: 2.1
+요약
+----
 
-Summary
--------
+이 RFC는 GDAL/OGR C/C++ 유틸리티를 C 호출 가능 함수로 노출시키는 방법을 정의합니다. 유틸리티 코드가 새 함수를 호출할 수 있도록 수정합니다. 이 RFC는 몇몇 유틸리티를 통해 시연되지만, 다른 유틸리티들로 확장되는 것을 목표로 하는 일반 프레임과 원칙을 제공합니다.
 
-This RFC defines how to expose GDAL/OGR C/C++ utilities as C callable
-functions. The utility code is modified to call the new function. This
-RFC gives a general frame and principles, demonstrated with a few
-utilities, but aimed at being extended with other utilities.
+근거
+----
 
-Rationale
+인메모리 데이터셋에 대해 작업할 수 있고 진행 상황/취소 콜백 함수를 이용할 수 있도록, 시스템 호출 사용을 수반하지 않고 코드로부터 GDAL 유틸리티를 호출해야 할 필요가 있습니다.
+
+변경 사항
 ---------
 
-There is a need for calling GDAL utilities from code without involving
-system calls, to be able to work on in-memory datasets and use
-progress/cancellation callback functions.
+GDAL 유틸리티의 공개 선언을 담고 있는 :file:`gdal_utils.h` 공개 헤더 파일을 생성합니다. (아직 진행 중인) 현재 헤더는 `여기 <https://github.com/rouault/gdal2/blob/rfc59.1/gdal/apps/gdal_utils.h>`_ 에서 찾아볼 수 있습니다.
 
-Changes
--------
+각 유틸리티는 문자열 배열로 지정되는 인자들로부터 옵션 구조를 생성하는 함수(XXXXOptionsNew)를 가지고 있습니다. 이 함수는 명령줄 유틸리티 자체의 코드와 협력하기 위해 사용되는 추가적인 반공개(semi-private) 구조도 인자로 받아들입니다.
 
-A public header file gdal_utils.h is created which contains the public
-declarations of GDAL utilities. The current header(still in progress)
-can be found
-`here <https://github.com/rouault/gdal2/blob/rfc59.1/gdal/apps/gdal_utils.h>`__.
-
-Each utility has a function (XXXXOptionsNew) to create an option
-structure from arguments specified as an array of strings. This function
-also accepts as argument an extra semi-private structure used to
-cooperate with the code of the command line utility itself.
-
-For GDALInfo():
+GDALInfo()의 경우:
 
 ::
 
@@ -80,7 +67,7 @@ For GDALInfo():
     */
    char CPL_DLL *GDALInfo( GDALDatasetH hDataset, const GDALInfoOptions *psOptions );
 
-Similarly for GDALTranslate():
+GDALTranslate()의 경우도 마찬가지입니다:
 
 ::
 
@@ -102,7 +89,7 @@ Similarly for GDALTranslate():
                                       const GDALTranslateOptions *psOptions,
                                       int *pbUsageError);
 
-Similarly for GDALWarp():
+GDALWarp()의 경우도 마찬가지입니다:
 
 ::
 
@@ -127,7 +114,7 @@ Similarly for GDALWarp():
                                   GDALDatasetH *pahSrcDS,
                                   const GDALWarpAppOptions *psOptions, int *pbUsageError );
 
-Similarly for GDALVectorTranslate() (equivalent of ogr2ogr):
+GDALVectorTranslate()의 경우도 마찬가지입니다(ogr2ogr와 동등합니다):
 
 ::
 
@@ -149,16 +136,15 @@ Similarly for GDALVectorTranslate() (equivalent of ogr2ogr):
                                   GDALDatasetH *pahSrcDS,
                                   const GDALVectorTranslateOptions *psOptions, int *pbUsageError );
 
-For other utilities, see
-`gdal_utils.h <http://svn.osgeo.org/gdal/trunk/gdal/apps/gdal_utils.h>`__
+다른 유틸리티에 대해서는 `gdal_utils.h <https://svn.osgeo.org/gdal/trunk/gdal/apps/gdal_utils.h>`_ 를 참조하십시오.
 
-SWIG bindings (Python / Java / C# / Perl) changes
--------------------------------------------------
+SWIG 바인딩 (파이썬 / 자바 / C# / 펄) 변경 사항
+-----------------------------------------------
 
-All bindings
-~~~~~~~~~~~~
+모든 바인딩
+~~~~~~~~~~~
 
-For all bindings, the above functions are mapped to SWIG with :
+모든 바인딩에 대해, SWIG에 앞의 함수들을 다음과 같이 매핑합니다:
 
 ::
 
@@ -273,14 +259,12 @@ For all bindings, the above functions are mapped to SWIG with :
                                                 void* callback_data=NULL);
    %}
 
-For other utilities, see
-`gdal.i <http://svn.osgeo.org/gdal/trunk/gdal/swig/python/gdal.i>`__
+다른 유틸리티에 대해서는 `gdal.i <https://svn.osgeo.org/gdal/trunk/gdal/swig/python/gdal.i>`_ 를 참조하십시오.
 
-Python bindings
-~~~~~~~~~~~~~~~
+파이썬 바인딩
+~~~~~~~~~~~~~
 
-For Python bindings, convenience wrappers are created to allow
-specifying options in a more user friendly way.
+파이썬 바인딩의 경우, 좀 더 사용자 친화적인 방법으로 옵션을 지정할 수 있게 해주는 편이 래퍼(convenience wrapper)를 생성합니다.
 
 ::
 
@@ -303,10 +287,7 @@ specifying options in a more user friendly way.
              other keywords arguments of gdal.InfoOptions()
            If options is provided as a gdal.InfoOptions() object, other keywords are ignored. """
 
-gdal.Info() can be used either with setting the attributes of
-gdal.InfoOptions() or inlined arguments of gdal.Info(). Arguments can be
-specified as array of strings, command line syntax or dedeicated
-keywords. So various combinations are possible :
+gdal.InfoOptions()의 속성을 설정하는 데 또는 gdal.Info()의 그때 그때 즉석에서 처리되는(inline) 인자로 gdal.Info()를 사용할 수 있습니다. 인자를 문자열 배열, 명령줄 문법 또는 전용 키워드로 지정할 수 있기 때문에, 다양하게 조합할 수 있습니다:
 
 ::
 
@@ -728,66 +709,55 @@ keywords. So various combinations are possible :
              other keywords arguments of gdal.BuildVRTOptions()
            If options is provided as a gdal.BuildVRTOptions() object, other keywords are ignored. """
 
-Utilities
----------
+유틸리티
+--------
 
-Utilities are modified to call the respective function.
+유틸리티들이 각각 대응하는 함수를 호출하도록 수정합니다.
 
-Documentation
--------------
+문서화
+------
 
-All new methods/functions are documented.
+새 메소드/함수를 모두 문서화합니다.
 
 Test Suite
 ----------
 
-gdal.Info method is tested in
-`test_gdalinfo_lib.py <http://svn.osgeo.org/gdal/trunk/autotest/utilities/test_gdalinfo_lib.py>`__.
+`test_gdalinfo_lib.py <https://svn.osgeo.org/gdal/trunk/autotest/utilities/test_gdalinfo_lib.py>`_ 에서 gdal.Info 메소드를 테스트합니다.
 
-gdal.Translate method is tested in
-`test_gdal_translate_lib.py <http://svn.osgeo.org/gdal/trunk/autotest/utilities/test_gdal_translate_lib.py>`__
+`test_gdal_translate_lib.py <https://svn.osgeo.org/gdal/trunk/autotest/utilities/test_gdal_translate_lib.py>`_ 에서 gdal.Translate 메소드를 테스트합니다.
 
-gdal.Warp method is tested in
-`test_gdalwarp_lib.py <http://svn.osgeo.org/gdal/trunk/autotest/utilities/test_gdalwarp_lib.py>`__
+`test_gdalwarp_lib.py <https://svn.osgeo.org/gdal/trunk/autotest/utilities/test_gdalwarp_lib.py>`_ 에서 gdal.Warp 메소드를 테스트합니다.
 
-gdal.VectorTranslate method is tested in
-`test_ogr2ogr_lib.py <http://svn.osgeo.org/gdal/trunk/autotest/utilities/test_ogr2ogr_lib.py>`__
+`test_ogr2ogr_lib.py <https://svn.osgeo.org/gdal/trunk/autotest/utilities/test_ogr2ogr_lib.py>`_ 에서 gdal.VectorTranslate 메소드를 테스트합니다.
 
-gdal.DEMProcessing method is tested in
-`test_gdaldem_lib.py <http://svn.osgeo.org/gdal/trunk/autotest/utilities/test_gdaldem_lib.py>`__
+`test_gdaldem_lib.py <https://svn.osgeo.org/gdal/trunk/autotest/utilities/test_gdaldem_lib.py>`_ 에서 gdal.DEMProcessing 메소드를 테스트합니다.
 
-gdal.Nearblack method is tested in
-`test_nearblack_lib.py <http://svn.osgeo.org/gdal/trunk/autotest/utilities/test_nearblack_lib.py>`__
+`test_nearblack_lib.py <https://svn.osgeo.org/gdal/trunk/autotest/utilities/test_nearblack_lib.py>`_ 에서 gdal.Nearblack 메소드를 테스트합니다.
 
-gdal.Grid method is tested in
-`test_gdal_grid_lib.py <http://svn.osgeo.org/gdal/trunk/autotest/utilities/test_gdal_grid_lib.py>`__
+`test_gdal_grid_lib.py <https://svn.osgeo.org/gdal/trunk/autotest/utilities/test_gdal_grid_lib.py>`_ 에서 gdal.Grid 메소드를 테스트합니다.
 
-gdal.Rasterize method is tested in
-`test_gdal_rasterize_lib.py <http://svn.osgeo.org/gdal/trunk/autotest/utilities/test_gdal_rasterize_lib.py>`__.
+`test_gdal_rasterize_lib.py <https://svn.osgeo.org/gdal/trunk/autotest/utilities/test_gdal_rasterize_lib.py>`_ 에서 gdal.Rasterize 메소드를 테스트합니다.
 
-gdal.BuildVRT method is tested in
-`test_gdalbuildvrt_lib.py <http://svn.osgeo.org/gdal/trunk/autotest/utilities/test_gdalbuildvrt_lib.py>`__.
+`test_gdalbuildvrt_lib.py <https://svn.osgeo.org/gdal/trunk/autotest/utilities/test_gdalbuildvrt_lib.py>`_ 에서 gdal.BuildVRT 메소드를 테스트합니다.
 
-Compatibility Issues
---------------------
+호환성 문제점
+-------------
 
-None expected. Command line utilities will keep the same interface. It
-will be checked by ensuring their tests in autotest/utilities still
-pass.
+예상되는 문제점은 없습니다. 명령줄 유틸리티들은 동일한 인터페이스를 유지할 것입니다. :file:`autotest/utilities` 에서의 유틸리티 테스트를 여전히 통과하는지 확인할 것입니다.
 
-Related ticket
---------------
+관련 티켓
+---------
 
-Implementation
---------------
+구현
+----
 
-Implementation will be done by Faza Mahamood and Even Rouault
+파자 마하무드와 이벤 루올이 이 RFC를 구현할 것입니다.
 
-The proposed implementation for gdalinfo and gdal_translate lies in the
-"rfc59.1" branch of the
-`https://github.com/rouault/gdal2/tree/rfc59.1 <https://github.com/rouault/gdal2/tree/rfc59.1>`__.
+gdalinfo 및 gdal_translate에 대해 제안한 구현은 `""rfc59.1"" 브랜치 <https://github.com/rouault/gdal2/tree/rfc59.1>`_ 에 있습니다.
 
-Voting history
---------------
+투표 이력
+---------
 
-+1 from DanielM and EvenR
+-  대니얼 모리셋 +1
+-  이벤 루올 +1
+

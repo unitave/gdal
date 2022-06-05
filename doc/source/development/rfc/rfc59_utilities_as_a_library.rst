@@ -23,7 +23,7 @@ RFC 59 : GDAL/OGR 유틸리티를 라이브러리로
 변경 사항
 ---------
 
-새 libgdalutils 라이브러리를 생성합니다. 유닉스 및 윈도우 빌드 둘 다 새 라이브러리를 연산에 넣도록 수정했습니다. GDAL 유틸리티가 새 함수를 사용하도록 수정합니다. GDAL 유틸리티의 공개 선언을 담고 있는 새 :file:`gdal_utils.h` 헤더 파일을 생성합니다. (아직 진행 중인) 현재 헤더를 `여기 <https://github.com/fazam/gdal/blob/gdalinfo/gdal/apps/gdal_utils.h>`_ 에서 찾아볼 수 있습니다.
+새 libgdalutils 라이브러리를 생성합니다. 유닉스 및 윈도우 빌드 둘 다 새 라이브러리를 연산에 넣도록 수정했습니다. GDAL 유틸리티가 새 함수를 사용하도록 수정합니다. GDAL 유틸리티의 공개 선언을 담고 있는 새 :file:`gdal_utils.h` 헤더 파일을 생성합니다. (아직 진행 중인) 현재 헤더는 `여기 <https://github.com/fazam/gdal/blob/gdalinfo/gdal/apps/gdal_utils.h>`_ 에서 찾아볼 수 있습니다.
 
 ::
 
@@ -141,7 +141,7 @@ gdal.InfoOptions()의 속성을 설정하는 데 또는 gdal.Info()의 그때 �
 문서화
 ------
 
-새 메소드 및 함수를 모두 문서화합니다.
+새 메소드/함수를 모두 문서화합니다.
 
 테스트 스위트
 -------------
