@@ -1,168 +1,124 @@
 .. _rfc-62:
 
 =======================================================================================
-RFC 62 : Raster algebra
+RFC 62 : 래스터 대수
 =======================================================================================
 
-Author: Ari Jolma
+저자: 아리 욜마(Ari Jolma)
 
-Contact: ari.jolma at gmail.com
+연락처: ari.jolma@gmail.com
 
-Status: Development
+상태: 개발 중
 
-Implementation in version:
+요약
+----
 
-Summary
--------
+이 RFC는 래스터 밴드 객체에 "래스터 대수(raster algebra)", 예를 들어 밴드를 수정하거나 밴드의 값을 계산하는 연산 작업 모음을 지원하는 함수 또는 메소드 집합을 작성할 것을 제안합니다. 수정 작업의 예시 가운데 하나는 밴드의 모든 셀에 값을 추가하는 것이 있고, 계산 작업의 예시 가운데 하나는 밴드에 있는 셀 값들 가운데 최대값을 찾는 것이 있습니다. 연산 작업은 밴드 자체에 더해 인자를 받을 수도 있고 받지 않을 수도 있으며, 인자를 받는 경우 이 인자는 숫자값, 데이터 구조, 또는 또다른 밴드가 될 수도 있습니다. 마찬가지로, 계산된 값은 단순한 숫자값, 데이터 구조, 또는 또다른 밴드가 될 수도 있습니다.
 
-It is proposed that a set of functions or methods are written for raster
-band objects to support "raster algebra", i.e., a set of operations,
-which modify bands or compute values from bands. An example of a
-modification is adding a value to all the cells of the band. An example
-of a computation is the maximum cell value in the band. Operations may
-or may not take arguments, in addition to the band itself, and if they
-take, the argument may be a numeric value, a data structure, or another
-band. Similarly, the computed value may be a simple numeric value, a
-data structure, or another band.
+근거
+----
 
-Rationale
+래스터 대수는 지리공간 과학 및 기술의 잘 알려진 지류 가운데 하나로 또다른 도구가 필요한 경우가 많습니다. 현재 GDAL 코어는 래스터 대수를 종합적으로 지원하지 않습니다.
+
+관련 작업
 ---------
 
-Raster algebra is a well known branch of geospatial science and
-technology and an often needed tool. Currently GDAL does not have
-comprehensive support for raster algebra in core.
+-  파이썬 바인딩:
+   래스터 밴드 또는 래스터 밴드의 일부분을 NumPy 배열 객체로 읽어들이거나 NumPy 배열 객체로부터 작성할 수 있습니다. 대용량 래스터는 블록별로 반복할 수 있습니다. NumPy 메소드는 파이썬을 사용하는 많은 래스터 대수 메소드를 효율적으로 구현할 수 있게 해줍니다. NumPy를 사용하는 병렬 처리도 일부 지원합니다.
 
-Related work
-------------
+-  펄(Perl) 바인딩:
+   래스터 밴드 또는 래스터 밴드의 일부분을 PDL(Perl Data Language) 객체로 읽어들이거나 PDL 객체로부터 작성할 수 있습니다. 대용량 래스터는 블록별로 반복할 수 있습니다. PDL 메소드는 펄을 사용하는 많은 래스터 대수 메소드를 효율적으로 구현할 수 있게 해줍니다. PDL을 사용하는 병렬 처리도 일부 지원합니다.
 
-Python bindings: raster bands or parts of raster bands can be read into
-/ written from numpy array objects. Huge rasters can be iterated block
-by block. numpy methods allow efficient implementation of many raster
-algebra methods using python. There is some support for parallel
-processing using numpy.
+-  QGIS 래스터 계산기:
+   래스터 계산 문자열을 표현식 트리로 파싱하고 입력물로부터 산출 밴드를 행별로 계산합니다. 모든 계산은 배정밀도 부동소수점형 숫자로 이루어집니다. QGIS 래스터 계산기는 병렬 처리를 지원하지 않습니다.
 
-Perl bindings: raster bands or parts of raster bands can be read into /
-written from PDL objects. Huge rasters can be iterated block by block.
-PDL methods allow efficient implementation of many raster algebra
-methods using perl. There is some support for parallel processing using
-PDL.
+-  PostGIS 래스터:
+   콜백 함수들이 래스터 대수를 지원합니다.
 
-QGIS raster calculator: raster calculation string is parsed into an
-expression tree and output band is computed row by row from the inputs.
-All computations are done with double precision floating point numbers.
-The calculation does not support parallel processing.
+활용할 수도 있는 기존 연구가 존재합니다:
 
-PostGIS raster: raster algebra is supported by callback functions.
+-  `데스크톱 또는 클러스터 상에서 1조 셀 DEM에 대한 병렬 우선순위-침수(Priority-Flood) 함몰부 채우기 <https://www.sciencedirect.com/science/article/pii/S0098300416301704>`_
 
-There is existing research, which may be exploited:
+-  `데스크톱 또는 클러스터 상에서 1조 셀 DEM에 대한 병렬 비발산(non-divergent) 흐름 누적 <https://arxiv.org/abs/1608.04431>`_
 
-Parallel Priority-Flood depression filling for trillion cell digital
-elevation models on desktops or clusters
-`http://www.sciencedirect.com/science/article/pii/S0098300416301704 <http://www.sciencedirect.com/science/article/pii/S0098300416301704>`__
+요구 사항 (목표)
+----------------
 
-Parallel Non-divergent Flow Accumulation For Trillion Cell Digital
-Elevation Models On Desktops Or Clusters
-`https://arxiv.org/abs/1608.04431 <https://arxiv.org/abs/1608.04431>`__
+-  구현이 데이터 유형을 인식해야 합니다. 템플릿으로 작성된 코드를 의미할 수도 있습니다.
 
-Requirements (Goals)
---------------------
+-  구현이 병렬 처리 친화적이어야 합니다.
 
-The implementation should be data type aware. This may mean code written
-with templates.
+-  구현이 C++ / C API를 상대적으로 사용하기 쉽게 해줘야 합니다. 템플릿을 사용하지 않는 인터페이스를 의미할 수도 있습니다.
 
-The implementation should be parallel processing friendly.
+-  구현이 셀 값에 대해 예를 들어 사용자가 확장할 수 있는 임의 함수를 사용하는 것을 허용해야 합니다.
 
-The implementation should allow a relatively easy to use C++ / C API.
-This may mean interface, which does not use templates.
+-  구현이 예를 들어 셀의 값이 그 이웃 셀들에 따라 달라지는 초점 메소드(focal method)를 허용해야 합니다.
 
-The implementation should allow arbitrary functions on cell values.
-I.e., be extensible by the user.
+접근법
+------
 
-The implementation should allow focal methods. I.e., methods, where the
-value of a cell depends on its neighborhood.
+이 구현은 GDAL 핵심과 긴밀하게 통합되지 않아도 됩니다. 즉 "애드온(add-on)" 유형의 해결책도 괜찮다는 뜻입니다.
 
-Approach
---------
+GDAL 설계는 래스터 대수 구현에 몇몇 제약 조건/요구 사항을 설정합니다:
 
-The implementation does not need to be tightly integrated with the core.
-This means an "add-on" type solution is ok.
+#. 블록을 기반으로 데이터에 접근해야 합니다.
+#. GDAL은 여러 데이터 유형을, 심지어 복소수 값조차 지원해야 합니다.
+#. 일부 메소드가 필요로 하는 단순하지 않은(not-simple) 구조를 즉시 지원할 수 없습니다. (이때 "메소드"란 래스터 대수의 함수들을 말합니다.)
+#. 밴드로부터 데이터를 병렬로 읽어올 수 있지만, 쓰기는 병렬이어서는 안 됩니다.
 
-GDAL design sets some constraints/requirements to raster algebra
-implementation: 1) the access to data is based on blocks, 2) GDAL
-supports several datatypes, even complex values, 3) there is no
-immediate support for the not-simple data structures needed by some
-methods (by "method" I refer to functions of raster algebra in this
-text), 4) data can be read from a band in parallel but writing needs to
-be exclusive.
-
-Changes
--------
-
-Drivers
--------
-
-Drivers are not affected.
-
-Bindings
---------
-
-The functionality will be added to the bindings.
-
-Utilities
+변경 사항
 ---------
 
-Existing utilities are not affected but new utilities may be written
-taking advantage of the new functionality.
+드라이버
+--------
 
-Documentation
+드라이버에 영향을 미치지 않습니다.
+
+바인딩
+------
+
+바인딩에 이 기능을 추가할 것입니다.
+
+유틸리티
+---------
+
+기존 유틸리티에 영향을 미치지 않지만 이 새 기능을 사용할 새 유틸리티를 작성할 수도 있습니다.
+
+문서화
+------
+
+새 기능에 대한 문서를 작성해야만 합니다.
+
+테스트 스위트
 -------------
 
-Must be written.
+새 테스트를 작성해야만 합니다.
 
-Test Suite
-----------
+호환성 문제
+-----------
 
-Must be written.
+관련 티켓
+---------
 
-Compatibility Issues
---------------------
+구현
+----
 
-Related tickets
----------------
+제안한 구현은 `래스터 대수 <https://github.com/ajolma/raster_algebra>`_ 에서 개발 중입니다.
 
-Implementation
---------------
+이 코드는 문제를 다음과 같이 해결하려 시도합니다(소스는 예전 접근법으로부터 이전 중입니다. 예전 접근법은 메소드로서의 연산자를 기반으로 했지만, 새 접근법은 연산자 클래스를 기반으로 합니다):
 
-A proposed implementation is developed at
-`https://github.com/ajolma/raster_algebra <https://github.com/ajolma/raster_algebra>`__
+-  '피연산자(operand)' 및 '연산자(operator)' 클래스를 정의합니다. 피연산자는 데이터를 담는 객체이며 연산자는 피연산자로부터 (본질적으로 피연산자인) 결과값을 계산하는 객체입니다.
 
-This code attempts to solve the problem as follows. (The source is in
-transition from an old approach, which was based on operators as
-methods, while the new approach is based on operator classes)
+-  래스터 대수 계산은 피연산자 및 연산자 객체들의 트리이며, 재귀적인 방식으로 실행됩니다.
 
-Classes 'operand' and 'operator' are defined. An operand is an object,
-which holds data and an operator is an object, which computes a result
-(essentially an operand) from operands.
+-  인터페이스 클래스들과 템플릿화된 구상(concrete) 클래스들이 존재합니다. 구상 클래스는 인터페이스 클래스로부터 상속받습니다.
 
-Raster algebra computation is a tree of operand and operator objects,
-which is executed in a recursive fashion.
+숫자 및 밴드, 2개의 피연산자 클래스를 정의합니다. 다른 유형의 피연산자도 필요합니다. 예를 들어 분류자(classifier)는 정수형 값 또는 실수형 범위를 숫자형으로 매핑할 것입니다. 이를 위한 코드가 소스에 존재하지만 새로운 접근법을 반영하도록 구성되지 않았습니다.
 
-There are interface classes and templated concrete classes. The concrete
-classes inherit from the interface classes.
+중심이 되는 메소드는 밴드 클래스에 있는 'compute'인데, 이는 기본적으로 :cpp:fuc:`GDALRasterBand::ReadBlock` 문서에 있는 효율적인 블록 루프 코드입니다.
 
-Two operand classes are defined: a number and a band. There is a need
-for other types of operands. For example a classifier would map integer
-values or real number ranges into numbers. Code for such exists in the
-source but it is not organized to reflect the new approach.
+밴드를 위한 템플릿 구상 클래스 및 값을 요청한 데이터 유형으로 반환하는 오버로드 get_value 메소드가 여러 데이터 유형들을 지원합니다.
 
-A central method is 'compute' in band class, which is basically the
-effective block loop code presented in the documentation for
-GDALRasterBand::ReadBlock.
-
-Multiple data types are supported by template concrete class for bands
-and by overloaded get_value method, which returns the value in required
-data type.
-
-Voting history
---------------
+투표 이력
+---------
 
