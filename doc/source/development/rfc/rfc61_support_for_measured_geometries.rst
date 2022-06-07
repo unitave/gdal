@@ -1,109 +1,93 @@
 .. _rfc-61:
 
 =======================================================================================
-RFC 61 : Support for measured geometries
+RFC 61 : 측정 도형 지원
 =======================================================================================
 
-Author: Ari Jolma
+저자: 아리 욜마(Ari Jolma)
 
-Contact: ari.jolma at gmail.com
+연락처: ari.jolma@gmail.com
 
-Status: Adopted
+상태: 승인, GDAL 2.1버전에 구현
 
-Implementation in version: 2.1
+요약
+----
 
-Summary
--------
+이 RFC는 측정(measured) 도형을 구현하는 방법을 정의합니다. (측정 도형이란 포인트가 M 좌표를 가진, 예를 들어 XYM 또는 XYZM인 도형을 말합니다.)
 
-This RFC defines how to implement measured geometries (geometries, where
-the points have M coordinate, i.e., they are XYM or XYZM).
+근거
+----
 
-Rationale
+"측정값(measure)으로도 알려진 M 좌표는 도형의 각 포인트에 저장할 수 있는 추가적인 값입니다. (`IBM 기술 메모 <https://www.ibm.com/support/pages/what-are-semantics-m-coordinate-measure>`_ 를 참조하십시오.)
+
+M 좌표는 OGC 단순 피처(Simple Feature) 모델에 포함되며 많은 벡터 데이터 포맷에서 사용됩니다.
+
+변경 사항
 ---------
 
-An M coordinate, which is also known as "measure", is an additional
-value that can be stored for each point of a geometry (IBM Technical
-Note,
-`https://www-304.ibm.com/support/docview.wss?uid=swg21054384 <https://www-304.ibm.com/support/docview.wss?uid=swg21054384>`__).
+C++ API에 변경 사항을 적용해야 하며, C API를 개선해야 합니다. 이 개선 사항을 이용하기 위해서는 물론 C++ API의 변경 때문에라도 몇몇 드라이버를 변경해야 합니다.
 
-M coordinate is in the OGC simple feature model and it is used in many
-vector data formats.
+공통 API
+~~~~~~~~
 
-Changes
--------
+새로운 OGRwkbGeometryType 값이 필요합니다. SFSQL 1.2 및 ISO SQL/MM Part 3를, 예를 들어 M에 대해 2차원 유형 + 2000을 그리고 ZM에 대해 2차원 유형 + 3000을 사용할 것입니다. (또한 현재 구현되지은 않았지만 완벽성을 위해 Tin, PolyhedralSurface 및 Triangle 같은 유형들을 추가할 수 있습니다.) (`#6401 티켓 <https://trac.osgeo.org/gdal/ticket/6401>`_ 에 따라) wkbCurve 및 wkbSurface를 #define으로부터 OGRwkbGeometryType 열거형으로 이동시켰고, 그 Z/M/ZM 변이형들도 추가했습니다.
 
-Changes are required into the C++ API and the C API needs to be
-enhanced. Several drivers need to be changed to take advantage of this
-enhancement but also due to the changes in the C++ API.
+좀 더 일반적으로 말하자면, 깔끔한 값들의 집합을 사용하는 경로가 있을 수 있으며 (있어야 하며?) 레거시 지원을 예외로 할 수 있습니다.
 
-Common API
-~~~~~~~~~~
-
-New OGRwkbGeometryType values are needed. SFSQL 1.2 and ISO SQL/MM Part
-3 will be used, i.e., 2D type + 2000 for M and 2D type + 3000 for ZM.
-(Also types such as Tin, PolyhedralSurface and Triangle types can be
-added for completeness, even if unimplemented currently). wkbCurve and
-wkbSurface have been moved from #define to the OGRwkbGeometryType
-enumerations, and their Z/M/ZM variants have been added as well (per
-#6401)
-
-On a more general note, there could (should?) be a path to using a clean
-set of values and have legacy support as an exception.
-
-Abstract types are defined and not part of the enum.
+추상 유형을 정의하는데 열거형의 일부로 정의하지는 않습니다.
 
 ::
 
-   // additions to enum OGRwkbGeometryType
-       wkbCurve = 13,          /**< Curve (abstract type). ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbSurface = 14,        /**< Surface (abstract type). ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbPolyhedralSurface = 15,/**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbTIN = 16,              /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbTriangle = 17,         /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
+   // OGRwkbGeometryType 열거형에 추가
+       wkbCurve = 13,          /**< 곡선 (추상 유형). ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbSurface = 14,        /**< 면 (추상 유형). ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbPolyhedralSurface = 15,/**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbTIN = 16,              /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbTriangle = 17,         /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
 
-       wkbCurveZ = 1013,           /**< wkbCurve with Z component. ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbSurfaceZ = 1014,         /**< wkbSurface with Z component. ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbPolyhedralSurfaceZ = 1015,  /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbTINZ = 1016,                /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbTriangleZ = 1017,           /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
+       wkbCurveZ = 1013,           /**< Z 구성 요소를 가진 wkbCurve. ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbSurfaceZ = 1014,         /**< Z 구성 요소를 가진 wkbSurface. ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbPolyhedralSurfaceZ = 1015,  /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbTINZ = 1016,                /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbTriangleZ = 1017,           /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
 
-       wkbPointM = 2001,              /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbLineStringM = 2002,         /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbPolygonM = 2003,            /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbMultiPointM = 2004,         /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbMultiLineStringM = 2005,    /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbMultiPolygonM = 2006,       /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbGeometryCollectionM = 2007, /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbCircularStringM = 2008,     /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbCompoundCurveM = 2009,      /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbCurvePolygonM = 2010,       /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbMultiCurveM = 2011,         /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbMultiSurfaceM = 2012,       /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbCurveM = 2013,              /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbSurfaceM = 2014,            /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbPolyhedralSurfaceM = 2015,  /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbTINM = 2016,                /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbTriangleM = 2017,           /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
+       wkbPointM = 2001,              /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbLineStringM = 2002,         /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbPolygonM = 2003,            /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbMultiPointM = 2004,         /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbMultiLineStringM = 2005,    /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbMultiPolygonM = 2006,       /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbGeometryCollectionM = 2007, /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbCircularStringM = 2008,     /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbCompoundCurveM = 2009,      /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbCurvePolygonM = 2010,       /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbMultiCurveM = 2011,         /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbMultiSurfaceM = 2012,       /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbCurveM = 2013,              /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbSurfaceM = 2014,            /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbPolyhedralSurfaceM = 2015,  /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbTINM = 2016,                /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbTriangleM = 2017,           /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
 
-       wkbPointZM = 3001,              /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbLineStringZM = 3002,         /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbPolygonZM = 3003,            /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbMultiPointZM = 3004,         /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbMultiLineStringZM = 3005,    /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbMultiPolygonZM = 3006,       /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbGeometryCollectionZM = 3007, /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbCircularStringZM = 3008,     /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbCompoundCurveZM = 3009,      /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbCurvePolygonZM = 3010,       /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbMultiCurveZM = 3011,         /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbMultiSurfaceZM = 3012,       /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbCurveZM = 3013,              /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbSurfaceZM = 3014,            /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbPolyhedralSurfaceZM = 3015,  /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbTINZM = 3016,                /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
-       wkbTriangleZM = 3017,           /**< ISO SQL/MM Part 3. GDAL &gt;= 2.1 */
+       wkbPointZM = 3001,              /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbLineStringZM = 3002,         /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbPolygonZM = 3003,            /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbMultiPointZM = 3004,         /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbMultiLineStringZM = 3005,    /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbMultiPolygonZM = 3006,       /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbGeometryCollectionZM = 3007, /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbCircularStringZM = 3008,     /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbCompoundCurveZM = 3009,      /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbCurvePolygonZM = 3010,       /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbMultiCurveZM = 3011,         /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbMultiSurfaceZM = 3012,       /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbCurveZM = 3013,              /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbSurfaceZM = 3014,            /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbPolyhedralSurfaceZM = 3015,  /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbTINZM = 3016,                /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
+       wkbTriangleZM = 3017,           /**< ISO SQL/MM Part 3. GDAL 2.1 이상 버전 */
 
-   // add tests for M
+   // M에 대한 테스트 추가
    #define wkbHasM(x)     OGR_GT_HasM(x)
    #define wkbSetM(x)     OGR_GT_SetM(x)
 
@@ -114,8 +98,7 @@ Abstract types are defined and not part of the enum.
 C++ API
 ~~~~~~~
 
-The property int nCoordinateDimension in class OGRGeometry will be
-replaced by int flags. It may have the following flags:
+:cpp:class:`OGRGeometry` 클래스에 있는 ``int nCoordinateDimension`` 속성을 ``int`` 플래그로 대체할 것입니다. 다음 플래그들을 가질 수도 있습니다:
 
 ::
 
@@ -124,35 +107,24 @@ replaced by int flags. It may have the following flags:
    #define OGR_G_MEASURED 0x4
    #define OGR_G_IGNORE_MEASURED 0x8
 
-The "ignore" flag is needed internally for backwards compatibility. The
-flag OGR_G_NOT_EMPTY_POINT is used only to denote the emptiness of an
-OGRPoint object.
+하위 호환성을 위해 내부적으로 "ignore" 플래그가 필요합니다. OGR_G_NOT_EMPTY_POINT 플래그는 :cpp:class:`OGRPoint` 객체가 비어 있음을 나타내기 위해서만 사용합니다.
 
-Currently a hack to set nCoordDimension negative is used to denote an
-empty point.
+현재 비어 있는 포인트를 나타내기 위해 nCoordDimension를 음의 값으로 설정하는 꼼수를 사용하고 있습니다.
 
-The removal of nCoordinateDimension may imply changes to drivers etc.
-which get or set it.
+nCoordinateDimension을 제거하면 이를 가져오거나 설정하는 드라이버 등등을 변경해야 할 수도 있습니다.
 
-The tests are
+다음을 테스트합니다:
 
 ::
 
    Is3D = flags & OGR_G_3D
    IsMeasured = flags & OGR_G_MEASURED
 
-The setters and getters are implemented with \|= and &=.
+세터(setter) 및 게터(getters)를 ``|=`` 및 ``&=`` 로 구현합니다.
 
-When any of these flags is set or unset, the corresponding data becomes
-invalid and may be discarded.
+이 플래그들 가운데 하나라도 설정하거나 설정 해제하는 경우, 대응하는 데이터가 무결하지 않게 되어 폐기될 수도 있습니다.
 
-Keep the following methods with original semantics, i.e., coordinate
-dimension is 2 or 3, but deprecate. There is some discrepancy in
-documentation. Their documentation says that they may return zero for
-empty points while in ogrpoint.cpp it says that negative nCoordDimension
-values are used for empty points and the getCoordinateDimension method
-of point returns absolute value of nCoordDimension - thus not zero. A
-fix to the doc is probably enough.
+다음 메소드들이 원래 의미 체계를 가지도록, 예를 들어 좌표 차원을 2 또는 3으로 유지하지만, 퇴출시키십시오. 문서에 일부 모순점들이 존재합니다. 메소드 문서에는 비어 있는 포인트에 대해 0을 반환할 수도 있다고 적혀 있지만 :file:`ogrpoint.cpp` 에는 비어 있는 포인트에 대해 음의 nCoordDimension 값을 사용하고 포인트의 getCoordinateDimension 메소드는 nCoordDimension의 절대값을 -- 따라서 0이 아닌 값을 -- 반환한다고 되어 있습니다. 문서를 수정하는 것으로 충분할 것입니다.
 
 ::
 
@@ -160,86 +132,60 @@ fix to the doc is probably enough.
    void setCoordinateDimension(int nDimension);
    void flattenTo2D()
 
-It is proposed to possibly add a new method to replace
-getCoordinateDimension. set3D and setMeasured would replace
-setCoordinateDimension and flattenTo2D. See below.
+getCoordinateDimension()을 대체할 새 메소드를 추가할 수 있다고 제안합니다. set3D() 및 setMeasured()가 setCoordinateDimension() 및 flattenTo2D()를 대체할 것입니다. 다음을 참조하십시오.
 
-class OGRGeometry:
+:cpp:class:`OGRGeometry` 클래스:
 
 ::
 
-   //Possibly add methods (SF Common Architecture):
-   int Dimension(); // -1 for empty geometries (to denote undefined), 0 for points, 1 for curves, 2 for surfaces, max of components for collections
-   char *GeometryType(); // calls OGRToOGCGeomType (which needs to be enhanced)
+   //추가할 수도 있는 메소드들 (SF 공통 아키텍처):
+   int Dimension(); // 비어 있는 도형의 경우 (정의되지 않았다는 사실을 나타내는) -1, 포인트의 경우 0, 곡선의 경우 1, 면의 경우2, 도형 집합의 경우 구성 요소들의 최대값
+   char *GeometryType(); // OGRToOGCGeomType을 호출합니다. (개선이 필요합니다.)
 
-   //Add methods (SF Common Architecture) see above for implementation:
-   int CoordinateDimension(); // 2 if not 3D and not measured, 3 if 3D or measured, 4 if 3D and measured
+   //추가할 메소드들 (SF 공통 아키텍처) 구현에 대해서는 앞을 참조하십시오:
+   int CoordinateDimension(); // 3차원이 아니고 측정되지 않은 경우 2, 3차원이거나 측정된 경우 3, 3차원이고 측정된 경우 4
    OGRBoolean Is3D() const;
    OGRBoolean IsMeasured() const;
 
-   //Add methods (non-standard; note the use of one method instead of second unset* method):
+   //추가할 메소드들 (비표준; 두 번째 unset* 메소드 대신 메소드 하나를 사용한다는 사실을 기억하십시오):
    virtual void set3D(OGRBoolean bIs3D);
    virtual void setMeasured(OGRBoolean bIsMeasured);
 
-   //Add now or later methods:
+   //지금 또는 나중에 추가할 메소드들:
    virtual OGRGeometry *LocateAlong(double mValue);
    virtual OGRGeometry *LocateBetween(double mStart, double mEnd);
 
-   //Remove b3D from importPreambleFromWkb: it is not used, the flags are managed within the method.
+   //importPreambleFromWkb에서 b3D 제거: 사용되지 않으며, 메소드 내부에서 플래그들을 관리합니다.
 
-int CoordinateDimension() should have the new semantics. The method name
-in simple features documents actually is without prefix get.
+``int CoordinateDimension()`` 이 새 의미 체계를 가져야 합니다. 단순 피처 문서에 있는 메소드 이름에는 사실 ``get`` 접두어가 없습니다.
 
-Whether set3D and setMeasured should affect the children geometries in a
-collection is an issue. Currently doc for setCoordinateDimension says
-"Setting the dimension of a geometry collection will affect the children
-geometries.", thus we have already committed to maintaining dimensions
-of children in collections. It is proposed that set3D and setMeasured
-either add or strip Z or M values to or from the geometry (including
-possible children). In general the strategy should be to follow the
-existing strategy regarding Z (i.e., to strip or add).
+set3D() 및 setMeasured()가 도형 집합에 있는 하위(children) 도형에 영향을 미쳐야 하는지 여부가 문제점입니다. 현재 setCoordinateDimension() 문서에는 "도형 집합의 차원을 설정하는 것이 하위 도형에 영향을 미칠 것"이라고 적혀 있기 때문에, 이미 도형 집합에 있는 하위 도형의 차원을 유지하기로 한 것입니다. set3D() 및 setMeasured() 메소드가 (하위일 수도 있는 도형 포함) 도형에서 Z 또는 M 값을 추가하거나 제거할 것을 제안합니다. 일반적으로 Z와 관련한 기존 (예를 들어 제거 또는 추가) 전략을 따라야 할 것입니다.
 
-Add property double m to class OGRPoint. Add constructor, getters, and
-setters for it.
+:cpp:class:`OGRPoint` 클래스에 ``double m`` 속성을 추가합니다. 이를 위한 구성자, 게터 및 세터를 추가합니다.
 
-Add property double \*padfM to class OGRSimpleCurve. Add constructor,
-getters, and setters for it. New setters with postfix M are needed for
-XYM data since the object may be upgraded to XYZ from XY in setters. Add
-also methods RemoveM() and AddM() with similar semantics as Make3D and
-Make2D.
+:cpp:class:`OGRSimpleCurve` 클래스에 ``double *padfM`` 속성을 추가합니다. 이를 위한 구성자, 게터 및 세터를 추가합니다. XYM 데이터에 대해 접미어 M이 붙은 새 세터가 필요합니다. 객체가 세터에서 XY로부터 XYZ로 업드레이드될 수도 있기 때문입니다. Make3D() 및 Make2D()와 비슷한 의미 체계를 가진 RemoveM() 및 AddM() 메소드도 추가합니다.
 
-Override methods set3D and setMeasured in those classes where
-setCoordinateDimension is overridden.
+setCoordinateDimension()이 대체되는 클래스들에서 set3D() 및 setMeasured() 메소드를 대체합니다.
 
-Change the semantics of methods whose name begins with \_ and have a
-parameter "int b3D". The parameter will be "int coordinates", i.e., a
-flags like int, which tells about Z and M.
+이름이 ``_`` 로 시작하고 "int b3D" 파라미터를 가진 메소드들의 의미 체계를 변경합니다. 이 파라미터는 예를 들어 Z 및 M에 대해 알려주는 "int" 같은 플래그인 "int coordinates"가 될 것입니다.
 
 C API
 ~~~~~
 
-ogr_core.h:
+:file:`ogr_core.h`:
 
 ::
 
    OGRwkbGeometryType CPL_DLL OGR_GT_SetM( OGRwkbGeometryType eType );
    int                CPL_DLL OGR_GT_HasM( OGRwkbGeometryType eType );
 
-The current behavior is that calling SetPoint on a geometry with
-coordinate dimension 2 upgrades the coordinate dimension 3. To keep 2D
-points 2D SetPoint_2D must be used. Thus we need separate functions for
-M and ZM geometries. The proposal is to use postfixes M and ZM, i.e.,
-SetPointM, SetPointZM. Similarly for AddPoint.
+현재 습성은 좌표 차원이 2인 도형에 SetPoint()를 호출하면 좌표 차원을 3으로 업드레이드하는 것입니다. 2차원 포인트로 유지하려면 SetPoint_2D() 2차원 메소드를 사용해야만 합니다. 따라서 M 및 ZM 도형에 대해서도 개별 함수가 필요합니다. AddPoint()에 대해 예를 들어 SetPointM(), SetPointZM()처럼 접미어 M 및 ZM을 붙일 것을 제안합니다.
 
-Currently there is no SetPoints_2D function. The doc at pabyZ param at
-SetPoints comments that "defaults to NULL for 2D objects" but that does
-not seem to be the case. See #6344. If that is fixed as written there,
-then only SetPointsZM is needed.
+현재 SetPoints_2D() 함수가 존재하지 않습니다. SetPoints() 함수의 'pabyZ' 파라미터의 주석에는 "2차원 객체의 경우 기본값이 NULL"이라고 되어 있지만 그렇지 않은 것으로 보입니다. `#6344 티켓 <https://trac.osgeo.org/gdal/ticket/6344>`_ 을 참조하십시오. 이 티켓에 적힌 대로 수정된다면, SetPointsZM()만 필요합니다.
 
-GetPoint and GetPoints do not have a 2D version, so only \*ZM version is
-needed.
+GetPoint() 및 GetPoints()에는 2차원 버전이 없기 때문에, ``*ZM`` 버전만 필요합니다.
 
-ogr_api.h:
+:file:`ogr_api.h`:
 
 ::
 
@@ -251,7 +197,7 @@ ogr_api.h:
 
    double CPL_DLL OGR_G_GetM( OGRGeometryH, int );
 
-ogr_p.h (This is public header, so new functions are needed)
+:file:`ogr_p.h` (공개 헤더이기 때문에 새 함수들이 필요합니다):
 
 ::
 
@@ -262,9 +208,9 @@ ogr_p.h (This is public header, so new functions are needed)
                                           int * pnMaxPoints,
                                           int * pnReadPoints );
    void CPL_DLL OGRMakeWktCoordinateM( char *, double, double, double, double, int ); // int = flags OGR_G_3D OGR_G_MEASURED
-   // Change the semantics of OGRReadWKBGeometryType: b3D is not used and the returned eGeometryType may may any valid type
+   // OGRReadWKBGeometryType의 의미 체계 변경: b3D를 사용하지 않으며 반환되는 eGeometryType이 어떤 무결한 유형이라도 될 수 있습니다.
 
-pggeometry.h is internal, so we can change the function prototype
+:file:`pggeometry.h` 는 내부 헤더이기 때문에 함수 프로토타입을 변경할 수 있습니다:
 
 ::
 
@@ -277,128 +223,114 @@ pggeometry.h is internal, so we can change the function prototype
                                     double* padfZ,
                                     double* padfM);
 
-Use of padfM requires changes to openfilegdb driver.
+'padfM' 파라미터를 사용하기 때문에 OpenFileGDB 드라이버를 변경해야 합니다.
 
-GEOS, filters, and other issues
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+GEOS, 필터 및 기타 문제점
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When a geometry with measures is sent to GEOS or used as a filter the M
-coordinate is ignored.
+측정값을 가진 도형을 GEOS로 전송하거나 필터로 사용하는 경우 M 좌표를 무시합니다.
 
-LocateAlong and LocateBetween are the only standard methods, which use M
-but there could be others, which for example get the extent of M. Such
-are not intended to be added now but they can be added later.
+LocateAlong() 및 LocateBetween()만이 M을 사용하는 표준 메소드지만, 예를 들어 M의 범위를 가져오는 다른 메소드가 존재할 수 있습니다. 현재 그런 메소드를 추가할 계획은 없지만 향후 추가할 수도 있습니다.
 
-SWIG bindings (Python / Java / C# / Perl) changes
--------------------------------------------------
+SWIG 바인딩 (파이썬 / 자바 / C# / 펄) 변경 사항
+-----------------------------------------------
 
-The new C API functions need to be exposed through swig. Further changes
-depend on whether the language bindings are aware of coordinates. At
-least Python and Perl are.
+새 C API 함수들을 SWIG을 통해 노출시켜야 합니다. 언어 바인딩들이 좌표를 인식하느냐에 따라 다음 변경 사항들이 달라집니다. 적어도 파이썬과 펄은 좌표를 인식합니다.
 
-The new geometry types will be included into the i files.
+i 파일에 새 도형 유형들을 포함시킬 것입니다.
 
-Some new setters and getters are needed for M. Is3D, IsMeasured, Set3D
-and SetMeasured methods should be added. Also OGR_GT_HasM.
+M에 대해 몇몇 새로운 세터와 게터가 필요합니다. Is3D(), IsMeasured(), Set3D() 및 SetMeasured() 메소드는 물론 OGR_GT_HasM() 메소드도 추가해야 합니다.
 
-Drivers
--------
+드라이버
+--------
 
-Drivers that are probably affected by the C++ changes are at least
-(these use the CoordinateDimension API) pg, mssqlspatial, sqlite, db2,
-mysql, gml, pgdump, geojson, libkml, gpkg, wasp, gpx, filegdb, vfk, bna,
-dxf.
+C++ 변경 사항 때문에 영향을 받을 수도 있는 (CoordinateDimension API를 사용하는) 드라이버들은 최소한 다음과 같습니다:
 
-The now deprecated CoordinateDimension API is proposed to be replaced
-with calls to \*3D and \*Measured.
+   -  PG
+   -  MSSQLSpatial
+   -  SQLite
+   -  DB2
+   -  MySQL
+   -  GML
+   -  PGDump
+   -  GeoJSON
+   -  LibKML
+   -  GPKG
+   -  WASP
+   -  GPX
+   -  FilegDB
+   -  VFK
+   -  BNA
+   -  DXF
 
-Once the support for M coordinates is in place the driver will advertise
-the support.
+현재 퇴출된 CoordinateDimension API를 ``*3D()`` 및 ``*Measured()`` 호출로 대체할 것을 제안합니다.
 
-Within the work of this RFC the support is built into memory, shape and
-pg drivers. Support for other drivers are left for further work.
+M 좌표에 대한 지원이 자리를 잡으면 드라이버가 해당 지원을 노출시킬 것입니다.
 
-Utilities
----------
+이 RFC의 작업 내용은 Memory, Shapefile 및 PG 드라이버에 M 좌표 지원을 빌드하는 것을 포함합니다. 다른 드라이버들에 지원을 구현하는 것은 향후 작업할 계획입니다.
 
-There is a minimum requirement and new possibilities.
+유틸리티
+--------
 
-ogrinfo: report measured geom type, report measures
+최소 요구 사항 및 새로운 가능성이 있습니다.
 
-ogr2ogr: support measured geom types
+-  ogrinfo: 측정 도형 유형 및 측정값을 리포트합니다.
+-  ogr2ogr: 측정 도형 유형을 리포트합니다.
+-  ogrlineref: 분명히 측정값을 처리하는 것으로 보이며, 더 많은 생각이 필요합니다.
+-  gdal_rasterize: 작성(burn-in) 값을 위해 측정값을 사용할 수 있습니다.
+-  gdal_contour: 측정값을 "표고" 값으로 사용할 수 있습니다.
+-  gdal_grid: 측정값을 "Z" 값으로 사용할 수 있습니다.
 
-ogrlineref: seems to deal specifically with measures, needs more thought
+문서화
+------
 
-gdal_rasterize: measure could be used for the burn-in value
+새 메소드 및 함수를 모두 문서화합니다.
 
-gdal_contour: measure could be used as the "elevation" value
-
-gdal_grid: measure could be used as the "Z" value
-
-Documentation
+테스트 스위트
 -------------
 
-All new methods/functions are documented.
+펄 유닛 테스트(:file:`swi/perl/t/measures-\*.t`)로 적어도 초기 테스트를 수행할 것입니다. 향후 자동 테스트 스위트를 확장할 것입니다. 기존 테스트들은 통과할 것입니다.
 
-Test Suite
-----------
+호환성 문제점
+-------------
 
-At least the initial tests will be done with Perl unit tests
-(swi/perl/t/measures-\*.t). Later autotest suite will be extended.
-Existing tests should not fail.
-
-Compatibility Issues
---------------------
-
-Many drivers (actually datasets and layers) which support measures need
-to have the support added. Support should be advertised using
+측정값을 지원하는 드라이버 (실제로는 데이터셋 및 레이어) 다수에 해당 지원을 추가해야 합니다. 다음을 이용해서 지원 사실을 노출시켜야 합니다:
 
 ::
 
    #define ODsCMeasuredGeometries   "MeasuredGeometries"
    #define OLCMeasuredGeometries    "MeasuredGeometries"
 
-The entry point for a creating a layer is CreateLayer method in
-GDALDataset. If the dataset does not support measured geometries it will
-strip the measured flag from the geometry type it gets as a parameter.
-This is in line with current behavior non linear geometry types and
-datasets not supporting them.
+레이어 생성을 위한 입구점(entry point)은 :cpp:class:`GDALDataset` 에 있는 CreateLayer() 메소드입니다. 데이터셋이 측정 도형을 지원하지 않는 경우 이 메소드가 파라미터로 가져오는 도형 유형의 측정 플래그를 제거할 것입니다. 이 습성은 비선형 도형 유형 및 데이터셋이 측정 도형을 지원하지 않는 현재 습성과 일관성을 유지합니다.
 
-ICreateLayer, which all drivers that have create layer capability
-implement, have geometry type as an argument. The method should call
-CPLError() with CPLE_NotSupported and return NULL if the driver does not
-support measures. Similarly for ICreateFeature and ISetFeature.
+레이어 생성 케이퍼빌리티를 구현한 모든 드라이버가 가지고 있는 ICreateLayer()는 도형 유형을 인자로 가지고 있습니다. 이 메소드는 CPLError()를 CPLE_NotSupported로 호출해서 드라이버가 측정값을 지원하지 않는 경우 NULL을 반환해야 합니다. ICreateFeature() 및 ISetFeature()도 마찬가지입니다.
 
-The user-oriented API functions (CreateLayer, CreateFeature, and
-SetFeature) should (silently) strip out the measures before continuing
-to the I\* methods in drivers that do not support measures. This (side
-effect) may not be what is wanted in some usage scenarios but it would
-follow the pattern of what is already done with nonlinear geometries.
-This should be documented.
+사용자 지향 API 함수(CreateLayer, CreateFeature 및 SetFeature)는 측정값을 지원하지 않는 드라이버에 있는 ``I*()`` 메소드로 진행하기 전에 측정값을 (암묵적으로) 제거해야 합니다. 몇몇 사용례 시나리오에서는 이런 부작용을 원하지 않겠지만 이미 비선형 도형 작업 시 수행한 패턴을 따를 것입니다. 이런 내용을 문서화해야 합니다.
 
-An alternative would be to store M value(s) (or WKT or WKB) as attribute
-(scalar or vector, depending on the geometry type).
+이에 대한 대안은 M 값(들)을 (또는 WKT/WKB를) (도형 유형에 따라 스칼라(scalar) 또는 벡터) 속성으로 저장하는 것입니다.
 
-Needs a decision.
+결정이 필요합니다.
 
-Some incompatibilities will necessarily be introduced. For example when
-the current XYM-as-XYZ hack in shape will be replaced by proper XYM.
+몇몇 불호환성이 어쩔 수 없이 발생할 것입니다. 예를 들어 Shapefile 드라이버에서 현재의 XYM과 XYZ를 동일하게(XYM-as-XYZ) 취급하는 꼼수는 제대로 된 XYM으로 대체될 것입니다.
 
-Related tickets
----------------
+관련 티켓
+---------
 
-`https://trac.osgeo.org/gdal/ticket/6063 <https://trac.osgeo.org/gdal/ticket/6063>`__
-`https://trac.osgeo.org/gdal/ticket/6331 <https://trac.osgeo.org/gdal/ticket/6331>`__
+-  `#6063 티켓 <https://trac.osgeo.org/gdal/ticket/6063>`_
+-  `#6331 티켓 <https://trac.osgeo.org/gdal/ticket/6331>`_
 
-Implementation
---------------
+구현
+----
 
-The implementation will be done by Ari Jolma.
+아리 욜마가 이 RFC를 구현할 것입니다.
 
-The proposed implementation will be in
-`https://github.com/ajolma/GDAL-XYZM <https://github.com/ajolma/GDAL-XYZM>`__
+제안한 구현은 `https://github.com/ajolma/GDAL-XYZM <https://github.com/ajolma/GDAL-XYZM>`_ 에 있을 것입니다.
 
-Voting history
---------------
+투표 이력
+---------
 
-+1 from Even, Tamas, Jukka and Daniel
+-  이벤 루올 +1
+-  세케레시 터마시 +1
+-  유카 라흐코넨 +1
+-  대니얼 모리셋 +1
+
