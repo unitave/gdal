@@ -31,20 +31,20 @@ GDALInfo()의 경우:
 
 ::
 
-   /*! Options for GDALInfo(). Opaque type */
+   /*! GDALInfo() 용 옵션. 불투명 유형입니다. */
    typedef struct GDALInfoOptions GDALInfoOptions;
    typedef struct GDALInfoOptionsForBinary GDALInfoOptionsForBinary;
 
    /**
-    * Allocates a GDALInfoOptions struct.
+    * GDALInfoOptions 구조를 할당합니다.
     *
-    * @param papszArgv NULL terminated list of options (potentially including filename and open options too)
-    *                  The accepted options are the one of the gdalinfo utility.
-    * @param psOptionsForBinary (output) may be NULL (and should generally be NULL),
-    *                           otherwise (gdalinfo_bin.cpp use case) must be allocated with
-    *                           GDALInfoOptionsForBinaryNew() prior to this function. Will be
-    *                           filled with potentially present filename, open options, subdataset number...
-    * @return pointer to the allocated GDALInfoOptions struct.
+    * @param papszArgv NULL로 종료되는 옵션 목록입니다. (파일명 및 열기 옵션도 포함할 수 있습니다.)
+    *                  gdalinfo 유틸리티의 옵션을 받아들입니다.
+    * @param psOptionsForBinary (산출물) NULL일 수 있으며 (일반적으로 NULL이어야 합니다)
+    *                           그렇지 않은 경우 (gdalinfo_bin.cpp 사용례) 이 함수 이전에
+    *                           GDALInfoOptionsForBinaryNew()로 할당해야만 합니다. 존재할 수 있는
+    *                           파일명, 열기 옵션, 하위 데이터셋 번호 등등으로 채워질 것입니다.
+    * @return 할당된 GDALInfoOptions 구조를 가리키는 포인터를 반환합니다.
     *
     * @since GDAL 2.1
     */
@@ -53,15 +53,15 @@ GDALInfo()의 경우:
    void CPL_DLL GDALInfoOptionsFree( GDALInfoOptions *psOptions );
 
    /**
-    * Lists various information about a GDAL supported raster dataset.
+    * GDAL 지원 래스터 데이터셋에 관한 다양한 정보를 목록화합니다.
     *
-    * GDALInfoOptions* must be allocated and freed with GDALInfoOptionsNew()
-    * and GDALInfoOptionsFree() respectively.
+    * GDALInfoOptionsNew()로 GDALInfoOptions* 를 할당하고
+    * GDALInfoOptionsFree()로 할당 해제해야만 합니다.
     *
-    * @param hDataset the dataset handle.
-    * @param psOptions the options structure returned by GDALInfoOptionsNew() or NULL.
-    * @return string corresponding to the information about the raster dataset.
-    * It must be freed using CPLFree().
+    * @param hDataset 데이터셋 핸들입니다.
+    * @param psOptions GDALInfoOptionsNew()가 반환하는 옵션 구조 또는 NULL입니다.
+    * @return 래스터 데이터셋에 관한 정보에 해당하는 문자열을 반환합니다.
+    * CPLFree()로 해제해야만 합니다.
     *
     * @since GDAL 2.1
     */
@@ -71,7 +71,7 @@ GDALTranslate()의 경우도 마찬가지입니다:
 
 ::
 
-   /*! Options for GDALTranslate(). Opaque type */
+   /*! GDALTranslate() 용 옵션. 불투명 유형입니다. */
    typedef struct GDALTranslateOptions GDALTranslateOptions;
    typedef struct GDALTranslateOptionsForBinary GDALTranslateOptionsForBinary;
 
@@ -93,7 +93,7 @@ GDALWarp()의 경우도 마찬가지입니다:
 
 ::
 
-   /*! Options for GDALWarp(). Opaque type */
+   /*! GDALWarp() 용 옵션. 불투명 유형입니다. */
    typedef struct GDALWarpAppOptions GDALWarpAppOptions;
 
    typedef struct GDALWarpAppOptionsForBinary GDALWarpAppOptionsForBinary;
@@ -118,7 +118,7 @@ GDALVectorTranslate()의 경우도 마찬가지입니다(ogr2ogr와 동등합니
 
 ::
 
-   /*! Options for GDALVectorTranslate(). Opaque type */
+   /*! GDALVectorTranslate() 용 옵션. 불투명 유형입니다. */
    typedef struct GDALVectorTranslateOptions GDALVectorTranslateOptions;
 
    typedef struct GDALVectorTranslateOptionsForBinary GDALVectorTranslateOptionsForBinary;
@@ -202,8 +202,8 @@ SWIG 바인딩 (파이썬 / 자바 / C# / 펄) 변경 사항
    }
    };
 
-   /* Note: we must use 2 distinct names since there's a bug/feature in swig */
-   /* that doesn't play nicely with the (int object_list_count, GDALDatasetShadow** poObjects) input typemap */
+   /* 주의: SWIG에 "int object_list_count, GDALDatasetShadow** poObjects" 입력 유형 매핑과 잘 */
+   /* 동작하지 않는 버그/기능이 있기 때문에 2개의 개별 이름을 사용해야만 합니다 */
 
    %inline %{
    int wrapper_GDALWarpDestDS( GDALDatasetShadow* dstDS,
@@ -238,8 +238,8 @@ SWIG 바인딩 (파이썬 / 자바 / C# / 펄) 변경 사항
    }
    };
 
-   /* Note: we must use 2 distinct names since there's a bug/feature in swig */
-   /* that doesn't play nicely with the (int object_list_count, GDALDatasetShadow** poObjects) input typemap */
+   /* 주의: SWIG에 "int object_list_count, GDALDatasetShadow** poObjects" 입력 유형 매핑과 잘 */
+   /* 동작하지 않는 버그/기능이 있기 때문에 2개의 개별 이름을 사용해야만 합니다 */
 
    %inline %{
    int wrapper_GDALVectorTranslateDestDS( GDALDatasetShadow* dstDS,
@@ -274,18 +274,18 @@ SWIG 바인딩 (파이썬 / 자바 / C# / 펄) 변경 사항
             showGCPs = True, showMetadata = True, showRAT = True, showColorTable = True,
             listMDD = False, showFileList = True, allMetadata = False,
             extraMDDomains = None):
-       """ Create a InfoOptions() object that can be passed to gdal.Info()
-           options can be be an array of strings, a string or let empty and filled from other keywords."""
+       """ gdal.Info() 옵션으로 전송할 수 있는 InfoOptions() 객체를 생성합니다. 이 객체는
+           문자열 배열, 문자열이 될 수 있고 또는 비워둔 채 다른 키워드들로 채울 수도 있습니다."""
 
 
    def Info(ds, **kwargs):
-       """ Return information on a dataset.
-           Arguments are :
-             ds --- a Dataset object or a filename
-           Keyword arguments are :
-             options --- return of gdal.InfoOptions(), string or array of strings
-             other keywords arguments of gdal.InfoOptions()
-           If options is provided as a gdal.InfoOptions() object, other keywords are ignored. """
+       """ 데이터셋에 대한 정보를 반환합니다.
+           인자:
+             ds --- 데이터셋 객체 또는 파일명
+           키워드 인자:
+             options --- gdal.InfoOptions()의 반환, 문자열 또는 문자열 배열,
+             gdal.InfoOptions()의 다른 키워드 인자들
+           옵션을 gdal.InfoOptions() 객체로 제공하는 경우, 다른 키워드를 무시합니다. """
 
 gdal.InfoOptions()의 속성을 설정하는 데 또는 gdal.Info()의 그때 그때 즉석에서 처리되는(inline) 인자로 gdal.Info()를 사용할 수 있습니다. 인자를 문자열 배열, 명령줄 문법 또는 전용 키워드로 지정할 수 있기 때문에, 다양하게 조합할 수 있습니다:
 
@@ -329,49 +329,49 @@ gdal.InfoOptions()의 속성을 설정하는 데 또는 gdal.Info()의 그때 �
                  noData = None, rgbExpand = None,
                  stats = False, rat = True, resampleAlg = None,
                  callback = None, callback_data = None):
-       """ Create a TranslateOptions() object that can be passed to gdal.Translate()
-           Keyword arguments are :
-             options --- can be be an array of strings, a string or let empty and filled from other keywords.
-             format --- output format ("GTiff", etc...)
-             outputType --- output type (gdal.GDT_Byte, etc...)
-             bandList --- array of band numbers (index start at 1)
-             maskBand --- mask band to generate or not ("none", "auto", "mask", 1, ...)
-             width --- width of the output raster in pixel
-             height --- height of the output raster in pixel
-             widthPct --- width of the output raster in percentage (100 = original width)
-             heightPct --- height of the output raster in percentage (100 = original height)
-             xRes --- output horizontal resolution
-             yRes --- output vertical resolution
-             creationOptions --- list of creation options
-             srcWin --- subwindow in pixels to extract: [left_x, top_y, width, height]
-             projWin --- subwindow in projected coordinates to extract: [ulx, uly, lrx, lry]
-             projWinSRS --- SRS in which projWin is expressed
-             strict --- strict mode
-             unscale --- unscale values with scale and offset metadata
-             scaleParams --- list of scale parameters, each of the form [src_min,src_max] or [src_min,src_max,dst_min,dst_max]
-             exponents --- list of exponentiation parameters
-             outputBounds --- assigned output bounds: [ulx, uly, lrx, lry]
-             metadataOptions --- list of metadata options
-             outputSRS --- assigned output SRS
-             GCPs --- list of GCPs
-             noData --- nodata value (or "none" to unset it)
-             rgbExpand --- Color palette expansion mode: "gray", "rgb", "rgba"
-             stats --- whether to calcule statistics
-             rat --- whether to write source RAT
-             resampleAlg --- resampling mode
-             callback --- callback method
-             callback_data --- user data for callback
+       """ gdal.Translate()로 전송할 수 있는 TranslateOptions() 객체를 생성합니다.
+           키워드 인자:
+             options --- 문자열 배열, 문자열이 될 수 있고 또는 비워둔 채 다른 키워드들로 채울 수도 있습니다.
+             format --- 산출물 포맷 ("GTiff" 등등)
+             outputType --- 산출물 유형 (gdal.GDT_Byte 등등)
+             bandList --- 밴드 번호 배열 (1에서 시작하는 색인)
+             maskBand --- 생성하거나 생성하지 않을 마스크 밴드 ("none", "auto", "mask", 1, ...)
+             width --- 산출 래스터의 픽셀 단위 너비
+             height --- 산출 래스터의 픽셀 단위 높이
+             widthPct --- 산출 래스터의 백분율 너비 (100 = 원래 너비)
+             heightPct --- 산출 래스터의 백분율 높이 (100 = 원래 높이)
+             xRes --- 산출물의 수평 해상도
+             yRes --- 산출물의 수직 해상도
+             creationOptions --- 생성 옵션 목록
+             srcWin --- 추출할 픽셀 단위 하위 창: [left_x, top_y, width, height]
+             projWin --- 추출할 투영 좌표 단위 하위 창: [ulx, uly, lrx, lry]
+             projWinSRS --- projWin을 표현하는 공간 좌표계
+             strict --- 엄격 모드
+             unscale --- 척도 및 오프셋 메타데이터를 가진 비척도(unscale) 값
+             scaleParams --- 각각 [src_min,src_max] 또는 [src_min,src_max,dst_min,dst_max] 형식의 척도 파라미터 목록
+             exponents --- 지수(exponentiation) 파라미터 목록
+             outputBounds ---할당된 산출물 경계: [ulx, uly, lrx, lry]
+             metadataOptions --- 메타데이터 옵션 목록
+             outputSRS --- 할당된 산출 공간 좌표계
+             GCPs --- GCP 목록
+             noData --- NODATA 값 (또는 설정 해제하려면 "none")
+             rgbExpand --- 색상표 확장 모드: "gray", "rgb", "rgba"
+             stats --- 통계 계산 여부
+             rat --- 소스 RAT 작성 여부
+             resampleAlg --- 리샘플링 모드
+             callback --- 콜백 메소드
+             callback_data --- 콜백 용 사용자 데이터
        """
 
    def Translate(destName, srcDS, **kwargs):
-       """ Convert a dataset.
-           Arguments are :
-             destName --- Output dataset name
-             srcDS --- a Dataset object or a filename
-           Keyword arguments are :
-             options --- return of gdal.InfoOptions(), string or array of strings
-             other keywords arguments of gdal.TranslateOptions()
-           If options is provided as a gdal.TranslateOptions() object, other keywords are ignored. """
+       """ 데이터셋을 변환합니다.
+           인자:
+             destName --- 산출 데이터셋 이름
+             srcDS --- 데이터셋 객체 또는 파일명
+           키워드 인자:
+             options --- gdal.InfoOptions()의 반환, 문자열 또는 문자열 배열,
+             gdal.TranslateOptions()의 다른 키워드 인자들
+           옵션을 gdal.TranslateOptions() 객체로 제공하는 경우, 다른 키워드를 무시합니다. """
 
 ::
 
@@ -393,57 +393,57 @@ gdal.InfoOptions()의 속성을 설정하는 데 또는 gdal.Info()의 그때 �
             copyMetadata = True, metadataConflictValue = None,
             setColorInterpretation = False,
             callback = None, callback_data = None):
-       """ Create a WarpOptions() object that can be passed to gdal.Warp()
-           Keyword arguments are :
-             options --- can be be an array of strings, a string or let empty and filled from other keywords.
-             format --- output format ("GTiff", etc...)
-             outputBounds --- output bounds as (minX, minY, maxX, maxY) in target SRS
-             outputBoundsSRS --- SRS in which output bounds are expressed, in the case they are not expressed in dstSRS
-             xRes, yRes --- output resolution in target SRS
-             targetAlignedPixels --- whether to force output bounds to be multiple of output resolution
-             width --- width of the output raster in pixel
-             height --- height of the output raster in pixel
-             srcSRS --- source SRS
-             dstSRS --- output SRS
-             srcAlpha --- whether to force the last band of the input dataset to be considered as an alpha band
-             dstAlpha --- whether to force the creation of an output alpha band
-             outputType --- output type (gdal.GDT_Byte, etc...)
-             workingType --- working type (gdal.GDT_Byte, etc...)
-             warpOptions --- list of warping options
-             errorThreshold --- error threshold for approximation transformer (in pixels)
-             warpMemoryLimit --- size of working buffer in bytes
-             resampleAlg --- resampling mode
-             creationOptions --- list of creation options
-             srcNodata --- source nodata value(s)
-             dstNodata --- output nodata value(s)
-             multithread --- whether to multithread computation and I/O operations
-             tps --- whether to use Thin Plate Spline GCP transformer
-             rpc --- whether to use RPC transformer
-             geoloc --- whether to use GeoLocation array transformer
-             polynomialOrder --- order of polynomial GCP interpolation
-             transformerOptions --- list of transformer options
-             cutlineDSName --- cutline dataset name
-             cutlineLayer --- cutline layer name
-             cutlineWhere --- cutline WHERE clause
-             cutlineSQL --- cutline SQL statement
-             cutlineBlend --- cutline blend distance in pixels
-             cropToCutline --- whether to use cutline extent for output bounds
-             copyMetadata --- whether to copy source metadata
-             metadataConflictValue --- metadata data conflict value
-             setColorInterpretation --- whether to force color interpretation of input bands to output bands
-             callback --- callback method
-             callback_data --- user data for callback
+       """ gdal.Warp()로 전송할 수 있는 WarpOptions() 객체를 생성합니다.
+           Keyword 인자:
+             options --- 문자열 배열, 문자열이 될 수 있고 또는 비워둔 채 다른 키워드들로 채울 수도 있습니다.
+             format --- 산출물 포맷 ("GTiff" 등등)
+             outputBounds --- 대상 공간 좌표계 단위 (minX, minY, maxX, maxY)의 산출물 경계
+             outputBoundsSRS --- dstSRS에 표현되지 않은 경우 산출물 경계를 표현하는 공간 좌표계
+             xRes, yRes --- 대상 공간 좌표계 단위 산출물 해상도
+             targetAlignedPixels --- 산출물 경계를 산출물 해상도의 배수로 강제할지 여부
+             width --- 산출 래스터의 픽셀 단위 너비
+             height --- 산출 래스터의 픽셀 단위 높이
+             srcSRS --- 소스 공간 좌표계
+             dstSRS --- 산출 공간 좌표계
+             srcAlpha --- 입력 데이터셋의 마지막 밴드를 강제로 알파 밴드로 간주할지 여부
+             dstAlpha --- 산출물에 알파 밴드를 강제 생성할지 여부
+             outputType --- 산출물 유형 (gdal.GDT_Byte 등등)
+             workingType --- 작업 유형 (gdal.GDT_Byte 등등)
+             warpOptions --- 왜곡 옵션 목록
+             errorThreshold --- 근사치 변환기 용 오류 한계값 (픽셀 단위)
+             warpMemoryLimit --- 작업 버퍼의 바이트 단위 용량
+             resampleAlg --- 리샘플링 모드
+             creationOptions --- 생성 옵션 목록
+             srcNodata --- 소스 NODATA 값(들)
+             dstNodata --- 산출 NODATA 값(들)
+             multithread --- 멀티스레드 계산 및 I/O 작업 여부
+             tps --- 박막 스플라인 GCP 변환 사용 여부
+             rpc --- RPC 변환기 사용 여부
+             geoloc --- 지리위치(GeoLocation) 배열 변환기 사용 여부
+             polynomialOrder --- 다항 GCP 보간 순서
+             transformerOptions --- 변환기 옵션 목록
+             cutlineDSName --- 설명문(cutline) 데이터셋 이름
+             cutlineLayer --- 설명문 레이어 이름
+             cutlineWhere --- 설명문 WHERE 절
+             cutlineSQL --- 설명문 SQL 선언문
+             cutlineBlend --- 픽셀 단위 설명문 혼합(blend) 거리
+             cropToCutline --- 산출 밴드에 설명문 범위를 사용할지 여부
+             copyMetadata --- 소스 메타데이터를 복사할지 여부
+             metadataConflictValue --- 메타데이터 데이터 충돌 값
+             setColorInterpretation --- 입력 밴드의 색상 해석을 산출 밴드에 강제할지 여부
+             callback --- 콜백 메소드
+             callback_data --- 콜백 용 사용자 데이터
        """
 
    def Warp(destNameOrDestDS, srcDSOrSrcDSTab, **kwargs):
-       """ Warp one or several datasets.
-           Arguments are :
-             destNameOrDestDS --- Output dataset name or object
-             srcDSOrSrcDSTab --- an array of Dataset objects or filenames, or a Dataset object or a filename
-           Keyword arguments are :
-             options --- return of gdal.InfoOptions(), string or array of strings
-             other keywords arguments of gdal.WarpOptions()
-           If options is provided as a gdal.WarpOptions() object, other keywords are ignored. """
+       """ 하나 이상의 데이터셋을 왜곡합니다.
+           인자:
+             destNameOrDestDS --- 산출 데이터셋 이름 또는 객체
+             srcDSOrSrcDSTab --- 데이터셋 객체 또는 파일명 배열, 또는 데이터셋 객체 또는 파일명
+           키워드 인자:
+             options --- gdal.InfoOptions()의 반환, 문자열 또는 문자열 배열,
+             gdal.WarpOptions()의 다른 키워드 인자들
+           옵션을 gdal.WarpOptions() 객체로 제공하는 경우, 다른 키워드를 무시합니다. """
 
 ::
 
@@ -459,38 +459,38 @@ gdal.InfoOptions()의 속성을 설정하는 데 또는 gdal.Info()의 그때 �
             geometryType = None,
             segmentizeMaxDist= None,
             callback = None, callback_data = None):
-       """ Create a VectorTranslateOptions() object that can be passed to gdal.VectorTranslate()
-           Keyword arguments are :
-             options --- can be be an array of strings, a string or let empty and filled from other keywords.
-             format --- output format ("ESRI Shapefile", etc...)
-             accessMode --- None for creation, 'update', 'append', 'overwrite'
-             srcSRS --- source SRS
-             dstSRS --- output SRS (with reprojection if reproject = True)
-             reproject --- whether to do reprojection
-             SQLStatement --- SQL statement to apply to the source dataset
-             SQLDialect --- SQL dialect ('OGRSQL', 'SQLITE', ...)
-             where --- WHERE clause to apply to source layer(s)
-             selectFields --- list of fields to select
-             spatFilter --- spatial filter as (minX, minY, maxX, maxY) bounding box
-             datasetCreationOptions --- list of dataset creation options
-             layerCreationOptions --- list of layer creation options
-             layers --- list of layers to convert
-             layerName --- output layer name
-             geometryType --- output layer geometry type ('POINT', ....)
-             segmentizeMaxDist --- maximum distance between consecutive nodes of a line geometry
-             callback --- callback method
-             callback_data --- user data for callback
+       """ gdal.VectorTranslate()로 전송할 수 있는 VectorTranslateOptions() 객체를 생성합니다.
+           Keyword 인자:
+             options --- 문자열 배열, 문자열이 될 수 있고 또는 비워둔 채 다른 키워드들로 채울 수도 있습니다.
+             format --- 산출물 포맷 ("ESRI Shapefile" 등등)
+             accessMode --- 생성 시 설정하지 않음, 'update', 'append', 'overwrite'
+             srcSRS --- 소스 공간 좌표계
+             dstSRS --- 산출 공간 좌표계 (reproject = True이면 재투영)
+             reproject --- 재투영할지 여부
+             SQLStatement --- 소스 데이터셋에 적용할 SQL 선언문
+             SQLDialect --- SQL 방언 ('OGRSQL', 'SQLITE', ...)
+             where --- 소스 레이어(들)에 적용할 WHERE 절
+             selectFields --- 선택할 필드 목록
+             spatFilter --- (minX, minY, maxX, maxY) 경계 상자 형식의 공간 필터
+             datasetCreationOptions --- 데이터셋 생성 옵션 목록
+             layerCreationOptions --- 레이어 생성 옵션 목록
+             layers --- 변환할 레이어 목록
+             layerName --- 산출 레이어 이름
+             geometryType --- 산출 레이어 도형 유형 ('POINT', ....)
+             segmentizeMaxDist --- 라인 도형의 연속하는 노드들 사이의 최대 거리
+             callback --- 콜백 메소드
+             callback_data --- 콜백 용 사용자 데이터
        """
 
    def VectorTranslate(destNameOrDestDS, srcDS, **kwargs):
-       """ Convert one vector dataset
-           Arguments are :
-             destNameOrDestDS --- Output dataset name or object
-             srcDS --- a Dataset object or a filename
-           Keyword arguments are :
-             options --- return of gdal.InfoOptions(), string or array of strings
-             other keywords arguments of gdal.VectorTranslateOptions()
-           If options is provided as a gdal.VectorTranslateOptions() object, other keywords are ignored. """
+       """ 벡터 데이터셋 하나를 변환합니다.
+           인자:
+             destNameOrDestDS --- 산출 데이터셋 이름 또는 객체
+             srcDS --- 데이터셋 객체 하나 또는 파일명 하나
+           키워드 인자:
+             options --- gdal.InfoOptions()의 반환, 문자열 또는 문자열 배열,
+             gdal.VectorTranslateOptions()의 다른 키워드 인자들
+           옵션을 gdal.VectorTranslateOptions() 객체로 제공하는 경우, 다른 키워드를 무시합니다. """
 
 ::
 
@@ -500,37 +500,37 @@ gdal.InfoOptions()의 속성을 설정하는 데 또는 gdal.Info()의 그때 �
                  zFactor = None, scale = None, azimuth = None, altitude = None, combined = False,
                  slopeFormat = None, trigonometric = False, zeroForFlat = False,
                  callback = None, callback_data = None):
-       """ Create a DEMProcessingOptions() object that can be passed to gdal.DEMProcessing()
-           Keyword arguments are :
-             options --- can be be an array of strings, a string or let empty and filled from other keywords.
-             colorFilename --- (mandatory for "color-relief") name of file that contains palette definition for the "color-relief" processing.
-             format --- output format ("GTiff", etc...)
-             creationOptions --- list of creation options
-             computeEdges --- whether to compute values at raster edges.
-             alg --- 'ZevenbergenThorne' or 'Horn'
-             band --- source band number to use
-             zFactor --- (hillshade only) vertical exaggeration used to pre-multiply the elevations.
-             scale --- ratio of vertical units to horizontal.
-             azimuth --- (hillshade only) azimuth of the light, in degrees. 0 if it comes from the top of the raster, 90 from the east, ... The default value, 315, should rarely be changed as it is the value generally used to generate shaded maps.
-             altitude ---(hillshade only) altitude of the light, in degrees. 90 if the light comes from above the DEM, 0 if it is raking light.
-             combined --- (hillshade only) whether to compute combined shading, a combination of slope and oblique shading.
-             slopeformat --- (slope only) "degree" or "percent".
-             trigonometric --- (aspect only) whether to return trigonometric angle instead of azimuth. Thus 0deg means East, 90deg North, 180deg West, 270deg South.
-             zeroForFlat --- (aspect only) whether to return 0 for flat areas with slope=0, instead of -9999.
-             callback --- callback method
-             callback_data --- user data for callback
+       """ gdal.DEMProcessing()으로 전송할 수 있는 DEMProcessingOptions() 객체를 생성합니다.
+           Keyword 인자:
+             options --- 문자열 배열, 문자열이 될 수 있고 또는 비워둔 채 다른 키워드들로 채울 수도 있습니다.
+             colorFilename --- ("color-relief"의 경우 필수) "color-relief" 처리를 위한 색상표 정의를 담고 있는 파일의 이름
+             format --- 산출물 포맷 ("GTiff" 등등)
+             creationOptions --- 생성 옵션 목록
+             computeEdges --- 래스터 경계에 있는 값을 계산할지 여부
+             alg --- 'ZevenbergenThorne' 또는 'Horn'
+             band --- 사용할 소스 밴드 번호
+             zFactor --- (음영기복 전용) 표고를 사전에 곱하기 위해 사용하는 수직 과장
+             scale --- 수직 단위와 수평 단위의 비율
+             azimuth --- (음영기복 전용) 광원의 도 단위 방위각입니다. 래스터 위에서 수직으로 빛이 내리쬐는 경우 0, 동쪽인 경우 90, ... 기본값은 315로, 음영도 생성 시 일반적으로 쓰이는 값이기 때문에 변경할 필요가 거의 없습니다.
+             altitude ---(음영기복 전용) 광원의 도 단위 고도입니다. DEM 위에서 수직으로 빛이 내리쬐는 경우 90, 지평선(수평선)인 경우 0입니다.
+             combined --- (음영기복 전용) 경사와 비스듬한 음영을 조합하는 결합 음영을 계산할지 여부
+             slopeformat --- (경사 전용) "degree" 또는 "percent"
+             trigonometric --- (경사방향 전용) 방위각 대신 삼각법 각도(trigonometric angle)를 반환할지 여부를 설정합니다. 즉 0deg는 동쪽, 90deg는 북쪽, 180deg는 서쪽, 270deg는 남쪽입니다.
+             zeroForFlat --- (경사방향 전용) 평지 지역에 대해 slope=-9999가 아니라 slope=0으로 반환할지 여부
+             callback --- 콜백 메소드
+             callback_data --- 콜백 용 사용자 데이터
        """
 
    def DEMProcessing(destName, srcDS, processing, **kwargs):
-       """ Apply a DEM processing.
-           Arguments are :
-             destName --- Output dataset name
-             srcDS --- a Dataset object or a filename
-             processing --- one of "hillshade", "slope", "aspect", "color-relief", "TRI", "TPI", "Roughness"
-           Keyword arguments are :
-             options --- return of gdal.InfoOptions(), string or array of strings
-             other keywords arguments of gdal.DEMProcessingOptions()
-           If options is provided as a gdal.DEMProcessingOptions() object, other keywords are ignored. """
+       """ DEM 처리를 적용합니다.
+           인자:
+             destName --- 산출 데이터셋 이름
+             srcDS --- 데이터셋 객체 하나 또는 파일명 하나
+             processing --- "hillshade", "slope", "aspect", "color-relief", "TRI", "TPI", "Roughness" 가운데 하나
+           키워드 인자:
+             options --- gdal.InfoOptions()의 반환, 문자열 또는 문자열 배열,
+             gdal.DEMProcessingOptions()의 다른 키워드 인자들
+           옵션을 gdal.DEMProcessingOptions() 객체로 제공하는 경우, 다른 키워드를 무시합니다. """
 
 ::
 
@@ -538,30 +538,30 @@ gdal.InfoOptions()의 속성을 설정하는 데 또는 gdal.Info()의 그때 �
             creationOptions = None, white = False, colors = None,
             maxNonBlack = None, nearDist = None, setAlpha = False, setMask = False,
             callback = None, callback_data = None):
-       """ Create a NearblackOptions() object that can be passed to gdal.Nearblack()
-           Keyword arguments are :
-             options --- can be be an array of strings, a string or let empty and filled from other keywords.
-             format --- output format ("GTiff", etc...)
-             creationOptions --- list of creation options
-             white --- whether to search for nearly white (255) pixels instead of nearly black pixels.
-             colors --- list of colors  to search for, e.g. ((0,0,0),(255,255,255)). The pixels that are considered as the collar are set to 0
-             maxNonBlack --- number of non-black (or other searched colors specified with white / colors) pixels that can be encountered before the giving up search inwards. Defaults to 2. 
-             nearDist --- select how far from black, white or custom colors the pixel values can be and still considered near black, white or custom color.  Defaults to 15.
-             setAlpha --- adds an alpha band if the output file.
-             setMask --- adds a mask band to the output file.
-             callback --- callback method
-             callback_data --- user data for callback
+       """ gdal.Nearblack()으로 전송할 수 있는 NearblackOptions() 객체를 생성합니다.
+           Keyword 인자:
+             options --- 문자열 배열, 문자열이 될 수 있고 또는 비워둔 채 다른 키워드들로 채울 수도 있습니다.
+             format --- 산출물 포맷 ("GTiff" 등등)
+             creationOptions --- 생성 옵션 목록
+             white --- 근사 검은색 픽셀 대신 근사 하얀색(255) 픽셀을 검색할지 여부
+             colors --- 예를 들면 ((0,0,0),(255,255,255)) 같은 형식의 검색할 색상 목록입니다. 색상으로 간주하는 픽셀은 0으로 설정됩니다.
+             maxNonBlack --- 안쪽으로의 검색을 포기하기 전에 발견할 수 있는 검은색이 아닌 (또는 white, colors로 지정한 다른 검색 색상이 아닌) 픽셀의 최대 개수입니다. 기본값은 2입니다.
+             nearDist --- 픽셀값이 검은색/하얀색/사용자 지정 색상으로 간주되려면 검은색/하얀색/사용자 지정 색상과 얼마나 다를 수 있는지 선택합니다. 기본값은 15입니다.
+             setAlpha --- 산출 파일이 지원하는 경우 알파 밴드를 추가합니다.
+             setMask --- 산출 파일에 마스크 밴드를 추가합니다.
+             callback --- 콜백 메소드
+             callback_data --- 콜백 용 사용자 데이터
        """
 
    def Nearblack(destNameOrDestDS, srcDS, **kwargs):
-       """ Convert nearly black/white borders to exact value.
-           Arguments are :
-             destNameOrDestDS --- Output dataset name or object
-             srcDS --- a Dataset object or a filename
-           Keyword arguments are :
-             options --- return of gdal.InfoOptions(), string or array of strings
-             other keywords arguments of gdal.NearblackOptions()
-           If options is provided as a gdal.NearblackOptions() object, other keywords are ignored. """
+       """ 근사 검은색/하얀색 경계를 정확한 값으로 변환합니다.
+           인자:
+             destNameOrDestDS --- 산출 데이터셋 이름 또는 객체
+             srcDS --- 데이터셋 객체 하나 또는 파일명 하나
+           키워드 인자:
+             options --- gdal.InfoOptions()의 반환, 문자열 또는 문자열 배열,
+             gdal.NearblackOptions()의 다른 키워드 인자들
+           옵션을 gdal.NearblackOptions() 객체로 제공하는 경우, 다른 키워드를 무시합니다. """
 
 ::
 
@@ -581,38 +581,38 @@ gdal.InfoOptions()의 속성을 설정하는 데 또는 gdal.Info()의 그때 �
                  z_increase = None,
                  z_multiply = None,
                  callback = None, callback_data = None):
-       """ Create a GridOptions() object that can be passed to gdal.Grid()
-           Keyword arguments are :
-             options --- can be be an array of strings, a string or let empty and filled from other keywords.
-             format --- output format ("GTiff", etc...)
-             outputType --- output type (gdal.GDT_Byte, etc...)
-             width --- width of the output raster in pixel
-             height --- height of the output raster in pixel
-             creationOptions --- list of creation options
-             outputBounds --- assigned output bounds: [ulx, uly, lrx, lry]
-             outputSRS --- assigned output SRS
-             noData --- nodata value
-             algorithm --- e.g "invdist:power=2.0:smoothing=0.0:radius1=0.0:radius2=0.0:angle=0.0:max_points=0:min_points=0:nodata=0.0"
-             layers --- list of layers to convert
-             SQLStatement --- SQL statement to apply to the source dataset
-             where --- WHERE clause to apply to source layer(s)
-             spatFilter --- spatial filter as (minX, minY, maxX, maxY) bounding box
-             zfield --- Identifies an attribute field on the features to be used to get a Z value from. This value overrides Z value read from feature geometry record.
-             z_increase --- Addition to the attribute field on the features to be used to get a Z value from. The addition should be the same unit as Z value. The result value will be Z value + Z increase value. The default value is 0.
-             z_multiply - Multiplication ratio for Z field. This can be used for shift from e.g. foot to meters or from  elevation to deep. The result value will be (Z value + Z increase value) * Z multiply value.  The default value is 1.
-             callback --- callback method
-             callback_data --- user data for callback
+       """ gdal.Grid()로 전송할 수 있는 GridOptions() 객체를 생성합니다.
+           Keyword 인자:
+             options --- 문자열 배열, 문자열이 될 수 있고 또는 비워둔 채 다른 키워드들로 채울 수도 있습니다.
+             format --- 산출물 포맷 ("GTiff" 등등)
+             outputType --- 산출물 유형 (gdal.GDT_Byte 등등)
+             width --- 산출 래스터의 픽셀 단위 너비
+             height --- 산출 래스터의 픽셀 단위 높이
+             creationOptions --- 생성 옵션 목록
+             outputBounds ---할당된 산출물 경계: [ulx, uly, lrx, lry]
+             outputSRS --- 할당된 산출 공간 좌표계
+             noData --- NODATA 값
+             algorithm --- 예: "invdist:power=2.0:smoothing=0.0:radius1=0.0:radius2=0.0:angle=0.0:max_points=0:min_points=0:nodata=0.0"
+             layers --- 변환할 레이어 목록
+             SQLStatement --- 소스 데이터셋에 적용할 SQL 선언문
+             where --- 소스 레이어(들)에 적용할 WHERE 절
+             spatFilter --- (minX, minY, maxX, maxY) 경계 상자 형식의 공간 필터
+             zfield --- Z 값을 가져오기 위해 사용할 피처에 있는 속성 필드를 식별합니다. 이 값은 피처 도형 레코드에서 읽어온 Z 값을 대체합니다.
+             z_increase --- Z 값을 가져오기 위해 사용할 피처에 있는 속성 필드에 추가할 값입니다. 이 값의 단위는 Z 값의 단위와 동일해야 합니다. 결과값은 Z 값 + Z 증가 값입니다. 기본값은 0입니다.
+             z_multiply --- Z 필드에 대한 곱셈 비율입니다. 예를 들어 피트 단위를 미터 단위로 또는 표고 값을 심도 값으로 변환하기 위해 사용할 수 있습니다. 결과값은 (Z 값 + Z 증가 값) * Z 곱셈 값이 됩니다. 기본값은 1입니다.
+             callback --- 콜백 메소드
+             callback_data --- 콜백 용 사용자 데이터
        """
 
    def Grid(destName, srcDS, **kwargs):
-       """ Create raster from the scattered data.
-           Arguments are :
-             destName --- Output dataset name
-             srcDS --- a Dataset object or a filename
-           Keyword arguments are :
-             options --- return of gdal.InfoOptions(), string or array of strings
-             other keywords arguments of gdal.GridOptions()
-           If options is provided as a gdal.GridOptions() object, other keywords are ignored. """
+       """ 분산 데이터로부터 래스터를 생성합니다.
+           인자:
+             destName --- 산출 데이터셋 이름
+             srcDS --- 데이터셋 객체 하나 또는 파일명 하나
+           키워드 인자:
+             options --- gdal.InfoOptions()의 반환, 문자열 또는 문자열 배열,
+             gdal.GridOptions()의 다른 키워드 인자들
+           옵션을 gdal.GridOptions() 객체로 제공하는 경우, 다른 키워드를 무시합니다. """
 
 ::
 
@@ -625,42 +625,42 @@ gdal.InfoOptions()의 속성을 설정하는 데 또는 gdal.Info()의 그때 �
             burnValues = None, attribute = None, useZ = False, layers = None,
             SQLStatement = None, SQLDialect = None, where = None,
             callback = None, callback_data = None):
-       """ Create a RasterizeOptions() object that can be passed to gdal.Rasterize()
-           Keyword arguments are :
-             options --- can be be an array of strings, a string or let empty and filled from other keywords.
-             format --- output format ("GTiff", etc...)
-             creationOptions --- list of creation options
-             outputBounds --- assigned output bounds: [minx, miny, maxx, maxy]
-             outputSRS --- assigned output SRS
-             width --- width of the output raster in pixel
-             height --- height of the output raster in pixel
-             xRes, yRes --- output resolution in target SRS
-             targetAlignedPixels --- whether to force output bounds to be multiple of output resolution
-             noData --- nodata value
-             initValues --- Value or list of values to pre-initialize the output image bands with.  However, it is not marked as the nodata value in the output file.  If only one value is given, the same value is used in all the bands.
-             bands --- list of output bands to burn values into
-             inverse --- whether to invert rasterization, ie burn the fixed burn value, or the burn value associated  with the first feature into all parts of the image not inside the provided a polygon.
-             allTouched -- whether to enable the ALL_TOUCHED rasterization option so that all pixels touched by lines or polygons will be updated, not just those on the line render path, or whose center point is within the polygon.
-             burnValues -- list of fixed values to burn into each band for all objects. Excusive with attribute.
-             attribute --- identifies an attribute field on the features to be used for a burn-in value. The value will be burned into all output bands. Excusive with burnValues.
-             useZ --- whether to indicate that a burn value should be extracted from the "Z" values of the feature. These values are added to the burn value given by burnValues or attribute if provided. As of now, only points and lines are drawn in 3D.
-             layers --- list of layers from the datasource that will be used for input features.
-             SQLStatement --- SQL statement to apply to the source dataset
-             SQLDialect --- SQL dialect ('OGRSQL', 'SQLITE', ...)
-             where --- WHERE clause to apply to source layer(s)
-             callback --- callback method
-             callback_data --- user data for callback
+       """ gdal.Rasterize()로 전송할 수 있는 RasterizeOptions() 객체를 생성합니다.
+           Keyword 인자:
+             options --- 문자열 배열, 문자열이 될 수 있고 또는 비워둔 채 다른 키워드들로 채울 수도 있습니다.
+             format --- 산출물 포맷 ("GTiff" 등등)
+             creationOptions --- 생성 옵션 목록
+             outputBounds ---할당된 산출물 경계: [minx, miny, maxx, maxy]
+             outputSRS --- 할당된 산출 공간 좌표계
+             width --- 산출 래스터의 픽셀 단위 너비
+             height --- 산출 래스터의 픽셀 단위 높이
+             xRes, yRes --- 대상 공간 좌표계 단위 산출물 해상도
+             targetAlignedPixels --- 산출물 경계를 산출물 해상도의 배수로 강제할지 여부
+             noData --- NODATA 값
+             initValues --- 산출 이미지 밴드를 사전 초기화하기 위해 사용할 값 또는 값 목록입니다. 하지만, 산출 파일에서 NODATA 값으로 표시되지는 않습니다. 값을 하나만 지정하는 경우, 모든 밴드에 동일한 값을 사용합니다.
+             bands --- 값을 작성할 산출 밴드 목록입니다.
+             inverse --- 역 래스터화할지 여부. 예를 들어 고정 작성값을 작성할지 또는 지정한 폴리곤의 내부가 아니라 이미지의 모든 부분에 첫 번째 피처와 연결된 값을 작성할지 여부를 설정합니다.
+             allTouched --- ALL_TOUCHED 래스터화 옵션을 활성화해서, 라인을 렌더링한 경로 상에 있는 또는 중심 포인트가 폴리곤 내부에 떨어지는 픽셀만이 아니라 라인 또는 폴리곤에 접하는 모든 픽셀을 업데이트할지 여부
+             burnValues --- 모든 객체의 각 밴드에 작성할 고정 값 목록입니다. attribute와 함께 사용할 수 없습니다.
+             attribute --- 작성할 값을 위해 사용할 피처에 있는 속성 필드를 식별합니다. 모든 산출 밴드에 값을 작성할 것입니다. burnValues와 함께 사용할 수 없습니다.
+             useZ --- 작성 값을 피처의 "Z" 값으로부터 추출해야 할지 여부를 나타냅니다. burnValues 또는 attribute를 지정한 경우 burnValues 또는 attribute로 설정한 작성 값에 이 값을 추가합니다. 현재로서는 포인트 및 라인만 3차원으로 그립니다.
+             layers --- 입력 피처에 대해 사용할 데이터소스의 레이어 목록입니다.
+             SQLStatement --- 소스 데이터셋에 적용할 SQL 선언문
+             SQLDialect --- SQL 방언 ('OGRSQL', 'SQLITE', ...)
+             where --- 소스 레이어(들)에 적용할 WHERE 절
+             callback --- 콜백 메소드
+             callback_data --- 콜백 용 사용자 데이터
        """
 
    def Rasterize(destNameOrDestDS, srcDS, **kwargs):
-       """ Burns vector geometries into a raster
-           Arguments are :
-             destNameOrDestDS --- Output dataset name or object
-             srcDS --- a Dataset object or a filename
-           Keyword arguments are :
-             options --- return of gdal.InfoOptions(), string or array of strings
-             other keywords arguments of gdal.RasterizeOptions()
-           If options is provided as a gdal.RasterizeOptions() object, other keywords are ignored. """
+       """ 래스터에 벡터 도형을 작성합니다.
+           인자:
+             destNameOrDestDS --- 산출 데이터셋 이름 또는 객체
+             srcDS --- 데이터셋 객체 하나 또는 파일명 하나
+           키워드 인자:
+             options --- gdal.InfoOptions()의 반환, 문자열 또는 문자열 배열,
+             gdal.RasterizeOptions()의 다른 키워드 인자들
+           옵션을 gdal.RasterizeOptions() 객체로 제공하는 경우, 다른 키워드를 무시합니다. """
 
 ::
 
@@ -679,35 +679,35 @@ gdal.InfoOptions()의 속성을 설정하는 데 또는 gdal.Info()의 그때 �
                        VRTNodata = None,
                        hideNodata = None,
                        callback = None, callback_data = None):
-       """ Create a BuildVRTOptions() object that can be passed to gdal.BuildVRT()
-           Keyword arguments are :
-             options --- can be be an array of strings, a string or let empty and filled from other keywords..
-             resolution --- 'highest', 'lowest', 'average', 'user'.
-             outputBounds --- output bounds as (minX, minY, maxX, maxY) in target SRS.
-             xRes, yRes --- output resolution in target SRS.
-             targetAlignedPixels --- whether to force output bounds to be multiple of output resolution.
-             separate --- whether each source file goes into a separate stacked band in the VRT band.
-             bandList --- array of band numbers (index start at 1).
-             addAlpha --- whether to add an alpha mask band to the VRT when the source raster have none.
-             resampleAlg --- resampling mode.
-             outputSRS --- assigned output SRS.
-             allowProjectionDifference --- whether to accept input datasets have not the same projection. Note: they will *not* be reprojected.
-             srcNodata --- source nodata value(s).
-             VRTNodata --- nodata values at the VRT band level.
-             hideNodata --- whether to make the VRT band not report the NoData value.
-             callback --- callback method.
-             callback_data --- user data for callback.
+       """ gdal.BuildVRT()로 전송할 수 있는 BuildVRTOptions() 객체를 생성합니다.
+           Keyword 인자:
+             options --- 문자열 배열, 문자열이 될 수 있고 또는 비워둔 채 다른 키워드들로 채울 수도 있습니다.
+             resolution --- 'highest', 'lowest', 'average', 'user'
+             outputBounds --- 대상 공간 좌표계 단위 (minX, minY, maxX, maxY)의 산출물 경계
+             xRes, yRes --- 대상 공간 좌표계 단위 산출물 해상도
+             targetAlignedPixels --- 산출물 경계를 산출물 해상도의 배수로 강제할지 여부
+             separate --- 각 소스 파일을 VRT 밴드에 있는 개별 스택 밴드로 넣을지 여부
+             bandList --- 밴드 번호 배열 (1에서 시작하는 색인)
+             addAlpha --- 소스 래스터에 알파 마스크 밴드가 없는 경우 VRT에 추가할지 여부
+             resampleAlg --- 리샘플링 모드
+             outputSRS --- 할당된 산출 공간 좌표계
+             allowProjectionDifference --- 동일한 투영법을 가지지 않은 입력 데이터셋들을 입력받을지 여부. 주의: 재투영하지 '않을' 것입니다.
+             srcNodata --- 소스 NODATA 값(들)
+             VRTNodata --- VRT 밴드 수준의 NODATA 값들
+             hideNodata --- VRT 밴드가 NODATA 값을 리포트하지 않게 할지 여부
+             callback --- 콜백 메소드
+             callback_data --- 콜백 용 사용자 데이터
        """
 
    def BuildVRT(destName, srcDSOrSrcDSTab, **kwargs):
-       """ Build a VRT from a list of datasets.
-           Arguments are :
-             destName --- Output dataset name
-             srcDSOrSrcDSTab --- an array of Dataset objects or filenames, or a Dataset object or a filename
-           Keyword arguments are :
-             options --- return of gdal.InfoOptions(), string or array of strings
-             other keywords arguments of gdal.BuildVRTOptions()
-           If options is provided as a gdal.BuildVRTOptions() object, other keywords are ignored. """
+       """ 데이터셋 목록으로부터 VRT를 작성합니다.
+           인자:
+             destName --- 산출 데이터셋 이름
+             srcDSOrSrcDSTab --- 데이터셋 객체 또는 파일명 목록, 또는 데이터셋 객체 또는 파일명
+           키워드 인자:
+             options --- gdal.InfoOptions()의 반환, 문자열 또는 문자열 배열,
+             gdal.BuildVRTOptions()의 다른 키워드 인자들
+           옵션을 gdal.BuildVRTOptions() 객체로 제공하는 경우, 다른 키워드를 무시합니다. """
 
 유틸리티
 --------
