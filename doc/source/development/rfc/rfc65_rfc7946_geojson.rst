@@ -4,94 +4,83 @@
 RFC 65: RFC 7946 GeoJSON
 =======================================================================================
 
-Authors: Sean Gillies
+저자: 션 길리스(Sean Gillies)
 
-Contact: sean at mapbox.com
+연락처: sean@mapbox.com
 
-Status: Adopted, implemented
+상태: 승인, GDAL 2.2버전에 구현
 
-Implementation version: 2.2
+요약
+----
 
-Summary
--------
+국제 인터넷 표준화 기구(Internet Engineering Task Force; IETF)의 `RFC 7946 <https://tools.ietf.org/html/rfc7946>`_ 가 GeoJSON을 표준화했습니다. OGR GeoJSON 드라이버가 RFC 7946 GeoJSON을 작성할 수 있도록 업데이트해야 합니다.
 
-GeoJSON has been standardized by the IETF: `RFC
-7946 <https://tools.ietf.org/html/rfc7946>`__. Updates to the OGR
-GeoJSON driver are needed so that it may write RFC 7946 GeoJSON.
+근거
+----
 
-Rationale
+RFC 7946 표준은 GeoJSON의 레거시 정의와 하위 호환되지만, 몇 가지 차이점이 있습니다. (`RFC 7946 부록 B <https://datatracker.ietf.org/doc/html/rfc7946#appendix-B>`_ 를 참조하십시오.) OGR의 경우, 가장 중요한 차이점은 다음과 같습니다:
+
+   -  "crs" 제거 (CRS84만 사용)
+   -  폴리곤의 반시계 방향을 규정
+   -  반대 자오선(경도 180도)에서 도형을 분할
+   -  반대 자오선 및 극에서의 경계 상자 표현
+
+주의: RFC 7946은 2차원 및 3차원 좌표로 명확하게 제한되며, 예를 들어 M 차원 사용을 금지합니다. GeoJSON 2008 사양을 사용하는 기존 드라이버도 이미 이렇게 하고 있었습니다.
+
+gdal-dev 메일링 리스트에서는 개발자가 레이어 생성 옵션을 통해 RFC 7946 GeoJSON을 요청하도록 환경 설정할 수 있어야 하고 이 옵션이 전부 아니면 전무(all-or-nothing) 스위치여야 한다고 합의되었습니다.
+
+변경 사항
 ---------
 
-The RFC 7946 standard is backwards compatible with the legacy definition
-of GeoJSON, but has a few differences (see
-`https://tools.ietf.org/html/rfc7946#appendix-B <https://tools.ietf.org/html/rfc7946#appendix-B>`__).
-For OGR, the most significant are: removal of "crs" (CRS84 only),
-counter-clockwise winding of polygons, geometry splitting at the
-antimeridian, and representation of bounding boxes at the antimeridian
-and poles. Note: RFC 7946 explicitly restricts to 2D and 3D coordinates,
-and forbid use of the M dimension for example. This was already the case
-in the existing driver for the GeoJSON 2008 output.
+GeoJSON 드라이버에 예를 들어 ``RFC7946=TRUE`` 같은 레이어 생성 옵션을 추가할 것입니다. 이 옵션을 활성화하는 경우, OGR가 기본적으로 폴리곤 방향을 제대로 설정하고 반대 자오선에서 도형을 분할한 다음 (필요한 경우 재투영해서) 7자리 정밀도를 가진 CRS84 좌표로 GeoJSON을 작성할 것입니다.
 
-Consensus on the gdal-dev list is that developers should be able to
-require RFC 7946 GeoJSON by configuring layer creation with an option
-and that it be an all-or-nothing switch.
+이 작업과 관련해서, :cpp:func:`OGRGeometryFactory::transformWithOptions` 메소드가 극지방 및 반대 자오선에 걸쳐 있는 투영으로부터 EPSG:4326으로 도형을 재투영하는 작업을 더 잘 처리할 수 있도록 개선했습니다.
 
-Changes
--------
+업데이트된 드라이버
+~~~~~~~~~~~~~~~~~~~
 
-A layer creation option will be added for the GeoJSON driver, e.g.,
-``RFC7946=TRUE``. When "on", OGR will write GeoJSON with CRS84
-coordinates (reprojecting as needed) with 7 places of precision by
-default, polygons wound properly, and geometries split at the
-antimeridian.
+-  GeoJSON
 
-Related to that work, the OGRGeometryFactory::transformWithOptions()
-method has been improved to better deal with reprojection of geometries
-from polar projections, and projections that span the antimeridian, to
-EPSG:4326
+SWIG 바인딩 (파이썬 / 자바 / C# / 펄) 변경 사항
+-----------------------------------------------
 
-Updated drivers
-~~~~~~~~~~~~~~~
+없음
 
-GeoJSON
+유틸리티
+--------
 
-SWIG bindings (Python / Java / C# / Perl) changes
--------------------------------------------------
+유틸리티는 레이어 생성 옵션을 이용해서 RFC 7946을 구현할 것입니다.
 
-None
+문서화
+------
 
-Utilities
----------
+새 레이어 생성 옵션의 문서는 RFC 7946을 참조할 것입니다.
 
-Utilities will implement RFC 7946 by using the layer creation option.
-
-Documentation
+테스트 스위트
 -------------
 
-Documentation of the new layer creation option will reference RFC 7946.
+:file:`gr_geojson.py` 파일이 새 옵션의 영향을 테스트합니다.
 
-Test Suite
-----------
+호환성 문제점
+-------------
 
-The ogr_geojson.py file tests the effect of the new option.
+새 레이어 생성 옵션이 옵트인(opt-in) 파라미터이기 때문에 하위 호환성 문제점은 없습니다. 예전 GDAL/OGR 버전들도 RFC 7646을 준수하는 GeoJSON 파일을 읽을 수 있습니다.
 
-Compatibility Issues
---------------------
+관련 티켓
+---------
 
-As this is a opt-in parameter, no backward compatibility issue. GeoJSON
-files conformant to RFC 7646 can be read by previous GDAL/OGR versions.
+`#6705 티켓 <https://trac.osgeo.org/gdal/ticket/6705>`_
 
-Related ticket
---------------
+구현
+----
 
-#6705
+이벤 루올이 `Mapbox <https://www.mapbox.com/>`_ 의 후원을 받아 이 RFC를 구현했습니다.
 
-Implementation
---------------
+투표 이력
+---------
 
-Implementation has been done by Even Rouault and sponsored by Mapbox.
+-  유카 라흐코넨 +1
+-  하워드 버틀러 +1
+-  대니얼 모리셋 +1
+-  이벤 루올 +1
 
-Voting history
---------------
-
-+1 from JukkaR, HowardB, DanielM and EvenR
