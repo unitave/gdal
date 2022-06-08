@@ -1,41 +1,25 @@
 .. _rfc-66:
 
 =======================================================================================
-RFC 66 : OGR random layer read/write capabilities
+RFC 66 : OGR 임의 레이어 읽기/쓰기 케이퍼빌리티
 =======================================================================================
 
-Author: Even Rouault
+A저자: 이벤 루올
 
-Contact: even.rouault at spatialys.com
+연락처: even.rouault@spatialys.com
 
-Status: Implemented
+상태: 승인, GDAL 2.2버전에 구현
 
-Implementing version: 2.2
+요약
+----
 
-Summary
--------
+이 RFC는 레이어 수준에서 벡터 피처를 반복할 수 있는 기존 케이퍼빌리티에 추가로 데이터 수준에서 동일한 작업을 할 수 있는 새로운 API를 도입할 것을 제안합니다. 산출 케이퍼빌리티 가진 대부분의 드라이버가 지원하는, 레이어에 피처를 임의의 순서로 작성하는 기존 케이퍼빌리티를 새로운 데이터셋 케이퍼빌리티 플래그로 공식화합니다.
 
-This RFC introduces a new API to be able to iterate over vector features
-at dataset level, in addition to the existing capability of doing it at
-the layer level. The existing capability of writing features in layers
-in random order, that is supported by most drivers with output
-capabilities, is formalized with a new dataset capability flag.
+근거
+----
 
-Rationale
----------
-
-Some vector formats mix features that belong to different layers in an
-interleaved way, which make the current feature iteration per layer
-rather inefficient (this requires for each layer to read the whole
-file). One example of such drivers is the OSM driver. For this driver, a
-hack had been developed in the past to be able to use the
-OGRLayer::GetNextFeature() method, but with a really particular
-semantics. See "Interleaved reading" paragraph of :ref:`vector.osm` for more
-details. A similar need arises with the development of a new driver,
-GMLAS (for GML Application Schemas), that reads GML files with arbitrary
-element nesting, and thus can return them in a apparent random order,
-because it works in a streaming way. For example, let's consider the
-following simplified XML content :
+일부 벡터 포맷은 서로 다른 레이어에 속한 피처들을 교차삽입 방식으로 혼합하는데, 이는 현재의 레이어별 피처 반복을 조금 비효율적으로 만듭니다. (각 레이어를 반복하기 위해 전체 파일을 읽어와야 하기 때문입니다.) 이런 드라이버의 한 예가 OSM 드라이버입니다. 이 드라이버의 경우, :cpp:func:`OGRLayer::GetNextFeature` 메소드를 사용할 수 있도록 과거에 한 가지 꼼수를 개발했지만, 이 꼼수는 정말로 특별한 의미 체계를 수반합니다. 더 자세한 내용은 :ref:`vector.osm` 의 "교차삽입 읽기" 단락을 참조하십시오.
+스트리밍 방식으로 작동하기 때문에 임의 요소를 내포하는 GML 파일을 읽어와서 명백한 임의의 순서로 반환할 수 있는 새로운 GMLAS(GML Application Schemas) 드라이버의 개발 과정에서도 비슷한 필요성이 발생합니다. 예를 들어 다음과 같이 단순화된 XML 콘텐츠가 있다고 할 때:
 
 ::
 
@@ -47,63 +31,60 @@ following simplified XML content :
        ...
    </A>
 
-The driver will be first able to complete the building of feature B
-before emitting feature A. So when reading sequences of this pattern,
-the driver will emit features in the order B,A,B,A,...
+이 드라이버는 피처 A를 내보내기 전에 먼저 피처 B의 작성을 완료할 수 있을 것입니다. 따라서 이 패턴의 순열을 읽어오는 경우, 드라이버가 B, A, B, A, ...라는 순서로 피처들을 내보낼 것입니다.
 
-Changes
--------
+변경 사항
+---------
 
 C++ API
 ~~~~~~~
 
-Two new methods are added at the GDALDataset level :
+:cpp:class:`GDALDataset` 수준에 새 메소드 2개를 추가합니다:
 
 GetNextFeature():
 
 ::
 
    /**
-    \brief Fetch the next available feature from this dataset.
+    \brief 이 데이터셋으로부터 사용할 수 있는 다음 피처를 가져옵니다.
 
-    The returned feature becomes the responsibility of the caller to
-    delete with OGRFeature::DestroyFeature().
+    호출자가 반환된 피처를 OGRFeature::DestroyFeature()를 이용해서
+    삭제할 책임을 집니다.
 
-    Depending on the driver, this method may return features from layers in a
-    non sequential way. This is what may happen when the
-    ODsCRandomLayerRead capability is declared (for example for the
-    OSM and GMLAS drivers). When datasets declare this capability, it is strongly
-    advised to use GDALDataset::GetNextFeature() instead of
-    OGRLayer::GetNextFeature(), as the later might have a slow, incomplete or stub
-    implementation.
-    
-    The default implementation, used by most drivers, will
-    however iterate over each layer, and then over each feature within this
-    layer.
+    드라이버에 따라, 이 메소드는 레이어로부터 순차적이지 않은 방식으로
+    피처를 반환할 수도 있습니다. (예를 들어 OSM 및 GMLAS 드라이버의 경우)
+    ODsCRandomLayerRead 케이퍼빌리티를 선언하면 이런 일이 발생할 수도
+    있습니다. 데이터셋이 이 케이퍼빌리티를 선언하는 경우,
+    OGRLayer::GetNextFeature() 대신 GDALDataset::GetNextFeature()를
+    사용할 것을 강력하게 권장합니다. 전자가 느리고 불완전하며 버벅거리는
+    구현을 가질 수도 있기 때문입니다.
 
-    This method takes into account spatial and attribute filters set on layers that
-    will be iterated upon.
+    하지만 대부분의 드라이버가 각 레이어를 반복한 다음 레이어의 각 피처를
+    반복하는 기본 구현을 사용할 것입니다.
 
-    The ResetReading() method can be used to start at the beginning again.
+    이 메소드는 반복될 레이어 상에 설정된 공간 및 속성 필터를 연산에
+    넣습니다.
 
-    Depending on drivers, this may also have the side effect of calling
-    OGRLayer::GetNextFeature() on the layers of this dataset.
+    ResetReading() 메소드를 사용해서 처음부터 다시 시작할 수도 있습니다.
 
-    This method is the same as the C function GDALDatasetGetNextFeature().
+    드라이버에 따라, 이 메소드에는 이 데이터셋의 레이어에 대해
+    OGRLayer::GetNextFeature()를 호출하는 부작용이 있을 수도 있습니다.
 
-    @param ppoBelongingLayer a pointer to a OGRLayer* variable to receive the
-                             layer to which the object belongs to, or NULL.
-                             It is possible that the output of *ppoBelongingLayer
-                             to be NULL despite the feature not being NULL.
-    @param pdfProgressPct    a pointer to a double variable to receive the
-                             percentage progress (in [0,1] range), or NULL.
-                             On return, the pointed value might be negative if
-                             determining the progress is not possible.
-    @param pfnProgress       a progress callback to report progress (for
-                             GetNextFeature() calls that might have a long duration)
-                             and offer cancellation possibility, or NULL
-    @param pProgressData     user data provided to pfnProgress, or NULL
-    @return a feature, or NULL if no more features are available.
+    이 메소드는 GDALDatasetGetNextFeature() C 함수와 동일합니다.
+
+    @param ppoBelongingLayer 객체가 속해 있는 레이어를 받는 OGRLayer*
+                             변수를 가리키는 포인터, 또는 NULL입니다.
+                             피처가 NULL이 아닌 경우에도 *ppoBelongingLayer의
+                             산출물이 NULL일 수 있습니다.
+    @param pdfProgressPct    ([0,1] 범위의) 진행 상황 백분율을 받는
+                             더블형 변수를 가리키는 포인터, 또는 NULL입니다.
+                             진행 상황을 판단할 수 없는 경우 반환 시 포인터가
+                             가리키는 값이 음수일 수도 있습니다.
+    @param pfnProgress       진행 상황을 리포트하고 (GetNextFeature() 호출의
+                             경우 시간이 오래 걸릴 수도 있습니다) 취소할 수 있는
+                             가능성을 제공하는 진행 상황 콜백, 또는 NULL입니다.
+    @param pProgressData     pfnProgress에 제공되는 사용자 데이터, 또는 NULL입니다.
+    @return 피처 하나, 또는 사용할 수 있는 피처가 더 이상 없는 경우 NULL을 반환합니다.
     @since GDAL 2.2
    */
 
@@ -112,38 +93,38 @@ GetNextFeature():
                                             GDALProgressFunc pfnProgress,
                                             void* pProgressData )
 
-and ResetReading():
+그리고 ResetReading():
 
 ::
 
    /** 
-    \brief Reset feature reading to start on the first feature.
+    \brief 피처 읽기를 첫 번째 피처 상에서 시작하도록 리셋합니다.
 
-    This affects GetNextFeature().
+    이 메소드는 GetNextFeature()에 영향을 미칩니다.
 
-    Depending on drivers, this may also have the side effect of calling
-    OGRLayer::ResetReading() on the layers of this dataset.
+    드라이버에 따라, 이 메소드에도 이 데이터셋의 레이어에 대해
+    OGRLayer::ResetReading()을 호출하는 부작용이 있을 수도 있습니다.
 
-    This method is the same as the C function GDALDatasetResetReading().
+    이 메소드는 GDALDatasetResetReading() C 함수와 동일합니다.
     
     @since GDAL 2.2
    */
    void        GDALDataset::ResetReading();
 
-New capabilities
-~~~~~~~~~~~~~~~~
+새로운 케이퍼빌리티
+~~~~~~~~~~~~~~~~~~~
 
-The following 2 new dataset capabilities are added :
+다음 새로운 데이터셋 케이퍼빌리티 2개를 추가합니다:
 
 ::
 
-   #define ODsCRandomLayerRead     "RandomLayerRead"   /**< Dataset capability for GetNextFeature() returning features from random layers */
-   #define ODsCRandomLayerWrite    "RandomLayerWrite " /**< Dataset capability for supporting CreateFeature on layer in random order */
+   #define ODsCRandomLayerRead     "RandomLayerRead"   /**< 임의의 레이어로부터 피처를 반환하는 GetNextFeature()를 위한 데이터셋 케이퍼빌리티 */
+   #define ODsCRandomLayerWrite    "RandomLayerWrite " /**< 레이어에 대한 CreateFeature()를 임의의 순서로 지원하기 위한 데이터셋 케이퍼빌리티 */
 
 C API
 ~~~~~
 
-The above 2 new methods are available in the C API with :
+C API에서 앞의 새 메소드 2개를 다음과 같이 사용할 수 있습니다:
 
 ::
 
@@ -155,50 +136,21 @@ The above 2 new methods are available in the C API with :
 
    void CPL_DLL GDALDatasetResetReading( GDALDatasetH hDS );
 
-Discussion about a few design choices of the new API
-----------------------------------------------------
+새 API의 몇몇 설계 선택에 관한 논의
+-----------------------------------
 
-Compared to OGRLayer::GetNextFeature(), GDALDataset::GetNextFeature()
-has a few differences :
+:cpp:func:`OGRLayer::GetNextFeature` 와 비교했을 때, :cpp:func:`GDALDataset::GetNextFeature` 에는 차이점이 몇 가지 존재합니다:
 
--  it returns the layer which the feature belongs to. Indeed, there's no
-   easy way from a feature to know which layer it belongs too (since in
-   the data model, features can exist outside of any layer). One
-   possibility would be to correlate the OGRFeatureDefn\* object of the
-   feature with the one of the layer, but that is a bit inconvenient to
-   do (and theoretically, one could imagine several layers sharing the
-   same feature definition object, although this probably never happen
-   in any in-tree driver).
--  even if the feature returned is not NULL, the returned layer might be
-   NULL. This is just a provision for now, since that cannot currently
-   happen. This could be interesting to address schema-less datasources
-   where basically each feature could have a different schema (GeoJSON
-   for example) without really belonging to a clearly identified layer.
--  it returns a progress percentage. When using OGRLayer API, one has to
-   count the number of features returned with the total number returned
-   by GetFeatureCount(). For the use cases we want to address knowing
-   quickly the total number of features of the dataset is not doable.
-   But knowing the position of the file pointer regarding the total size
-   of the size is easy. Hence the decision to make GetNextFeature()
-   return the progress percentage. Regarding the choice of the range
-   [0,1], this is to be consistent with the range accepted by GDAL
-   progress functions.
--  it accepts a progress and cancellation callback. One could wonder why
-   this is needed given that GetNextFeature() is an "elementary" method
-   and that it can already returns the progress percentage. However, in
-   some circumstances, it might take a rather long time to complete a
-   GetNextFeature() call. For example in the case of the OSM driver, as
-   an optimization you can ask the driver to return features of a subset
-   of layers. For example all layers except nodes. But generally the
-   nodes are at the beginning of the file, so before you get the first
-   feature, you have typically to process 70% of the whole file. In the
-   GMLAS driver, the first GetNextFeature() call is also the opportunity
-   to do a preliminary quick scan of the file to determine the SRS of
-   geometry columns, hence having progress feedback is welcome.
+-  피처가 속해 있는 레이어를 반환합니다. 실제로 피처로부터 해당 피처가 속해 있는 레이어를 쉽게 알아낼 수 있는 방법은 없습니다. (데이터 모델에서, 피처는 어떤 레이어든 그 바깥에 존재할 수 있기 때문입니다.) 피처의 ``OGRFeatureDefn*`` 객체를 레이어의 ``OGRFeatureDefn*`` 객체와 상호연결하는 것도 한 가지 방법이지만, 그러기에는 조금 불편합니다. (그리고 아마도 어떤 인트리 드라이버에서도 절대 발생하지 않을 일이지만 이론적으로는 레이어 여러 개가 동일한 피처 정의 객체를 공유하는 것도 상상해볼 수 있습니다.)
 
-The progress percentage output is redundant with the progress callback
-mechanism, and the latter could be used to get the former, however it
-may be a bit convoluted. It would require doing things like:
+-  반환된 피처가 NULL이 아닌 경우에도, 반환된 레이어가 NULL일 수도 있습니다. 이는 현재로서는 일어날 수 없는 일이기 때문에 단시 하나의 규정일 뿐입니다. 기본적으로 각 피처가 명확하게 식별된 레이어에 실제로 속하지 않은 채 서로 다른 스키마를 가질 수 있는 (예를 들면 GeoJSON 같은) 스키마가 없는 데이터소스를 처리하는 경우 흥미로울 수 있습니다.
+
+-  진행 상황 백분율을 반환합니다. OGRLayer API를 사용하는 경우, 반환된 피처의 개수를 GetFeatureCount()가 반환한 총 개수로 나누어야 합니다. 사용례를 위해 데이터셋의 피처 총 개수를 빨리 알 수 있는 방법이 없다는 것을 강조하고 싶습니다. 그러나 총 용량이라는 측면에서 파일 포인터가 파일의 어느 위치에 있는지는 쉽게 알 수 있습니다. 따라서 GetNextFeature()가 진행 상황 백분율을 반환하도록 결정했습니다. [0,1] 범위를 선택한 이유는, GDAL 진행 상황 함수가 입력받는 범위와 일치하기 때문입니다.
+
+-  진행 상황 및 취소 콜백을 받아들입니다. GetNextFeature()가 "기초적인" 메소드이고 이미 진행 상황 백분율을 반환할 수 있는데 어째서 이런 기능이 필요한지 궁금해 할 수도 있습니다. 하지만 어떤 상황에서는 GetNextFeature() 호출을 완료하는 데 긴 시간이 걸릴 수도 있습니다. 예를 들어 OSM 드라이버의 경우, 최적화로서 사용자가 드라이버에 레이어 부분 집합의 피처를, 예를 들면 노드를 제외한 모든 레이어 피처를 반환하도록 요청할 수 있습니다. 그러나 일반적으로 노드는 파일의 시작 위치에 존재하기 때문에 첫 번째 피처를 가져오기 전에 평균적으로 전체 파일의 70%를 처리하게 됩니다.
+   GMLAS 드라이버에서, 첫 번째 GetNextFeature() 호출은 도형 열의 공간 좌표계를 판단하기 위해 파일을 빠르게 예비 스캔할 수 있는 기회이기도 합니다. 따라서 진행 상황 피드백을 받는 편이 좋습니다.
+
+진행 상황 백분율 산출물은 진행 상황 콜백 메커니즘과 중복되며, 전자를 가져오기 위해 후자를 사용할 수 있지만 조금 난해할 수도 있습니다. 다음과 같은 작업을 수행해야 할 것이기 때문입니다:
 
 ::
 
@@ -210,81 +162,62 @@ may be a bit convoluted. It would require doing things like:
 
    myDS->GetNextFeature(&poLayer, MyProgress, &pct)
 
-SWIG bindings (Python / Java / C# / Perl) changes
--------------------------------------------------
+SWIG 바인딩 (파이썬 / 자바 / C# / 펄) 변경 사항
+-----------------------------------------------
 
-GDALDatasetGetNextFeature is mapped as gdal::Dataset::GetNextFeature()
-and GDALDatasetResetReading as gdal::Dataset::ResetReading().
+GDALDatasetGetNextFeature는 gdal::Dataset::GetNextFeature()로 매핑되고 GDALDatasetResetReading은 gdal::Dataset::ResetReading()로 매핑됩니다.
 
-Regarding gdal::Dataset::GetNextFeature(), currently only Python has
-been modified to return both the feature and its belonging layer. Other
-bindings just return the feature for now (would need specialized
-typemaps)
+gdal::Dataset::GetNextFeature()와 관련해서, 현재 파이썬만 피처와 피처가 속해 있는 레이어를 둘 다 반환하도록 수정했습니다. 현재 다른 바인딩들은 피처만 반환합니다. (수정하려면 특화된 유형 매핑이 필요할 것입니다.)
 
-Drivers
--------
+드라이버
+--------
 
-The OSM and GMLAS driver are updated to implement the new API.
+OSM 및 GMLAS 드라이버가 이 새로운 API를 구현하도록 업데이트했습니다.
 
-Existing drivers that support ODsCRandomLayerWrite are updated to
-advertise it (that is most drivers that have layer creation
-capabilities, with the exceptions of KML, JML and GeoJSON).
+ODsCRandomLayerWrite를 지원하는 기존 드라이버가 이를 노출시키도록 업데이트했습니다.
+(레이어 생성 케이퍼빌리티를 지원하는 드라이버 가운데 KML, JML 및 GeoJSON 드라이버를 제외한 대부분의 드라이버를 업데이트했습니다.)
 
-Utilities
----------
+유틸리티
+--------
 
-ogr2ogr / GDALVectorTranslate() is changed internally to remove the hack
-that was used for the OSM driver to use the new API, when
-ODsCRandomLayerRead is advertized. It checks if the output driver
-advertises ODsCRandomLayerWrite, and if it does not, emit a warning, but
-still goes on proceeding with the conversion using random layer
-reading/writing.
+ogr2ogr / GDALVectorTranslate()로부터 ODsCRandomLayerRead가 노출된 경우 OSM 드라이버가 새 API를 사용하도록 사용되었던 꼼수를 제거했습니다. 새 API는 산출 드라이버가 ODsCRandomLayerWrite를 노출시키는지 확인하고 노출시키지 않는 경우 경고를 발하지만 임의 레이어 읽기/쓰기를 이용해서 변환을 계속 진행시킵니다.
 
-ogrinfo is extended to accept a -rl (for random layer) flag that
-instructs it to use the GDALDataset::GetNextFeature() API. It was
-considered to use it automatically when ODsCRandomLayerRead was
-advertized, but the output can be quite... random and thus not very
-practical for the user.
+ogrinfo가 :cpp:func:`GDALDataset::GetNextFeature` API를 사용하도록 지시하는 "-rl" (random layer) 플래그를 받아들이도록 확장합니다. ODsCRandomLayerRead가 노출되었을 때 자동적으로 해당 플래그를 사용한다고 간주되었지만, 산출물이 꽤나 무작위적이어서 사용자에게 실용적이진 않습니다.
 
-Documentation
+문서화
+------
+
+새 메소드 및 함수를 모두 문서화합니다.
+
+테스트 스위트
 -------------
 
-All new methods/functions are documented.
+OSM 및 GMLAS 드라이버의 특수 GetNextFeature() 구현을 각각 대응하는 테스트로 테스트합니다.
+:cpp:func:`GDALDataset::GetNextFeature` 의 기본 구현은 MEM 드라이버 테스트로 테스트합니다.
 
-Test Suite
-----------
+호환성 문제점
+-------------
 
-The specialized GetNextFeature() implementation of the OSM and GMLAS
-driver is tested in their respective tests. The default implementation
-of GDALDataset::GetNextFeature() is tested in the MEM driver tests.
+C/C++ API 기존 사용자의 경우 호환성 문제점은 없습니다.
 
-Compatibility Issues
---------------------
+기본 구현이 존재하기 때문에, 특수 구현이 없는 드라이버에 대해 새로운 함수/메소드를 안전하게 사용할 수 있습니다.
 
-None for existing users of the C/C++ API.
+새로운 :cpp:func:`GDALDataset::ResetReading` 및 :cpp:func:`GDALDataset::GetNextFeature` 가상 메소드의 추가로 인해 동일한 이름이지만 다른 의미 체계 또는 서명을 가진 메소드 이름을 이미 내부적으로 사용하고 있는 트리 외부의 드라이버에 문제점이 발생할 수도 있습니다. 몇몇 인트리(in-tree) 드라이버에서 이런 문제점을 찾아내서 수정했습니다.
 
-Since there is a default implementation, the new functions/methods can
-be safely used on drivers that don't have a specialized implementation.
+구현
+----
 
-The addition of the new virtual methods GDALDataset::ResetReading() and
-GDALDataset::GetNextFeature() may cause issues for out-of-tree drivers
-that would already use internally such method names, but with different
-semantics, or signatures. We have encountered such issues with a few
-in-tree drivers, and fixed them.
+이벤 루올이 이 RFC를 구현할 것입니다. 이 구현은 새 GMLAS 드라이버의 필요성에 의해 촉발되었습니다.
+(GMLAS 드라이버의 초기 개발은 `코페르니쿠스 유럽 지구 관측 프로그램 <https://www.copernicus.eu/en>`_ 의 후원으로 이루어졌습니다.)
 
-Implementation
---------------
+제안한 구현은 `"gmlas randomreadwrite" 브랜치 <https://github.com/rouault/gdal2/tree/gmlas_randomreadwrite>`_ 저장소에 있습니다. (`커밋 <https://github.com/rouault/gdal2/commit/8447606d68b9fac571aa4d381181ecfffed6d72c>`_)
 
-The implementation will be done by Even Rouault, and is mostly triggered
-by the needs of the new GMLAS driver (initial development funded by the
-European Earth observation programme Copernicus).
+투표 이력
+---------
 
-The proposed implementation is in
-`https://github.com/rouault/gdal2/tree/gmlas_randomreadwrite <https://github.com/rouault/gdal2/tree/gmlas_randomreadwrite>`__
-(commit:
-`https://github.com/rouault/gdal2/commit/8447606d68b9fac571aa4d381181ecfffed6d72c <https://github.com/rouault/gdal2/commit/8447606d68b9fac571aa4d381181ecfffed6d72c>`__)
+-  세케레시 터마시 +1
+-  하워드 버틀러 +1
+-  유카 라흐코넨 +1
+-  대니얼 모리셋 +1
+-  이벤 루올 +1
 
-Voting history
---------------
-
-+1 from TamasS, HowardB, JukkaR, DanielM and EvenR.
