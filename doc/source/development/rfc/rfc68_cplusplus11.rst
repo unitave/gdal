@@ -1,268 +1,223 @@
 .. _rfc-68:
 
 ==============================
-RFC 68: C++11 Compilation Mode
+RFC 68: C++11 컴파일 모드
 ==============================
 
 ======== ======================================
-Author:  Kurt Schwehr
-Contact: schwehr@google.com / schwehr@gmail.com
-Started: 2017-Apr-11
-Passed:  2017-Sep-11
-Status:  Adopted, implemented in GDAL 2.3
+저자:    커트 슈베어(Kurt Schwehr)
+연락처:  schwehr@google.com / schwehr@gmail.com
+제안일:  2017년 4월 11일
+승인일:  2017년 9월 11일
+상태:    승인, GDAL 2.3버전에 구현
 ======== ======================================
 
-This RFC is based on `GEOS RFC
-5 <http://trac.osgeo.org/geos/wiki/RFC5>`__ by Mateusz Łoskot.
+이 RFC는 마테우시 워스코트(Mateusz Łoskot)가 작성한 `GEOS RFC 5 <https://trac.osgeo.org/geos/wiki/RFC5>`_ 를 기반으로 합니다.
 
-Summary
--------
+요약
+----
 
-The document proposes to switch to
-`C++11 <http://en.wikipedia.org/wiki/C%2B%2B11>`__ compilation mode as
-default throughout the whole C++ source code of GDAL.
+이 RFC는 GDAL의 전체 C++ 소스 코드에 걸쳐 `C++11 <https://ko.wikipedia.org/wiki/C%2B%2B11>`_ 컴파일 모드를 기본값으로 전환할 것을 제안합니다.
 
-The goal of the document is to request and achieve agreement on using
-C++11 as the minimum required version of the C++ programming language
-standard.
+이 RFC의 목표는 C++11을 C++ 프로그래밍 언어 표준의 최소 요구 버전으로 사용할 것을 요청하고 동의를 구하는 것입니다.
 
-Motivation
-----------
+동기
+----
 
-C++11 is the first major update of the C++ standard since 1998.
-(`C++03 <https://en.wikipedia.org/wiki/C%2B%2B03>`__ was a bug fix
-release.)
+C++11는 1998년 이후 첫 번째 C++ 표준 주요 업데이트입니다. (`C++03 <https://en.wikipedia.org/wiki/C++03>`_ 은 버그 수정 배포판이었습니다.)
 
-Having fewer versions of C++ to support will reduce the load on
-developers and testing systems.
+지원하는 C++ 버전을 줄이는 것은 개발자 및 테스트 시스템에 부과되는 부하를 줄여줄 것입니다.
 
-C++11 features aim to promote writing clean, compact, type-safe and fast
-code. It also delivers better feature-wise compatibility with the C
-language (C99).
+C++11 기능은 깔끔하고 간결하며 유형 안전(type-safe)하고 빠른 코드 작성의 촉진을 목적으로 합니다. 또한 기능 면에서 C 언어(C99)와 더 나은 호환성을 제공합니다.
 
-The Wikipedia article at
-`http://en.wikipedia.org/wiki/C++11 <http://en.wikipedia.org/wiki/C++11>`__
-does a great job describing all changes in C++11 extensively.
+`https://en.wikipedia.org/wiki/C++11 <https://en.wikipedia.org/wiki/C++11>`_ 위키피디아 문서가 C++11의 모든 변경 사항을 광범위하게 설명하고 있습니다.
 
-The ``std::auto_ptr`` smart pointer, together with a bunch of other
-features, were deprecated and will be removed from C++17. Features like
-``std::unique_ptr`` provide much stronger replacements.
+C++17에서 다른 많은 기능들과 함께 ``std::auto_ptr`` 스마트 포인터를 퇴출시키고 제거할 것입니다. ``std::unique_ptr`` 같은 기능들이 훨씬 더 강력한 대체 기능을 제공합니다.
 
-Enabling C++11 compilation mode will improve the programming environment
-making it much friendlier than C++98.
+C++11 컴파일 모드를 활성화하면 C++98보다 훨씬 더 친화적인 프로그래밍 환경으로 개선될 것입니다.
 
-A social factor: since (many) C++ programmers no longer enjoy C++98,
-allowing C++11 mode may increase potential for new contributions.
+사회적 요인: (많은) C++ 프로그래머들이 더 이상 C++98을 좋아하지 않기 때문에, C++11 모드를 허용하면 새로운 기여 가능성을 높일 수 있을 것입니다.
 
-Compilers Landscape
--------------------
+컴파일러 분야
+-------------
 
-Summary of compilers supported by GDAL with their minimal versions
-required to compile source code based on
-
-`http://en.cppreference.com/w/cpp/compiler_support <http://en.cppreference.com/w/cpp/compiler_support>`__
-C++11 features.
+GDAL이 지원하는, C++11의 `컴파일러 지원 <https://en.cppreference.com/w/cpp/compiler_support>`_ 기능을 기반으로 소스 코드를 컴파일하기 위해 필요한 최소 버전을 가진 컴파일러들을 요약합니다.
 
 C++11
 ~~~~~
 
-===== ============ ========================================================================= =================================================================================================
-GCC   4.8.1+       `C++11 status <https://gcc.gnu.org/projects/cxx-status.html#cxx11>`__     Debian 8 (stable), Ubuntu 15.04+, Ubuntu 14.04 ``ppa:ubuntu-toolchain-r/test``, Fedora 19+, RHEL7
-===== ============ ========================================================================= =================================================================================================
-Clang 3.3+         `C++11 status <https://clang.llvm.org/cxx_status.html#cxx11>`__           Debian 8 (stable), Ubuntu 14.04+, Fedora 19+, CentOS 6(?)
-MSVC  14.0+ (2015) `C++11 status <https://msdn.microsoft.com/en-us/library/hh567368.aspx>`__ n/a
-===== ============ ========================================================================= =================================================================================================
+.. list-table:: C++11 Compilers
+   :header-rows: 0
+
+   * - GCC
+     - 4.8.1+
+     - `C++11 상태 <https://gcc.gnu.org/projects/cxx-status.html#cxx11>`_
+     - Debian 8 (안정 버전), Ubuntu 15.04+, Ubuntu 14.04 ``ppa:ubuntu-toolchain-r/test``, Fedora 19+, RHEL7
+   * - Clang
+     - 3.3+
+     - `C++11 상태 <https://clang.llvm.org/cxx_status.html#cxx11>`_
+     - Debian 8 (안정 버전), Ubuntu 14.04+, Fedora 19+, CentOS 6(?)
+   * - MSVC
+     - 14.0+ (2015)
+     - `C++11 상태 <https://docs.microsoft.com/en-us/previous-versions/hh567368(v=vs.140)>`_
+     - n/a
 
 C++14
 ~~~~~
 
-The C++14 compilers are listed for comparison only:
+다음 C++14 컴파일러 목록은 비교만을 위한 것입니다:
 
-===== ============
-GCC   4.9+
-===== ============
-Clang 3.4+
-MSVC  14.0+ (2015)
-===== ============
+.. list-table:: C++14 Compilers
+   :header-rows: 0
 
-Plan
+   * - GCC
+     - 4.9+
+   * - Clang
+     - 3.4+
+   * - MSVC
+     - 14.0+ (2015)
+
+계획
 ----
 
-This proposal only requests agreement for the C++11 compilation mode
-switch in the current ``trunk`` branch only.
+이 제안은 현재 ``trunk`` 브랜치에만 있는 C++11 컴파일 모드 스위치에 대한 동의를 요청합니다.
 
-This proposal does not suggest any detailed roadmap of large refactoring
-of the GDAL C++ codebase.
+이 제안은 GDAL C++ 코드베이스의 대규모 리팩토링(refactoring)에 대한 어떤 상세 로드맵도 제안하지 않습니다.
 
-The GDAL codebase is > 1.3M LOC and given the available man-power to
-LOCs ratio, such one-step refactoring would not be feasible.
+GDAL 코드베이스는 130만 LOC(Lines of Code)를 넘기 때문에 가용 인력 대 LOC 비율을 감안할 때 이런 한 단계 리팩토링은 실현 가능하지 않습니다.
 
-Instead, the task will be tackled with the baby step approach gradually
-transforming the codebase according to priorities set along the way. Any
-disruptive refactoring, changes in interfaces of C++ classes, breaking
-changes in C++ API must be announced and discussed on the mailing list
-or the bug tracker.
+대신, 작업 도중 설정되는 우선 순위에 따라 코드베이스를 점진적으로 변환하는 걸음마 접근법으로 해결할 것입니다. 메일링 리스트 또는 버그 트래커 상에서 차질을 일으키는 모든 리팩토링, C++ 클래스 인터페이스의 변경, C++ API의 주요 변경 사항들을 발표하고 논의해야만 합니다.
 
-*IMPORTANT*: C++11 refactoring must not change the C API or break C API
-compatibility, unless agreed upon based on prior RFC proposed.
+**중요**: 제안된 RFC를 기반으로 먼저 동의되지 않는 한 C++11 리팩토링이 절대로 C API를 변경하거나 C API 호환성을 망가뜨려서는 안 됩니다.
 
-However, if the proposal is accepted, any new C++ code written for GDAL
-must be C++11-compliant.
+하지만 제안이 승인된 경우 GDAL에 작성되는 새로운 모든 C++ 코드는 반드시 C++11을 준수해야만 합니다.
 
-Prior acceptance of this proposal is necessary in order to start any
-source code refactoring using C++11 features.
+C++11 기능을 이용해서 어떤 소스 코드라도 리팩토링하려면 사전에 이 제안에 대한 동의가 필요합니다.
 
-Once accepted, first step will be to update the build configurations to
-require C++11-compliant compiler.
+승인되고 나면, 첫 번째 단계는 빌드 환경설정이 C++11을 준수하는 컴파일러를 요구하도록 업데이트하는 일이 될 것입니다.
 
-Issues
+문제점
 ------
 
-This section outlines issues potentially caused by upgrade to C++11
-language.
+이 단락에서는 C++11 언어로 업그레이드함으로써 발생할 가능성이 있는 문제점들의 개요를 서술합니다:
 
--  C++11 destructors, by default, have now the new exception
-   specification of ``nothrow(true)``. Destructors of GDAL classes
-   should be reviewed and any that are allowed/expected to throw
-   exceptions must be marked with ``nothrow(false)``. Otherwise, any
-   user of the existing GDAL codebase would find the program terminating
-   whenever GDAL destructor throws an exception. Such review would be
-   beneficial anyway.
+-  C++11 삭제자(destructor)는 이제 기본적으로 ``nothrow(true)`` 라는 새로운 예외 사양을 가집니다. GDAL 클래스의 삭제자를 살펴봐야 하고, 예외 발생을 허용하거나 예외를 발생시킬 것으로 예상되는 모든 삭제자를 ``nothrow(false)`` 로 표시해야만 합니다. 그렇지 않으면 기존 GDAL 코드베이스의 모든 사용자들이 GDAL 삭제자가 예외를 발생시킬 때마다 프로그램이 종료되는 일을 겪게 될 것입니다. 이런 목적이 아니더라도 이렇게 코드를 살펴보는 일로 얻을 수 있는 이득이 많습니다.
 
-Release
--------
+배포
+----
 
-First release of GDAL with C++11 compiler requirement could be 2.3.0.
+C++11 컴파일러를 요구하는 GDAL의 첫 번째 배포판이 GDAL 2.3.0버전일 수 있습니다.
 
 .. _c14-1:
 
 C++14
 ~~~~~
 
-This section clarifies status of C++14 support in GDAL.
+이 단락에서는 GDAL의 C++14 지원 상태를 분명하게 밝힙니다.
 
--  Once C++11 is adopted as default compilation mode, GDAL developers
-   and maintainers must ensure it also successfully compiles in C++14
-   and C++17 modes.
+-  C++11을 기본 컴파일 모드로 도입하고 나면, GDAL 개발자들과 유지/관리자들이 C++14 및 C++17 모드에서도 성공적으로 컴파일되는지 확인해야만 합니다.
 
--  Are contributors allowed to add ``ifdef``'s for C++14 and C++17? No.
-   Not at this time.
+-  기여자들이 C++14 및 C++17에 ``ifdef`` 를 추가할 수 있습니까?
+   아니오. 지금은 안 됩니다.
 
--  Is there a plan to upgrade to C++14 or C++17 to allow use of the C++
-   latest features? No, there is no plan. It is, however, recognized,
-   such motion may be put to the vote around 2020.
+-  C++ 최신 기능을 사용할 수 있도록 C++14 또는 C++17로 업그레이드할 계획이 있습니까?
+   아니오, 그런 계획은 없습니다. 하지만 그런 요구가 있다는 사실을 알고 있으며 2020년 경에 해당 제안을 표결에 부칠 수도 있습니다.
 
-References
-----------
+참조
+----
 
--  `http://en.cppreference.com/w/cpp/compiler_support <http://en.cppreference.com/w/cpp/compiler_support>`__
-   C++ compiler support
+-  `C++ 컴파일러 지원 <https://en.cppreference.com/w/cpp/compiler_support>`_
 
-Self-assigned development constraints
--------------------------------------
+스스로 부여한 개발 제약 조건
+----------------------------
 
-The changes should have moderate impact on the existing GDAL/OGR code
-base, and particularly on most of its code, that lies in drivers.
-Existing users of the GDAL/OGR API should also be moderately impacted by
-the changes, if they do not need to use the new offered capabilities.
+변경 사항들이 기존 GDAL/OGR 코드베이스에, 특히 드라이버에 있는 GDAL/OGR 코드 대부분에 큰 영향을 미쳐서는 안 됩니다. 사용자들이 새로 제공되는 케이퍼빌리티를 사용해야 할 필요가 없는 경우, 변경 사항들은 GDAL/OGR API의 기존 사용자들에게도 큰 영향을 미쳐서는 안 됩니다.
 
-GDAL has been working well with C++11 builds for a number of years now,
-so there should be no externally visible changes for the initial removal
-of C++03 support.
+GDAL은 현재 몇 년 동안 C++11 빌드와 잘 작동해왔기 때문에, C++03 지원의 초기 제거로 인해 외부에서 알아차릴 수 있는 변화는 없을 것입니다.
 
-Core changes: summary
----------------------
+핵심 변경 사항: 요약
+--------------------
 
-1. Change configure.ac to remove ``with_cpp11`` flag, always use C++11,
-   and fail if ``AX_CXX_COMPILE_STDCXX_11`` does not find C++11
-2. Remove @CXX11_SUPPORT@ in GDALmake.opt.in and anywhere else it occurs
-3. Remove continuous build targets that do not support C++11 from
-   Travis-CI and AppVeyor
-4. Remove #if HAVE_CXX11 and leave only the C++11 code
+1. ``with_cpp11`` 플래그를 제거하고, 항상 C++11을 사용하고, ``AX_CXX_COMPILE_STDCXX_11`` 이 C++11을 찾지 못 하는 경우 실패하도록 :file:`configure.ac` 를 변경합니다.
+2. :file:`GDALmake.opt.in` 및 @CXX11_SUPPORT@가 나타나는 모든 곳에서 @CXX11_SUPPORT@를 제거합니다.
+3. Travis-CI 및 AppVeyor로부터 C++11을 지원하지 않는 연속 빌드 대상을 제거합니다.
+4. ``#if HAVE_CXX11`` 을 제거하고 C++11 코드만 남겨놓습니다.
 
    -  ``find . -name \*.h -o -name \*.cpp | xargs egrep 'HAVE_CXX11'``
 
 5. CPL_STATIC_ASSERT -> ``static_assert``
-6. ``NULL`` -> ``nullptr`` (Only for C++ code)
-7. CPL_OVERRIDE -> override and remove redundant virtual
-8. -MAX or -max() -> ``std::numeric_limits<T>::lowest()``
+6. ``NULL`` -> ``nullptr`` (C++ 코드에서만)
+7. CPL_OVERRIDE -> 반복 가상 메소드를 대체하고 제거합니다.
+8. -MAX 또는 -max() -> ``std::numeric_limits<T>::lowest()``
 
-Changes in SWIG bindings
-------------------------
+SWIG 바인딩 변경 사항
+---------------------
 
-The switch does not impact the ``C`` API used by the SWIG bindings.
-However, there may be some code that can be removed.
+스위치가 SWIG 바인딩이 사용하는 ``C`` API에 영향을 미치지 않습니다.
+하지만, 제거할 수 있는 코드가 일부 있을 수도 있습니다.
 
-Potential changes that are *NOT* included in this RFC
------------------------------------------------------
 
-There are many C++11 features not address in this RFC. See
-`https://en.wikipedia.org/wiki/C%2B%2B11 <https://en.wikipedia.org/wiki/C%2B%2B11>`__
+이 RFC에 포함되지 '않은' 잠재적인 변경 사항들
+---------------------------------------------
 
--  attributes
+이 RFC에서 다루지 않은 C++11 기능이 많이 있습니다. `C++11 <https://ko.wikipedia.org/wiki/C%2B%2B11>`_ 을 참조하십시오.
+
+-  속성(attribute)
 -  ``auto``
 -  ``consexpr``
 -  ``cstdint``
--  ``delete`` and ``default`` for member functions
--  enum classes
--  initializer lists and ``std::initializer_list``
--  lambda
--  range based for loops
+-  멤버 함수에 대한 ``delete`` 및 ``default``
+-  열거형(enum) 클래스
+-  초기화자 목록(initializer list) 및 ``std::initializer_list``
+-  람다(lambda)
+-  범위 기반 루프
 -  std::regex
--  rvalue references
--  smart pointers ``std::unique_ptr`` and ``std::shared_ptr``
--  New string literals: u8"An UTF-8 string", u"An UTF-16 str", U"An
-   UTF-32 str", R"xml(raw content)xml"
--  ``std::thread``, ``thread_local`` and related
--  tuples
--  And more...
+-  rvalue 참조
+-  ``std::unique_ptr`` 및 ``std::shared_ptr`` 스마트 포인터
+-  새로운 문자열 리터럴: u8"An UTF-8 string", u"An UTF-16 str", U"An UTF-32 str", R"xml(raw content)xml"
+-  ``std::thread``, ``thread_local`` 및 관련 기능
+-  튜플(tuple)
+-  ...
 
-Backward compatibility
-----------------------
+하위 호환성
+-----------
 
-Any code using the C++ API must use C++11 or newer.
+C++ API를 사용하는 모든 코드가 C++11 이상 버전을 사용해야만 합니다.
 
-The C API should not be impacted.
+C API에 영향을 미쳐서는 안 됩니다.
 
-GDAL 2.2.x and older will continue to have C++03 support.
+GDAL 2.2.x 이전 버전들은 계속 C++03을 지원할 것입니다.
 
-Testing
--------
+테스트
+------
 
-The existing autotest suite should continue to pass.
+기존 자동 테스트 스위트를 계속 통과할 것입니다.
 
-Version numbering
------------------
+버전 번호 매기기
+----------------
 
-Although the above describes changes should have very few impact on
-existing applications of the C API, some behavior changes, C++ level
-changes and the conceptual changes are thought to deserve a 2.3 version
-number.
+앞에서 변경 사항들이 C API의 기존 응용 프로그램들에 거의 영향을 미치지 않아야 한다고 설명했지만, 몇몇 습성 변경, C++ 수준 변경 사항들 및 개념 변경은 2.3버전 번호를 매겨도 될 정도라고 생각됩니다.
 
-Implementation
---------------
+구현
+----
 
-Implementation will be done by Kurt Schwehr. Others are welcome to pitch
-in.
+커트 슈베어가 이 RFC를 구현할 것입니다. 다른 개발자도 언제든지 참여할 수 있습니다.
 
-Related RFCs
-------------
+관련 RFC
+--------
 
-Related RFCs:
+-  `GEOS RFC 5: C++11 컴파일 모드 <https://trac.osgeo.org/geos/wiki/RFC5>`_:
+   GEOS는 빌드하는 데 C++11을 요구하도록 전환 중입니다.
+-  `OTB(Orfeo ToolBox)를 C++14로 포팅 <https://wiki.orfeo-toolbox.org/index.php/Request_for_Comments-36:_Move_OTB_to_C%2B%2B14>`_
 
--  `GEOS RFC 5: C++11 Compilation
-   Mode <http://trac.osgeo.org/geos/wiki/RFC5>`__: GEOS is switching to
-   requiring C++11 to build.
--  `Move OTB to
-   C++14 <https://wiki.orfeo-toolbox.org/index.php/Request_for_Comments-36:_Move_OTB_to_C%2B%2B14>`__
+투표 이력
+---------
 
-Voting history
---------------
+`https://lists.osgeo.org/pipermail/gdal-dev/2017-September/047139.html <https://lists.osgeo.org/pipermail/gdal-dev/2017-September/047139.html>`_
 
-`https://lists.osgeo.org/pipermail/gdal-dev/2017-September/047139.html <https://lists.osgeo.org/pipermail/gdal-dev/2017-September/047139.html>`__
+-  이벤 루올 +1
+-  유카 라흐코넨 +1
+-  대니얼 모리셋 +1
+-  하워드 버틀러 +1
+-  커트 슈베어 +1
 
--  EvenR +1
--  JukkaR +1
--  DanielM +0
--  HowardB +1
--  KurtS +1
