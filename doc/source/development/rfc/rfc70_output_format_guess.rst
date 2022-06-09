@@ -1,131 +1,89 @@
 .. _rfc-70:
 
 ============================================================================
-RFC 70: Guessing output format from output file name extension for utilities
+RFC 70: 유틸리티를 위한 산출 파일명 확장자로부터 산출 포맷 추측하기
 ============================================================================
 
-======================= ==========================
-Author:                 Even Rouault
-Contact:                even.rouault@spatialys.com
-Started:                Aug 2017
-Status:                 Adopted, implemented
-Implementation version: 2.3.0
-======================= ==========================
+======= ===========================
+저자:   이벤 루올
+연락처: even.rouault@spatialys.com
+제안일: 2017년 8월
+상태:   승인, GDAL 2.3.0버전에 구현
+======= ===========================
 
-Summary
--------
+요약
+----
 
-This proposal is to add syntaxic sugar to make GDAL and OGR command line
-utilities, so they take into account the extension of the output
-filename to guess which output driver to use, when it is not explicitly
-specified with -f / -of switch.
+이 RFC는 사용할 드라이버를 "-f" / "-of" 스위치로 명확하게 지정하지 않은 경우 사용할 드라이버를 추측하기 위해 산출 파일명의 확장자를 고려할 수 있는 GDAL 및 OGR 명령줄 유틸리티를 만들기 위한 당의 구문(syntactic sugar)을 추가할 것을 제안합니다.
 
-Motivation
-----------
+동기
+----
 
-Currently command line utilities require to explicitly specify the
-output format when not wishing to use the default format (generally
-GeoTIFF for raster, and Shapefile for vector). But this is rather
-counter-intuitive. For example "gdal_translate in.tif out.png" will
-generate a GeoTIFF, and "ogr2ogr out.gpkg in.shp" a shapefile. So you
-have to specify respectively -of PNG and -f GPKG to get the expected
-result.
+현재 명령줄 유틸리티에서 기본 포맷(일반적으로 래스터의 경우 GeoTIFF, 벡터의 경우 shapefile)을 사용하고 싶지 않은 경우 산출 포맷을 명확하게 지정해줘야 합니다. 그러나 이는 직관적이지 않습니다. 예를 들면 ``gdal_translate in.tif out.png`` 는 GeoTIFF를 생성하고, ``ogr2ogr out.gpkg in.shp`` 은 shapefile을 생성할 것입니다. 따라서 원하는 결과물을 얻으려면 각각 "-of PNG"와 "-f GPKG"를 지정해야 합니다.
 
-Guessing the output format from the extension of the output filename is
-for example a behavior found in ImageMagick convert utility, or in
-OpenJPEG opj_compress/opj_decompress utilities.
+산출 파일명의 확장자로부터 산출 포맷을 추측하는 것은 예를 들어 ImageMagick 변환 유틸리티 또는 OpenJPEG의 opj_compress / opj_decompress 유틸리티에서 볼 수 있는 습성입니다.
 
-Changes in C/C++ and Python utilities
--------------------------------------
+C/C++ 및 파이썬 유틸리티 변경 사항
+----------------------------------
 
-Command line utilities, when neither -f nor -of are specified (note:
-since r39878 both switches can be indifferently used), will loop through
-the registered drivers and check if one or several drivers, with output
-capabilities, declare to recognize the extension of the output filename.
+명령줄 유틸리티는 "-f" 또는 "-of" 스위치를 지정하지 않는 경우 (주의: r39878부터 두 스위치를 구분없이 사용할 수 있습니다) 등록된 드라이버들을 반복하면서 산출 케이퍼빌리티를 가진 하나 이상의 드라이버가 산출 파일명의 확장자를 인식할 수 있다고 선언하는지 확인할 것입니다.
 
--  When one and only one driver declares this extension (.tif, .png,
-   .jpg etc), it will be used automatically
--  When several drivers declare this extension (for example KML and
-   LIBKML for .kml), the utility will select the first registered driver
-   (except netCDF instead of GMT for .nc files), and a warning is
-   emitted specifying which driver is used
--  When no driver declares this extension, and the extension is not
-   empty (e.g a .mpg filename), the utility will error out
+-  오직 하나의 드라이버가 해당 확장자(.tif, .png, .jpg 등등)를 선언하는 경우 자동으로 해당 드라이버를 사용할 것입니다.
 
-For completeness:
+-  드라이버 여러 개가 (예를 들면 .kml에 대해 KML 및 LIBKML 드라이버들이) 해당 확장자를 선언하는 경우 유틸리티가 먼저 등록된 드라이버를 선택하고 어떤 드라이버를 사용한다는 경고를 발할 것입니다. (다만 .nc 파일에는 GMT 대신 netCDF 드라이버를 선택할 것입니다.)
 
--  When there's no extension, and no prefix is recognized (see below),
-   the default output driver will be silently used, as currently
+-  어떤 드라이버도 해당 파일을 선언하지 않는데 확장자가 비어 있지 않은 경우 (예를 들어 파일명 확장자가 .mpg인 경우) 유틸리티가 오류를 발생시키고 종료될 것입니다.
 
-Since at least GDAL 1.10, the base of this logic already exists since a
-warning is emitted for C/C++ utilities, when the extension of the output
-format is known to be recognized by another driver than the default
-output driver.
+완성도를 위해:
 
-Similarly, for vector output, if doing something like "ogr2ogr
-PG:dbname=mydb out.shp", a PG:dbname=mydb directory is created with
-shapefiles, instead of ingesting the shapefile into PostgreSQL. A
-warning is emitted in that case since the PG driver declares the PG:
-prefix in its metadata. The new behavior will be to imply the -update
-switch in such situation.
+-  어떤 확장자도 없고 접두어도 인식하지 못 하는 경우 (아래 참조) 현재와 마찬가지로 기본 산출 드라이버를 암묵적으로 사용할 것입니다.
 
-When the utilities are available as library functions (GDALTranslate(),
-etc.), output format guessing will also be applied if the -f/-of switch
-is not specified
+최소한 GDAL 1.10버전부터 기본 산출 드라이버가 아닌 다른 드라이버가 산출 포맷의 확장자를 인식할 수 있는 경우 C/C++ 유틸리티에서 경고를 발하기 때문에, 이 로직의 기반이 이미 존재하고 있습니다.
 
-Changes in SWIG bindings
-------------------------
+마찬가지로 벡터 산출물의 경우 ``ogr2ogr PG:dbname=mydb out.shp`` 같은 명령어를 실행하면 shapefile을 PostgreSQL로 삽입하는 대신 shapefile을 가진 ``PG:dbname=mydb`` 디렉터리를 생성합니다. 이런 경우 PG 드라이버가 자체 메타데이터에 있는 ``PG:`` 접두어를 선언하기 때문에 경고를 발합니다. 새로운 습성은 이런 상황에서 "-update" 스위치를 내포할 것입니다.
 
-For librarified utilities (gdal.Translate, etc.), the format argument
-now defaults to None.
+유틸리티를 (GDALTranslate() 등 같은) 라이브러리 함수로 사용할 수 있는데 "-f" / "-of" 스위치를 지정하지 않은 경우에도 산출 포맷을 추측할 것입니다.
 
-Potential issues
-----------------
+SWIG 바인딩 변경 사항
+---------------------
 
-There might be some fragility with the new logic in the situation where
-a GDAL version has only one driver that supports extension xxx, but a
-later version adds another driver that also supports extension xxx (or
-another distribution of the same version has a plugin that handles xxx).
-So scripts that did "gdal_translate in out.xxx" would now error out in
-the next version since several drivers are available.
+라이브러리화된 유틸리티의 경우 (gdal.Translate등등) 포맷 인자의 기본값이 이제 'None'입니다.
 
-Bottom line: always specify the output driver when
-reliability/reproducibility is desired.
+잠재적인 문제점
+---------------
 
-This RFC mostly helps for interactive conversions where the less you
-type the better.
+특정 GDAL 버전에 xxx 확장자를 지원하는 드라이버가 하나뿐인데 이후 버전에 xxx 확장자를 지원하는 또다른 드라이버가 추가된 (또는 동일 버전에 xxx를 처리하는 플러그인을 추가한 또다른 배포판이 나온) 상황에서는 이 새 로직에 약간의 취약성이 있을 수도 있습니다. 즉 ``gdal_translate in out.xxx`` 를 실행했던 스크립트가 다음 버전에서는 드라이버 여러 개를 사용할 수 있기 때문에 오류를 발생시키며 종료될 수 있다는 뜻입니다.
 
-Backward compatibility
-----------------------
+결론을 내자면, 신뢰성/재현성을 원하는 경우 항상 산출 드라이버를 지정하십시오.
 
-This will break scripts that use an output filename whose extension is
-matched by a driver which is not the default one. This incompatibility
-is rather unlikely since previous GDAL versions already emit a warning
-in this situation (for C/C++ utilities only. for Python utilities
-default driver is silently used), so people have likely specified the
-output driver if they really want to do "gdal_translate in.tif out.png
--of GTiff".
+이 RFC는 사용자가 입력을 적게 할수록 좋은 대화형 변환에 주로 도움이 됩니다.
 
-MIGRATION_GUIDE.TXT will mention those potential caveats.
+하위 호환성
+-----------
 
-Testing
--------
+이 RFC의 변경 사항은 확장자가 기본 드라이버가 아닌 드라이버와 일치하는 산출 파일명을 사용하는 스크립트를 망가뜨릴 것입니다. 예전 GDAL 버전들이 이미 이런 상황에서 경고를 발하기 때문에 (C/C++ 유틸리티만 해당합니다. 파이썬 유틸리티의 경우 기본 드라이버를 암묵적으로 사용합니다) 이런 비호환성이 나타나는 일은 드뭅니다. 다시 말해 정말로 ``gdal_translate in.tif out.png -of GTiff`` 를 수행하고자 하는 경우 사용자들이 산출 드라이버를 지정했을 가능성이 큽니다.
 
-The existing autotest suite should continue to pass (with a few changes
-related to tests for the current behavior)
+:file:`MIGRATION_GUIDE.TXT` 에 이런 잠재적인 조심할 점에 대해 언급할 것입니다.
 
-Implementation
---------------
+테스트
+------
 
-Implementation will be done by Even Rouault
+기존 자동 테스트 스위트를 (현재 습성에 대한 테스트와 관련된 몇 가지 변경 사항과 함께) 계속해서 통과할 것입니다.
 
-Proposed implementation is in
-`https://github.com/rouault/gdal2/tree/rfc70 <https://github.com/rouault/gdal2/tree/rfc70>`__
+구현
+----
 
-Diff:
-`https://github.com/OSGeo/gdal/compare/trunk...rouault:rfc70 <https://github.com/OSGeo/gdal/compare/trunk...rouault:rfc70>`__
+이벤 루올이 이 RFC를 구현할 것입니다.
 
-Voting history
---------------
+제안한 구현은 `"rfc70" 브랜치 <https://github.com/rouault/gdal2/tree/rfc70>`_ 에 있습니다.
 
-+1 from JukkaR, TamasS, DanielM and EvenR
+`변경 사항 목록 <https://github.com/OSGeo/gdal/compare/trunk...rouault:rfc70>`_
+
+투표 이력
+---------
+
+-  유카 라흐코넨 +1
+-  세케레시 터마시 +1
+-  대니얼 모리셋 +1
+-  이벤 루올 +1
+
