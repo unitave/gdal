@@ -14,7 +14,7 @@ RFC 71: 깃허브 마이그레이션
 요약
 ----
 
-GDAL 소스 트리 및 티켓 데이터베이스를 OSGeo가 호스팅하는 서브버전(Subversion) 저장소/트랙(Trac) 데이터베이스로부터 깃허브(GitHub)로 옮길 것을 제안합니다. 소스 코드 이력은 온전히 보전될 것입니다. 이 마이그레이션을 보다 간단하게 하기 위해, 기존 티켓들은 OSGeo 트랙에 남겨두고 깃허브로 마이그레이션하지 않을 것입니다. 새 티켓은 깃허브에서 열어야 할 것입니다.
+GDAL 소스 트리 및 티켓 데이터베이스를 OSGeo가 호스팅하는 서브버전(Subversion) 저장소/트랙(Trac) 데이터베이스로부터 깃허브(깃허브)로 옮길 것을 제안합니다. 소스 코드 이력은 온전히 보전될 것입니다. 이 마이그레이션을 보다 간단하게 하기 위해, 기존 티켓들은 OSGeo 트랙에 남겨두고 깃허브로 마이그레이션하지 않을 것입니다. 새 티켓은 깃허브에서 열어야 할 것입니다.
 
 동기
 ----
@@ -23,58 +23,54 @@ GDAL 소스 트리 및 티켓 데이터베이스를 OSGeo가 호스팅하는 서
 
 2. 2012년부터 `https://github.com/OSGeo/gdal <https://github.com/OSGeo/gdal>`_ 미러 사이트가 존재했으며, 그 동안 직접 SVN에 접속할 수 없는 기여자들이 (또는 접속할 수 있는 기여자들조차) -- 특히 유지/관리자가 기여 코드가 알려져 있는 퇴행(regression)을 도입하진 않았는지 확인할 수 있게 해주는 `Travis-CI <https://www.travis-ci.com/>`_ 와 `AppVeyor <https://www.appveyor.com/>`_ 의 `지속적 통합 <https://ko.wikipedia.org/wiki/%EC%A7%80%EC%86%8D%EC%A0%81_%ED%86%B5%ED%95%A9>`_ 서비스와 풀 요청에 코멘트를 다는 친화적인 방식이 합쳐져 -- 깃허브에 기여 코드를 커밋하는 편을 선호해왔습니다. 하지만 GDAL 유지/관리자들이 **깃허브** 풀 요청을 트랙으로 직접 포팅하는 일은 조금 벅찹니다.
 
-3. GitHub has become the de-facto hosting platform for a lot of open-source projects.
+3. 깃허브는 수많은 오픈 소스 프로젝트들의 실직적인 호스팅 플랫폼이 되었습니다.
 
 마이그레이션 상세 사항
 ----------------------
 
-0. The existing GitHub git repository will be pushed to `https://github.com/OSGeo/gdal_svn_mirror_backup <https://github.com/OSGeo/gdal_svn_mirror_backup>`_ (eventually removed once we are confident further steps have not messed things up)
+0. 기존 깃허브 깃 저장소를 `https://github.com/OSGeo/gdal_svn_mirror_backup <https://github.com/OSGeo/gdal_svn_mirror_backup>`_ 으로 푸시할 것입니다. (다음 단계들을 망치지 않았다는 확신이 들면 결국에는 제거할 것입니다.)
 
-1. As GitHub also uses the syntax "#1234" to link commit messages to its issues that was also used in Trac, currently when following links in **깃허브** that point to a Trac ticket, one ends up to a non-existing or unrelated **깃허브** issue/pull request.
-   So the commit messages of the current **깃허브** mirror will be rewritten by a "git filter-branch --msg-filter 'python rewrite.py' -- --all" command to replace "#1234" with "`https://trac.osgeo.org/gdal/ticket/1234 <https://trac.osgeo.org/gdal/ticket/1234>`_"
+1. 깃허브도 트랙에서 사용되는 "#1234" 문법을 사용해서 커밋 메시지를 해당 문제점과 링크시키기 때문에, 현재 트랙 티켓을 가리키는 **깃허브** 의 링크를 따라가는 경우 존재하지 않거나 관련이 없는 **깃허브** 이슈/풀 요청 페이지로 가게 됩니다. 따라서 ``git filter-branch --msg-filter 'python rewrite.py' -- --all`` 명령어를 사용해서 "#1234"를 "`https://trac.osgeo.org/gdal/ticket/1234 <https://trac.osgeo.org/gdal/ticket/1234>`_"로 대체하는 방식으로 현재 **깃허브** 미러의 커밋 메시지를 재작성할 것입니다.
 
-2. The git 'trunk' branch will be renamed 'master' to follow git best practices
+2. 깃의 모범적인 관행을 따르기 위해 'trunk' 브랜치를 'master'로 재명명할 것입니다.
 
-3. The existing 'tag/x.y.z' branches will be replaced by proper git tags.
+3. 기존 'tag/x.y.z' 브랜치들을 알맞은 깃 태그로 대체할 것입니다.
 
-4. This modified repository will be forced push to `https://github.com/OSGeo/gdal <https://github.com/OSGeo/gdal>`_
-   This will have the consequence of invalidating existing pull request or forks of repository that will have to be rebased to the new one.
-   From that point, "svn commit" should be avoided and changes should go to the git repository.
+4. 이렇게 수정된 저장소를 `https://github.com/OSGeo/gdal <https://github.com/OSGeo/gdal>`_ 로 강제 푸시할 것입니다. 이렇게 하면 기존 풀 요청 또는 새 저장소로 기반을 옮겨야 할 저장소 포크가 무효화되는 결과를 낳게 될 것입니다. 이때부터 "svn commit"을 하지 말고 깃 저장소에 변경 사항을 커밋해야 합니다.
 
-5. The cron job on the OSGeo server that refreshes the website from sources will be modified to pull from **깃허브** rather than SVN.
+5. OSGeo 서버 상에서 소스로부터 웹사이트를 새로고침하는 `cron <https://ko.wikipedia.org/wiki/Cron>`_ 이 SVN이 아니라 **깃허브** 로부터 소스를 가져오도록 수정할 것입니다.
 
-6. Ticket creation permissions will be removed in Trac.
-   Modification or closing of existing open tickets will still be possible.
-   From that point, if closing a Trac ticket, one will have manually to reference the github commit.
+6. 트랙에서 티켓 생성 권한을 제거할 것입니다. 기존에 열려 있던 티켓은 계속 수정하거나 닫을 수 있을 것입니다.
 
-7. The settings of the GDAL GitHub repository will be changed allow tickets to be filed. Labels and Milestones will be populated with relevant content
+7. 티켓을 제출할 수 있도록 GDAL 깃허브 저장소의 설정을 변경할 것입니다. 라벨 및 마일스톤을 관련 내용으로 채울 것입니다.
 
-Further actions required, in no particular order, and for which help from other GDAL developers/contributors would be welcome:
+추가적인 조치들이 필요한데, 다른 GDAL 개발자/기여자의 도움을 환영합니다. 다음 목록에는 우선 순위가 없습니다:
 
--  Most visible Trac wiki documentation will have to be revised to point to GitHub
+-  가장 많은 방문을 받는 트랙 위키 문서들의 링크가 깃허브를 가리키도록 교정해야 할 것입니다.
 
--  HOWTO-RELEASE will have to be revised.
+-  :file:`HOWTO-RELEASE` 문서를 개정해야 할 것입니다.
 
--  Existing SVN committers still interested in the project will have to request commit access to the GitHub repo.
+-  GDAL 프로젝트에 계속 관심이 있는 기존 SVN 커미터들은 깃허브 저장소에 커밋 접근 권한을 요청해야 할 것입니다.
 
--  Some support from OSGeo SAC will be needed to turn the GDAL SVN repository to read-only (a complementary option would be to rename it to gdal_historical so that people pulling from the old one are well aware of the migration by having their scripts 'cleanly' error out)
+-  GDAL SVN 저장소를 읽기 전용으로 변환하려면 OSGeo 시스템 관리 위원회(System Administration Committee)의 지원이 필요할 것입니다. (다른 선택지는 GDAL SVN 저장소의 이름을 'gdal_historical'로 재명명해서 예전 저장소에서 소스를 가져가는 사람들이 자신의 스크립트가 '깔끔하게' 오류를 발생시키고 종료하게 해서 이 마이그레이션에 대해 잘 알 수 있도록 하는 것입니다.)
 
--  Some guidelines on how we intend to use git/GitHub features will have to be rewritten.
+-  깃/깃허브 기능을 사용하려는 방법에 대한 몇 가지 지침을 재작성해야 할 것입니다.
 
 출구 전략
 ---------
 
-GitHub is a closed platform. In case it would close or would start asking to pay unreasonable fees, some backup strategy of the tickets would be needed. The solutions might be:
+깃허브는 폐쇄형 플랫폼입니다. 깃허브가 문을 닫거나 말도 안 되는 비용을 청구하는 경우를 대비해서 티켓들을 백업하기 위한 전략이 필요할 것입니다. 다음과 같은 해결책을 사용할 수 있습니다:
 
 -  `https://github.com/josegonzalez/python-github-backup <https://github.com/josegonzalez/python-github-backup>`_
 
--  GitLab has an import module from GitHub.
-   Although some experimentation has been done with those, this RFC does *not* cover setting up those solutions as a regular backup system.
+-  `깃랩(GitLab) <https://about.gitlab.com/>`_ 에는 '깃허브로부터 가져오기' 모듈이 있습니다.
+
+이 두 가지 방법에 대해 몇 가지 실험을 해보긴 했지만, 이 RFC는 이런 해결책들을 정규 백업 시스템으로 설정하는 내용을 다루지 '않습니다'.
 
 이 RFC가 다루지 않은 내용
 -------------------------
 
--  Migration of Trac wiki content to GitHub wiki is not in the scope of this RFC. Can be done later
+-  트랙 위키 콘텐츠를 깃허브 위키로 마이그레이션하는 일은 이 RFC의 범위를 벗어납니다. 향후 수행할 수 있을 것입니다.
 
 관련된 예전 논의들
 ------------------
