@@ -1,161 +1,106 @@
 .. _rfc-73:
 
 =======================================================================================================
-RFC 73: Integration of PROJ6 for WKT2, late binding capabilities, time-support and unified CRS database
+RFC 73: WKT2, 최신 바인딩 케이퍼빌리티, 시간 지원 및 통합 좌표계 데이터베이스를 위한 PROJ6 통합
 =======================================================================================================
 
-============== ============================
-Author:        Even Rouault
-Contact:       even.rouault @ spatialys.com
-Started:       2019-Jan-08
-Last modified: 2019-May-02
-Status:        Implemented in GDAL 3.0
-============== ============================
+============ ==========================
+저자:        이벤 루올
+연락처:      even.rouault@spatialys.com
+제안일:      2019년 1월 8일
+최신 수정일: 2019년 5월 2일
+상태:        승인, GDAL 3.0버전에 구현
+============ ==========================
 
-Summary
--------
+요약
+----
 
-The document describe work related to integration of PROJ 6 with GDAL,
-which adds different capabilities: support for CRS WKT 2 version, "late
-binding" capabilities for coordinate transformations between CRS,
-support of time-dimension for coordinate operations and the use of a
-unified CRS database.
+이 RFC는 GDAL과 PROJ 6버전의 통합과 관련된 작업을 설명합니다. 이 통합으로 다음과 같은 케이퍼빌리티가 추가됩니다:
 
-Motivation
-----------
+-  좌표계 WKT 2 지원
+-  좌표계들 간의 좌표 변환을 위한 "최신 바인딩(late binding)" 케이퍼빌리티
+-  좌표 작업을 위한 시간 차원 지원
+-  통합 좌표계 데이터베이스 사용
 
-The motivations are those exposed in
-`https://gdalbarn.com/#why <https://gdalbarn.com/#why>`__ , which are
-copied here
+동기
+----
 
-Coordinate systems in GDAL, PROJ, and libgeotiff are missing modern
-capabilities and need a thorough refactoring:
+이 RFC를 제안하게 된 동기는 `https://gdalbarn.com/#why <https://gdalbarn.com/#why>`_ 에서 설명하고 있습니다. 그 내용을 발췌했습니다.
 
--  The dreaded ad hoc CSV databases in PROJ_LIB and GDAL_DATA are
-   frustrating for users, pose challenges for developers, and impede
-   interoperability of definitions.
--  GDAL and PROJ are missing OGC WKT2 support.
--  PROJ 5.0+ no longer requires datum transformation pivots through
-   WGS84, which can introduce errors of up to 2m, but the rest of the
-   tools do not take advantage of it.
+GDAL, PROJ, 및 libgeotiff의 좌표계는 현대적인 케이퍼빌리티를 누락하고 있기 때문에 철저한 리팩토링(refactoring)이 필요합니다:
 
-CSV database
-~~~~~~~~~~~~
+-  PROJ_LIB 및 GDAL_DATA의 꺼려지는 즉석(ad hoc) CSV 데이터베이스는 사용자가 짜증을 내게 하고, 개발자에게는 문제를 일으키며, 좌표계 정의를 상호 운용하는 것을 방해합니다.
 
-The use of a SQLite-based database for EPSG and other definitions will
-allow the projects to add more capability (area-aware validation),
-transition the custom peculiar data structures of the projects to
-something more universally consumable, and promote definition
-interoperability between many coordinate system handling software tools.
+-  GDAL과 PROJ는 OGC WKT 2를 지원하지 않습니다.
+
+-  PROJ 5.0 이상 버전은 더 이상 WGS84에서 최대 2미터까지 오류가 날 수도 있는 원점 변환 회전(datum transformation pivot)을 요구하지 않습니다. 그러나 다른 도구들이 이 이점을 취하지 않습니다.
+
+CSV 데이터베이스
+~~~~~~~~~~~~~~~~
+
+EPSG 및 다른 좌표계 정의에 대해 SQLite 기반 데이터베이스를 사용하면 프로젝트에 더 많은 케이퍼빌리티(영역 인식 검증)를 추가할 수 있고, 프로젝트의 사용자 지정 고유 데이터 구조를 좀 더 보편적으로 사용할 수 있는 데이터 구조로 전환할 수 있으며, 소프트웨어 도구들이 다루는 수많은 좌표계들 간에 좌표계 정의 상호 운용성을 촉진할 수 있습니다.
 
 WKT2
 ~~~~
 
-`OGC WKT2 <http://docs.opengeospatial.org/is/12-063r5/12-063r5.html>`__
-fixes longstanding interoperability coordinate system definition
-discrepancies. WKT2 contains tools for describing time-dependent
-coordinate reference systems. PROJ 5+ is now capable of time-dependent
-transformations, but GDAL and other tools do not yet support them.
+`OGC WKT2 <https://docs.opengeospatial.org/is/12-063r5/12-063r5.html>`_ 가 오래 이어져 왔던 좌표계 정의 상호 운용성 불일치를 수정합니다. WKT 2는 시간 종속 좌표계를 설명하기 위한 도구를 담고 있습니다. PROJ 5 이상 버전은 이제 시간 종속 변환을 할 수 있지만, GDAL 및 다른 도구들이 아직 지원하지 않습니다.
 
-Several countries are updating their geodetic infrastructure to include
-time-dependent coordinate systems. For example, Australia and the United
-States are adapting time-dependent coordinate systems in 2020 and 2022,
-respectively. The familiar NAD83 and NAVD88 in North America being
-replaced by NATRF2022 and NAPGD2022, and the industry WILL have to adapt
-to these challenges sooner or later.
+몇몇 국가들이 국가 측지 인프라스트럭처가 시간 종속 좌표계를 포함시키도록 업데이트하고 있습니다. 예를 들면 호주와 미국이 각각 2020년과 2022년에 시간 종속 좌표계로 전환할 예정입니다. 북미에서 널리 쓰이던 NAD83 및 NAVD88을 NATRF2022 및 NAPGD2022로 대체하는 중이며, 산업계도 빠르건 늦건 이런 문제에 적응해 나가야 할 것입니다.
 
-WGS84 Pivot
-~~~~~~~~~~~
+WGS84 회전
+~~~~~~~~~~
 
-PROJ previously required datum transformation that pivoted through WGS84
-via a 7-parameter transform. This pivot is a practical solution, but it
-can introduce error of about two meters, and many legacy datums cannot
-be defined in terms of WGS84. PROJ 5+ now provides the tools to support
-late-binding through its `transformation pipeline
-framework <https://proj4.org/usage/transformation.html#geodetic-transformation>`__,
-but GDAL and the rest of the tools cannot use it yet. Higher accuracy
-transformations avoid stepping through WGS84 and eliminates extra
-transformation steps with side-car data from a local geodetic authority.
+예전 PROJ는 WGS84에서 파라미터 7개를 사용해서 회전(pivot)시키는 원점 변환을 요구했습니다. 이 회전은 실용적인 해결책이지만 약 2미터에 달하는 오류를 낼 수 있고, 또 수많은 레거시 원점들을 WGS84로 정의할 수 없기도 합니다. PROJ 5.0 이상 버전은 `변환 파이프라인 프레임워크 <https://proj.org/usage/transformation.html#geodetic-transformation>`_ 를 통해 최신 바인딩(late binding)을 지원하는 도구들을 제공하지만, GDAL과 다른 도구들은 아직 이 프레임워크를 사용하지 못 합니다. 정확도가 더 높은 새로운 변환은 WGS84를 거치지 않으며, 지역 측지 기관의 사이드카 데이터를 사용해서 추가 변환 단계를 없앱니다.
 
-Related work in other libraries
+다른 라이브러리에서의 관련 작업
 -------------------------------
 
-This RFC is the last step in the "gdalbarn" work. Previous steps have
-consisted in implementing the related changes in PROJ master per `PROJ
-RFC 2 <https://proj4.org/community/rfc/rfc-2.html>`__ and in libgeotiff
-master per `libgeotiff pull request
-2 <https://github.com/OSGeo/libgeotiff/pull/2>`__.
+이 RFC는 "`gdalbarn <https://gdalbarn.com/>`_" 작업의 마지막 단계입니다. 예전 단계들은 `PROJ RFC 2 <https://proj.org/community/rfc/rfc-2.html>`_ 에 따라 PROJ 마스터 저장소에 관련 변경 사항들을 구현하고 `libgeotiff 풀 요청 2번 <https://github.com/OSGeo/libgeotiff/pull/2>`_ 에 따라 libgeotiff 마스터 저장소에 관련 변경 사항들을 구현하는 단계들이었습니다.
 
-Proposal
---------
+제안
+----
 
-Third-party library requirements
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+제3자 라이브러리 요구 사항
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-GDAL master (future 3.0) will require PROJ master (future PROJ 6.0) and
-libgeotiff master (future libgeotiff 1.5 or 2.0) for build and
-execution.
+GDAL 마스터(향후 3.0버전)를 빌드하고 실행하려면 PROJ 마스터(향후 PROJ 6.0버전)와 libgeotiff 마스터(향후 libgeotiff 1.5 또는 2.0버전)가 필요할 것입니다.
 
-Regarding PROJ, no internal copy of PROJ will be embedded in GDAL
-master. It is not doable of supporting older versions of PROJ, as the
-OGRSpatialReference class has been largely rewritten to take advantage
-of functionality that has been completely moved from GDAL to PROJ: PROJ
-string import and export, WKT string import and export, EPSG database
-exploitation. To be able to use more easily GDAL master and PROJ master
-in complex setups where some GDAL dependencies use a libproj provided by
-the system, and where mixing naively PROJ master and this older libproj
-would result in runtime crashes, PROJ master can be built with
-CFLAGS/CXXFLAGS=-DPROJ_RENAME_SYMBOLS to alias its public symbols, and
-GDAL will be able to use this custom build. Note that this is not
-intended to be used in a long term, since proper packaging solutions
-will eventually use PROJ 6 to rebuild all its reverse dependencies. It
-should be noted also that PROJ is required at configure / nmake time,
-that is the dynamic loading at runtime through dlopen() / LoadLibrary()
-is no longer available.
+PROJ와 관련해서, GDAL 마스터에 어떤 PROJ 내부 복사본도 내장시키지 않을 것입니다. PROJ 예전 버전들을 지원하는 것은 불가능합니다. GDAL로부터 PROJ로 완전히 옮겨진 다음 기능들의 이점을 이용하기 위해 :cpp:class:`OGRSpatialReference` 클래스를 상당 부분 재작성했기 때문입니다:
 
-Regarding libgeotiff, the internal copy in frmts/gtiff/libgeotiff has
-been refreshed with the content of upstream libgeotiff master.
+-  PROJ 문자열 가져오기 및 내보내기
+-  WKT 문자열 가져오기 및 내보내기
+-  EPSG 데이터베이스 이용
 
-All continuous integration systems (Travis-CI and AppVeyor) have been
-updated to build PROJ master as part of the GDAL build.
+일부 GDAL 의존성이 시스템이 제공하는 libproj를 이용하는데 PROJ 마스터와 이 예전 libproj를 아무 생각 없이 혼합해서 런타임 크래시가 발생하는 복잡한 설정(setup)에서 GDAL 마스터와 PROJ 마스터를 좀 더 쉽게 이용하려면, PROJ 마스터의 공개 심볼의 별명을 지정하는 ``CFLAGS/CXXFLAGS=-DPROJ_RENAME_SYMBOLS`` 를 이용해서 PROJ를 빌드하면 됩니다. 이렇게 하면 GDAL이 이 사용자 지정 빌드를 사용할 수 있을 것입니다.
+이 방법은 장기적으로 사용하기 위한 해결책이 아니라는 사실을 기억하십시오. 제대로 된 패키지 작업 솔루션은 결국 PROJ 6를 사용해서 모든 역 의존성을 재작성할 것이기 때문입니다. 환경설정 또는 nmake 시 PROJ가 필요하다는 사실도 기억해둬야 합니다. 런타임 시 dlopen() / LoadLibrary()를 통한 동적 불러오기를 더 이상 사용할 수 없기 때문입니다.
 
-OGRSpatialReference rewrite
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+libgeotiff와 관련해서, :file:`frmts/gtiff/libgeotiff` 에 있는 복사본을 업스트림 libgeotiff 마스터의 내용으로 새로고침했습니다.
 
-The OGRSpatialReference class is central in GDAL/OGR for all coordinate
-reference systems (CRS) manipulations. Up to GDAL 2.4, this class
-contained mostly a OGR_SRSNode root node of a WKT 1 representation, and
-all getters and setters manipulated this tree representation. As part of
-this work, the main object contained internally by OGRSpatialReference
-is now a PROJ PJ object, and methods call PROJ C API getters and setters
-on this PJ object. This enables to be, mostly (*), representation
-independent.
+모든 지속적 통합(Continuous Integration) 시스템이 (Travis-CI 및 AppVeyor가) GDAL 빌드의 일부분으로 PROJ 마스터를 빌드하도록 업데이트했습니다.
 
-WKT1, WKT2, ESRI WKT, PROJ strings import and export is now delegated to
-PROJ. The same holds for import of CRS from the EPSG database, that now
-relies on proj.db SQLite database. Consequently all the data/\*.csv files
-that contained CRS related information have been removed from GDAL. It
-should be noted that "morphing" from ESRI WKT is now done automatically
-when importing WKT.
+OGRSpatialReference 재작성
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-While general semantics of methods like IsSame() or FindMatches() remain
-the same, underneath implementations are substantially different, which
-can lead to different results than previous GDAL versions in some cases.
-In the FindMatches() case, identification of CRS to EPSG entries is
-generally improved due to enhanced query capabilities in the database.
+:cpp:class:`OGRSpatialReference` class is central in GDAL/OGR for all coordinate reference systems (CRS) manipulations.
+Up to GDAL 2.4, this class contained mostly a OGR_SRSNode root node of a WKT 1 representation, and all getters and setters manipulated this tree representation.
+As part of this work, the main object contained internally by OGRSpatialReference is now a PROJ PJ object, and methods call PROJ C API getters and setters on this PJ object.
+This enables to be, mostly (\*), representation independent.
 
-(*) The "mostly" precision is here since it was not practical to do this
-rewrite in every place. So for some methods, an internal WKT1 export is
-still done. This is the case for methods that take a path to a SRS node
-(like "GEOGCS|UNIT") as an argument, or some methods like
-SetProjection(), GetProjParm(), that expect a OGC WKT1 specific name.
-Those are thought to be used mostly be drivers. Changing them to be EPSG
-names would impact a number of drivers, some of them little tested
-regarding SRS support, and which furthermore mostly support WKT1
-representation only.
+WKT1, WKT2, ESRI WKT, PROJ strings import and export is now delegated to PROJ.
+The same holds for import of CRS from the EPSG database, that now relies on proj.db SQLite database.
+Consequently all the :file:`data/*.csv` files that contained CRS related information have been removed from GDAL.
+It should be noted that "morphing" from ESRI WKT is now done automatically when importing WKT.
 
-OGRCoordinateTransformation changes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+While general semantics of methods like IsSame() or FindMatches() remain the same, underneath implementations are substantially different, which can lead to different results than previous GDAL versions in some cases.
+In the FindMatches() case, identification of CRS to EPSG entries is generally improved due to enhanced query capabilities in the database.
+
+*  The "mostly" precision is here since it was not practical to do this rewrite in every place.
+So for some methods, an internal WKT1 export is still done.
+This is the case for methods that take a path to a SRS node (like "GEOGCS|UNIT") as an argument, or some methods like SetProjection(), GetProjParm(), that expect a OGC WKT1 specific name.
+Those are thought to be used mostly be drivers. Changing them to be EPSG names would impact a number of drivers, some of them little tested regarding SRS support, and which furthermore mostly support WKT1 representation only.
+
+OGRCoordinateTransformation 변경 사항
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Since GDAL 2.3 and initial PROJ 5 support, when transforming between two
 CRS we still relied on the PROJ.4 string export of the source and target
@@ -194,8 +139,8 @@ operations that are time-dependent. Related, the transform options of
 the GDALTransform mechanism typically used by gdalwarp now accepts a
 COORDINATE_EPOCH for the same purpose.
 
-Use of OGRSpatialReference in GDAL
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+GDAL에서 OGRSpatialReference 사용
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Currently GDAL datasets accept and return a WKT 1 string to describe the
 SRS. To be more independent of the actual encoding, and for example
@@ -237,8 +182,8 @@ GetProjectionRef() method as \_GetProjectionRef(), and adding:
        return GetSpatialRefFromOldGetProjectionRef();
    }
 
-Default WKT version
-~~~~~~~~~~~~~~~~~~~
+기본 WKT 버전
+~~~~~~~~~~~~~
 
 OGRSpatialReference::exportToWkt() without options will report WKT 1
 (with explicit AXIS nodes. See below "Axis order issues" paragraph) for
@@ -256,12 +201,12 @@ passed in the options of exportToWkt())
 The gdalinfo, ogrinfo and gdalsrsinfo utililies will default to
 outputting WKT2:2018
 
-Axis order issues
-~~~~~~~~~~~~~~~~~
+축 순서 문제점
+~~~~~~~~~~~~~~
 
 This is a recurring pain point. This RFC proposes a new approach
 (without pretending to solving it completely) to what was initially done
-per `RFC 20: OGRSpatialReference Axis Support <./rfc20_srs_axes>`__. The
+per `RFC 20: OGRSpatialReference Axis Support <./rfc20_srs_axes>`_. The
 issue is that CRS official definitions use axis orders that do not
 conform to the way raster or vector data is traditionally encoded in GIS
 applications. The typical example is the Geographic "WGS 84" definition
@@ -293,7 +238,7 @@ DescribeCoverage response to explain how the SRS axis map to the grid
 axis of a coverage
 
 Extract from
-`https://docs.geoserver.org/stable/en/user/extensions/wcs20eo/index.html <https://docs.geoserver.org/stable/en/user/extensions/wcs20eo/index.html>`__
+`https://docs.geoserver.org/stable/en/user/extensions/wcs20eo/index.html <https://docs.geoserver.org/stable/en/user/extensions/wcs20eo/index.html>`_
 for a coverage that uses EPSG:4326
 
 ::
@@ -324,7 +269,7 @@ interpreted as:
 -  3: the third axis of the CRS maps to the third axis of the data
 
 This is similar to the PROJ axisswap operation:
-`https://proj4.org/operations/conversions/axisswap.html <https://proj4.org/operations/conversions/axisswap.html>`__
+`https://proj4.org/operations/conversions/axisswap.html <https://proj4.org/operations/conversions/axisswap.html>`_
 
 By default, on a newly create OGRSpatialReference object,
 GetDataAxisToSRSAxisMapping() returns the identity 1,2[,3], that is,
@@ -389,8 +334,8 @@ we no longer do derogations regarding axis order, but we add an
 additional interface to describe how we actually make our match match
 with the SRS definition.
 
-Driver changes
-~~~~~~~~~~~~~~
+드라이버 변경 사항
+~~~~~~~~~~~~~~~~~~
 
 Raster drivers that returned / accepted a SRS as a WKT string through
 the GetProjectionRef(), SetProjection(), GetGCPProjection() and
@@ -409,8 +354,8 @@ automatically add the "definition_12_063" column to an existing
 gpkg_spatial_ref_sys table if a SRS requiring WKT2 (typically a
 Geographic 3D CRS) is inserted.
 
-Changes in utilities
-~~~~~~~~~~~~~~~~~~~~
+유틸리티 변경 사항
+~~~~~~~~~~~~~~~~~~
 
 -  gdalinfo and ogrinfo reports the data axis to CRS axis mapping
    whenever a CRS is reported. They will also output WKT2_2018 by
@@ -459,16 +404,16 @@ Changes in utilities
    variants: WKT2_2015 and WKT2_2018. It will default to outputting
    WKT2_2018
 
-SWIG binding changes
-~~~~~~~~~~~~~~~~~~~~
+SWIG 바인딩 변경 사항
+~~~~~~~~~~~~~~~~~~~~~
 
 The enhanced ExportToWkt() and OGRCoordinateTransformation methods are
 available through SWIG bindings. May require additional typemaps for
 non-Python languages (particularly for the support of 4D X,Y,Z,time
 coordinates)
 
-Backward compatibility
-----------------------
+하위 호환성
+-----------
 
 This work is intended to be *mostly* backward compatible, yet inevitable
 differences will be found. For example the WKT 1 and PROJ string export
@@ -501,16 +446,16 @@ and SetGCPs(..., const OGRSpatialReference\* poSRS), and the removal of
 their older equivalents using WKT strings instead of a
 OGRSpatialReference\* instance.
 
-Documentation
--------------
+문서화
+------
 
 New methods have been documented, and documentation of existing methods
 has been changed when appropriate during the development. That said, a
 more thorough pass will be needed. The tutorials will also have to be
 updated.
 
-Testing
--------
+테스트
+------
 
 The autotest suite has been adapted in a number of places since the
 expected results have changed for a number of reasons (AXIS node
@@ -526,24 +471,25 @@ strategy in a lot of different places.
 So users and developers are kindly invited to thoroughly test GDAL once
 this work has landed in master.
 
-Implementation
---------------
+구현
+----
 
-Done by Even Rouault, `Spatialys <http://www.spatialys.com>`__.
-Available per `PR 1185 <https://github.com/OSGeo/gdal/pull/1185>`__
-Funded through `gdalbarn <https://gdalbarn.com/>`__ sponsoring.
+이벤 루올(`Spatialys <http://www.spatialys.com>`_)이 `gdalbarn <https://gdalbarn.com/>`_ 의 후원을 받아 이 RFC를 구현했습니다.
 
-While it is provided as a multiple commit for """easier""" review, it
-will be probably squashed in a single commit for inclusion in master, as
-intermediate steps are not all buildable, due to PROJ symbol renames
-having occurred during the development, which would break bisectability.
+제안한 구현은 `풀 요청 1185번 <https://github.com/OSGeo/gdal/pull/1185>`_ 에서 사용할 수 있습니다.
 
-Voting history
---------------
+While it is provided as a multiple commit for """easier""" review, it will be probably squashed in a single commit for inclusion in master, as intermediate steps are not all buildable, due to PROJ symbol renames having occurred during the development, which would break bisectability.
 
-Adopted with +1 from PSC members HowardB, JukkaR, DanielM and EvenR
+투표 이력
+---------
 
-Modifications
--------------
+-  하워드 버틀러 +1
+-  유카 라흐코넨 +1
+-  대니얼 모리셋 +1
+-  이벤 루올 +1
 
-2019-May-02: change mentions of GDAL 2.5 to GDAL 3.0
+수정 사항
+---------
+
+2019년 5월 2일: GDAL 2.5를 GDAL 3.0으로 변경
+
