@@ -1,7 +1,7 @@
 .. _rfc-73:
 
 =======================================================================================================
-RFC 73: WKT2, 최신 바인딩 케이퍼빌리티, 시간 지원 및 통합 좌표계 데이터베이스를 위한 PROJ6 통합
+RFC 73: WKT2, 후기 바인딩 케이퍼빌리티, 시간 지원 및 통합 좌표계 데이터베이스를 위한 PROJ6 통합
 =======================================================================================================
 
 ============ ==========================
@@ -18,7 +18,7 @@ RFC 73: WKT2, 최신 바인딩 케이퍼빌리티, 시간 지원 및 통합 좌�
 이 RFC는 GDAL과 PROJ 6버전의 통합과 관련된 작업을 설명합니다. 이 통합으로 다음과 같은 케이퍼빌리티가 추가됩니다:
 
 -  좌표계 WKT 2 지원
--  좌표계들 간의 좌표 변환을 위한 "최신 바인딩(late binding)" 케이퍼빌리티
+-  좌표계들 간의 좌표 변환을 위한 "후기 바인딩(late binding)" 케이퍼빌리티
 -  좌표 작업을 위한 시간 차원 지원
 -  통합 좌표계 데이터베이스 사용
 
@@ -50,7 +50,7 @@ WKT2
 WGS84 회전
 ~~~~~~~~~~
 
-예전 PROJ는 WGS84에서 파라미터 7개를 사용해서 회전(pivot)시키는 원점 변환을 요구했습니다. 이 회전은 실용적인 해결책이지만 약 2미터에 달하는 오류를 낼 수 있고, 또 수많은 레거시 원점들을 WGS84로 정의할 수 없기도 합니다. PROJ 5.0 이상 버전은 `변환 파이프라인 프레임워크 <https://proj.org/usage/transformation.html#geodetic-transformation>`_ 를 통해 최신 바인딩(late binding)을 지원하는 도구들을 제공하지만, GDAL과 다른 도구들은 아직 이 프레임워크를 사용하지 못 합니다. 정확도가 더 높은 새로운 변환은 WGS84를 거치지 않으며, 지역 측지 기관의 사이드카 데이터를 사용해서 추가 변환 단계를 없앱니다.
+예전 PROJ는 WGS84에서 파라미터 7개를 사용해서 회전(pivot)시키는 원점 변환을 요구했습니다. 이 회전은 실용적인 해결책이지만 약 2미터에 달하는 오류를 낼 수 있고, 또 수많은 레거시 원점들을 WGS84로 정의할 수 없기도 합니다. PROJ 5.0 이상 버전은 `변환 파이프라인 프레임워크 <https://proj.org/usage/transformation.html#geodetic-transformation>`_ 를 통해 후기 바인딩을 지원하는 도구들을 제공하지만, GDAL과 다른 도구들은 아직 이 프레임워크를 사용하지 못 합니다. 정확도가 더 높은 새로운 변환은 WGS84를 거치지 않으며, 지역 측지 기관의 사이드카 데이터를 사용해서 추가 변환 단계를 없앱니다.
 
 다른 라이브러리에서의 관련 작업
 -------------------------------
@@ -81,100 +81,52 @@ libgeotiff와 관련해서, :file:`frmts/gtiff/libgeotiff` 에 있는 복사본�
 OGRSpatialReference 재작성
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-:cpp:class:`OGRSpatialReference` class is central in GDAL/OGR for all coordinate reference systems (CRS) manipulations.
-Up to GDAL 2.4, this class contained mostly a OGR_SRSNode root node of a WKT 1 representation, and all getters and setters manipulated this tree representation.
-As part of this work, the main object contained internally by OGRSpatialReference is now a PROJ PJ object, and methods call PROJ C API getters and setters on this PJ object.
-This enables to be, mostly (\*), representation independent.
+GDAL/OGR에서는 :cpp:class:`OGRSpatialReference` 클래스가 모든 좌표계 조작을 관장합니다. GDAL 2.4버전까지, 이 클래스는 주로 WKT 1 표현의 OGR_SRSNode 루트 노드를 담고 있었으며 모든 게터(getter)와 세터(setter)가 이 트리 표현을 조작했습니다. 이 RFC의 일부분으로서, :cpp:class:`OGRSpatialReference` 가 내부적으로 담고 있는 주요 객체가 이제 PROJ PJ 객체이며, 메소드는 이 PJ 객체 상에서 PROJ C API 게터 및 세터를 호출합니다. 이는 (``*``)가 대부분 표현 독립적일 수 있게 해줍니다.
 
-WKT1, WKT2, ESRI WKT, PROJ strings import and export is now delegated to PROJ.
-The same holds for import of CRS from the EPSG database, that now relies on proj.db SQLite database.
-Consequently all the :file:`data/*.csv` files that contained CRS related information have been removed from GDAL.
-It should be noted that "morphing" from ESRI WKT is now done automatically when importing WKT.
+WKT1, WKT2, ESRI WKT, PROJ 문자열 가져오기 및 내보내기는 이제 PROJ로 위임됩니다. 이제 proj.db SQLite 데이터베이스에 의존하는 EPSG 데이터베이스로부터 좌표계 가져오기에 대해서도 마찬가지입니다. 결과적으로 GDAL로부터 좌표계 관련 정보를 담고 있던 모든 :file:`data/*.csv` 파일을 제거했습니다. 이제 WKT를 가져올 때 ESRI WKT로부터의 "모핑(morphing)"을 자동으로 수행합니다.
 
-While general semantics of methods like IsSame() or FindMatches() remain the same, underneath implementations are substantially different, which can lead to different results than previous GDAL versions in some cases.
-In the FindMatches() case, identification of CRS to EPSG entries is generally improved due to enhanced query capabilities in the database.
+IsSame() 또는 FindMatches() 같은 메소드들의 일반 의미 체계는 그대로 유지되지만, 하부 구현은 상당히 다르기 때문에 동일한 상황에서 예전 GDAL 버전들과는 다른 결과를 낼 수 있습니다. FindMatches() 메소드의 경우  데이터베이스에서의 쿼리 케이퍼빌리티가 개선되었기 때문에 일반적으로 EPSG 항목들에 대한 좌표계 식별은 향상됩니다.
 
-*  The "mostly" precision is here since it was not practical to do this rewrite in every place.
-So for some methods, an internal WKT1 export is still done.
-This is the case for methods that take a path to a SRS node (like "GEOGCS|UNIT") as an argument, or some methods like SetProjection(), GetProjParm(), that expect a OGC WKT1 specific name.
-Those are thought to be used mostly be drivers. Changing them to be EPSG names would impact a number of drivers, some of them little tested regarding SRS support, and which furthermore mostly support WKT1 representation only.
+*  코드의 모든 위치에서 이렇게 재작성하는 일은 실용적이지 않았기 때문에 "대부분의" 정밀도는 이 클래스 안에 있습니다. 즉 일부 메소드의 경우, 내부적으로 계속 WKT 1 내보내기를 실행합니다. ("GEOGCS|UNIT" 같은) 공간 좌표계 노드를 가리키는 경로를 인자로서 받는 메소드, 또는 OGC WKT 1 특화 이름을 예상하는 SetProjection(), GetProjParm() 같은 일부 메소드가 이에 해당합니다. 주로 드라이버들이 이런 이름을 사용한다고 생각됩니다. OGC WKT 1 이름을 EPSG 이름으로 바꾸면 여러 드라이버에 영향을 미칠 것입니다. 이 가운데 몇몇 드라이버는 공간 좌표계 지원이라는 측면에서 거의 테스트되지 않았는데, 따라서 주로 WKT 1 표현만 지원합니다.
 
 OGRCoordinateTransformation 변경 사항
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Since GDAL 2.3 and initial PROJ 5 support, when transforming between two
-CRS we still relied on the PROJ.4 string export of the source and target
-CRS to create a coordinate operation pipeline. So this limited to
-"early-binding" operations, that is using the WGS84 pivot through
-towgs84 or nadgrids PROJ keywords. Now PROJ new capabilities to find
-appropriate coordinate operations between two CRS is used, offering
-"late-binding" capabilities to take into account other pivots than WGS84
-or area of uses.
+GDAL 2.3버전에서 PROJ 5를 처음 지원한 후로, 두 좌표계 간에 변환하는 경우 좌표 작업 파이프라인을 생성하기 위해 여전히 소스 및 대상 좌표계의 PROJ.4 문자열 내보내기에 의존하고 있었습니다. 즉 'towgs84' 또는 'nadgrids' PROJ 키워드를 통해 WGS84 회전을 사용하는 "초기 바인딩(early binding)"에 제한되어 있었습니다. 이제 두 좌표계 사이에서 적절한 좌표 작업을 찾을 수 있는 새로운 PROJ 케이퍼빌리티를 사용하기 때문에 "후기 바인딩" 케이퍼빌리티가 WGS84 또는 사용 영역(area of use) 이외의 다른 회전을 연산에 넣을 수 있습니다.
 
-OGRCreateCoordinateOperation() now takes an extra optional arguments to
-define options.
+OGRCreateCoordinateOperation()이 이제 옵션들을 정의하기 위한 선택적인 추가 인자를 받습니다.
 
-One of those options is to define an area of interest that will be taken
-into account when searching candidate operations. If several operations
-match, the "best" (according to PROJ sorting criterion) will be
-selected. Note: it will systematically be used even if later calls to
-Transform() use coordinates outside of the initial area of interest.
+이런 옵션 가운데 하나는 후보 작업을 검색하는 경우 연산에 넣을 관심 영역(area of interest)을 정의합니다. 여러 작업이 일치하는 경우, (PROJ 정렬 기준에 따라) "최적(best)" 작업을 선택할 것입니다.
+주의: 이후 Transform() 호출이 처음 관심 영역 밖에 있는 좌표를 사용하더라도 선택한 최적 작업을 시스템적으로 사용할 것입니다.
 
-Another option is the ability to specify the coordinate operation to
-apply, so as an override of what GDAL / PROJ would have automatically
-computed, either as a PROJ string (generally a +proj=pipeline), or a WKT
-coordinate operation/concatenated operation. Users can typically select
-a specific coordinate operation by using the new PROJ projinfo utility
-that can return the candidate operations from a source_crs / target_crs
-tuple.
+또다른 옵션은 적용할 좌표 작업을 지정할 수 있는 기능으로, (일반적으로 ``+proj=pipeline`` 인) PROJ 문자열 또는 WKT 좌표 작업/연쇄 작업 가운데 하나로 GDAL / PROJ가 자동 계산했을 작업을 대체합니다. 사용자들은 일반적으로 source_crs / target_crs 튜플로부터 후보 작업을 반환할 수 있는 새로운 PROJ projinfo 유틸리티를 사용해서 특정 좌표 작업을 선택할 수 있습니다.
 
-When no option is specified, GDAL will use PROJ to list all candidate
-coordinate operations. For each call to Transform(), it will compute the
-average coordinate of the input coordinates and use it to determine the
-best coordinate operation from the candidate ones.
+어떤 작업도 지정되지 않은 경우, GDAL은 PROJ를 사용해서 모든 좌표 작업 후보들을 목록화할 것입니다. Transform()을 호출할 때마다, 입력 좌표의 평균 좌표를 계산해서 후보 작업들로부터 최적 좌표 작업을 판단하는 데 사용할 것입니다.
 
-The Transform() method now takes an extra argument to contain the
-coordinate epoch (generally as a decimal year value) for coordinate
-operations that are time-dependent. Related, the transform options of
-the GDALTransform mechanism typically used by gdalwarp now accepts a
-COORDINATE_EPOCH for the same purpose.
+좌표 작업이 시간 종속적인 경우 이제 Transform() 메소드가 좌표 시대(coordinate epoch)를 담을 수 있는 추가 인자를 (일반적으로 십진수 연도 값으로) 받습니다. 이와 관련해서, 일반적으로 gdalwarp가 사용하는 :cpp:class:`GDALTransform` 의 변환 옵션들이 이제 동일한 목적으로 COORDINATE_EPOCH를 받아들입니다.
 
 GDAL에서 OGRSpatialReference 사용
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Currently GDAL datasets accept and return a WKT 1 string to describe the
-SRS. To be more independent of the actual encoding, and for example
-allowing a GeoPackage raster dataset to be able to use WKT 2, it is
-desirable to be able to attach a SRS that is not dependent of the
-representation (WKT 1 or WKT 2), hence using a OGRSpatialReference
-object instead of a const char\* string.
+현재 GDAL 데이터셋은 공간 좌표계를 서술하기 위해 WKT 1 문자열을 받아들이고 반환합니다. 실제 인코딩으로부터 좀 더 독립적이기 위해 그리고 예를 들어 지오패키지 래스터 데이터셋이 WKT 2를 이용할 수 있도록 하기 위해, (WKT 1 또는 WKT 2) 표현에 의존적이지 않은 공간 좌표계를 추가할 수 있는 기능이 필요합니다. 따라서 ``const char*`` 문자열 대신 :cpp:class:`OGRSpatialReference` 객체를 사용하는 편이 좋습니다.
 
-The following new methods are added in GDALDataset:
+:cpp:class:`GDALDataset` 에 다음 새 메소드들을 추가합니다:
 
--  virtual const OGRSpatialReference\* GetSpatialRef() const;
--  virtual CPLErr SetSpatialRef(const OGRSpatialReference*);
--  virtual const OGRSpatialReference\* GetGCPSpatialRef() const;
--  virtual CPLErr SetGCPs(int nGCPCount, const GDAL_GCP *pasGCPList,
-   const OGRSpatialReference*);
+-  ``virtual const OGRSpatialReference* GetSpatialRef() const;``
+-  ``virtual CPLErr SetSpatialRef(const OGRSpatialReference*);``
+-  ``virtual const OGRSpatialReference* GetGCPSpatialRef() const;``
+-  ``virtual CPLErr SetGCPs(int nGCPCount, const GDAL_GCP *pasGCPList, const OGRSpatialReference*);``
 
-To ease the transition, the following non virtual methods are added in
-GDALDataset:
+전환을 쉽게 하기 위해, :cpp:class:`GDALDataset` 에 다음과 같은 비가상 메소드들을 추가합니다:
 
--  const OGRSpatialReference\* GetSpatialRefFromOldGetProjectionRef()
-   const;
--  CPLErr OldSetProjectionFromSetSpatialRef(const OGRSpatialReference\*
-   poSRS);
--  const OGRSpatialReference\* GetGCPSpatialRefFromOldGetGCPProjection()
-   const;
--  CPLErr OldSetGCPsFromNew( int nGCPCount, const GDAL_GCP \*pasGCPList,
-   const OGRSpatialReference \* poGCP_SRS );
+-  ``const OGRSpatialReference* GetSpatialRefFromOldGetProjectionRef() const;``
+-  ``CPLErr OldSetProjectionFromSetSpatialRef(const OGRSpatialReference* poSRS);``
+-  ``const OGRSpatialReference* GetGCPSpatialRefFromOldGetGCPProjection() const;``
+-  ``CPLErr OldSetGCPsFromNew( int nGCPCount, const GDAL_GCP *pasGCPList, const OGRSpatialReference * poGCP_SRS );``
 
-and the previous GetProjectionRef(), SetProjection(), GetGCPProjection()
-and SetGCPs() are available as projected virtual methods, prefixed by an
-underscore
+그 다음 예전 GetProjectionRef(), SetProjection(), GetGCPProjection() 및 SetGCPs() 앞에 언더바(``_``)를 붙여서 투영 가상 메소드로서 사용할 수 있습니다.
 
-This way to convert an existing driver, it is a matter of renaming its
-GetProjectionRef() method as \_GetProjectionRef(), and adding:
+기존 드라이버를 변환하는 이 방법은 드라이버의 GetProjectionRef() 메소드를 \_GetProjectionRef()로 재명명하고 다음을 추가하는 것입니다:
 
 ::
 
@@ -185,61 +137,28 @@ GetProjectionRef() method as \_GetProjectionRef(), and adding:
 기본 WKT 버전
 ~~~~~~~~~~~~~
 
-OGRSpatialReference::exportToWkt() without options will report WKT 1
-(with explicit AXIS nodes. See below "Axis order issues" paragraph) for
-CRS compatibles of this representation, and otherwise use WKT2:2018
-(typically for Geographic 3D CRS).
+:cpp:func:`OGRSpatialReference::exportToWkt()` 을 옵션 없이 호출하면 이 표현으로 된 호환 가능한 좌표계에 대한 WKT 1을 (명확한 AXIS 노드들과 함께. 다음 "축 순서 문제점" 단락을 참조하십시오) 리포트할 것입니다. 옵션을 지정해서 호출하면 (일반적으로 3차원 지리 좌표계를 위한) WKT2:2018을 사용할 것입니다.
 
-An enhanced version of exportToWkt() accepts options to specify the
-exact WKT version used, if multi-line or single-line output must be
-used, etc.
+exportToWkt() 개선 버전은 여러 줄 또는 한 줄 산출물을 사용해야만 하는 경우를 포함하는 여러 상황에서 사용하는 WKT의 정확한 버전을 지정하는 옵션을 받아들입니다.
 
-Alternatively the OSR_WKT_FORMAT configuration option can be used to
-modify the WKT version used by exportToWk() (when no explicit version is
-passed in the options of exportToWkt())
+아니면 (exportToWkt()의 옵션으로 어떤 명확한 버전도 전송하지 않은 경우) OSR_WKT_FORMAT 환경설정 옵션을 사용해서 exportToWkt()가 사용하는 WKT 버전을 수정할 수 있습니다.
 
-The gdalinfo, ogrinfo and gdalsrsinfo utililies will default to
-outputting WKT2:2018
+gdalinfo, ogrinfo 및 gdalsrsinfo 유틸리티는 기본값으로 WKT2:2018을 산출할 것입니다.
 
 축 순서 문제점
 ~~~~~~~~~~~~~~
 
-This is a recurring pain point. This RFC proposes a new approach
-(without pretending to solving it completely) to what was initially done
-per `RFC 20: OGRSpatialReference Axis Support <./rfc20_srs_axes>`_. The
-issue is that CRS official definitions use axis orders that do not
-conform to the way raster or vector data is traditionally encoded in GIS
-applications. The typical example is the Geographic "WGS 84" definition
-from EPSG, EPSG:4326, which uses latitude as the first axis and
-longitude as the second axis. RFC 20 decided that by default the AXIS
-definition would be stripped off from the WKT when the axis order from
-the authority did not match the GIS friendly one (and use a custom EPSGA
-authority to have WKT with official AXIS elements)
+축 순서는 반복되는 문제점입니다. 이 RFC는 `RFC 20: OGRSpatialReference 축 지원 <./rfc20_srs_axes>`_ 에 따라 초기에 수행되었던 내용에 대해 (완전히 해결했다는 척을 하지 않고) 새로운 접근법을 제안합니다. 이 문제점은 공식 좌표계 정의가 GIS 응용 프로그램에서 래스터 또는 벡터 데이터가 일반적으로 인코딩되는 방식을 준수하지 않는 축 순서를 사용한다는 것입니다. 전형적인 예시가 바로 EPSG, EPSG:4326의 "WGS 84" 지리 좌표계 정의로, 위도를 첫 번째 축 그리고 경도를 두 번째 축으로 사용합니다. RFC 20은 기관의 축 순서가 GIS 친화적인 순서와 일치하지 않는 경우 기본적으로 WKT로부터 AXIS 정의를 제거할 것을 (그리고 사용자 지정 EPSGA 기관 코드에 공식 AXIS 요소를 가진 WKT를 사용할 것을) 결정했습니다.
 
-This was technically possible since the WKT 1 grammar makes the AXIS
-element definition. However removal of the AXIS definitions was a
-potential source of confusion as it was unclear which axis order was
-actually used. Furthermore, in WKT2, the AXIS element is compulsory, and
-the internal PROJ representation requires also a coordinate system to be
-defined. So there would have been two unsatisfactory options:
+AXIS 요소 정의가 WKT 1 문법으로 작성되었기 때문에 이 접근법이 기술적으로 가능했습니다. 하지만 AXIS 정의를 제거한다는 것은 실제로 어떤 축 순서를 사용하는지가 명확하지 않기 때문에 잠재적인 혼란의 이유가 되었습니다. 게다가 WKT 2에서는 AXIS 요소가 필수적이며 내부 PROJ 표현도 좌표계를 정의할 것을 요구합니다. 즉 다음과 같은 두 가지 만족스럽지 않은 선택지가 남게 됩니다:
 
--  return patched versions of the official definition with the GIS
-   friendly order, while still using the official authority code.
-   Practical since we keep the link with the source code, but a lie
-   since we modify it. Users would not know whether they must trust the
-   encoded order, or the official order from the authority.
--  return patched versions of the official definition with the GIS
-   friendly order, but without the official authority code. This would
-   be compliant, but we would lose the link with the authority code.
+-  계속 공식 기관 코드를 사용하면서도 GIS 친화적 순서를 가진 공식 축 정의의 패치된 버전을 반환합니다. 소스 코드와의 링크를 유지하고 있기 때문에 실용적인 접근법이지만, 공식 정의를 수정하기 때문에 거짓된 방법이기도 합니다. 사용자는 인코딩된 순서를 신뢰해야 하는지 아니면 기관의 공식 순서를 신뢰해야 하는지 알 수 없게 될 것입니다.
 
-The solution put forward in this RFC is to add a "data axis to SRS axis
-mapping" concept, which is a bit similar to what is done in WCS
-DescribeCoverage response to explain how the SRS axis map to the grid
-axis of a coverage
+-  공식 기관 코드 없이 GIS 친화적 순서를 가진 공식 축 정의의 패치된 버전을 반환합니다. 이 접근법은 GIS 응용 프로그램에서 래스터 또는 벡터 데이터가 일반적으로 인코딩되는 방식을 준수하지만, 공식 기관 코드와의 링크를 잃게 될 것입니다.
 
-Extract from
-`https://docs.geoserver.org/stable/en/user/extensions/wcs20eo/index.html <https://docs.geoserver.org/stable/en/user/extensions/wcs20eo/index.html>`_
-for a coverage that uses EPSG:4326
+이 RFC에서 지향하는 해결책은 "데이터 축을 공간 좌표계 축에 매핑" 개념을 추가하는 것입니다. 이 접근법은 WCS DescribeCoverage 응답에서 공간 좌표계 축이 어떻게 커버리지의 그리드 축에 매핑되는지 설명하기 위해 수행하는 방식과 조금 비슷합니다.
+
+다음은 EPSG:4326을 사용하는 커버리지에 대한 `GeoServer 문서 <https://docs.geoserver.org/stable/en/user/extensions/wcs20eo/index.html>`_ 에서 발췌한 내용입니다.
 
 ::
 
@@ -250,116 +169,67 @@ for a coverage that uses EPSG:4326
            </gml:GridFunction>
          </gml:coverageFunction>
 
-A similar mapping is added to define how the 'x' and 'y' components in
-the geotransform matrix or in a OGRGeometry map to the axis defined by
-the CRS definition.
+이와 유사한 매핑을 추가해서 지리변환 행렬 또는 :cpp:class:`OGRGeometry` 에서 'x' 및 'y' 구성요소를 어떻게 좌표 정의가 정의한 축에 매핑하는지 정의합니다.
 
-Such mapping is given by a new method in OGRSpatialReference
+:cpp:class:`OGRSpatialReference` 의 새로운 메소드가 이런 매핑을 지원합니다.
 
 ::
 
    const std::vector<int>& GetDataAxisToSRSAxisMapping() const
 
-To explain its semantics, imagine that it return 2,-1,3. That is
-interpreted as:
+이 메소드의 의미 체계를 설명하려면, 먼저 이 메소드가 2, -1, 3을 반환한다고 생각해보십시오. 이 숫자들은 다음과 같이 해석됩니다:
 
--  2: the first axis of the CRS maps to the second axis of the data
--  -1: the second axis of the CRS maps to the first axis of the data,
-   with values negated
--  3: the third axis of the CRS maps to the third axis of the data
+-  2: 좌표계의 첫 번째 축을 데이터의 두 번째 축에 매핑합니다.
+-  -1: 좌표계의 두 번째 축을 데이터의 첫 번째 축에, 축의 값을 음의 값으로 변환해서 매핑합니다.
+-  3: 좌표계의 세 번째 축을 데이터의 세 번째 축에 매핑합니다.
 
-This is similar to the PROJ axisswap operation:
-`https://proj4.org/operations/conversions/axisswap.html <https://proj4.org/operations/conversions/axisswap.html>`_
+이는 `PROJ axisswap 작업 <https://proj.org/operations/conversions/axisswap.html>`_ 과 유사합니다.
 
-By default, on a newly create OGRSpatialReference object,
-GetDataAxisToSRSAxisMapping() returns the identity 1,2[,3], that is,
-conform to the axis order defined by the authority.
+기본적으로, :cpp:class:`OGRSpatialReference` 객체를 새로 생성할 때 GetDataAxisToSRSAxisMapping()가 기관이 정의한 축 순서를 준수하는 1,2[,3] 식별 정보를 반환합니다.
 
-As all GDAL and a vast majority of OGR drivers depend on using the "GIS
-axis mapping", a method SetAxisMappingStrategy(
-OAMS_TRADITIONAL_GIS_ORDER or OAMS_AUTHORITY_COMPLIANT or OAMS_CUSTOM )
-is added to make their job of specifying the axis mapping easier;
+모든 GDAL 드라이버와 거의 대부분의 OGR 드라이버가 "GIS 축 매핑" 사용에 의존하기 때문에, ``SetAxisMappingStrategy( OAMS_TRADITIONAL_GIS_ORDER 또는 OAMS_AUTHORITY_COMPLIANT 또는 OAMS_CUSTOM )`` 메소드를 추가해서 드라이버가 쉽게 축 매핑을 지정할 수 있도록 합니다.
 
-OAMS_TRADITIONAL_GIS_ORDER means:
+OAMS_TRADITIONAL_GIS_ORDER는 다음을 의미합니다:
 
--  for geographic 2D CRS,
+-  2차원 지리 좌표계의 경우,
 
-   -  for Latitude NORTH, Longitude EAST (such as EPSG:4326),
-      GetDataAxisToSRSAxisMapping() returns {2,1}, meaning that the data
-      order is longitude, latitude
-   -  for Longitude EAST, Latitude NORTH (such as OGC:CRS84), returns
-      {1,2}
+   -  (EPSG:4326처럼) Latitude NORTH, Longitude EAST라면 GetDataAxisToSRSAxisMapping()가 {2,1}을 반환합니다. 데이터 축 순서가 경도, 위도라는 뜻입니다.
+   -  (OGC:CRS84처럼) Longitude EAST, Latitude NORTH라면 {1,2}를 반환합니다.
 
--  for projected CRS,
+-  투영 좌표계의 경우,
 
-   -  for EAST, NORTH (ie most projected CRS), return {1,2}
-   -  for NORTH, EAST, return {2,1}
-   -  for North Pole CRS, with East/SOUTH, North/SOUTH, such as
-      EPSG:5041 ("WGS 84 / UPS North (E,N)"), would return {1,2}
-   -  for North Pole CRS, with northing/SOUTH, easting/SOUTH, such as
-      EPSG:32661 ("WGS 84 / UPS North (N,E)"), would return {2,1}
-   -  similarly for South Pole CRS
-   -  for all other cases, return {1,2}
+   -  (대부분의 투영 좌표계처럼) EAST, NORTH라면 {1,2}를 반환합니다.
+   -  NORTH, EAST라면 {2,1}을 반환합니다.
+   -  EPSG:5041("WGS 84 / UPS North (E,N)")와 같이 East/SOUTH, North/SOUTH인 북극 좌표계라면 {1,2}를 반환할 것입니다.
+   -  EPSG:32661("WGS 84 / UPS North (N,E)")와 같이 northing/SOUTH, easting/SOUTH인 북극 좌표계라면 {2,1}을 반환할 것입니다.
+   -  남극 좌표계도 마찬가지입니다.
+   -  다른 모든 경우 {1,2}를 반환합니다.
 
-OGRCreateCoordinateTransformation() now honors the data axis to srs axis
-mapping.
+OGRCreateCoordinateTransformation()가 이제 "데이터 축을 공간 좌표계 축에 매핑" 개념을 지원합니다.
 
-Note: contrary to what I indicated in a previous email, gdaltransform
-behavior is unchanged, since internally the GDALTransform mechanism
-forces the GIS friendly order.
+주의: 저자가 예전 이메일에 썼던 내용과는 반대로, gdaltransform 유틸리티의 습성은 바뀌지 않습니다. :cpp:class:`GDALTransform` 메커니즘이 내부적으로 GIS 친화적 순서를 강제하기 때문입니다.
 
-Raster datasets are modified to call
-SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER) on the
-OGRSpatialReference\* they return, and assumes it in SetSpatialRef()
-(assumed and unchecked for now)
+래스터 데이터셋이 자신이 반환하는 ``OGRSpatialReference*`` 상에서 ``SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER)`` 를 호출하고 SetSpatialRef()에서 이를 가정하도록 수정합니다. (현재 가정만 하고 확인하지는 않습니다.)
 
-Vector layers mostly all call
-SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER) on the
-OGRSpatialReference\* returned by GetSpatialRef(). In the case of the
-GML driver, if the user defines the INVERT_AXIS_ORDER_IF_LAT_LONG open
-option, axis swapping is not done (as previously) and the
-AUTHORITY_COMPLIANT strategy is used. ICreateLayer() when receiving a
-OGRSpatialReference\* may decide (and most will do it) to change the
-axis mapping strategy. That is: if it receives a OGRSpatialReference
-with AUTHORITY_COMPLIANT order, it may decide to switch to
-TRADITIONAL_GIS_ORDER and GetSpatialRef()::GetDataAxisToSRSAxisMapping()
-will reflect that. ogr2ogr is modified to do the geometry axis swapping
-in that case.
+벡터 레이어는 주로 GetSpatialRef()가 반환하는 ``OGRSpatialReference*`` 상에서 ``SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER)`` 를 호출합니다. GML 드라이버의 경우, 사용자가 INVERT_AXIS_ORDER_IF_LAT_LONG 열기 옵션을 정의한다면 (예전과 마찬가지로) 축 순서 뒤바꾸기를 수행하지 않고 AUTHORITY_COMPLIANT 전략을 사용합니다. ``OGRSpatialReference*`` 를 받을 때 ICreateLayer()가 축 매핑 전략을 변경할 수도 있습니다. (대부분의 경우 변경할 것입니다.) 다시 말해 GML 드라이버가 AUTHORITY_COMPLIANT 순서를 가진 :cpp:class:`OGRSpatialReference` 객체를 받는 경우 TRADITIONAL_GIS_ORDER로 변경하도록 결정할 수도 있으며 :cpp:func:`GetSpatialRef()::GetDataAxisToSRSAxisMapping()` 이 이를 반영할 것입니다. 이런 경우 ogr2ogr가 도형 축 순서 뒤바꾸기를 수행하도록 수정합니다.
 
-Related to that change, WKT 1 export now always return the AXIS element,
-and EPSG:xxxx thus behaves identically to EPSGA:xxxx
+이 변경 사항과 관련해서 WKT 1 내보내기는 이제 항상 AXIS 요소를 반환하고, 따라서 EPSG:xxxx는 EPSGA:xxxx와 동일하게 동작합니다.
 
-So a summary view of this approach is that in the formal SRS definition,
-we no longer do derogations regarding axis order, but we add an
-additional interface to describe how we actually make our match match
-with the SRS definition.
+즉 이 접근법을 요약하자면: 공간 좌표계 공식 정의에서 축 순서를 더 이상 훼손하지 않지만, 실제로 공간 좌표계 정의와 일치하게 만드는 방법을 설명할 수 있는 추가적인 인터페이스를 추가합니다.
 
 드라이버 변경 사항
 ~~~~~~~~~~~~~~~~~~
 
-Raster drivers that returned / accepted a SRS as a WKT string through
-the GetProjectionRef(), SetProjection(), GetGCPProjection() and
-SetGCPs() methods have been upgraded to use the new virtual methods, in
-most cases by using the compatibility layer.
+대부분의 경우 호환성 레이어를 사용해서, GetProjectionRef(), SetProjection(), GetGCPProjection() 및 SetGCPs() 메소드들을 통해 공간 좌표계를 WKT 문자열로 반환하는/받아들이는 래스터 드라이버들이 새 가상 메소드들을 이용하도록 업그레이드했습니다.
 
-The GDALPamDataset (PAM .aux.xml files) and the GDAL VRT drivers have
-been fully upgraded to support the new interfaces, and
-serialize/deserialize the data axis to SRS axis mapping values.
+:cpp:class:`GDALPamDataset` (PAM .aux.xml 파일) 및 GDAL VRT 드라이버가 새 인터페이스를 지원하고 데이터 축을 공간 좌표계 축에 매핑한 값들을 직렬화(serialize)/직렬화 해제(deserialize)하도록 완전히 업그레이드했습니다.
 
-The GeoPackage driver now fully supports the official "gpkg_crs_wkt"
-extension used to store WKT 2 string definitions in the
-gpkg_spatial_ref_sys table. The driver attempts at not using the
-extension when SRS can be encoded as WKT1 strings, and will
-automatically add the "definition_12_063" column to an existing
-gpkg_spatial_ref_sys table if a SRS requiring WKT2 (typically a
-Geographic 3D CRS) is inserted.
+지오패키지 드라이버가 이제 'gpkg_spatial_ref_sys' 테이블에 WKT 2 문자열 정의를 저장하기 위해 사용되는 공식 "gpkg_crs_wkt" 확장 사양을 완전하게 지원합니다. 이 드라이버는 공간 좌표계를 WKT 1 문자열로 인코딩할 수 있는 경우 이 확장 사양을 사용하지 않으려 시도하고, WKT 2를 필요로 하는 공간 좌표계(일반적으로 3차원 지리 좌표계)가 삽입되는 경우 자동적으로 기존 'gpkg_spatial_ref_sys' 테이블에 "definition_12_063" 열을 추가할 것입니다.
 
 유틸리티 변경 사항
 ~~~~~~~~~~~~~~~~~~
 
--  gdalinfo and ogrinfo reports the data axis to CRS axis mapping
-   whenever a CRS is reported. They will also output WKT2_2018 by
-   default, unless "-wkt_format wkt1" is specified.
+-  gdalinfo 및 ogrinfo가 좌표계를 리포트할 때마다 "데이터 축을 좌표계 축에 매핑"을 리포트합니다. "-wkt_format wkt1"을 지정하지 않는 이상 이 두 유틸리티는 기본적으로 WKT2_2018로도 출력할 것입니다.
 
 ::
 
@@ -389,87 +259,57 @@ Geographic 3D CRS) is inserted.
    Origin = (2.000000000000000,49.000000000000000)
    Pixel Size = (0.100000000000000,-0.100000000000000)
 
--  gdalwarp, ogr2ogr and gdaltransform have gained a -ct switch that can
-   be used by advanced users to specify a coordinate operation, either
-   as a PROJ string (generally a +proj=pipeline), or a WKT coordinate
-   operation/concatenated operation, as explained in the above
-   "OGRCoordinateTransformation changes" paragraph. Note: the pipeline
-   must take into account the axis order of the CRS, even if the
-   underlying raster/vector drivers use the "GIS friendly" order. For
-   example "+proj=pipeline +step +proj=axisswap +order=2,1 +step
-   +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm +zone=31
-   +ellps=WGS84" when transforming from EPSG:4326 to EPSG:32631.
+-  gdalwarp, ogr2ogr 및 gdaltransform에 고급 사용자가 앞의 "OGRCoordinateTransformation 변경 사항" 단락에서 설명한 대로 (일반적으로 ``+proj=pipeline`` 인) PROJ 문자열 또는 WKT 좌표 작업/연쇄 작업 가운데 하나로 좌표 작업을 지정하기 위해 사용할 수 있는 "-ct" 스위치를 추가합니다.
+   주의: 기저 래스터/벡터 드라이버가 "GIS 친화적인" 축 순서를 사용하더라도 파이프라인은 좌표계의 축 순서를 고려해야만 합니다. 예를 들어 EPSG:4326로부터 EPSG:32631로 변환하는 경우 ``+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm +zone=31 +ellps=WGS84`` 를 사용해야 합니다.
 
--  gdalsrsinfo is enhanced to be able to specify the 2 new supported WKT
-   variants: WKT2_2015 and WKT2_2018. It will default to outputting
-   WKT2_2018
+-  gdalsrsinfo가 WKT2_2015 및 WKT2_2018 2개의 새로 지원하는 WKT 변이형을 지정할 수 있도록 개선합니다. 기본값은 WKT2_2018로 출력하는 것입니다.
 
 SWIG 바인딩 변경 사항
 ~~~~~~~~~~~~~~~~~~~~~
 
-The enhanced ExportToWkt() and OGRCoordinateTransformation methods are
-available through SWIG bindings. May require additional typemaps for
-non-Python languages (particularly for the support of 4D X,Y,Z,time
-coordinates)
+SWIG 바인딩을 통해 개선된 ExportToWkt() 및 OGRCoordinateTransformation() 메소드를 사용할 수 있습니다.
+파이썬이 아닌 언어의 경우 (특히 4차원 X, Y, Z, 시간 좌표를 지원하기 위해) 추가적인 유형 매핑이 필요할 수도 있습니다.
 
 하위 호환성
 -----------
 
-This work is intended to be *mostly* backward compatible, yet inevitable
-differences will be found. For example the WKT 1 and PROJ string export
-has been completely rewritten in PROJ, and so while being hopefully
-equivalent to what GDAL 2.4 or earlier generated, this is not strictly
-identical: number of significant digits, order of PROJ parameters,
-rounding, etc etc...
+이 작업의 의도는 '대부분' 하위 호환성을 확보하려는 것이지만, 그래도 어쩔 수 없는 차이점이 나타날 것입니다. 예를 들면 PROJ에 WKT 1 및 PROJ 문자열 내보내기를 완전히 재작성했기 때문에, GDAL 2.4 이전 버전들이 생성하는 내용과 일치하기를 바라지만 엄격하게 동일하지는 않습니다: 유효 숫자(significant digit)의 개수, PROJ 파라미터들의 순서, 반올림, ...
 
-MIGRATION_GUIDE.TXT has been updated to reflect some differences:
+몇몇 차이점을 반영시키기 위해 :file:`MIGRATION_GUIDE.TXT` 를 업데이트했습니다:
 
--  OSRImportFromEPSG() takes into account official axis order.
--  removal of OPTGetProjectionMethods(), OPTGetParameterList() and
-   OPTGetParameterInfo() No equivalent.
--  removal of OSRFixup() and OSRFixupOrdering(): no longer needed since
-   objects constructed are always valid
--  removal of OSRStripCTParms(). Use OSRExportToWktEx() instead with the
-   FORMAT=SQSQL option
--  exportToWkt() outputs AXIS nodes
--  OSRIsSame(): now takes into account data axis to CRS axis mapping,
-   unless IGNORE_DATA_AXIS_TO_SRS_AXIS_MAPPING=YES is set as an option
-   to OSRIsSameEx()
--  ogr_srs_api.h: SRS_WKT_WGS84 macro is no longer declared by default
-   since WKT without AXIS is too ambiguous. Preferred remediation: use
-   SRS_WKT_WGS84_LAT_LONG. Or #define USE_DEPRECATED_SRS_WKT_WGS84
-   before including ogr_srs_api.h
+-  OSRImportFromEPSG()가 공식 축 순서를 연산에 넣습니다.
 
-Out-of-tree raster drivers will be impacted by the introduction of the
-new virtual methods GetSpatialRef(), SetSpatialRef(), GetGCPSpatialRef()
-and SetGCPs(..., const OGRSpatialReference\* poSRS), and the removal of
-their older equivalents using WKT strings instead of a
-OGRSpatialReference\* instance.
+-  OPTGetProjectionMethods(), OPTGetParameterList() 및 OPTGetParameterInfo()를 제거합니다. 동등한 메소드는 없습니다.
+
+-  OSRFixup() 및 OSRFixupOrdering()을 제거합니다:
+   객체 구조가 항상 무결하기 때문에 더 이상 필요하지 않습니다.
+
+-  OSRStripCTParms()를 제거합니다:
+   대신 OSRExportToWktEx()를 FORMAT=SQSQL 옵션으로 사용합니다.
+
+-  exportToWkt()가 AXIS 노드를 산출합니다.
+
+-  OSRIsSame():
+   OSRIsSameEx()에 IGNORE_DATA_AXIS_TO_SRS_AXIS_MAPPING=YES 옵션을 설정하지 않는 이상 이제 "데이터 축을 좌표계 축에 매핑"을 연산에 넣습니다.
+
+-  :file:`ogr_srs_api.h`:
+   AXIS가 없는 WKT가 너무 모호하기 때문에 더 이상 SRS_WKT_WGS84 매크로를 기본적으로 선언하지 않습니다. 개선 사항으로 SRS_WKT_WGS84_LAT_LONG을 사용할 것을 추천합니다. 또는 ``#include <ogr_srs_api.h>`` 앞에 ``#define USE_DEPRECATED_SRS_WKT_WGS84`` 를 삽입하십시오.
+
+새로운 GetSpatialRef(), SetSpatialRef(), GetGCPSpatialRef() 및 SetGCPs(..., const OGRSpatialReference* poSRS) 가상 메소드들의 도입과 이 새 메소드들에 대응했던, ``OGRSpatialReference*`` 인스턴스 대신 WKT 문자열을 사용했던 예전 메소드들을 제거했기 때문에 트리 외부에 있는 래스터 드라이버들이 영향을 받을 것입니다.
 
 문서화
 ------
 
-New methods have been documented, and documentation of existing methods
-has been changed when appropriate during the development. That said, a
-more thorough pass will be needed. The tutorials will also have to be
-updated.
+새로운 메소드들을 문서화했으며, 개발 도중 적절한 경우 기존 메소드들의 문서도 변경했습니다. 그렇기는 하지만 좀 더 철저하게 훑어봐야 할 것입니다. 예제도 업데이트해야 할 것입니다.
 
 테스트
 ------
 
-The autotest suite has been adapted in a number of places since the
-expected results have changed for a number of reasons (AXIS node
-exported in WKT, differences in WKT and PROJ string generation). New
-tests have been added for the new capabilities.
+여러 가지 이유로 (WKT로 AXIS 노드 내보내기, WKT와 PROJ 문자열 생성의 차이점 등등) 예상 결과물이 달라졌기 때문에 자동 테스트 스위트를 여러 군데 수정했습니다. 새 케이퍼빌리티에 대한 새로운 테스트도 추가했습니다.
 
-It should be noted that autotest not necessarily checks everything, and
-issues have been discovered and fixed through manual testing. The
-introduction of the "data axis to CRS axis mapping" concept is also
-quite error prone, as it requires setting the OAMS_TRADITIONAL_GIS_ORDER
-strategy in a lot of different places.
+자동 테스트가 반드시 모든 것을 확인하는 것은 아니며, 수동 테스트를 통해 여러 문제점들을 발견하고 수정했다는 사실을 기억해야 할 것입니다. "데이터 축을 좌표계 축에 매핑" 개념의 도입도 상당히 오류가 발생하기 쉽습니다. 서로 다른 여러 위치에 OAMS_TRADITIONAL_GIS_ORDER 전략을 설정해야 하기 때문입니다.
 
-So users and developers are kindly invited to thoroughly test GDAL once
-this work has landed in master.
+따라서 이 작업이 마스터에 들어가고 나면 사용자 및 개발자가 GDAL을 철저하게 테스트해볼 것을 권장합니다.
 
 구현
 ----
@@ -478,7 +318,7 @@ this work has landed in master.
 
 제안한 구현은 `풀 요청 1185번 <https://github.com/OSGeo/gdal/pull/1185>`_ 에서 사용할 수 있습니다.
 
-While it is provided as a multiple commit for """easier""" review, it will be probably squashed in a single commit for inclusion in master, as intermediate steps are not all buildable, due to PROJ symbol renames having occurred during the development, which would break bisectability.
+**더 쉬운** 검토를 위해 이 RFC 구현을 여러 차례에 걸쳐 커밋하지만, 마스터에 포함시키기 위한 단일 커밋에서는 아마도 전체 구현을 우겨넣게 될 것입니다. 개발 도중 PROJ 심볼을 재명명했기 때문에 양분성(bisectability)을 망가뜨릴 가능성이 있어 중간 단계를 거치는 경우 전체 구현을 모두 빌드하지 못 할 수도 있기 때문입니다.
 
 투표 이력
 ---------
