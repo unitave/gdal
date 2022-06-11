@@ -1,119 +1,85 @@
 .. _rfc-74:
 
-===========================================================
-RFC 74: Migrate gdal.org to RTD-style Sphinx infrastructure
-===========================================================
+====================================================================
+RFC 74: gdal.org를 RTD 스타일 스핑크스 인프라스트럭처로 마이그레이션
+====================================================================
 
-======== ==============
-Author:  Howard Butler
-======== ==============
-Contact: howard@hobu.co
-Started: 2019-May-19
-Status:  *Adopted*
-======== ==============
+======= ===============
+저자:   하워드 버틀러
+연락처: howard@hobu.co
+제안일: 2019년 5월 19일
+상태:   승인
+======= ===============
 
-Summary
--------
+요약
+----
 
-The document proposes migrating the GDAL documentation from a Doxygen to
-`Sphinx <http://www.sphinx-doc.org/en/master/>`__ in
-`ReadTheDocs <https://readthedocs.org>`__ format.
+이 RFC는 GDAL 문서를 독시젠(Doxygen)으로부터 `ReadTheDocs <https://readthedocs.org/>`_ 서식으로 된 `스핑크스(Sphinx) <https://www.sphinx-doc.org/ko/master/>`_ 로 마이그레션할 것을 제안합니다.
 
-Motivation
-----------
+동기
+----
 
-Casual contribution to the GDAL documentation is challenging. Wiki-style
-contribution is possible through the Trac instance, but that requires
-getting an OSGeo login, which is a high bar, and the Trac information is
-disconnected from the primary documentation. Other projects such as PROJ
-and `MapServer <https://mapserver.org>`__ have seen significant uptick
-in contributed documentation by adopting Sphinx-based systems, and we
-hope the adoption of this approach for GDAL will ignite a renaissance of
-documentation contribution as it did for those projects.
+GDAL 문서에 가볍게 기여하기란 어렵습니다. 트랙(Trac) 인스턴스를 통해 위키 스타일로 기여할 수는 있지만, 그 자체로 허들이 높은 OSGeo 로그인 계정이 필요한 데다가 기본 문서로부터 트랙 정보가 분리됩니다. `PROJ <https://proj.org/>`_ 및 `MapServer <https://mapserver.org/>`_ 같은 다른 프로젝트들이 스핑크스 기반 시스템을 도입해서 문서 기여도가 상당히 상향되었기 때문에, GDAL에 이 접근법을 도입함으로써 다른 프로젝트와 같이 문서 기여도에 새로운 불씨를 댕길 수 있으리라 기대합니다.
 
-The current approach has some significant deficiencies that have not
-been overcome by waiting for new versions of Doxygen to arrive. These
-include:
+현재의 접근법에는 독시젠 새 버전이 나올 때까지 기다린다 하더라도 극복하기 어려운, 다음을 포함하는 몇 가지 상당한 결함이 있습니다:
 
--  The Doxygen build buries the source of the documentation deep into
-   the source tree, which makes it hard to find where to properly add
-   information.
--  The structure of the website is indirect from the source code that
-   creates it.
--  New features such as convenient mobile-friendly styling, alternative
-   serializations such as PDF, and tighter API and user-level
-   documentation integration are not within easy reach.
--  Editing of raw HTML means that convenient output of other
-   serialization types, such as PDF, Windows Compiled Help, or manpage
-   output is challenging.
+-  독시젠 빌드는 문서 소스를 소스 트리 깊숙히 묻어버리기 때문에, 정보를 제대로 추가하기 위한 위치를 찾기 어렵습니다.
 
-Proposal
---------
+-  웹사이트의 구조가 웹사이트를 생성하는 소스 코드와 직접적인 관련이 없습니다.
 
-The GDAL team will refactor the GDAL.org website to be based on Sphinx
-with the following properties:
+-  편리한 모바일 친화적 스타일, PDF 같은 연속 간행물(serialization) 대안, 그리고 API와 사용자 수준 문서의 보다 긴밀한 통합 같은 새로운 기능에 쉽게 접근할 수 없습니다.
 
--  Convert the bulk of the existing documentation to reStructuredText
--  Adapt the `ReadTheDocs
-   theme <https://sphinx-rtd-theme.readthedocs.io/en/stable/>`__
--  Apply an "Edit this Page on GitHub" link to every page on the site
-   for convenient contribution
--  Utilize `GitHub Pages <https://pages.github.com/>`__ to host
-   gdal.org, with updates being regenerated and committed to a
-   repository by `Azure
-   Pipelines <https://dev.azure.com/osgeo/gdal/_build>`__ continuous
-   integration.
--  Output a PDF serialization of the website for documentation version
-   posterity.
+-  원시(raw) HTML을 편집한다는 것은 PDF, 윈도우 상에서 컴파일되는 도움말, 매뉴얼 페이지(man page) 출력 같은 다른 간행물 유형들을 쉽게 산출할 수 없다는 의미입니다.
 
-Considerations
-~~~~~~~~~~~~~~
+제안
+----
 
--  Numerous hard links to driver pages exist in source code. Care must
-   be taken to attempt to preserve these links as well as possible with
-   redirects to adapt to any new organization.
--  Porting of existing Trac content to the new data structure will allow
-   decommission of that piece of infrastructure. Significant content
-   porting investment may be required to achieve this.
--  Doxygen API-style documents are still valuable, and we propose to
-   keep a rendering of them at ``/doxygen`` for users who wish to
-   continue with that approach. Internal API documentation will continue
-   to use Doxygen, and it will be reflected into the Sphinx website
-   using the Breathe capability.
--  Initial content organization will attempt to mimic the existing
-   website as well as can be achieved, but no requirement to maintain
-   adherence to the previous structure is required if other organization
-   approaches are more convenient given the features and capabilities of
-   Sphinx.
--  Existing translations will not be ported. Adaptation and continuation
-   of porting of translations is beyond the scope of this RFC, but there
-   are capabilities for managing translations in Sphinx (MapServer.org
-   provides an excellent example), and follow-on contributors can keep
-   moving forward with the architecture once the initial effort is
-   complete.
--  Content may be missed during the transition. Please file tickets in
-   GitHub for any items that became more difficult to find or are gone
-   after the transition.
+GDAL 팀이 GDAL.org 웹사이트를 다음 속성들과 함께 스핑크스 기반으로 리팩토링할 것입니다:
 
-Logistics
+-  기존 문서 대부분을 `reStructuredText <https://docutils.sourceforge.io/rst.html>`_ 로 변환합니다.
+
+-  `ReadTheDocs 테마 <https://sphinx-rtd-theme.readthedocs.io/en/stable/>`_ 를 조정합니다.
+
+-  문서 기여를 쉽게 하기 위해 사이트의 모든 페이지에 "깃허브에서 이 페이지를 편집" 링크를 적용합니다.
+
+-  `깃허브 페이지 <https://pages.github.com/>`_ 를 활용해서 GDAL.org 웹사이트를 호스팅하고, `애저(Azure) 파이프라인 <https://dev.azure.com/osgeo/gdal/_build>`_ 지속적 통합이 문서 업데이트를 재생성하고 저장소에 커밋합니다.
+
+-  문서 버전을 후대에 남기기 위해 웹사이트의 PDF 간행물을 산출합니다.
+
+고려 사항
 ~~~~~~~~~
 
-A current example of the site lives at
-`https://gdal.dev <https://gdal.dev>`__ This example is set to noindex.
-Once the RFC is passed, adaptation of the infrastructure that builds it
-will be migrated to `https://gdal.org <https://gdal.org>`__ and the
-example website will be completely decommissioned. Currently,
-`https://github.com/hobu/gdal <https://github.com/hobu/gdal>`__
-``doc-sprint`` branch is the fork that drives this content. It will be
-squash-merged to the main repository at the passing of the RFC.
+-  소스 코드에 드라이버 페이지들을 가리키는 수많은 하드 링크가 존재합니다. 이런 링크들을 새로운 모든 구조에 맞춰 리다이렉트하면서 가능한 한 보전하려 시도하도록 주의를 기울여야만 합니다.
 
-References:
+-  기존 트랙의 콘텐츠를 새로운 데이터 구조로 포팅하면 해당 인프라스트럭처 부분의 사용을 중단할 수 있습니다. 이를 달성하려면 콘텐츠 포팅을 위해 상당한 투자를 해야 할 수도 있습니다.
 
--  `issue #1204 <https://github.com/OSGeo/gdal/issues/1204>`__.
--  `2019 OSGeo Community Code
-   Sprint <https://wiki.osgeo.org/wiki/OSGeo_Community_Sprint_2019>`__
+-  독시젠 API 스타일 문서는 여전히 가치가 있기 때문에, 이 접근법을 계속 사용하기를 바라는 사용자들을 위해 ``/doxygen`` 에 독시젠 문서를 계속 렌더링할 것을 제안합니다. 내부 API 문서는 계속 독시젠을 사용할 것이며, `Breathe <https://breathe.readthedocs.io/en/latest/index.html>`_ 케이퍼빌리티를 사용해서 스핑크스 웹사이트에 이를 반영할 것입니다.
 
-Voting history
---------------
+-  초기 콘텐츠 구조가 달성할 수 있는 만큼 기존 웹사이트를 모방하려 시도할 것이지만, 스핑크스의 기능 및 케이퍼빌리티와 비교해서 다른 구조 접근법이 더 편리한 경우 이전 구조를 고수할 필요는 없습니다.
 
-+1 from KurtS, HowardB, DanielM, NormanB, JukkaR and EvenR.
+-  기존 번역은 포팅하지 않을 것입니다. 번역 포팅을 승인하고 지속하는 것은 이 RFC의 범위를 벗어나지만, 스핑크스에는 번역을 관리할 수 있는 케이퍼빌리티가 있으며 (MapServer.org가 훌륭한 예입니다) 초기 작업을 완료하고 나면 후속 기여자가 이 아키텍처로 계속 진행할 수 있습니다.
+
+-  전환 도중 콘텐츠가 누락될 수도 있습니다. 전환 이후 찾기가 어려워졌다거나 사라진 모든 항목에 대해 깃허브에 티켓을 제출해주십시오.
+
+실행 계획
+~~~~~~~~~
+
+현재 제안 사이트의 예시가 `https://gdal.dev <https://gdal.dev>`_ 에 있습니다. 이 예시에는 목차를 설정하지 않았습니다. 이 RFC가 승인되고 나면, 목차를 작성하는 인프라스트럭처를 `https://gdal.org <https://gdal.org>`_ 에 맞춰 조정하고 마이그레이션한 다음 예시 사이트는 완전히 폐기할 것입니다.
+현재 예시 사이트의 콘텐츠를 관리하는 포크는 `"doc-sprint" <https://github.com/hobu/gdal>`_ 브랜치입니다. 이 RFC가 승인되면 주 저장소에 이 브랜치를 한 번에 우겨넣어 병합할 것입니다.
+
+참조
+----
+
+-  `#1204 이슈 <https://github.com/OSGeo/gdal/issues/1204>`_.
+-  `2019년 OSGeo 커뮤니티 코드 스프린트 <https://wiki.osgeo.org/wiki/OSGeo_Community_Sprint_2019>`_
+
+투표 이력
+---------
+
+-  커트 슈베어 +1
+-  하워드 버틀러 +1
+-  대니얼 모리셋 +1
+-  노먼 바커(Norman Barker) +1
+-  유카 라흐코넨 +1
+-  이벤 루올 +1
+
