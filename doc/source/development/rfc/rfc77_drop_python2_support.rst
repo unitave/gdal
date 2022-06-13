@@ -1,240 +1,257 @@
 .. _rfc-77:
 
 ================================================================================
-RFC 77: Drop Python 2 support in favour of Python 3.6
+RFC 77: 파이썬 3.6을 위해 파이썬 2 지원 중단
 ================================================================================
 
-============== ============================
-Author:        Idan Miara
-Contact:       idan@miara.com
-Started:       2020-Nov-3
-Last updated:  2020-Nov-29
-Status:        Adopted, implemented in GDAL 3.3
-============== ============================
+============ =========================
+저자:        이단 미아라(Idan Miara)
+연락처:      idan@miara.com
+제안일:      2020년 11월 3일
+최신 수정일: 2020년 11월 29일
+상태:        승인, GDAL 3.3버전에 구현
+============ =========================
 
-Summary
--------
+요약
+----
 
-This RFC drops Python 2 support and sets Python 3.6 as the new minimum supported Python version.
+이 RFC는 파이썬 2 지원을 중단하고 파이썬 3.6버전을 새로운 파이썬 최저 지원 버전으로 설정할 것을 제안합니다.
 
-Motivation
-----------
+동기
+----
 
-Currently GDAL Python bindings support Python 2.7 and Python 3 (so only the common between the two).
-Python 2 is at End Of Life, and is no longer supported since the January 2020.
-https://www.python.org/doc/sunset-python-2/
+현재 GDAL 파이썬 파인딩은 파이썬 2.7 및 파이썬 3을 (따라서 이 둘 사이의 버전들만) 지원합니다. 파이썬 2는 지원 종료되어 2020년 1월부터 더 이상 지원되지 않습니다:
 
-"We did not want to hurt the people using Python 2. So, in 2008, we announced that we would sunset Python 2 in 2015,
-and asked people to upgrade before then. Some did, but many did not. So, in 2014, we extended that sunset till 2020."
+-  https://www.python.org/doc/sunset-python-2/ 에서 발췌:
 
-While keeping Python 2.7 support might serve those who didn't upgrade their code to Python 3 in the 12 year transition period,
-This PR suggests that the time has come and the benefits of dropping Python 2 support outnumber the drawbacks.
-Virtually all supported OS and relevant programs already use Python 3.
-Moreover, most of the related projects that usually is used with GDAL already dropped Python 2 support (as can be seen below).
-It makes sense that people who didn't upgrade their code in 12 years are still using a much older version of GDAL anyway...
+   "우리는 파이썬 2를 사용하는 사람들에게 피해를 주고 싶지 않았습니다. 따라서 2008년에 우리는 2015년에 파이썬 2를 중단하겠다고 발표하고 그 전에 업그레이드할 것을 당부했습니다. 일부는 업그레이드했지만 다수는 업그레이드하지 않았습니다. 그래서 2014년에 지원 중단을 2020년까지 연장했습니다."
 
-The drawbacks of keeping Python 2 support puts unnecessary maintenance burden on the GDAL maintainers,
-As maintainers need to make sure their new code is backwards compatible with Python 2.
-Furthermore, many important features that added in Python 3 cannot be used in GDAL to maintain backwards compatibility with Python 2.
+파이썬 2.7버전 지원을 유지하면 12년이라는 전환 기간 동안 파이썬 3버전으로 업그레이드하지 않았던 이들에게 도움이 될 수도 있겠지만, 이 풀 요청은 파이썬 2 지원 중단이 가져올 이익이 결점을 뛰어넘는 때가 왔다고 제안합니다. 거의 모든 지원 운영 체제 및 관련 프로그램들이 이미 파이썬 3을 사용합니다. 더구나 일반적으로 GDAL을 사용하는 관련 프로젝트 대부분이 이미 파이썬 2 지원을 (다음 단락에서 볼 수 있듯이) 중단했습니다. 12년이라는 시간 동안 자신의 코드를 업그레이드하지 않은 사람들은 어차피 GDAL 예전 버전을 계속 사용할 것으로 보아야 할 것입니다.
 
-Related projects that dropped Python 2 support:
--------------------------------------------------
+파이썬 2 지원을 유지하는 데 따른 결점은 GDAL 유지/관리자들에게 불필요한 유지관리 업무를 부과한다는 것입니다. 유지/관리자들이 새로운 코드가 파이썬 2버전과 하위 호환되는지 확인해야 하기 때문입니다. 게다가 파이썬 2버전과의 하위 호환을 유지하기 위해 파이썬 3버전에 추가된 수많은 중요 기능들을 사용할 수 없기도 합니다.
 
-* QGIS since v3.0 - February 2018. (now supports Python 3.7)
+파이썬 2 지원을 중단한 관련 프로젝트:
+-------------------------------------
 
-https://www.qgis.org/en/site/forusers/visualchangelog30/index.html
-https://qgis.org/api/api_break.html
+-  QGIS 3.0 이상 버전 - 2018년 2월. (현재 파이썬 3.7버전을 지원합니다.)
 
-* GRASS GIS since v7.8 - September 2019 (now supports Python 3.7)
+   -  https://www.qgis.org/ko/site/forusers/visualchangelog30/index.html
+   -  https://qgis.org/api/api_break.html
 
-https://trac.osgeo.org/grass/wiki/Python3Support
+-  GRASS GIS 7.8 이상 버전 - 2019년 9월. (현재 파이썬 3.7버전을 지원합니다.)
 
-* pyproj since v2.3 - August 2019 (now supports Python 3.5-3.7)
+   -  https://trac.osgeo.org/grass/wiki/Python3Support
 
-https://pyproj4.github.io/pyproj/stable/history.html
+-  pyproj 2.3 이상 버전 - 2019년 8월. (현재 파이썬 3.5 ~ 3.7버전을 지원합니다.)
 
-* numpy since v1.19 - June 2020 (now supports Python Python 3.6-3.8)
+   -  https://pyproj4.github.io/pyproj/stable/history.html
+
+-  NumPy 1.19 이상 버전 - 2020년 6월. (현재 파이썬 3.6 ~ 3.8버전을 지원합니다.)
 
 https://numpy.org/devdocs/release/1.19.0-notes.html
 
-* RasterIO since v1.1 - October 2019 (now supports Python 3.6)
+-  RasterIO 1.1 이상 버전 - 2019년 10월. (현재 파이썬 3.6버전을 지원합니다.)
 
-https://sgillies.net/2019/10/10/rasterio-1-1-0.html
-https://github.com/mapbox/rasterio/issues/1813
+   -  https://sgillies.net/2019/10/10/rasterio-1-1-0.html
+   -  https://github.com/rasterio/rasterio/issues/1813
 
-Python 3 version status:
----------------------------
+파이썬 3버전 상태:
+------------------
 
-* Python 3.5 (Released: Sep 2015) is End Of Life. Many related projects already dropped support of it.
-* Python 3.6 (Released: Dec 2016) will be End Of Life on Dec 2021. Python 3.6 brings many important features.
-* Python 3.7 (Released: Jun 2018) will be End Of Life on Jun 2023. Python 3.7 is already widely adopted and supported by all the related projects listed above.
-* Python 3.8 (Released: Oct 2019) will be End Of Life on Oct 2024. Python 3.8 is too new to be set as the minimum supported version.
+-  Python 3.5 (배포일: 2015년 9월):
+   지원 종료되었습니다. 관련 프로젝트 다수가 이미 이 버전 지원을 중단했습니다.
 
-https://endoflife.date/python#:~:text=The%20support%20for%20Python%202.7,dropping%20support%20for%20Python%202.7.
+-  Python 3.6 (배포일: 2016년 12월):
+   2021년 12월 지원 종료 예정입니다. 파이썬 3.6버전은 수많은 중요 기능들을 도입했습니다.
 
-Python 3 OS Support:
-----------------------
+-  Python 3.7 (배포일: 2018년 6월):
+   2023년 6월 지원 종료 예정입니다. 파이썬 3.7버전은 이미 널리 도입되었으며 앞 단락의 모든 관련 프로젝트가 지원하고 있습니다.
 
-Linux:
-++++++++
+-  Python 3.8 (배포일: 2019년 10월):
+   2024년 10월 지원 종료 예정입니다. 파이썬 3.8버전은 최저 지원 버전으로 설정하기에는 너무 최신 버전입니다.
 
-======================= =============== ===============  ===============================
-Distribution            Release date     End Of Life     Python Version
-Ubuntu 16.04 Xenial LTS April 2016       April 2021      Python 3.5
-Ubuntu 18.04 Bionic LTS April 2018       April 2023      Python 3.6 (3.7 in universe)
-Ubuntu 20.04 Xenial LTS April 2020       April 2021      Python 3.8
-Debian  9.0 Stretch LTS June 2017        July 2022       Python 3.5
-Debian 10.0 Buster LTS  July 2019        ~2022           Python 3.7
-Centos/RHEL 8           September 2019   ?               Python 3.6 (?)
-Amazon Linux                             December 2021   Python 3.6
-======================= =============== ===============  ===============================
+   -  https://endoflife.date/python
+
+파이썬 3 운영 체제 지원:
+------------------------
+
+리눅스:
++++++++
+
+.. list-table:: Supports of Python 3 on Linux
+   :header-rows: 1
+
+   * - 배포판
+     - 배포일
+     - 지원 종료
+     - 파이썬 버전
+   * - 우분투 16.04 Xenial LTS
+     - 2016년 4월
+     - 2021년 4월
+     - 파이썬 3.5
+   * - 우분투 18.04 Bionic LTS
+     - 2018년 4월
+     - 2023년 4월
+     - 파이썬 3.6 (유니버스 배포판은 3.7)
+   * - 우분투 20.04 Xenial LTS
+     - 2020년 4월
+     - 2021년 4월
+     - 파이썬 3.8
+   * - 데비안  9.0 Stretch LTS
+     - 2017년 6월
+     - 2022년 7
+     - 파이썬 3.5
+   * - 데비안 10.0 Buster LTS
+     - 2019년 7월
+     - 2022년
+     - 파이썬 3.7
+   * - Centos/RHEL 8
+     - 2019년 9월
+     - ?
+     - 파이썬 3.6 (?)
+   * - 아마존 리눅스
+     - 
+     - 2021년 12월
+     - 파이썬 3.6
 
 https://wiki.python.org/moin/Python3LinuxDistroPortingStatus
 
 
-Windows:
-+++++++++
-
-* Conda: Python 3.6-3.9
-* OSGeo4W: Python 3.7
-* gisinternals: Python 2.7, 3.4-3.7
-
-MacOS:
+윈도우:
 +++++++
 
-It appears the even though Python 2.7 is preinstalled on Mac OS X,
-Python 3.5-3.9 can be installed alongside Python 2 on Mac OS X 10.8 (Released: July 2012) and newer.
+-  콘다(Conda): 파이썬 3.6 ~ 3.9
+-  OSGeo4W: 파이썬 3.7
+-  gisinternals: 파이썬 2.7, 3.4 ~ 3.7
 
-https://docs.python.org/3.6/using/mac.html.
+macOS:
+++++++
 
-Which version should be the new minimum version ?
------------------------------------------------------
+맥OS X에 파이썬 2.7버전이 사전 설치되어 있는 것으로 보이지만, (2012년 7월 배포된) 맥OS X 10.8버전에 파이썬 2를 제거하지 않은 채 파이썬 3.5 ~ 3.9 이상 버전을 설치할 수 있습니다.
 
-This RFC suggest the new minimum supported Python version should be 3.6 for the following reasons:
+https://docs.python.org/3/using/mac.html
 
-* Python < 3.6 is End of Life.
-* Long list of great new features that were introduced in Python 3.6, Several of which are immediately useful to simplify code or improve testing:
-    * f-strings
-    * builtin pathlib
-    * underscores in numeric literals
-    * type annotations
-    * malloc debugging
-* Python 3.6 is supported out of the box in virtually every relevant OS.
-* Python 3.6 is probably the safest choice for now in respect to other related projects.
-* Python 3.7 (and newer) isn't available seamlessly in some popular LTS Linux distributions.
-* We want to make the transition as smooth and easy as possible. Setting the minimum to Python 3.7 might make the transition harder for the CI because of the above reason.
-* Dropping Python 3.6 in favour of Python 3.7 or newer in future versions shouldn't be as hard as this drop (see next section for a suggested approach).
+어떤 버전을 새 최저 버전으로 삼아야 하는가?
+-------------------------------------------
 
-GDAL Release cycle and regular Python version dropping
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+이 RFC는 새로운 파이썬 최저 지원 버전이 다음과 같은 이유로 3.6버전이어야 한다고 제안합니다:
 
-When releasing GDAL 3.1.0, Even Rouault suggested GDAL would use fixed release cycles of 6 months between major versions:
+-  Python 3.6 미만 버전들은 지원 종료되었습니다.
 
-http://osgeo-org.1560.x6.nabble.com/gdal-dev-Reconsidering-release-cycle-length-td5436163.html#a5436242
+-  파이썬 3.6버전에 훌륭한 새 기능들이 많이 도입되었으며, 그 중 몇몇은 코드 단순화 또는 테스트 개선을 위해 즉시 사용할 수 있습니다:
 
-Projecting from that suggestion, GDAL 3.3.0 should be released around April-May 2021.
+   -  f 문자열(f-string)
+   -  내장 pathlib
+   -  숫자형 리터럴에 언더바(``_``) 사용
+   -  유형 주석
+   -  메모리 할당(malloc) 디버깅
 
-We could potentially synchronize with NEP 29 -
-Recommend Python and Numpy version support as a community policy standard.
-Which suggests when to drop each Python version.
+-  거의 모든 관련 운영 체제가 설치 즉시 Python 3.6버전을 지원합니다.
 
-https://numpy.org/neps/nep-0029-deprecation_policy.html
+-  다른 관련 프로젝트들과 관련해서 Python 3.6이 현재 가장 안전한 선택지일 것입니다.
 
-NEP 29 suggests to drop support for Python 3.6 support on Jun 23, 2020 (in favour of Python 3.7).
+-  몇몇 유명한 리눅스의 장기 지원(Long Term Support) 배포판에서 Python 3.7 (이상) 버전을 심리스(seamless)하게 사용할 수 없습니다.
 
-We could potentially discuss similar/more conservative approaches and delay each drop by a few more months,
-or only drop Python versions that have reached End Of Life (As of today, Python < 3.6 have reached End Of Life).
-Further discussion on the matter of dropping other Python versions is a subject for another RFC.
+-  파이썬 지원 버전 전환을 가능한한 원활하고 쉽게 진행하고자 합니다. 파이썬 3.7버전을 최저 지원 버전으로 설정하면 앞에서 설명한 이유 때문에 지속적 통합(Continuous Integration)에 대한 전환이 어려워질 수도 있습니다.
 
-Backward compatibility
-----------------------
+-  향후 GDAL 버전들에서 파이썬 3.7 이상 버전을 위해 파이썬 3.6버전 지원을 중단하는 것은 이번 지원 중단만큼 힘들지 않을 것입니다. (제안하는 접근법에 대해서는 다음 단락을 읽어보십시오.)
 
-Currently, GDAL Python code itself is compatible with Python 2 and Python 3.
-Once this PR is accepted, GDAL 3.3.0 would not be compatible with Python 2.
-Thus any "Python 2 only" code that uses GDAL would need to be upgraded to Python 3 and
-at the same time the respective Python interpreter would need to be upgraded
-to a supported Python version.
+GDAL 배포 사이클 및 정규 파이썬 버전 중단하기
++++++++++++++++++++++++++++++++++++++++++++++
 
-Will GDAL 3.2 be a LTS?
-++++++++++++++++++++++++++
+GDAL 3.1.0을 배포했을 때, 이벤 루올이 GDAL 메이저 버전 업그레이드 시기를 6개월로 고정하는 배포 사이클을 도입하자고 제안했습니다:
 
-Currently - No.
-So far, nobody has stepped up to make a LTS, So there won't be one unless someone takes it up upon themselves or raise funds to make it happen.
-GDAL only provide bugfix releases of the current stable branch for 6 months.
+-  https://lists.osgeo.org/pipermail/gdal-dev/2020-April/052023.html
 
-CI Impacts:
-------------
+이 제안을 반영하면, 2021년 4월 ~ 5월 경에 GDAL 3.3.0버전을 배포해야 합니다.
 
-Impacts on our CI should be analyzed.
-It seems that all our CI builds use Python 2.7 or 3.5, so all of them would need to be adjusted.
-In particular, builds that use older Linux distributions would need to be upgraded.
+각 파이썬 버전을 언제 지원 종료해야 할지 제안하는 `NEP 29 - 파이썬 및 NumPy 버전 지원을 커뮤니티 정책 표준으로 권장 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_ 과 동기화할 수도 있습니다.
 
-Impacts on GDAL core
---------------------
+NEP 29는 2020년 6월 23일에 (파이썬 3.7버전을 위해) 파이썬 3.6버전 지원을 중단하자고 제안합니다.
 
-There should be no impacts on GDAL core,
-As the Python bindings are generated by SWIG on top of the binary form of GDAL.
+잠재적으로 유사하거나 좀 더 보수적인 접근법에 대해 논의하고 각 지원 중단을 몇 개월 정도 연기하거나, 지원 종료된 파이썬 버전들만 지원 중단할 수 있습니다. (파이썬 3.6 미만 버전은 오늘자로 지원 종료되었습니다.)
+다른 파이썬 버전들의 지원 중단하는 문제에 대한 추가 논의는 또다른 RFC로 제안해야 합니다.
 
-Limitations and scope
+하위 호환성
+-----------
+
+현재 GDAL 파이썬 코드 자체는 파이썬 2 및 파이썬 3과 호환됩니다. 이 풀 요청이 승인되면, GDAL 3.3.0버전은 파이썬 2와 호환되지 않을 것입니다. 따라서 GDAL을 사용하는 모든 "파이썬 2 전용" 코드를 파이썬 3으로 업그레이드하는 동시에 파이썬 해석기도 파이썬 최저 지원 버전으로 업그레이드해야 할 것입니다.
+
+GDAL 3.2버전이 장기 지원 버전이 될 것인가?
+++++++++++++++++++++++++++++++++++++++++++
+
+현재로서는 아닙니다. 지금까지 아무도 LTS 버전을 만들자고 하지 않았기 때문에, 누군가가 자청해서 LTS 버전을 만들고 유지/관리하거나 또는 그러기 위해 모금 활동을 하지 않는 이상 GDAL LTS 버전은 존재하지 않을 것입니다.
+GDAL은 6개월 동안 현재 안정 브랜치의 버그 수정 배포판을 제공할 뿐입니다.
+
+지속적 통합에 미치는 영향:
+--------------------------
+
+CI에 대한 영향을 분석해야 합니다. GDAL의 모든 CI 빌드가 파이썬 2.7 또는 3.5버전을 사용하는 것으로 보이기 때문에, 전부 조정해야 할 것입니다. 특히, 예전 리눅스 배포판을 사용하는 CI 빌드를 업그레이드해야 할 것입니다.
+
+GDAL 코어에 미치는 영향
+-----------------------
+
+GDAL 코어에 대한 영향은 없을 것입니다. SWIG이 GDAL의 바이너리 형식을 기반으로 파이썬 바인딩을 생성하기 때문입니다.
+
+제한 사항 및 범위
+-----------------
+
+이 RFC의 범위는 GDAL 파이썬 코드에만 적용되어야 합니다. GDAL이 지원하는 다른 어떤 언어에도 영향을 미쳐서는 안 됩니다.
+
+SWIG 바인딩 변경 사항
 ---------------------
 
-The scope of this RFC should be the GDAL Python code alone. There shouldn't be effect on any other language supported by GDAL.
+SWIG 파이썬 바인딩은 처음부터 이미 파이썬 3.6을 지원하고 있습니다. 파이썬 2 지원을 중단하면 더 최신 SWIG 버전을 사용하거나 또는 바인딩에 대해 몇몇 개선 사항을 적용할 수도 있지만 이것이 우선 순위여야 할 필요는 없습니다.
 
-SWIG binding changes
---------------------
-
-To begin with, the SWIG Python bindings already support Python 3.6.
-Dropping Python 2 support might allow us to use a newer SWIG version or to make some improvements to the bindings,
-but it doesn't have to be in the first step.
-
-Security implications
----------------------
-
-Python 3.6 is the minimum Python version that is not End Of Life,
-thus still receiving security updates.
-
-Performance impact
+보안에 미치는 영향
 ------------------
 
-There might be some performance gain for this upgrade for some uses as there were many performance improvements between Python 2.7-3.6.
-The scope of the improvements could be limited because most of GDAL Python code is a thin wrapper around the C++ code.
+파이썬 3.6버전은 지원이 종료되지 않은 최저 파이썬 버전이기 때문에, 계속 보안 업데이트를 받고 있습니다.
 
-Documentation
+성능에 미치는 영향
+------------------
+
+Python 2.7버전과 3.6버전 사이에 수많은 성능 개선이 이루어졌기 때문에 이 업그레이드로 인해 몇몇 사용례에서 성능이 조금 개선될 수도 있습니다. 대부분의 GDAL 파이썬 코드가 C++ 코드를 감싸는 얇은 래퍼(thin wrapper)이기 때문에, 개선 범위가 제한될 수 있습니다.
+
+문서화
+------
+
+GDAL 파이썬 문서는 자동으로 생성되며, 이미 파이썬 3버전을 지원할 것입니다.
+문서에 파이썬 2 특화 단락이 존재하는 경우, 제거하거나 리팩토링해야 합니다.
+
+테스트
+------
+
+CI를 업그레이드할 때 파이썬 2 테스트도 제거하거나 업그레이드해야 합니다. 파이썬 3.6 미만 버전에서 실패하는 단순 테스트를 추가해야 합니다. 추가 테스트는 필요없을 것입니다.
+
+예전 논의
+---------
+
+이 RFC의 주제는 과거에 논의된 적이 있습니다:
+
+-  https://github.com/OSGeo/gdal/issues/3114
+-  https://github.com/OSGeo/gdal/pull/3142
+
+관련 풀 요청:
 -------------
 
-The GDAL Python documentation is generated automatically in should already support Python 3.
-If there are sections in the documentation that are Python 2 specific, they should be removed or refactored.
+다음 GDAL 버전에서 지원하지 않는다고 알려진 파이썬 버전을 실행하는 경우 퇴출 경고 추가하기:
 
-Testing
--------
+-  https://github.com/OSGeo/gdal/pull/3165
 
-While upgrading the CI, Python 2 tests should be removed or upgraded.
-A simple test that fails on Python < 3.6 should be added.
-No any additional tests should be needed.
+구현
+----
 
-Previous discussions
---------------------
+-  이벤 루올, 로버트 쿠(Robert Coup)와 이단 미아라가 이 RFC를 구현했습니다.
 
-This topic has been discussed in the past in :
-
-- https://github.com/OSGeo/gdal/issues/3114
-- https://github.com/OSGeo/gdal/pull/3142
-
-Related PRs:
--------------
-
-Adding a deprecation warning if running a Python version that is known to be unsupported in the the next GDAL version:
-
-- https://github.com/OSGeo/gdal/pull/3165
-
-Voting history
---------------
+투표 이력
+---------
 
 https://lists.osgeo.org/pipermail/gdal-dev/2020-November/053039.html
 
-* +1 from EvenR, HowardB, KurtS, JukkaR, DanielM
+-  이벤 루올 +1
+-  하워드 버틀러 +1
+-  커트 슈베어 +1
+-  유카 라흐코넨 +1
+-  대니얼 모리셋 +1
 
-Credits
--------
-
-* implemented by Even Rouault, Robert Coup and Idan Miara

@@ -375,8 +375,8 @@ GDAL의 기존 네이티브 코드 플러그인 메커니즘과 유사합니다.
 이런 파이썬 드라이버를 작성하는 방법을 설명하는 예제를 추가했습니다:
 `vector_python_driver.rst <https://github.com/rouault/gdal/blob/pythondrivers/gdal/doc/source/tutorials/vector_python_driver.rst>`_
 
-Testing
--------
+테스트
+------
 
 앞의 파이썬 드라이버 및 몇몇 오류 사례를 테스트하기 위해 GDAL 자동 테스트 스위트를 확장할 것입니다:
 `ogr_pythondrivers.py <https://github.com/rouault/gdal/blob/pythondrivers/autotest/ogr/ogr_pythondrivers.py>`_
