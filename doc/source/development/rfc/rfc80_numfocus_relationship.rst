@@ -1,137 +1,112 @@
 .. _rfc-80:
 
 =============================================================
-RFC 80: NumFOCUS relationship and sponsorship program
+RFC 80: NumFOCUS와의 관계와 후원 프로그램
 =============================================================
 
-============== =============================================
-Author:        Even Rouault (with content from Chris Holmes)
-Contact:       even.rouault @ spatialys.com
-Started:       2021-Apr-15
-Last modified: 2021-Jun-07
-Status:        Adopted
-============== =============================================
+============ ===================================================
+저자:        이벤 루올 (크리스 홈즈(Chris Holmes)의 콘텐츠 포함)
+연락처:      even.rouault@spatialys.com
+제안일:      2021년 4월 15일
+최신 수정일: 2021년 6월 7일
+상태:        승인
+============ ===================================================
 
-Summary
--------
+요약
+----
 
-The GDAL project will apply for Fiscal sponsorship to `NumFOCUS <https://numfocus.org>`__,
-under the "Grantor-Grantee" model
+GDAL 프로젝트는 "양도인-수탁자(Grantor-Grantee)" 모델에 따라 `NumFOCUS <https://numfocus.org/>`_ 에 재정 후원을 신청할 것입니다.
 
-Motivation
-----------
+동기
+----
 
-GDAL's funding model to date has been using the overhead of new feature
-implementation to support the maintenance activities. While this is a common
-open source funding model, it is no longer sustainable given the maturity that
-GDAL has reached. Undirected financial resources will give the project the
-ability to target challenges that have proven too big or too structural to
-otherwise attack.
+지금까지 GDAL의 자금 조달 모델은 유지관리 활동을 지원하기 위해 새로운 기능 구현의 간접비(overhead)를 사용해왔습니다. 이것이 흔한 오픈 소스 자금 조달 모델이기는 하지만, 현재 GDAL이 도달한 성숙도를 감안할 때 더 이상 지속 가능하지 않은 것도 사실입니다. 방향이 지정되지 않은 재정 자원은 프로젝트가 다른 방식으로 공격하기엔 너무 크거나 또는 너무 구조적이라고 입증된 도전적인 문제를 목표로 할 수 있는 능력을 제공합니다.
 
-Details
--------
+상세 사항
+---------
 
-The GDAL project has determined that joining NumFOCUS for Fiscal sponsorship
-will help address those challenges. NumFOCUS will receive donations given by
-sponsors of the GDAL project.
+GDAL 프로젝트는 재정 후원을 위해 NumFOCUS에 합류하는 것이 이런 도전적인 문제들을 해결하는 데 도움이 될 것이라고 판단했습니다. NumFOCUS가 GDAL 프로젝트의 후원자들로부터 기부금을 받게 될 것입니다.
 
-GDAL is well aligned with the requirements for a project to join NumFOCUS, most
-of them are inherited from being an OSGeo project:
+NumFOCUS에 합류하기 위해 프로젝트에 부과되는 요구 사항과 GDAL은 잘 일치합니다. 이런 요구 사항 가운데 대부분은 GDAL이 OSGeo 프로젝트라는 점에서 상속받는 사항들입니다:
 
-- Be scientifically oriented.
-- Be open.
-- Be kind.
+-  과학 지향적이어야 합니다.
+-  공개적이어야 합니다.
+-  인도적이어야 합니다.
 
-More precisely, GDAL will apply for Fiscal sponsorship under the "Grantor-Grantee"
-model. It is described at https://numfocus.org/projects-overview and put inline
-below for convenience:
+좀 더 정확하게 말하자면, GDAL은 "양도인-수탁자(Grantor-Grantee)" 모델에 따라 재정 후원을 신청할 것입니다. `이 웹페이지 <https://numfocus.org/projects-overview>`_ 에서 이에 대해 설명하고 있으며, 편의를 위해 다음과 같이 발췌합니다:
 
 ::
 
-    The Grantor-Grantee Model is a "lightweight" option for fiscal sponsorship,
-    for when a project is in need of an entity to receive and manage grant
-    funding. In this model, the project remains a separate entity responsible
-    for managing its own tax and liability issues. NumFOCUS ensures that the
-    project will use the grant funds received to accomplish the ends described
-    in the grant proposal, in alignment with our purpose as a 501(c)(3) public
-    charity in the United States.
+    양도인-수탁자 모델은 재정 후원을 위한 "경량" 옵션으로, 프로젝트에서
+    자금을 받고 관리하기 위한 독립체(entity)가 필요한 경우 사용됩니다.
+    이 모델에서는 프로젝트가 자체 세금 및 부채 문제를 관리하기 위한
+    개별 독립체로 남게 됩니다. NumFOCUS는 미국의 501(c)(3) 공공 자선
+    단체로서의 목적에 따라 후원금 제안서에 설명된 목적을 달성하기 위해
+    받은 후원금을 사용할 것을 보장합니다.
 
+GDAL에 기부된 자금은 (NumFOCUS가 자체 운영을 위해 받는, 일반적으로 15%로 결정되는 수수료를 제외하고) GDAL에 배정될 것입니다.
 
-Funds donated to GDAL will be earmarked to it (minus the commission received by
-NumFOCUS for its operations, typically 15%, to be confirmed).
+GDAL 프로젝트는 GDAL이 무엇인지 그리고 어째서 NumFOCUS에 합류하려 하는지를 제시하는 `첫 번째 문서 <https://docs.google.com/document/d/1-cZzyctrfvpqF_Cymkn0M9yKYClCA_5MGAmJ_frAi98/edit#heading=h.iq2vc7xizie0>`_ 를 이미 제출했습니다.
 
-The project has already submitted a `first document <https://docs.google.com/document/d/1-cZzyctrfvpqF_Cymkn0M9yKYClCA_5MGAmJ_frAi98/edit#heading=h.iq2vc7xizie0>`__ presenting what GDAL is and why it wants to join NumFOCUS:
+이제 NumFOCUS 위원회의 승인을 받을 수 있도록 공식적으로 `NumFOCUS 신청서 <https://numfocus.typeform.com/to/VUPE35>`_ 를 제출해야 합니다.
 
-We now need to formally apply through their `application form <https://numfocus.typeform.com/to/VUPE35>`__
-so that the application is passed to the NumFOCUS board for approval.
+이 신청서에 대한 제안 답변은 `여기 <https://docs.google.com/document/d/1bc5jdpCe1axdyBHxbJnun7e0DTyDoZI_eFYgJYnOhB8/edit>`_ 에서 볼 수 있습니다.
 
-The proposed answers to that application form are at:
-https://docs.google.com/document/d/1bc5jdpCe1axdyBHxbJnun7e0DTyDoZI_eFYgJYnOhB8/edit
+`사전 승인된 양도인-수탁자 계약서 <https://docs.google.com/document/d/12KGmSD_EGWqlzh0fiaHNIiN6xPWgdTy--NYf4QR-5k8/edit>`_ 에도 GDAL 프로젝트 운영 위원회 회원 3명의 서명이 필요합니다.
 
-A `Pre-approved Grantor/ Grantee Agreement <https://docs.google.com/document/d/12KGmSD_EGWqlzh0fiaHNIiN6xPWgdTy--NYf4QR-5k8/edit>`__
-will also have to be signed by 3 members of the GDAL PSC.
+기부금의 일반 사용
+------------------
 
-General use of funds
---------------------
+이 주제에 대해서는 향후 문서에서 더 구체화할 것이지만, 여기에서는 일반 원칙을 분명히 하겠습니다.
 
-This topic will be refined in a further document, but we will underline here
-the general principles.
+NumFOCUS를 통해 획득한 자금은 프로젝트의 일반적인 소용은 물론 (PROJ, libgeotiff, libtiff, shapelib 등등과 같은) 주요 오픈 소스 의존성을 위한 방식으로 사용될 것입니다.
 
-Funds obtained through NumFOCUS should be used in a way that is for the general good
-of the project, as well as its key open source dependencies (such as PROJ, libgeotiff,
-libtiff, shapelib, etc.).
+자금 지원의 대상이 될 작업은 다음과 같습니다(다음 목록으로만 제한되지는 않습니다):
 
-The tasks candidate to funding will be along (non-exhaustive
-list):
+-  티켓 중요도 분류 및 해결
+-  기여 코드 검토
+-  지속적 통합 유지/관리 및 개선
+-  메일링 리스트 모니터링
+-  보안 모니터링 인프라스트럭처에서 제기된 리포트 처리
+-  문서 개선
+-  소프트웨어 배포
+-  다른 자금 지원을 받는 (특히 신규) 개발자와의 협력
+-  이런 활동들에 대한 보고서 작성
 
-- ticket triaging and fixing,
-- code contribution review,
-- continuous integration maintenance and improvements,
-- monitoring of mailing list,
-- addressing reports raised by security monitoring infrastructure,
-- documentation improvement,
-- software releases,
-- co-operation with other funded developers (in particular onboarding),
-- reports of those activities
+보다 일반적으로는 프로젝트가 장기적으로 번성하기 위해 필요한, 그러나 특정 기능에 직접 관련되지 않기 때문에 일반적으로 직접적인 자금 지원이 어려운 모든 작업이 대상이 됩니다. 새로운 기능 및 개선 사항들은 해당 기능 및 개선 사항을 개발할 수 있는 능력을 가진 이해 당사자가 또는 이들이 그런 목적을 위해 고용할 수 있는 서비스 제공자들을 통해 기여 코드로서 계속 제출될 것으로 예상됩니다.
 
-More generally, all tasks that are needed for a project to strive on the long term, but are
-typically hard to get directly funding from, as not being directly tied to a
-particular feature. It is expected that new features and
-improvements will go on being submitted as code contributions by the interested
-parties in capacity to develop them, or through service providers they might hire
-for that purpose.
+후원자들이 직접 특정 기능을 개발할 수도, 후원 프로그램을 통해 우선 지원을 받을 수도 없게 될 것입니다. 후원자들은 이런 목적을 위해 다른 GDAL 사용자들과 마찬가지로 커뮤니티 지원을 사용하거나 서비스 제공자에 조회할 수도 있습니다. 하지만 다음에 자세히 설명하는 대로, 후원자들이 피드백을 줄 수 있는 방법을 제공할 것입니다.
 
-Sponsors will not be able to direct particular developments, nor receive priority
-support through the sponsorship program. For such purposes, they may use
-community support or refer to service providers, as for other GDAL users.
-However, we will offer a way to sponsors to give feedback, as detailed afterwards.
-
-GDAL Advisory Council
----------------------
-
-The GDAL Advisory Council is a newly forming group that is tasked with ensuring the project is evolving to meet the needs of its largest supporters. There will be periodic meetings with the advisory board, GDAL PSC members wishing to participate, and persons benefiting from funding, providing a forum to give feedback on the latest GDAL work. Board members will also be expected to share how they are using GDAL in their organization (in as much detail as is possible, understanding that some can only talk in general terms). Though the GDAL PSC owns the decision making around how the sponsorship money is allocated, the advisory board will provide key input on the maintenance priorities of the sponsors.
-
-Our hope is that these sessions can also lead to new feature development in GDAL through joint funding initiatives between top sponsors, providing more structure to the way GDAL features are funded today. This ideally leads to more cost-sharing as organizations will be able to be more strategic when they know what everyone else is interested in. These efforts will be above and beyond the core maintenance sponsorship, but the Advisory Council will be a key forum to enable it.
-
-The Advisory board will have an email list, with members of the GDAL PSC on it, and will meet on a periodic schedule, to be determined as the group forms. It will consist of one representative from each of the Gold sponsors, one representative for every three Silver sponsors, and one representative from Bronze sponsors.
-
-Acknowledgment of NumFOCUS and sponsors
----------------------------------------
-
-The GDAL website will be updated to have a page dedicated to the sponsoring
-program, acknowledging sponsors and NumFOCUS, providing a detailed FAQ on what
-the sponsorship program consists in and a "sponsoring prospectus" that can be
-used by candidate sponsors. A work-in-progress version of this update is available
-at https://github.com/OSGeo/gdal/pull/3681
-
-Impacts on OSGeo relationship
------------------------------
-
-GDAL and will continue to remain a OSGeo project for all other concerns than
-NumFOCUS-related sponsorship.
-
-Voting History
+GDAL 자문 회의
 --------------
 
-+1 from PSC members EvenR, KurtS, FrankW, MateuszL, DanielM, HowardB and NormanB
+GDAL 자문 회의(GDAL Advisory Council)는 새로 구성되는 그룹으로, GDAL 프로젝트가 GDAL의 최대 지지자들의 요구를 충족시키기 위해 진화하도록 하는 임무를 맡았습니다. 자문 회의 구성원, 참여를 원하는 GDAL 프로젝트 운영 위원회 회원들과 자금 지원의 혜택을 받는 인원들의 정기 회의를 열어 최신 GDAL 작업에 대한 피드백을 줄 수 있는 포럼을 제공할 것입니다. 
+자문 회의 구성원들은 자신의 기관에서 GDAL을 어떻게 사용하는지도 (일부 방법은 일반적인 용어를 사용할 수밖에 없다는 점을 이해하면서 가능한 한 자세하게) 공유해야 할 것입니다. GDAL 프로젝트 운영 위원회가 후원금을 어떻게 할당할 것인지에 대한 의사 결정 권한을 가지지만, 자문 회의는 후원자의 유지/관리 우선 순위에 대한 주요 의견을 제시할 것입니다.
+
+이런 정기 회의가 최고 후원자들 간의 공동 자금 조달 계획을 통해 GDAL의 새로운 기능 개발로 이어져 오늘날 GDAL 기능에 자금이 지원되는 방식에 더 많은 체계를 제공하게 되기를 희망합니다. 기관들이 다른 모든 이들이 어떤 사항에 관심을 가지고 있는지 아는 경우 좀 더 전략적이 될 수 있을 것이기 때문에, 이상적으로는 더 많은 비용 분담으로 이어집니다.
+이런 노력은 핵심 유지/관리 후원 이상일 것이지만, 자문 회의가 이를 가능하게 하는 중요한 포럼이 될 것입니다.
+
+자문 회의는 GDAL 프로젝트 관리 위원회 회원들을 포함하는 이메일 목록을 가지고, 그룹을 구성하는 대로 결정될 정기 일정에 따라 회의를 할 것입니다. 자문 회의는 각 골드 후원자의 대표자 1명, 실버 후원자 3사 당 대표자 1명, 그리고 브론즈 후원자들의 대표자 1명으로 구성될 것입니다.
+
+NumFOCUS 및 후원자에 대한 감사의 말
+-----------------------------------
+
+GDAL 웹사이트에 후원자들 및 NumFOCUS에 감사의 말을 전하는 후원 프로그램 전용 페이지를 추가하고 후원 프로그램이 어떻게 구성되는지 그리고 후원자 후보들이 사용할 수 있는 "후원 안내서(sponsoring prospectus)"에 대한 자세한 FAQ를 제공하도록 업데이트할 것입니다.'
+https://github.com/OSGeo/gdal/pull/3681 에서 이 업데이트의 작업 중 버전을 볼 수 있습니다.
+
+OSGeo 관계에 미치는 영향
+------------------------
+
+GDAL은 NumFOCUS 관련 후원을 제외한 다른 모든 문제에 대해 계속 OSGeo 프로젝트로 남아 있을 것입니다.
+
+투표 이력
+---------
+
+-  이벤 루올 +1
+-  커트 슈베어 +1
+-  프랑크 바르메르담 +1
+-  마테우시 워스코트 +1
+-  대니얼 모리셋 +1
+-  하워드 버틀러 +1
+-  노먼 바커 +1
 

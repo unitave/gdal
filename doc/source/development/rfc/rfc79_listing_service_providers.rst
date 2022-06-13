@@ -1,124 +1,92 @@
 .. _rfc-79:
 
 =============================================================
-RFC 79: Listing of Service Providers on GDAL website
+RFC 79: GDAL 웹페이지에 서비스 제공자 목록 추가
 =============================================================
 
-============== ============================
-Author:        Daniel Morissette, Even Rouault
-Contact:       even.rouault @ spatialys.com
-Started:       2021-Feb-22
-Last updated:  2021-Mar-01
-Status:        Adopted
-============== ============================
+============ ===========================
+저자:        대니얼 모리셋, 이벤 루올
+연락처:      even.rouault@spatialys.com
+제안일:      2021년 2월 22일
+최신 수정일: 2021년 3월 1일
+상태:        승인
+============ ===========================
 
-1. Motivation
-=============
+1. 동기
+=======
 
-GDAL is developed and supported by a rich ecosystem of businesses and
-individuals around the world but we do not do a good job of promoting those
-service providers and making them easy to find by our users at the moment.
+전세계 기업 및 개인들의 풍요로운 생태계가 GDAL을 개발하고 지원하고 있지만 현재로서는 이런 서비스 제공자들을 홍보하고 GDAL 사용자들이 쉽게 이들을 찾을 수 있도록 하는 일을 제대로 하지 못 하고 있습니다.
 
-In this RFC, we propose a plan to address this by adding a Service Providers
-page to the GDAL website.
+이 RFC는 GDAL 웹사이트에 서비스 제공자(Service Provider) 페이지를 추가해서 이 문제를 해결할 계획을 제안합니다.
 
-2. Proposed plan
-================
+2. 제안 계획
+============
 
-A new Service Providers page will be added to the Sphinx documentation.
+스핑크스(Sphinx) 문서에 새 서비스 제공자 페이지를 추가할 것입니다.
 
-The service providers will be grouped in three categories. The descriptions
-below should make it relatively easy to determine in which group a given
-organization belongs.
+서비스 제공자들은 3개의 카테고리로 그룹화시킬 것입니다. 다음 설명을 참조하면 어떤 기관이 어떤 그룹에 속하는지 판단하기 쉬울 것입니다.
 
-Each qualified organization who wishes to be listed is responsible for
-adding themselves to the correct category in the page through a pull
-request (or a direct commit in case of core committers). We are intentionally
-not providing instructions here for preparing the pull request as
-it is expected that a qualified service provider should have people on
-staff who can figure it out. Yes, we intentionally
-try to keep the bar at a minimum level.
+서비스 제공자 목록에 포함되길 바라는, 자격을 갖춘 각 기관은 풀 요청을 통해 (또는 핵심 커밋 개발자의 경우 직접 커밋해서) 웹페이지의 올바른 카테고리에 자신을 추가할 책임을 가집니다. 자격을 갖춘 서비스 제공자에는 풀 요청을 준비하는 방법을 알아낼 수 있는 직원이 있을 것이기 때문에 이 문서에 풀 요청 준비를 위한 지침을 의도적으로 제공하지 않습니다. 네, 의도적으로 장벽을 최대한으로 낮추려 시도하고 있습니다.
 
-A PSC vote is NOT required in order to add a new service provider,
-i.e. any core committer can validate and commit the pull
-request (or their own entry) but in case of doubts or disagreements on the
-interpretation of the rules, the GDAL PSC will be the ultimate authority
-to resolve the question.
+새 서비스 제공자를 추가하는 데 프로젝트 운영 위원회 투표를 필요로 하지 않습니다. 예를 들어 모든 핵심 커밋 개발자가 풀 요청(또는 자신의 항목)을 검증하고 커밋할 수 있지만 규칙 해석에 대해 의심이 들거나 동의하지 않는 경우 GDAL 프로젝트 운영 위원회가 문제를 해결하는 최종 권한을 가질 것입니다.
 
-Organizations in each category are displayed in randomized order (except
-in the PDF docs which are static). However entries should be added to the
-source file in alphabetical order (for PDF docs purpose).
-The output will be similar to
-https://mapserver.org/community/service_providers.html
+각 카테고리의 기관들은 임의의 순서로 표시됩니다. (다만 PDF 문서의 경우 고정된 순서로 출력됩니다.) 하지만 소스 파일에는 (PDF 문서를 위해) 항목들을 알파벳 순서로 추가해야 합니다. 그 결과물은 https://mapserver.org/community/service_providers.html 페이지와 비슷할 것입니다.
 
-2.1 Core Contributors
----------------------
+2.1 핵심 기여자
+---------------
 
-Core Contributors are the organizations that have one or more
-Core Committer (a person with merge rights in the GDAL GitHub repository)
-and/or PSC members as part of their staff and who provide
-GDAL related services to customers.
+핵심 기여자는 한 명 이상의 (GDAL 깃허브 저장소에 병합 권한을 가진 사람인) 핵심 커밋 개발자 그리고/또는 프로젝트 운영 위원회 회원이 직원으로 있는, 그리고 고객에게 GDAL 관련 서비스를 제공하는 기관을 말합니다.
 
-To qualify, the Core Committers and/or PSC members must be directly employed
-by the organization and not part time contractors.
+핵심 기여자 자격을 갖추려면, 해당 기관이 핵심 커밋 개발자 그리고/또는 프로젝트 운영 위원회 회원을 파트타임 계약자가 아니라 정직원으로 고용하고 있어야만 합니다.
 
-They get to add a 200px max high or wide logo with a descriptive text outlining their qualifications and services.
+핵심 기여자는 자신의 자격 및 서비스를 요약하는 설명 텍스트와 함께 최대 200픽셀 높이 또는 너비를 가진 로고를 추가할 수 있습니다.
 
-2.2 Contributors
-----------------
+2.2 기여자
+----------
 
-Contributors are organizations who provide GDAL related services and
-have one or more people on their staff who are well known in the GDAL
-community for their long term contributions to the project. Contributions are
-not limited to source code and can also be in the form of documentation,
-binary builds, active user support via the public forums, etc.
+기여자는 GDAL 프로젝트에 대한 장기간 기여로 인해 GDAL 커뮤니티에 잘 알려져 있는 직원이 한 명 이상 있으며 GDAL 관련 서비스를 제공하는 조직을 말합니다. 이때 기여에는 소스 코드에 대한 기여만이 아니라 문서화, 바이너리 빌드, 공개 포럼을 통한 활발한 사용자 지원 등등도 포함될 수 있습니다.
 
-They get to add a 150px max high or wide logo with a descriptive text outlining their qualifications and services.
+기여자는 자신의 자격 및 서비스를 요약하는 설명 텍스트와 함께 최대 150픽셀 높이 또는 너비를 가진 로고를 추가할 수 있습니다.
 
-2.3 Other Service Providers
----------------------------
+2.3 기타 서비스 제공자
+----------------------
 
-Organization with GDAL expertise and providing services around GDAL
-can fit in this category. While proprietary solutions providers are welcome,
-we expect organizations listed here to be providing legitimate services to
-users of the Open Source software as well.
-This is not an advertisement board for proprietary products.
+이 카테고리에는 GDAL에 대한 전문성을 가지고 GDAL과 연관된 서비스를 제공하는 기관이 포함될 수 있습니다. 독점 솔루션 제공자도 환영하지만, 이 카테고리에 목록화된 기관들이 오픈 소스 소프트웨어 사용자들에게도 합법적인 서비스를 제공할 것을 기대합니다. 이 웹페이지는 독점 상품을 위한 광고판이 아닙니다.
 
-They get to add a 100px max high or wide logo with a descriptive text outlining their qualifications and services.
+기타 서비스 제공자는 자신의 자격 및 서비스를 요약하는 설명 텍스트와 함께 최대 100픽셀 높이 또는 너비를 가진 로고를 추가할 수 있습니다.
 
-2.4 Refreshing the service providers list
------------------------------------------
+2.4 서비스 제공자 목록 새로고침
+-------------------------------
 
-If at some point (every 2 years?) we feel that the list is or might be no
-longer current, we could bring it up to date as follows:
+적당한 때가 되어 (2년마다?) 목록이 더 이상 최신이 아니거나 아닐 수도 있다고 판단되는 경우, 다음과 같이 최신으로 업데이트할 수 있습니다:
 
-* create a GitHub ticket dedicated for the refresh
-* send an email to the list with this message "in 4 weeks, we are going to remove
-  all currently listed service providers to refresh the site. If you are still
-  interested, add a note to ticket XXXX".
+-  새로고침을 위한 전용 깃허브 티켓을 생성합니다.
+-  목록에 있는 서비스 제공자들에게 다음 메시지를 담은 이메일을 보냅니다:
 
-Instead of the ticket we could just ask people to reply to the email but the advantage of
-the ticket is to generate less email traffic for those not interested. It
-leaves a trace of the list of organizations who responded in a single place inside the ticket.
+   "사이트를 새로고침하기 위해, 4주 안에 현재 목록에 있는 모든 서비스 제공자들을 제거할 것입니다. 계속 목록에 포함되고 싶다면, XXXX 티켓에 메모를 추가해주십시오."
+
+티켓 대신 그냥 이메일에 답장을 보내라고 요청할 수도 있지만, 티켓의 장점은 원하지 않는 서비스 제공자들의 이메일 트래픽을 줄일 수 있다는 점입니다. 티켓을 사용하면 티켓 내부의 한 위치에 응답한 기관들의 목록을 남깁니다.
 
 3. FAQ
 ======
 
-* Should we also recognize sponsors or organizations that are funding significant
-  features in this page?
+-  이 페이지에 중요 기능을 후원하는 후원자 또는 기관을 공인해야 할까요?
 
-  * No. This is a service provider page and not a sponsorship page. However
-    if the organization in question is also offering GDAL related services they
-    can be added to the relevant category. They just won't get special status due
-    to their financial contributions.
+   -  아니오. 이 웹페이지는 서비스 제공자 페이지지 후원 페이지가 아닙니다. 하지만 후원 기관이 GDAL 관련 서비스도 제공하고 있는 경우 관련이 있는 카테고리에 추가할 수 있습니다. 재정적 기여만으로 특별한 취급을 하지는 않을 것입니다.
 
-4. Credits
-==========
+4. 감사의 말
+============
 
-This RFC is a straightforward adaptation of the equivalent MapServer one:
-https://mapserver.org/development/rfc/ms-rfc-116.html
+이 RFC는 동등한 MapServer RFC를 간단하게 적용한 것입니다:
 
-5. Voting History
-=================
+   -  https://mapserver.org/development/rfc/ms-rfc-116.html
 
-+1 from PSC members MateuszL, KurtS, JukkaR, DanielM and EvenR.
+5. 투표 이력
+============
+
+-  마테우시 워스코트(Mateusz Łoskot) +1
+-  커트 슈베어 +1
+-  유카 라흐코넨 +1
+-  대니얼 모리셋 +1
+-  이벤 루올 +1
+
