@@ -97,9 +97,9 @@ https://numpy.org/devdocs/release/1.19.0-notes.html
      - 2020년 4월
      - 2021년 4월
      - 파이썬 3.8
-   * - 데비안  9.0 Stretch LTS
+   * - 데비안 9.0 Stretch LTS
      - 2017년 6월
-     - 2022년 7
+     - 2022년 7월
      - 파이썬 3.5
    * - 데비안 10.0 Buster LTS
      - 2019년 7월
