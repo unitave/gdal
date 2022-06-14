@@ -111,20 +111,20 @@ placed in the hands of a Project Steering Committee. This project steering
 committee operates under the rules of :ref:`rfc-1`, and is overall responsible for
 decisions related to the GDAL/OGR project. The current members are (@github username):
 
-- Frank Warmerdam      (@warmerdam)
-- Daniel Morissette    (@dmorissette)
-- Howard Butler        (@hobu)
-- Tamas Szekeres       (@szekerest)
-- Even Rouault (chair) (@rouault)
-- Jukka Rahkonen       (@jratike80)
-- Kurt Schwehr         (@schwehr)
-- Norman Barker        (@normanb)
-- Sean Gillies         (@sgillies)
-- Mateusz Łoskot       (@mloskot)
+-  프랑크 바르메르담(Frank Warmerdam)	(@warmerdam)
+-  대니얼 모리셋(Daniel Morissette)	(@dmorissette)
+-  하워드 버틀러(Howard Butler)		(@hobu)
+-  세케레시 터마시(Szekeres Tamás)	(@szekerest)
+-  이벤 루올(Even Rouault) (회장)	(@rouault)
+-  유카 라흐코넨(Jukka Rahkonen)	(@jratike80)
+-  커트 슈베어(Kurt Schwehr)		(@schwehr)
+-  노먼 바커(Norman Barker)		(@normanb)
+-  션 길리스(Sean Gillies)		(@sgillies)
+-  마테우시 워스코트(Mateusz Łoskot)	(@mloskot)
 
-Past members:
+과거 회원:
 
-- Andrey Kiselev       (@strezen) (retired in 2019)
+-  안드레이 키셀레프(Andrey Kiselev)	(@strezen) (2019년 은퇴)
 
 Note that discussion of proposals to the PSC take place on gdal-dev, and input
 from all subscribers is welcome. A :ref:`list of past RFC <rfclist>` is available for review.
