@@ -1,145 +1,115 @@
 .. _community:
 
 ================================================================================
-Community
+커뮤니티
 ================================================================================
 
-GDAL's community interacts through `Mailing List`_, `GitHub`_, and
-`Chat`_.  Please feel welcome to ask questions and participate in all of the
-venues.  The `Mailing List`_ communication channel is for general questions,
-development discussion, and feedback. The `GitHub`_ communication channel is
-for development activities, bug reports, and testing. The `Chat`_
-room is for real-time chat activities such as meetings and interactive
-debugging sessions.
+GDAL 커뮤니티는 `메일링 리스트`_, `깃허브`_, 그리고 `챗`_ 을 통해 소통합니다. 이 모든 장소에서 자유롭게 질문하고 참여해주십시오.
+`메일링 리스트`_ 는 일반적인 질문, 개발 논의, 그리고 피드백을 위한 소통 채널입니다.
+`깃허브`_ 는 개발 활동, 버그 리포트, 그리고 테스트를 위한 소통 채널입니다.
+`챗`_ 채팅방은 회의 및 대화형 디버깅 작업 같은 실시간 채팅 활동을 위한 소통 채널입니다.
 
-Code of Conduct
----------------
+행동 수칙
+---------
 
 .. only:: html
 
-    GDAL uses a :ref:`code_of_conduct` which governs how we behave in any GDAL
-    forum or event and whenever we will be judged by our actions. We expect it to
-    be honored by everyone who participates in the GDAL community formally or
-    informally, or claims any affiliation with the project.
+   GDAL은 :ref:`code_of_conduct` 를 이용해서 GDAL 포럼 또는 이벤트에서 그리고 자신의 행동으로 판단을 받을 때마다 행동하는 방식을 결정합니다. GDAL 커뮤니티에 공식적으로든 비공식적으로든 참여하는, 또는 프로젝트와 관련이 있다고 주장하는 모든 사람이 이를 존중할 것으로 기대합니다.
 
 .. toctree::
    :hidden:
 
    code_of_conduct
 
+메일링 리스트
+-------------
 
-Mailing List
-------------
+GDAL의 개발자 및 사용자가 GDAL 메일링 리스트에 참여합니다. GDAL을 사용하는 방법이나 사용자 소프트웨어에 GDAL을 통합하는 방법에 대해 질문하거나, 당신이 가지고 있을 수도 있는 문제점을 리포트해도 괜찮습니다.
 
-Developers and users of GDAL participate on the GDAL mailing list. It is OK to
-ask questions about how to use GDAL, how to integrate GDAL into your own software,
-and report issues that you might have.
+https://lists.osgeo.org/mailman/listinfo/gdal-dev
 
-http://lists.osgeo.org/mailman/listinfo/gdal-dev
-
-
-GitHub
+깃허브
 ------
 
-Visit http://github.com/OSGeo/GDAL to file issues you might be having with the
-software. GitHub is also where you can obtain a current development version of the
-software in the `git`_ revision control system. The GDAL project is eager to
-take contributions in all forms, and we welcome those who are willing to roll
-up their sleeves and start filing tickets, pushing code, generating builds, and
-answering questions.
+당신이 가지고 있을 수도 있는 GDAL 소프트웨어 문제점을 제출하려면 https://github.com/OSGeo/GDAL 을 방문하십시오.
+깃허브에서는 `깃(git)`_ 리비전(revision) 제어 시스템에 있는 현재 GDAL 소프트웨어의 개발 버전을 다운로드할 수도 있습니다.
+GDAL 프로젝트는 모든 형식의 기여를 받아들일 준비가 되어 있으며, 기꺼이 소매를 걷어붙이고 티켓을 제출하고 코드를 푸시하며 빌드를 생성하고 질문에 답하고자 하는 사람들을 환영합니다.
 
+챗
+--
 
+`Libera.Chat`_ 에 있는 #gdal IRC 채널에서 몇몇 GDAL 개발자들을 만나볼 수 있습니다.
+이 메커니즘은 보통 커뮤니티 활동 회의 및 기타 지원을 위해 예약되어 있습니다.
+대부분의 상황에서 `메일링 리스트`_ 및 `깃허브`_ 가 좀 더 생산적인 소통 채널일 것입니다.
 
-Chat
-----
-
-You can find some GDAL developers in the IRC channel #gdal on `Libera.Chat`_.
-This mechanism is usually reserved for active meetings and other outreach
-with the community.
-The `Mailing List`_ and `GitHub`_ avenues are going to be more productive
-communication channels in most situations.
-
-.. _`git`: https://en.wikipedia.org/wiki/Git_(software)
+.. _`깃(git)`: https://ko.wikipedia.org/wiki/%EA%B9%83_(%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4)
 .. _`Libera.Chat`: https://web.libera.chat/#gdal
 
+소셜 미디어
+-----------
 
-Social media
-------------
+`트위터 <https://twitter.com/GdalOrg>`_ 에서 GDAL 공식 소식을 팔로우할 수 있습니다.
 
-You can follow GDAL official news on Twitter: https://twitter.com/GdalOrg
+컨퍼런스
+--------
 
+.. image::   ../../images/foss4g2022.png
+   :alt:     FOSS4G 2022
+   :target:  https://2022.foss4g.org/
 
-Conference
-----------
+`FOSS4G 2022 <https://2022.foss4g.org/>`_ 는 자유-오픈 소스 지리공간 소프트웨어를 위한 최고의 연례 컨퍼런스입니다. GDAL/OGR와 관련된 발표들을 포함하며, GDAL/OGR 개발 커뮤니티가 여럿 참석할 것입니다. 이 컨퍼런스는 GDAL/OGR, 다른 FOSS 지리공간 기술 및 관련 커뮤니티에 관심이 있는 이들을 위한 행사입니다. 올해 컨퍼런스는 2022년 8월 22일부터 28일까지 이탈리아 피렌체에서 열립니다.
 
-.. image::   ../../images/foss4g2021.png
-   :alt:     FOSS4G 2021
-   :target:  https://2021.foss4g.org/
+관리 방식 및 커뮤니티 참여
+--------------------------
 
-`FOSS4G 2021 <https://2021.foss4g.org/>`_ is the leading annual conference for free and open source geospatial software. It will include presentations related to GDAL/OGR, and some of the GDAL/OGR development community will be attending. It is the event for those interested in GDAL/OGR, other FOSS geospatial technologies and the community around them. The conference will be held ONLINE from September 27th to October 2nd 2021.
+OSGeo 프로젝트 멤버십
++++++++++++++++++++++
 
-Governance and Community Participation
---------------------------------------
+원래 GDAL/OGR를 대부분 작성한 원저자 프랑크 바르메르담이 여러 사람들의 기여와 의견과 함께 GDAL을 이끌었습니다.
+2006년 2월, GDAL/OGR는 `오픈 소스 지리공간 재단(Open Source Geospatial Foundation; OSGeo) <https://www.osgeo.org/>`_ 의 창립 프로젝트가 되었으며, OSGeo의 기대를 유지하기 위해 좀 더 커뮤니티 지향적인 관리 모델로 전환하기 시작했습니다.
 
-OSGeo Project Membership
-++++++++++++++++++++++++
+OSGeo 프로젝트로서의 멤버십은 GDAL/OGR 프로젝트가 다양한 모범 사례를 도입하고 있다는 사실을 보장하며, 사용자와 기여자에게 책임 있는 프로젝트 운영 및 프로젝트의 연속성을 보장합니다. 그 중에서도:
 
-Originally, GDAL has been lead by Frank Warmerdam, the original author of much
-of GDAL/OGR, though with contributions and input from a variety of people.
-As of February 2006 GDAL/OGR became a founding project of the
-`Open Source Geospatial Foundation (OSGeo) <https://www.osgeo.org/>`_
-and began a transition to a more community oriented governance
-model - in keeping with OSGeo expectations.
+-  합의 지향적인 프로젝트 관리 위원회(Project Management Committee)가 프로젝트를 담당할 것입니다.
 
-Membership as an OSGeo project provides assurances that a variety of best practices
-are being employed by the GDAL/OGR project, and that users and contributors can be
-assured of responsible project operation and continuity of the project. In particular:
+-  GDAL/OGR 기여자와 사용자를 보호하면서 코드를 적절하게 사용할 수 있도록 보장하기 위해 프로젝트 소스 코드 및 기여 콘텐츠를 점검할 것입니다.
 
-- A consensus oriented Project Management Committee will be in charge of the project.
-- Project source code and contributions will be vetted to ensure code is properly
-  made available, protecting contributors and users of GDAL/OGR.
-- Part of the systems infrastructure used by the project is provided by the foundation,
-  with responsible backup and redundancy to minimize disruptions.
+-  OSGeo 재단이 프로젝트 중단을 최소화하기 위한 책임 있는 백업 및 이중화(redundancy)와 함께 프로젝트가 이용하는 시스템 인프라스트럭처의 일부를 제공합니다.
 
 .. _psc:
 
-Project Steering Committee
-++++++++++++++++++++++++++
+프로젝트 운영 위원회
+++++++++++++++++++++
 
-As of April 2006 (following the GDAL/OGR 1.3.2 release) the project has been
-placed in the hands of a Project Steering Committee. This project steering
-committee operates under the rules of :ref:`rfc-1`, and is overall responsible for
-decisions related to the GDAL/OGR project. The current members are (@github username):
+(GDAL/OGR 1.3.2버전 배포 후) 2006년 4월, 프로젝트 운영 위원회(Project Steering Committee)가 프로젝트를 담당하게 되었습니다. 이 프로젝트 운영 위원회는 :ref:`rfc-1` 규칙 하에 운영되며, GDAL/OGR 프로젝트와 관련된 결정들에 대한 전체적인 책임을 집니다. 현재 회원은 다음과 같습니다(``@`` 문자 뒤는 깃허브 사용자명입니다):
 
--  프랑크 바르메르담(Frank Warmerdam)	(@warmerdam)
--  대니얼 모리셋(Daniel Morissette)	(@dmorissette)
--  하워드 버틀러(Howard Butler)		(@hobu)
--  세케레시 터마시(Szekeres Tamás)	(@szekerest)
--  이벤 루올(Even Rouault) (회장)	(@rouault)
--  유카 라흐코넨(Jukka Rahkonen)	(@jratike80)
--  커트 슈베어(Kurt Schwehr)		(@schwehr)
--  노먼 바커(Norman Barker)		(@normanb)
--  션 길리스(Sean Gillies)		(@sgillies)
--  마테우시 워스코트(Mateusz Łoskot)	(@mloskot)
+-  프랑크 바르메르담(Frank Warmerdam)   (@warmerdam)
+-  대니얼 모리셋(Daniel Morissette)     (@dmorissette)
+-  하워드 버틀러(Howard Butler)         (@hobu)
+-  세케레시 터마시(Szekeres Tamás)      (@szekerest)
+-  이벤 루올(Even Rouault) (회장)       (@rouault)
+-  유카 라흐코넨(Jukka Rahkonen)        (@jratike80)
+-  커트 슈베어(Kurt Schwehr)            (@schwehr)
+-  노먼 바커(Norman Barker)             (@normanb)
+-  션 길리스(Sean Gillies)              (@sgillies)
+-  마테우시 워스코트(Mateusz Łoskot)    (@mloskot)
 
 과거 회원:
 
--  안드레이 키셀레프(Andrey Kiselev)	(@strezen) (2019년 은퇴)
+-  안드레이 키셀레프(Andrey Kiselev)    (@strezen) (2019년 은퇴)
 
-Note that discussion of proposals to the PSC take place on gdal-dev, and input
-from all subscribers is welcome. A :ref:`list of past RFC <rfclist>` is available for review.
+프로젝트 운영 위원회는 "gdal-dev" 메일링 리스트 상에서 제안에 대해 논의하며, 메일링 리스트 구독자는 누구나 의견을 제시할 수 있습니다. 과거 제안들을 검토해보려면 :ref:`과거 RFC 목록 <rfclist>` 을 보면 됩니다.
 
-
-GDAL Service Providers
-----------------------
+GDAL 서비스 제공자
+------------------
 
 .. only:: html
 
-    GDAL is developed and supported by a rich ecosystem of businesses and
-    individuals around the world. You can consult a list of :ref:`service_providers`
-    who can assist you in getting the best out of your GDAL investment.
+   전세계 기업 및 개인들의 풍요로운 생태계가 GDAL을 개발하고 지원하고 있습니다.
+   GDAL에 대한 투자를 최대한 활용할 수 있도록 도움을 줄 수 있는 :ref:`service_providers` 목록을 참조할 수 있습니다.
 
 .. toctree::
    :hidden:
 
    service_providers
+

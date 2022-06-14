@@ -1,139 +1,97 @@
 .. _code_of_conduct:
 
 ================================================================================
-Code of Conduct
+행동 수칙
 ================================================================================
 
-This code of conduct governs how we behave in any GDAL forum or event and
-whenever we will be judged by our actions. We expect it to be honored by everyone
-who participates in the GDAL community formally or informally, or claims any
-affiliation with the project.
+이 행동 수칙(Code of Conduct)은 모든 GDAL 포럼 또는 이벤트에서 그리고 자신의 행동으로 판단을 받을 때마다 행동하는 방식을 결정합니다. GDAL 커뮤니티에 공식적으로든 비공식적으로든 참여하는, 또는 프로젝트와 관련이 있다고 주장하는 모든 사람이 이를 존중할 것으로 기대합니다.
 
-Introduction
--------------
+개요
+----
 
-This code of conduct governs how we behave in any GDAL forum or event and
-whenever we will be judged by our actions. We expect it to be honored by
-everyone who participates in the GDAL community formally or informally, or
-claims any affiliation with the GDAL project.
+이 행동 수칙(Code of Conduct)은 모든 GDAL 포럼 또는 이벤트에서 그리고 자신의 행동으로 판단을 받을 때마다 행동하는 방식을 결정합니다. GDAL 커뮤니티에 공식적으로든 비공식적으로든 참여하는, 또는 GDAL 프로젝트와 관련이 있다고 주장하는 모든 사람이 이를 존중할 것으로 기대합니다.
 
-It applies to in-person events (such as conferences and related social events),
-IRC, public and private mailing lists, the issue tracker, the wiki, blogs,
-Twitter, and any other forums which the community uses for communication and
-interactions.
+이 수칙은 (컨퍼런스 및 관련 사교 행사 같은) 대면 행사, IRC, 공개 및 비공개 메일링 리스트, 이슈 트래커, 위키, 블로그, 트위터, 그리고 커뮤니티가 소통 및 대화형 작업을 위해 사용하는 다른 모든 만남의 장에 적용됩니다.
 
-This code is not exhaustive or complete. It serves to distill our common
-understanding of a collaborative, shared environment and goals. We expect it to
-be followed in spirit as much as in the letter, so that it can enrich all of
-us and the technical communities in which we participate.
+이 수칙은 불완전하지도 완전하지도 않습니다. 협업적이고 공유된 환경 및 목표에 대한 공통된 이해를 이끌어내는 역할을 합니다. 문자 그대로 그리고 그만큼 정신적으로도 이 수칙을 따라서 우리 모두 및 우리가 참여하는 기술 공동체를 풍요롭게 할 수 있기를 기대합니다.
 
-Diversity Statement
--------------------
+다양성 선언
+-----------
 
-GDAL welcomes and encourages participation by everyone. We are committed to
-being a community that everyone feels good about joining, and we will always
-work to treat everyone well. No matter how you identify yourself or how others
-perceive you: we welcome you.
-Specific Guidelines
+GDAL은 모든 사람의 참여를 환영하고 권장합니다. 모든 사람이 기분 좋게 동참할 수 있는 커뮤니티가 되도록 헌신하고 항상 모든 사람을 잘 대해줄 수 있도록 노력할 것입니다. 당신이 자신을 어떻게 식별하든 타인이 당신을 어떻게 인식하든 간에 GDAL은 여러분을 환영합니다.
 
-We strive to:
+구체적인 지침
+   GDAL은 다음을 위해 노력합니다:
 
-- Be open.
+   -  개방하십시오.
 
-  We invite anyone to participate in our community. We preferably use public
-  methods of communication for project-related messages, unless discussing
-  something sensitive. This applies to messages for help or project-related
-  support, too; not only is a public support request much more likely to result
-  in an answer to a question, it also makes sure that any inadvertent mistakes
-  made by people answering will be more easily detected and corrected.
+      우리는 누구든 우리 커뮤니티에 참여하도록 초대합니다. 우리는 민감한 문제를 논의하는 경우가 아니라면 프로젝트 관련 메시지를 위해 공개적인 소통 수단을 사용하는 편입니다. 이는 도움 요청 또는 프로젝트 관련 지원에 대해서도 마찬가지입니다. 공개적인 지원 요청은 질문에 대한 답변으로 이어질 가능성이 더 높은 것은 물론, 답변해주는 사람들의 의도치 않은 실수도 더 쉽게 탐지하고 수정할 수 있도록 해줍니다.
 
-- Be empathetic, welcoming, friendly, and patient.
+   -  공감하고, 환영하고, 친절하고, 인내하십시오.
 
-  We work together to resolve conflict, assume good intentions, and do our best
-  to act in an empathetic fashion. We may all experience some frustration from
-  time to time, but we do not allow frustration to turn into a personal attack.
-  A community where people feel uncomfortable or threatened is not a productive
-  one. Note that we have a multi-cultural, multi-lingual community and some of
-  us are non-native speakers. We should be respectful when dealing with other
-  community members as well as with people outside our community.
+      우리는 갈등을 해결하고, 선한 의도를 가정하고, 공감하는 방식으로 행동하기 위해 최선을 다하기 위해 함께 노력합니다. 우리 모두는 때로 좌절할 수도 있지만, 이런 감정이 개인적인 공격으로 변하는 일을 용납하지 않습니다. 사람들이 불편하게 또는 위협적이라고 느끼는 커뮤니티는 생산적인 커뮤니티가 될 수 없기 때문입니다.
+      GDAL 커뮤니티는 다문화 다국어 커뮤니티이며 우리 가운데 상당수는 영어 원어민이 아니라는 사실을 기억하십시오. GDAL 커뮤니티 구성원들은 물론 GDAL 커뮤니티 외부의 사람들과 소통할 때에도 정중하게 대해야 합니다.
 
-- Be collaborative.
+   -  협력하십시오.
 
-  Our work will be used by other people, and in turn we will depend on the work
-  of others. When we make something for the benefit of GDAL, we are willing to
-  explain to others how it works, so that they can build on the work to make it
-  even better. Any decision we make will affect users and colleagues, and we
-  take those consequences seriously when making decisions.
+      다른 사람들이 우리의 작업물을 사용할 것이고, 그 대신 우리는 다른 사람들의 작업물에 의존할 것입니다. GDAL의 이익을 위해 무언가를 만들었을 때, 다른 사람들에게 그것이 어떻게 동작하는지 기꺼이 설명할 것입니다. 그래야 그 사람들이 우리의 작업물을 기반으로 더 나은 것을 만들 수 있기 때문입니다.
+      우리가 어떤 결정을 하든 사용자와 동료에게 영향을 미칠 것이기 때문에 우리는 의사 결정을 할 때 그런 결과를 심각하게 고려합니다.
 
-- Be inquisitive.
+   -  호기심을 가지십시오.
 
-  Nobody knows everything! Asking questions early avoids many problems later,
-  so questions are encouraged, though they may be directed to the appropriate
-  forum. Those who are asked should be responsive and helpful, within the
-  context of our shared goal of improving GDAL.
+      모든 것을 아는 사람은 아무도 없습니다! 조기에 질문을 던지면 후기에 많은 문제들을 피할 수 있습니다. 질문을 알맞은 소통의 장으로 돌릴 수도 있지만, GDAL은 질문을 권장합니다. 질문을 받는 사람들은 우리가 공유하는 GDAL 개선이라는 목표의 맥락 안에서 응답하고 도움을 줘야 합니다.
 
-- Be careful in the words that we choose.
+   -  단어를 조심해서 선택하십시오.
 
-  Whether we are participating as professionals or volunteers, we value
-  professionalism in all interactions, and take responsibility for our own
-  speech. Be kind to others. Do not insult or put down other participants.
+      전문가로서 참여하든 자원봉사자로서 참여하든, 우리는 모든 대화형 작업에서 직업의식(professionalism)을 중시하며 스스로의 말에 책임을 집니다. 다른 사람들에게 친절하십시오. 다른 참여자를 모욕하거나 비하하지 마십시오.
 
-- Be concise.
+   -  간결해야 합니다.
 
-  Keep in mind that what you write once will be read by hundreds of persons.
-  Writing a short email means people can understand the conversation as
-  efficiently as possible. Short emails should always strive to be empathetic,
-  welcoming, friendly and patient. When a long explanation is necessary,
-  consider adding a summary.
+      당신이 한 번 작성한 내용을 수백 명의 사람들이 읽을 것이라는 사실을 명심하십시오. 짧은 이메일을 작성한다는 것은 사람들이 대화 내용을 가능한 한 효율적으로 이해할 수 있다는 뜻입니다. 짧은 이메일은 항상 공감하고, 환영하고, 친절하고, 인내하도록 노력해야 합니다. 긴 설명이 필요한 경우, 요약을 추가하는 것을 고려하십시오.
 
-  Try to bring new ideas to a conversation so that each mail adds something
-  unique to the thread, keeping in mind that the rest of the thread still
-  contains the other messages with arguments that have already been made.
+      각 이메일이 스레드에 뭔가 유일한 것을 추가하도록 대화 내용에 새 아이디어를 불어넣도록 시도하십시오. 스레드의 나머지 부분에는 이미 벌어진 논의가 있는 다른 메시지들이 여전히 포함되어 있다는 사실을 기억하십시오.
 
-  Try to stay on topic, especially in discussions that are already fairly large.
+      특히 이미 꽤 방대해진 논의의 경우 주제를 벗어나지 않도록 노력하십시오.
 
-- Step down considerately.
+   -  신중하게 물러나십시오.
 
-  Members of every project come and go. When somebody leaves or disengages
-  from the project they should tell people they are leaving and take the proper
-  steps to ensure that others can pick up where they left off. In doing so,
-  they should remain respectful of those who continue to participate in the
-  project and should not misrepresent the project's goals or achievements.
-  Likewise, community members should respect any individual's choice to leave
-  the project.
+      모든 프로젝트의 멤버들은 오고 갑니다. 누군가가 프로젝트를 떠나거나 참여를 중단하는 경우 사람들에게 떠난다는 사실을 알리고 다른 사람들이 중단된 부분을 다시 시작할 수 있도록 적절한 조치를 취해야 합니다. 그 과정에서 프로젝트에 계속 참여하는 사람들을 존중해야 하며 프로젝트의 목표 또는 성과를 잘못 전달해서는 안 됩니다. 마찬가지로, 커뮤니티 구성원들은 프로젝트를 떠난다는 개인의 선택을 존중해야 합니다.
 
-Anti-Harassment
----------------
+괴롭힘 방지
+-----------
 
-Harassment and other exclusionary behavior are not acceptable.
-This includes, but is not limited to:
+괴롭힘(harassment) 및 다른 배제적인 행동은 용납하지 않습니다. 배제적 행동에는 다음이 포함되지만, 이에 국한되지는 않습니다:
 
-- Personal insults or discriminatory jokes and language, especially those using racist or sexist terms.
-- Offensive comments, excessive or unnecessary profanity.
-- Intimidation, violent threats or demands.
-- Sustained disruption of sessions or events.
-- Stalking, harassing photography or recording.
-- Unwelcome physical contact or sexual attention.
-- Repeated harassment of others. In general, if someone asks you to stop, then stop.
-- Posting (or threatening to post) other people's personally identifying information ("doxing").
-- Sharing private content, such as emails sent privately or non-publicly, or unlogged forums such as IRC channel history.
-- Advocating for, or encouraging, any of the above behavior.
+-  개인적인 모욕 또는 특히 인종차별적 또는 성차별적 용어를 사용하는 차별적인 농담 및 언어
 
-Reporting Guidelines
---------------------
+-  모욕적인 진술, 과도하거나 불필요한 비속어
 
-If you believe someone is breaking this code of conduct, you may reply to them,
-and point to this code of conduct. Such messages may be in public or in private,
-whatever is most appropriate. Assume good faith; it is more likely that
-participants are unaware of their bad behavior than that they intentionally try
-to degrade the quality of the discussion. Should there be difficulties in
-dealing with the situation, you may report your concerns to event staff, a forum
-leader or the GDAL Board. Serious or persistent offenders may be expelled from
-the event or forum by event organizers or forum leaders.
+-  위협, 폭력적인 협박 또는 요구
 
-To privately email the code of conduct committee leadership use coc@osgeo.org.
+-  세션 또는 행사의 지속적인 방해
 
-Credits
--------
+-  스토킹, 괴롭히는 사진 또는 녹음
 
-GDAL re-uses the `OSGeo Code of Conduct <https://www.osgeo.org/resources/osgeo-code-of-conduct/>`__
+-  원치 않는 신체 접촉 또는 성적 관심
+
+-  다른 사람들에 대한 반복되는 괴롭힘. 간단히 말해 누군가 당신에게 멈추라고 하면, 멈추십시오.
+
+-  다른 사람의 개인 식별 정보를 게시(또는 게시하겠다고 협박)하는 행위 ("신상 털기")
+
+-  개인적으로 또는 비공개로 전송한 이메일 같은 비공개 콘텐츠, 또는 IRC 채널 이력 같은 로그가 남지 않는 소통의 장을 공유하는 행위
+
+-  앞의 모든 행위 가운데 하나 이상을 옹호하거나 조장하는 행위
+
+신고 지침
+---------
+
+여러분이 누군가가 이 행동 수칙을 어기고 있다고 믿는다면, 그 사람에게 이 행동 수칙을 가리키는 링크를 답할 수도 있습니다. 이런 메시지는 공개 또는 비공개일 수도 있습니다. 가장 알맞은 수단을 사용하십시오. 선의를 가정하십시오. 참여자들은 의도적으로 논의의 질을 떨어뜨리려 시도한다기보다 자신의 나쁜 행위를 인식하지 못 하고 있을 가능성이 더 큽니다.
+상황에 대처하는 데 어려움이 있을 경우 행사 담당자, 소통의 장 주관자 또는 GDAL 이사회에 우려 사항을 신고할 수도 있습니다. 행사 주최자 또는 소통의 장 주관자가 행사 또는 소통의 장으로부터 심각하거나 지속적인 위반자를 쫓아낼 수도 있습니다.
+
+행동 수칙 위원회에 비공개로 이메일을 보내려면 coc@osgeo.org 주소로 보내주십시오.
+
+감사의 말
+---------
+
+GDAL은 `OSGeo 행동 수칙 <https://www.osgeo.org/resources/osgeo-code-of-conduct/>`_ 을 재사용합니다.
+
