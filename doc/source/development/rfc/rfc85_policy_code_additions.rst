@@ -1,89 +1,62 @@
 .. _rfc-85:
 
 ===========================================================
-RFC 85: Policy regarding substantial code additions
+RFC 85: 중요 코드 추가에 관한 정책
 ===========================================================
 
-======== ==================================================
-Authors: Howard Butler, Even Rouault
-======== ==================================================
-Started: 2022-01-17
-Status:  Adopted
-======== ==================================================
+======= ========================
+저자:   하워드 버틀러, 이벤 루올
+제안일: 2022년 1월 17일
+상태:   승인
+======= ========================
 
-Summary
--------
+요약
+----
 
-This document describes the policies that the GDAL project will apply to assess
-substantial code additions, typically new drivers, in particular coming from new
-contributors to the project.
+이 RFC는 GDAL 프로젝트가 중요 코드 추가, 특히 GDAL 프로젝트의 새로운 기여자가 기여하는, 일반적으로 새로운 드라이버를 평가하기 위해 적용할 정책을 설명합니다.
 
-Motivation
-----------
+동기
+----
 
-The GDAL project has historically been quite open to new code additions, including
-drivers that rely on proprietary licensed and/or closed-source SDKs (called
-"binary SDK" in the rest of this document). This approach is part
-of its strengths, but also comes at a price, with the software becoming larger
-and larger, and with contributions sometimes being abandoned by their authors without
-new maintainers.
+GDAL 프로젝트는 역사적으로 독점 사용 허가 그리고/또는 (이 문서에서 "바이너리 SDK"라고 부르는) 클로즈드 소스 SDK에 의존하는 드라이버를 포함하는 새로운 코드 추가에 활짝 열려 있었습니다. 이 접근법은 GDAL 프로젝트의 강점의 일부분이기도 하지만, 소프트웨어가 점점 더 대용량이 되어가고 때로는 새로운 유지/관리자 없이 작성자가 기여를 포기하게 되는 대가를 치르게 됩니다.
 
-Being a free & open-source project, the GDAL project will apply stronger scrutiny to
-code that requires a binary SDK and encourage contributors to submit code additions
-that do not depend on such binary SDK, or license SDKs under free & open-source
-license terms.
+자유-오픈 소스 프로젝트로서 GDAL 프로젝트는 바이너리 SDK를 요구하는 코드를 더 철저하게 검토하고, 기여자들이 이런 바이너리 SDK에 의존하지 않는 또는 자유-오픈 소스 사용 허가서 하에 SDK 사용 허가를 취득한 추가 코드를 제출하도록 권장할 것입니다.
 
-Policy
-------
+정책
+----
 
-- Drivers require a designated responsible contact, tracked in
-  https://github.com/OSGeo/gdal/wiki/Maintainers-per-sub-system
+-  드라이버에는 `하위 시스템별 유지관리자 <https://github.com/OSGeo/gdal/wiki/Maintainers-per-sub-system>`_ 에서 추적되는 지정 담당자가 필요합니다.
 
-- Contributions should follow other RFCs describing development rules, and come
-  with test scripts and sufficient documentation, covering usage and build instructions.
+-  기여 코드는 다른 RFC들이 설명하는 개발 규칙을 따라야 하며, 테스트 스크립트와 사용례 및 빌드 지침을 서술하는 충분한 문서와 함께 제출되어야 합니다.
 
-- If the driver require a binary SDK not downloadable without cost, or that requires
-  a complicated registration process, the GDAL team is unlikely to support
-  driver inclusion.
-- GDAL supports multiple operating systems, and new drivers should support as many as
-  is practical. At a minimum, drivers should work with the latest and OS-vendor supported
-  releases of operating systems the driver is documented to work with.
+-  드라이버가 비용을 지출하지 않고서는 다운로드할 수 없는 바이너리 SDK를 요구하거나 또는 복잡한 등록 과정을 거쳐야 하는 경우, GDAL 팀이 해당 드라이버를 소스 트리에 포함시킬 가능성은 낮습니다.
 
-- If the binary SDK is no longer supported, or modernized to work with current
-  compilers and GDAL, the driver can be dropped. This rule also applies to open-source
-  dependencies that are no longer maintained or are superseded by other alternatives.
+-  GDAL은 여러 운영 체제를 지원하기 때문에, 새 드라이버도 그만큼 많은 운영 체제를 지원해야 실용적입니다. 최소한 해당 드라이버가 작동한다고 문서화된 운영 체제의 최신 버전 및 운영 체제 판매자가 지원하는 배포판에서는 작동해야 합니다.
 
-- If the driver has unaddressed bugs, is breaking continuous integration (CI),
-  has caused CI bits to be disabled, or has not caught up to API modifications
-  requiring updates (extremely rare), the driver will be dropped from build
-  scripts, and thus will not be built without significant user intervention.
+-  바이너리 SDK가 더 이상 지원되지 않는 경우 또는 최신 버전이 현재 컴파일러 및 GDAL과 작동하지 않는 경우 해당 드라이버 지원을 종료할 수 있습니다. 이 규칙은 더 이상 유지/관리되지 않거나 다른 대안으로 대체된 오픈 소스 의존성에도 적용됩니다.
 
-- If critical/blocking issues reported in a driver are not addressed within a
-  2 month time-frame, it can be dropped from the tree entirely by a designated
-  GDAL maintainer for all releases going forward.
+-  드라이버에 해결되지 않은 버그가 있거나, 드라이버가 지속적 통합을 망가뜨리거나, 지속적 통합 부분을 비활성화시키거나, 또는 (아주 드물지만) 업데이트를 요구하는 API 수정 사항을 따라잡지 못 하는 경우, 빌드 스크립트로부터 해당 드라이버를 삭제할 것입니다. 즉 사용자가 특별히 개입하지 않는 이상 해당 드라이버는 빌드되지 않을 것입니다.
 
-- Contributors of significant code additions are expected to participate in the
-  day-to-day life of the GDAL project, and need to monitor closely the communication
-  channels of the project: issue tracker, mailing lists, etc.
+-  드라이버에 리포트된 중요한/차단된 문제점이 2개월이라는 기간 내에 해결되지 않을 경우 모든 배포판을 진행하기 위해 지정 GDAL 유지관리자가 소스 트리로부터 해당 드라이버를 완전히 삭제할 수 있습니다.
 
-- Maintainers are expected to support their contributions by triaging bug reports,
-  reviewing related pull requests and RFCs, making functional enhancements, testing
-  releases, and improving documentation, tests, and infrastructure.
+-  중요 코드를 추가하는 기여자는 GDAL 프로젝트의 일상에 참여할 것이 기대되며, 프로젝트의 소통 채널(이슈 트래커, 메일링 리스트 등등)을 면밀히 모니터링해야 합니다.
 
-- In addition, maintainers are expected to respond in a timely manner to wider
-  project changes (CI, build scripts, upgrade of dependencies, build tools,
-  documentation, etc.) as it pertains to their contributions.
+-  유지관리자가 버그 리포트의 중요도를 평가하고, 관련 풀 요청 및 RFC를 검토하고, 기능을 개선하며, 배포판을 테스트하고, 문서, 테스트 및 인프라스트럭처를 향상시킴으로써 담당하는 기여를 지원할 것을 기대합니다.
 
-- New contributions may require a significant review effort from a GDAL committer (ie
-  someone with direct modification rights to the source repository). While the
-  project has funded maintainers, it must be understood that they might not be
-  immediately available to do reviews of significant code additions. Contributors
-  may contract GDAL committers to have such task done within a more predictable timeline.
+-  뿐만 아니라 유지관리자가 보다 넓은 범위의 프로젝트 변경 사항들(CI, 빌드 스크립트, 의존성, 빌드 도구, 문서 등등의 업그레이드)에 시기적절하게 응답할 것을 기대합니다. 유지관리자가 담당하는 기여에 적용되기 때문입니다.
 
-- The above rules are not exhaustive. The PSC reserves the right to reject a proposed
-  code addition depending on its particular nature and other contextual elements.
+-  GDAL 커밋 개발자가 (예를 들면 소스 저장소에 직접 수정 사항을 적용할 수 있는 권한을 가진 누군가가) 신규 기여 코드를 엄청나게 검토해야 할 수도 있습니다. GDAL 프로젝트에는 자금 지원을 받는 유지관리자들이 있지만, 이들이 추가된 중요 코드를 즉시 검토하지 못 할 수도 있다는 사실을 이해해야만 합니다. 기여자가 GDAL 커밋 개발자와 계약해서 이런 작업이 좀 더 예측 가능한 일정 내에 완료되도록 할 수도 있습니다.
 
-Voting history
---------------
+-  이 규칙들은 완전하지 않습니다. GDAL 프로젝트 운영 위원회는 특정 특성 및 다른 상황적 요소에 따라 제안된 코드 추가를 거부할 권리를 가집니다.
 
-+1 from PSC members MateuszL, KurtS, TamasS, SeanG, HowardB, JukkaR and EvenR.
+투표 이력
+---------
+
+-  마테우시 워스코트 +1
+-  커트 슈베어 +1
+-  세케레시 터마시 +1
+-  션 길리스 +1
+-  하워드 버틀러 +1
+-  유카 라흐코넨 +1
+-  이벤 루올 +1
+

@@ -1,197 +1,147 @@
 .. _rfc-84:
 
 ===========================================================
-RFC 84: Migrating build systems to CMake
+RFC 84: 빌드 시스템을 CMake로 마이그레이션
 ===========================================================
 
-======== ==================================================
-Authors: Even Rouault, Nyall Dawson, Howard Butler
-======== ==================================================
-Contact: even.rouault at spatialys.com,
-         nyall.dawson at gmail.com,
-         howard at hobu.co
-Started: 2021-09-22
-Updated: 2022-01-17
-Status:  Adopted (implementation in progress)
-======== ==================================================
+======= ===================================================
+저자:   이벤 루올, 나이얼 도슨(Nyall Dawson), 하워드 버틀러
+연락처: even.rouault@spatialys.com,
+        nyall.dawson@gmail.com,
+        howard@hobu.co
+제안일: 2021년 9월 22일
+수정일: 2022년 1월 17일
+상태:   승인 (구현 진행 중)
+======= ===================================================
 
-Summary
--------
+요약
+----
 
-The document proposes :
+이 RFC는 다음을 제안합니다:
 
-- to develop a CMake build system, officially integrated in the source tree.
+-  소스 트리에 공식적으로 통합되는 CMake 빌드 시스템을 개발합니다.
 
-- and remove the current GNU makefiles and nmake build systems, when the CMake
-  build system has matured enough and reached feature parity.
-  We don't want to end up with a https://xkcd.com/927/ situation.
+-  CMake 빌드 시스템이 충분히 성숙해지고 기능 상 동등해졌을 때 현재의 GNU makefile 및 nmake 빌드 시스템을 제거합니다. https://xkcd.com/927/ 같은 상황에 처하기를 바라지 않기 때문입니다.
 
-Motivation
-----------
+동기
+----
 
-- A dual build system means editing twice, which increases the amount of work and
-  the chance for bugs.
+-  이중 빌드 시스템은 편집도 두 번 해야 한다는 뜻인데, 이는 작업량 및 버그 발생 가능성을 증가시킵니다.
 
-- For Unix, we have a rather custom and non-idiomatic build system using autoconf,
-  but not automake.
+-  유닉스의 경우 autoconf를 이용하지만 automake는 이용하지 않는, 다소 사용자 지정적이며 관용구적이지는 않은 빌드 시스템이 있습니다.
 
-- The makefiles in both build systems are hand-written. One of their main deficiency
-  from the point of view of a GDAL developer is the lack of tracking of header
-  dependencies. It is this very easy to produce a corrupted GDAL build, if forgetting to
-  manually clean a previous build. This is a serious obstacle to embed regular or
-  occasional GDAL developers that hit that issue, generally not found in other
-  projects.
+-  두 빌드 시스템의 makefile은 수동으로 작성됩니다. GDAL 개발자의 관점에서 makefile의 주요 결점 가운데 하나는 헤더 의존성을 추적하기 어렵다는 점입니다. 예전 빌드를 수동으로 정리하는 일을 잊어버리는 경우 손상된 GDAL 빌드를 어렵지 않게 생성하게 됩니다. 이것은 일반적으로 다른 프로젝트에서는 찾아볼 수 없는 문제점으로, 이런 문제점을 맞닥뜨린 정규 또는 비정기 GDAL 개발자가 해결하기 어려운 심각한 장애물입니다.
 
-- Neither Unix or Windows builds support out-of-tree builds.
+-  유닉스 빌드는 물론 윈도우 빌드도 트리 외부의 빌드를 지원하지 않습니다.
 
-- Windows builds have poor support for parallel build: it is limited to the files
-  in one directory.
+-  윈도우 빌드는 병렬 빌드를 제대로 지원하지 않습니다:
+   병렬 빌드는 한 디렉터리에 있는 파일들로 제한됩니다.
 
-- There is generally no consistency in the naming of build options in our
-  Unix and Windows build systems, which makes life harder for users having to
-  build GDAL on multiple platforms.
+-  일반적으로 유닉스 및 윈도우 빌드 시스템에서의 빌드 옵션 명명법에 일관성이 없습니다. 이는 여러 플랫폼 상에 GDAL을 빌드해야 하는 사용자를 어렵게 만듭니다.
 
-- The two existing build systems do not have the same features. For example,
-  configure now offers the option to selectively disable drivers, including ones
-  that do not depend on external dependencies, using a opt-out or opt-in
-  strategies, whereas the NMake build does not.
+-  기존의 두 빌드 시스템은 동일한 기능을 가지고 있지 않습니다. 예를 들면 configure는 이제 `옵트아웃(opt-out) <https://ko.wikipedia.org/wiki/%EC%98%B5%ED%8A%B8%EC%95%84%EC%9B%83>`_ 또는 `옵트인(opt-in) <https://ko.wikipedia.org/wiki/%EC%98%B5%ED%8A%B8%EC%9D%B8>`_ 전략을 사용해서 외부 의존성에 의존하지 않는 드라이버를 포함하는 드라이버들을 선택적으로 비활성화시킬 수 있는 옵션을 제공하지만, nmake 빌드는 제공하지 않습니다.
 
-- CMake has become the defacto solution with the widest adoption for C/C++ software that
-  want to address multiple platforms. Most of GDAL dependencies have at least a
-  CMake build system, and some have now CMake as the only option (GEOS 3.10 will
-  only have a CMake build system, and the same is proposed for PROJ 9 in
-  https://github.com/OSGeo/PROJ/pull/2880), making soon CMake a de-facto requirement
-  for a GDAL build.
-  Looking a bit in the FOSS4G field for C/C++ project, CMake is ubiquitous, so
-  there is a widespread knowledge of it among existing or potential contributors
-  to GDAL.
+-  CMake는 이제 다중 플랫폼을 처리하고자 하는 C/C++ 소프트웨어에 대한, 광범위하게 도입되고 있는 실질적인 해결책이 되었습니다. 대부분의 GDAL 의존성은 적어도 CMake 빌드 시스템을 포함하고 있으며, 그 중 일부는 이제 CMake를 유일한 옵션으로 삼기 때문에 (GEOS 3.10버전에는 CMake 빌드 시스템만 있으며, https://github.com/OSGeo/PROJ/pull/2880 에서도 PROJ에 대해 동일한 내용을 적용해야 한다고 제안하고 있습니다) CMake가 GDAL 빌드의 사실상의 요구 조건이 될 날이 머지 않았습니다. C/C++ 프로젝트의 FOSS4G 분야를 조금 살펴보면 CMake를 어디에서나 볼 수 있기(ubiquitous) 때문에, 기존 또는 잠재적인 GDAL 기여자 사이에도 CMake에 대한 지식이 널리 알려져 있다고 볼 수 있습니다.
 
-- A CMake build system has been asked repeatedly by many developers or users of
-  GDAL over the past years. We are aware of a least two public out-of-tree CMake
-  efforts: https://github.com/miurahr/cmake4gdal and https://github.com/nextgis-borsch/lib_gdal
+-  과거 몇 년 동안 수많은 GDAL 개발자 또는 사용자가 CMake 빌드 시스템을 반복해서 요청해왔습니다. 최소한 2개의 공개적인 트리 외부 CMake 빌드 시스템 개발 시도가 알려져 있습니다:
 
-- CMake has the widest industry tooling support. A number of Modern C++ IDEs offer good support for CMake:
-  Visual Studio, qtcreator, etc.
-  This should help reduce the barrier for contribution.
+   -  https://github.com/miurahr/cmake4gdal
+   -  https://github.com/nextgis-borsch/lib_gdal
 
-- CMake development is active with regular feature releases, whereas the technologies
-  behind our existing build systems are more in a maintenance mode.
+-  CMake는 업계에서 가장 광범위한 도구 지원을 받고 있습니다. 수많은 최신 C++ IDE가 CMake를 제대로 지원합니다:
 
-Why not CMake?
+   -  비주얼 스튜디오
+   -  Qt Creator
+   -  ...
+   
+   즉 기여에 대한 장벽을 낮추는 데 도움이 될 것입니다.
+
+-  CMake 개발은 정기적인 기능 배포로 활성화되어 있지만, GDAL의 기존 빌드 시스템 이면에 있는 기술의 상황은 유지/관리 모드에 더 가깝습니다.
+
+CMake를 사용하지 않을 이유?
+---------------------------
+
+CMake를 넘어서는 장점을 많이 가지고 있는 `Meson <https://mesonbuild.com/>`_ 및 `Bazel <https://bazel.build/>`_ 같은 다른 최신 크로스 플랫폼 빌드 시스템들이 존재합니다. 하지만 지금으로서는 활동 중인 GDAL 기여자들이 잘 알고 있거나 사용하고 있지 않습니다. 다중 플랫폼 빌드 시스템들의 케이퍼빌리티와 성숙도를 비교할 때 CMake가 현재 "가장 나쁘지 않은" 해결책을 대표합니다.
+
+CMake는 공유 라이브러리와 정적 라이브러리를 동시에 빌드하지 못 합니다. 하지만 2개의 빌드를 수행한 다음 빌드 산출물들을 병합하면 해결할 수 있습니다.
+
+단계 / 일정
+-----------
+
+계획된 일정은 다음과 같습니다:
+
+-  CMake를 새로운 빌드 시스템으로 추가하고, GNUmakefile 및 NMake 기반 파일 시스템을 공식적으로 퇴출시킵니다. 사용자와 패키지 작업자에게 CMake로 전환하고 그 과정에서 발견된 문제점들을 적극적으로 리포트할 것을 (그리고 해결에 도움을 줄 것을) 권장합니다. GDAL 3.5.x 포인트 릴리즈를 사용해서 리포트된 문제점들을 처리할 것입니다.
+
+  ==> 대상: GDAL 3.5 / 2022년 5월
+
+-  GNUmakefile 및 NMake 기반 파일 시스템을 완전히 제거해서 CMake를 GDAL 소스 트리에 있는 유일한 빌드 시스템으로 만듭니다.
+
+  ==> 대상: GDAL 3.5 / 2022년 11월
+
+상세 사항
+---------
+
+앞에서 언급했던 cmake4gdal 저장소가 최적의 시작점으로 보입니다. cmake4gdal은 현재 GDAL 저장소 트리 구조를 존중하며, 너무 오래되지도 않은 CMake 버전(3.10)을 대상으로 하고 있기 때문입니다.
+
+:file:`CMakeLists.txt` 및 기타 CMake 지원 파일들을 배포하는 스크립트들을 실행하는 것으로 시작하고, 이 스크립트들을 GDAL 저장소에 커밋할 것입니다.
+
+GDAL의 현재 빌드 시스템에서 포팅하고 확인해야 할 모든 기능들의 점검 목록을 다음에서 시작했습니다:
+
+-  https://docs.google.com/spreadsheets/d/1SsUXiZxKim6jhLjlJFCRs1zwMvNpbJbBMB6yl0ms01c/edit
+
+SWIG 바인딩
+-----------
+
+파이선, 자바 및 C# 바인딩을 CMake 빌드 시스템 옵션으로 사용할 수 있을 것입니다.
+
+펄 바인딩은 GDAL 3.5버전에서 제거될 예정이기 때문에 사용할 수 없을 것입니다.
+
+호환성
+------
+
+CMake 빌드 시스템 추가는 기존 빌드 시스템과 함께 사용할 수 있는 전환 단계 동안 대부분 추가된다는 점에서 기존 파일에 큰 영향을 미치지는 않을 것입니다. 하지만, C++ 파일 및 GNUmakefile / :file:`makefile.vc` 파일에 영향을 미치는 (예를 들면 가끔 사용되는 ``-I${include_prefix}/project`` 패턴을 가진 ``#include <header.h>`` 대신 ``#include <project/header.h>`` 스타일의 포함(inclusion) 지시문을 일관적으로 사용하는) 몇몇 개선 사항이 적용될 가능성이 큽니다.
+
+비공개(non-public) 심볼을 숨기기 위해 상용 중간 라이브러리의 PRIVATE 링크를 사용할 수도 있습니다. 이렇게 되면 비공개 심볼을 유출할 수 있는 기존 빌드로부터 살짝 달라질 수도 있습니다.
+
+CMake 최저 버전
+---------------
+
+cmake4gdal은 CMake 3.10버전을 최저 버전으로 사용합니다. CMake 3.10버전은 -- 예를 들어 안정 LTS 버전인 우분투 18.04가 제공하는 CMake 버전과 호환될 것이기 때문에 -- 합리적인 선택입니다.
+
+앞에서 설명한 일정을 감안할 때, CMake는 2023년 5월에 필수 사항이 될 것입니다. 이때의 안정 LTS 버전은 우분투 20.04일 것입니다. 따라서 좀 더 실용적일 것이라고 판단하는 경우 최저 버전을 올릴 가능성도 배제할 수 없습니다. 예를 들면 CMake 3.12버전에는 정적 빌드 및 상용 의존성과 관련한 문제점을 해결하는 데 도움이 될 수 있는 "객체 라이브러리"를 더 쉽게 처리할 수 있는 방법이 추가되었습니다. (https://github.com/libgeos/geos/issues/463 을 참조하십시오.)
+
+지원 플랫폼
+-----------
+
+GDAL의 지속적 통합(Continuous Integration)은 리눅스(Intel/AMD, ARM64 및 s390x 아키텍처), 안드로이드(빌드 작업만), macOS 및 윈도우"만" 테스트합니다. 향후 어느 시점에 -- 해결되지 않은 문제점을 테스트하고 해결을 도와줄 -- 다른 환경을 사용하는 사용자/개발자의 참여를 환영할 것입니다.
+
+일반 요구 사항
 --------------
 
-Other modern cross-platform build systems exist, including Meson and Bazel,
-which have many advantages over CMake. However, they are currently not widely
-familiar or used by active GDAL contributors. CMake represent the current
-"least worse" solution for multiple platform builds when comparing its capabilities
-and its maturity.
+다음 목록은 새로운 빌드 시스템이 준비되었고 기존 빌드 시스템을 제거할 수 있다고 간주할 수 있는 몇 가지 필수 조건들입니다:
 
-CMake does not address simultaneously building shared and static libraries. This
-can however be worked around by doing 2 builds and merging build artifacts.
+-  빌드 시스템이 작동한다고 알려진 대부분의 환경에서 빌드 시스템이 작동해야 합니다.
+   CI가 테스트한 환경의 경우 해당 플랫폼으로 빌드 시스템을 포팅하고 빌드가 작동하는지 확인하는 작업을 수반할 것입니다. 다른 빌드 시스템의 경우 사용자들의 수동 테스트에 의존할 것입니다.
 
-Phases / Schedule
------------------
+-  objdir / 소스 외부 빌드를 지원해야 합니다.
 
-The following is the planned schedule:
+-  크로스 빌드를 지원해야 합니다.
 
-- Add CMake as a new build system, and formally deprecate GNUmakefile and NMake
-  base file systems.
-  Users and packagers are encouraged to switch to CMake and actively report
-  (and help fixing) issues the find in the process.
-  GDAL 3.5.x point releases will be used to address reported issues.
+-  ``if(THIS_OS)`` 를 통한 명확한 운영 체제 테스트는 제한되어야 하며, 테스트할 수 있을 때마다 기능을 테스트하는 것으로 대체해야 합니다.
 
-  ==> Target: GDAL 3.5 / May 2022
+-  CMake가 앞의 필수 조건들을 만족하는 CMake와 기존 빌드 시스템을 가진 공식 배포판(아마도 3.6버전)이 있다는 사실이 패키지 작업자 피드백으로 검증되었습니다.
 
-- Completely remove GNUmakefile and NMake base file systems, and make CMake the
-  only build system in GDAL source tree.
+자금 지원
+---------
 
-  ==> Target: GDAL 3.6 / November 2022
+이벤 루올과 나이얼 도슨이 해당 작업을 완료하기 위해 프로젝트 후원 자금을 이용할 것입니다. GDAL을 위한 CMake 지원을 초기 빌드하기 위해 최근 대략 2인월(man-month)에 해당하는 노력을 기울였습니다.
 
-Details
--------
+투표 이력
+---------
 
-The above mentioned cmake4gdal repository seems to us the best starting point.
-It respects the current tree organization of the GDAL repository and targets a
-not too old CMake version (3.10).
+-  하워드 버틀러 +1
+-  마테우시 워스코트 +1
+-  커트 슈베어 +1
+-  대니얼 모리셋 +1
+-  유카 라흐코넨 +1
 
-We will start by running the scripts that deploy the CMakeLists.txt and other
-cmake support files, and commit them into the GDAL repository.
-
-A checklist of all features of our current build systems that will need to be
-ported and checked has been initiated in:
-https://docs.google.com/spreadsheets/d/1SsUXiZxKim6jhLjlJFCRs1zwMvNpbJbBMB6yl0ms01c/edit
-
-SWIG bindings
--------------
-
-The Python, Java and CSharp bindings will be available as options of the CMake
-build options.
-
-The Perl bindings will not be available, as being planned for removal in GDAL 3.5
-
-Compatibility
--------------
-
-The addition of the CMake build system, being mostly an addition during the transient
-phase where it will be available alongside the existing build systems, should
-moderately impact existent files. However, it is likely that there will be some
-improvements that affect C++ files (for example, to use consistently ``#include <project/header.h>``
-style of inclusion instead of the``#include <header.h>`` with ``-I${include_prefix}/project``
-pattern sometimes used) and the GNUmakefile/makefile.vc files.
-
-We may use of PRIVATE linking of vendored and intermediate libraries to hide
-non-public symbols. This might change a bit from existing builds that can leak them.
-
-Minimum CMake version
----------------------
-
-cmake4gdal uses CMake 3.10 as the minimum version. This is a reasonable choice,
-as it would be compatible with the cmake version provided by Ubuntu 18.04 for example,
-the current old-stable Ubuntu LTS.
-
-Given the mentioned schedule, CMake will become a requirement in May 2023,
-at a time where the new old-stable LTS will be Ubuntu 20.04. So we can't exclude
-we will bump this minimum version if it is found to be more practical.
-For example, CMake 3.12 adds an easier way for handling "object libraries", that
-can help solving issues regarding static builds and vendored dependencies
-(cf https://github.com/libgeos/geos/issues/463)
-
-Supported platforms
--------------------
-
-Our continuous integration "only" tests Linux (Intel/AMD, ARM64 and s390x architectures),
-Android (build only), MacOSX and Windows. We will welcome involvement at some point
-from users/developers of other environments to test and help address any outstanding issues.
-
-General requirements
---------------------
-
-The following lists a few requirements to consider the new build system be ready,
-and the existing ones can be removed:
-
-- The build system works on most environments where the build systems are known to work.
-  For CI-tested environments, this will involve porting to them and checking that
-  the builds are functional. For other build systems, we will depend on manual testing
-  from users.
-
-- objdir / out-of-source builds are supported.
-
-- cross builds are supported.
-
-- Explicit testing of OSes through ``if(THIS_OS)`` should be limited, and replaced
-  by testing of feature wherever doable.
-
-- There has been a formal release (presumably 3.6) with existing build systems
-  and cmake where cmake meets the above requirements, as verified by packager feedback.
-
-Funding
--------
-
-Even Rouault and Nyall Dawson will use project sponsorship funding to complete
-that work. An estimate of 2 man-months of effort has been made recently to
-provide an initial build out of CMake support for GDAL.
-
-Voting history
---------------
-
-+1 from PSC members: HowardB, MateuszL, KurtS, DanielM and JukkaR
