@@ -1,123 +1,69 @@
 .. _sponsoring-faq:
 
 ================================================================================
-Sponsoring FAQ
+후원에 대해 자주 받는 질문(FAQ)
 ================================================================================
 
-Why does GDAL need sponsorship?
--------------------------------
+어째서 GDAL이 후원이 필요합니까?
+--------------------------------
 
-GDAL is the most central piece of `Critical Digital Infrastructure`_ 
-in the geospatial world, serving as the primary building block for data management and processing 
-in open source, commercial, and government geospatial software. But most of its resources  
-have gone to the development of new features, while the maintenance burden has only increased with 
-more functionality.
+GDAL은 오픈 소스, 상업, 그리고 정부 지리공간 소프트웨어에서 데이터 관리 및 처리를 위한 기본 구성 요소(primary building block) 역할을 하고 있는, 지리공간 분야에서 `중요 디지털 인프라스트럭처`_ 의 가장 중심적인 부분입니다.
+그러나 GDAL의 자원 대부분은 새로운 기능들의 개발에 쓰이는 반면, 기능이 늘어날수록 유지/관리 부하는 커지고 있습니다.
 
-.. _Critical Digital Infrastructure: https://www.fordfoundation.org/campaigns/critical-digital-infrastructure-research/
+.. _중요 디지털 인프라스트럭처: https://www.fordfoundation.org/campaigns/critical-digital-infrastructure-research/
 
-The purpose of sponsor funding is to provide substantial long-acting resources
-that give the project the ability to address software, testing, and project
-challenges that do not attract individual sponsorship attention. With
-a pool of resources that are not earmarked for features, it can
-attack usability, performance, and modernization challenges that benefit everyone.
-Sustained funding enables multi-year efforts that do not
-disrupt the existing GDAL user base, and it will provide the baseline
-resources to allow day-to-day maintenance operations to continue uninterrupted.
+후원 자금 조달의 목적은 개별 후원자의 관심을 끌지 못 하는 소프트웨어, 테스트, 그리고 프로젝트 문제들을 해결할 수 있는 능력을 프로젝트에 부여하는 상당한 장기 자원을 제공하는 것입니다. GDAL 기능에 할당되지 않은 자원 풀(resource pool)을 이용해서 GDAL은 모든 사람이 혜택을 받을 수 있는 사용성, 성능, 그리고 현대화 문제에 도전할 수 있습니다. 지속적인 자원 조달을 통해 기존 GDAL 사용자 베이스를 방해하지 않는 다년간의 노력을 기울일 수 있으며, 일상적인 유지/관리 작업을 중단 없이 계속할 수 있게 해주는 기준 자원(baseline resource)을 제공할 것입니다.
 
-The larger funding levels enabled by sponsorship aim to help GDAL grow to a team of maintainers,
-as is typical in other leading open source projects. The past few years have seen only one maintainer, 
-who has been stretched thin. The resources provided by this effort allow maintenance activities to 
-continue *and* allow the project to support on-boarding additional developers to tackle various needs 
-of the project that have been ignored due to lack of direct funding interest.
+후원으로 활성화된 더 많은 자금 조달 수준은 GDAL이 다른 주요 오픈 소스 프로젝트와 마찬가지로 유지관리자 팀을 육성할 수 있게 도울 수 있습니다. 지난 몇 년 간 유지관리자가 단 한 명이었기 때문에 너무 무리를 하고 있었습니다. 후원 자금 조달로 제공되는 자원이 유지/관리 활동을 계속할 수 있게 해주고, '또한' 프로젝트가 추가 개발자의 신규 교육(onboarding)을 지원할 수 있게 해서 그동안 직접적인 자금 조달 관심이 부족했기 때문에 무시되어 왔던 프로젝트의 다양한 요구 사항들을 해결할 수 있게 해줍니다.
 
-My organization wants to sponsor. How can we do that?
------------------------------------------------------
+우리 기관이 후원하고 싶습니다. 어떻게 하면 됩니까?
+--------------------------------------------------
 
-To learn about the benefits of becoming a sponsor at
-various levels start with the `Sustainable GDAL Sponsorship Prospectus`_.
-If you are interested, need help convincing your key decision-makers, or have
-any questions, don't hesitate to contact gdal-sponsors@osgeo.org.
+다양한 레벨의 후원자가 되면 받을 수 있는 혜택에 대해 알아보려면 `지속 가능한 GDAL 후원 안내서`_ 로부터 시작하십시오.
+관심이 있거나, 주요 의사 결정권자를 설득하는 데 도움이 필요하거나, 질문이 있는 경우 주저하지 말고 gdal-sponsors@osgeo.org 로 연락을 주십시오.
 
-.. _Sustainable GDAL Sponsorship Prospectus: https://gdal.org/sponsors/Sustainable%20GDAL%20Sponsorship%20Prospectus.pdf
+.. _지속 가능한 GDAL 후원 안내서: https://gdal.org/sponsors/Sustainable%20GDAL%20Sponsorship%20Prospectus.pdf
 
-What is NumFOCUS and why is the project using that foundation rather than using OSGeo for this effort?
+NumFOCUS란 무엇이며 GDAL 프로젝트는 어째서 자금 조달을 위해 OSGeo가 아니라 NumFOCUS 재단을 이용합니까?
 ------------------------------------------------------------------------------------------------------
 
-`NumFOCUS <https://numfocus.org>`__ is a US-based 501(c)(3) tax-exempt non-profit that is already managing
-funding for many individual software projects using this model such as Numpy,
-Jupyter, pandas, Julia, and SciPy. They have staff, policies, procedures, and
-infrastructure for managing the financial support of open source software
-projects with this funding model. Many organizations in the initial list of
-sponsors are already funding projects through NumFOCUS, and adding GDAL to the
-roster improves efficiency on their side.
+`NumFOCUS <https://numfocus.org>`_ 는 미국에 기반을 둔 501(c)(3) 비과세 비영리 자선 재단으로, 이미 이런 모델을 사용해서 `Numpy <https://numpy.org/>`_, `Jupyter <https://jupyter.org/>`_, `pandas <https://pandas.pydata.org/>`_, `Julia <https://julialang.org/>`_ 및 `SciPy <https://scipy.org/>`_ 같은 수많은 개별 소프트웨어 프로젝트를 위한 자금 조달을 관리하고 있습니다. NumFOCUS 재단은 이런 자금 조달 모델을 사용해서 오픈 소스 소프트웨어 프로젝트의 재정 지원을 관리하기 위한 직원, 정책, 절차, 그리고 인프라스트럭처를 갖추고 있습니다. 후원자 초기 목록에 들어간 많은 기관들이 이미 NumFOCUS를 통해 프로젝트에 자금을 조달하고 있기 때문에, 그 목록에 GDAL을 추가하면 효율성이 향상됩니다.
 
-`OSGeo <https://www.osgeo.org>`__  does not have staff and procedures to manage tracking workloads and
-payments. OSGeo also does not provide tax-exempt status for contributions.
-NumFOCUS has established relationships with a large number of the initial
-sponsors. These properties are why the GDAL PSC has chosen the NumFOCUS path
-for management of this effort.
+`OSGeo <https://www.osgeo.org>`_ 는 작업량 및 자금 지불을 추적하고 관리할 직원 및 절차를 갖추고 있지 않습니다. OSGeo는 기부금에 대한 면세를 제공할 수 있는 상태도 아닙니다. NumFOCUS는 많은 초기 후원자들과 관계를 확립했습니다. GDAL 프로젝트 운영 위원회는 이런 이유로 자금 조달 관리를 위해 NumFOCUS를 선택했습니다.
 
-So GDAL is a NumFOCUS project now?
-----------------------------------
+그려면 GDAL은 이제 NumFOCUS 프로젝트입니까?
+-------------------------------------------
 
-Not exactly. GDAL will be a project within NumFOCUS under the "Grantor-Grantee Model".
-OSGeo is still the primary foundational "home" of GDAL such as it is, but NumFOCUS
-is providing this financial vehicle and service to the project under the purview of
-its charter.
+꼭 그렇지는 않습니다.
+GDAL은 "양도인-수탁자(Grantor-Grantee) 모델" 하에 NumFOCUS 내부 프로젝트가 될 것입니다. OSGeo가 여전히 GDAL의 주요 기본 "고향"이지만, NumFOCUS는 자신의 헌장 범위 아래 프로젝트에 이런 재정 수단 및 서비스를 제공하고 있습니다.
 
-What is the project going to do with the money?
------------------------------------------------
+GDAL 프로젝트는 이 돈으로 무엇을 하려 합니까?
+---------------------------------------------
 
-* The GDAL PSC will control the purse strings. Contributors seeking resources
-  will submit a proposal to the PSC (RFC-style, but not public) describing the
-  tasks and efforts they will seek to achieve. Any substantial efforts with
-  external impacts will continue to be required to use the GDAL RFC process as
-  described in :ref:`rfc-1`.
+-  GDAL 프로젝트 운영 위원회가 돈줄을 통제할 것입니다.
+   자금을 원하는 기여자는 프로젝트 운영 위원회에 자신이 달성하고자 하는 작업 및 활동을 설명하는 (RFC 스타일이지만 비공개인) 제안서를 제출할 것입니다. 외부에 상당한 영향을 미치는 모든 활동은 :ref:`rfc-1` 에서 설명하고 있는 GDAL RFC 진행 과정을 계속 따라야 할 것입니다.
 
-* Developers will be able submit requests to the GDAL PSC for 'maintenance
-  work units', which could encompass ticket i/o and related code improvements,
-  CI grooming, mailing list gardening, and fuzzing response activities.
+-  개발자는 프로젝트 운영 위원회에 티켓 입출력 및 관련 코드 개선, CI 정리, 메일링 리스트 솎아내기, 그리고 퍼지화(fuzzing) 응답 활동을 포함할 수 있는 '유지/관리 작업 단위'에 대한 요청을 제출할 수 있을 것입니다.
 
-* A significant portion (25% per year if possible) of the resources will be targeted toward
-  *growing* new active developers into the project. Examples of this include
-  soliciting ticket and code contributors with funding if they show interest
-  and aptitude, and providing resources to mentor and support junior developers who are
-  working into roles in the project.  These activities are
-  extremely hard to do without financial support.
+-  자금의 상당 부분(가능한 경우 연간 25%)은 활동적인 새로운 개발자들을 프로젝트에 참여하도록 '육성'하는 데 쓰일 것입니다. 예를 들어 티켓 및 코드 기여자가 관심과 적성을 보이는 경우 자금 지원을 요청하고, 프로젝트에서 역할을 담당하고 있는 신규 개발자를 멘토링하고 지원하기 위한 자금을 제공합니다. 자금 지원 없이는 이런 활동을 하기가 정말 어렵습니다.
 
-* Spot resources will be available to attack needs that have difficulty finding
-  funded attention, such as API improvements in support of specific application
-  niches and subsystem refreshes like build, tests, and CI. The GDAL PSC could
-  fund significant RFCs that demonstrate need and agreement on an ad hoc basis.
+-  특정 응용 프로그램의 빈틈 및 빌드, 테스트, CI 같은 하위 시스템 새로고침을 지원하기 위한 API 개선과 같이, 자금 지원을 받는 데 어려움을 겪고 있는 요구 사항들을 해결하는 데 즉석 자금을 사용할 수 있을 것입니다. GDAL 프로젝트 운영 위원회는 필요성 및 프로젝트 구성원 간의 합의를 입증하는 중요한 RFC에 임시 자금을 지원할 수 있습니다.
 
-* The GDAL PSC will delegate some resources to GDAL-related projects and
-  dependencies – libtiff, libgeotiff, PROJ, shapelib, and the various language
-  bindings and libraries. If more resources than the GDAL project itself can
-  use are available for a particular year, the project will open them up to the
-  wider community of related libraries and users to repurpose them.
+-  GDAL 프로젝트 운영 위원회는 libtiff, libgeotiff, PROJ, shapelib, 그리고 다양한 언어 바인딩 및 라이브러리 같은 GDAL 관련 프로젝트와 의존성에 일부 자금을 위임할 것입니다. 특정 연도에 GDAL 프로젝트 자체로는 소화할 수 없는 자금을 사용할 수 있는 경우, 관련 라이브러리 및 사용자들의 더 다양한 커뮤니티에 자금을 공개하고 용도를 변경할 것입니다.
 
-How can the resources be used?
-------------------------------
+자금을 어떻게 사용할 수 있습니까?
+---------------------------------
 
-The funds cannot be used to benefit an individual contributor or be directed by a
-contributor through the non-profit organization. For example, a fictional
-Imagery Corp cannot fund NumFOCUS with explicit intent to have those resources
-used to fix bugs or add features that benefit Imagery Corp. Imagery Corp can
-still continue to solicit GDAL active contributors, or actively contribute the
-fixes themselves, to achieve their goals with the software.
+개별 기부자에게 혜택을 주기 위해 자금을 사용하거나 또는 기부자가 비영리 기관을 통해 자금을 집행해서는 안 됩니다. 예를 들어 가상의 '상상 기업'이 스스로 혜택을 받을 수 있도록 버그 수정 및 기능 추가를 위해 기부금을 사용하게 할 목적으로 NumFOCUS 재단에 후원금을 낼 수는 없습니다. 그래도 상상 기업은 소프트웨어에 대한 자신의 목표를 달성하기 위해 GDAL의 활동적인 기여자에게 요청하거나 스스로 버그 수정에 적극적으로 기여할 수 있습니다.
 
-How is this going to impact GDAL software releases?
----------------------------------------------------
+후원 자금 조달로 인해 GDAL 소프트웨어 배포에 어떤 영향이 있을까요?
+------------------------------------------------------------------
 
-A primary goal of this effort is to provide resources needed to allow the current
-GDAL maintainer to
-keep up the existing release schedule and cadence. Without these resources, the
-schedule was likely to have significantly stretched out to one or two
-maintenance releases per year.
+이런 자금 조달의 기본 목표는 현재 GDAL 유지관리자가 기존 배포 일정 및 리듬을 유지할 수 있게 해주기 위해 필요한 자금을 제공하는 것입니다. 이런 자금 없이는 1년에 유지/관리 배포판 한두 개만 낼 수 있을 정도로 일정이 굉장히 늘어날 가능성이 큽니다.
 
-Can I use some of the funding to support fixing something?
-----------------------------------------------------------
+어떤 문제의 수정을 지원하기 위해 내가 자금의 일부를 사용할 수 있을까요?
+-----------------------------------------------------------------------
 
-Quite possibly. The GDAL PSC will provide a proposal template where you will
-need to describe the issue(s), propose the approach and impacts of it, and
-state your cost to complete the effort.
+가능합니다.
+GDAL 프로젝트 운영 위원회는 여러분이 문제점(들), 제안 접근법 및 그 영향을 설명하고 작업을 완료하기 위해 필요한 비용을 제시하기 위해 필요한 제안서 템플릿을 제공할 것입니다.
+

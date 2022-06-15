@@ -1,24 +1,21 @@
 .. _sponsors:
 
 ================================================================================
-Sponsors
+후원자
 ================================================================================
 
-GDAL is a truly collaborative effort, with many diverse organizations
-contributing resources to its success. The following organizations take an
-extra step, providing unrestricted funding every year to maintain and improve
-the health of the project:
+GDAL은 다양한 기관들이 그 성공을 위해 자원을 기여하고 있는 진정한 협동 프로젝트입니다. 다음 기관들은 프로젝트의 상태를 유지/관리하고 개선하기 위해 매년 무제한의 자금을 제공하는 추가적인 조치를 취하고 있습니다:
 
-- Gold level:
+-  골드 레벨:
 
   .. _gold-sponsors:
   .. container:: horizontal-logos
 
-    .. Note: they will appear in randomized order in HTML
+    .. Note: HTML에서는 무작위 순서로 나타날 것입니다.
 
     .. container:: horizontal-logo
 
-        .. note: Given the square shape of th AWS logo compared to the other ones, we have to reduce its width a bit so it doesn't look bigger overall
+        .. note: AWS 로고의 정사각형 형태를 다른 로고들과 비교할 때, AWS 로고가 더 커 보이지 않게 하기 위해 너비를 조금 줄여야 했습니다.
 
         .. image:: ../../images/sponsors/logo-aws.png
            :class: img-logos
@@ -53,13 +50,12 @@ the health of the project:
            :width: 250 px
            :target: https://www.planet.com
 
-
-- Silver level:
+-  실버 레벨:
 
   .. _silver-sponsors:
   .. container:: horizontal-logos
 
-    .. Note: they will appear in randomized order in HTML
+    .. Note: HTML에서는 무작위 순서로 나타날 것입니다.
 
     .. container:: horizontal-logo
 
@@ -77,12 +73,12 @@ the health of the project:
 
 
 
-- Bronze level:
+-  브론즈 레벨:
 
   .. _bronze-sponsors:
   .. container:: horizontal-logos
 
-    .. Note: they will appear in randomized order in HTML
+    .. Note: HTML에서는 무작위 순서로 나타날 것입니다.
 
     .. container:: horizontal-logo
 
@@ -127,45 +123,46 @@ the health of the project:
            :target: https://www.sparkgeo.com
 
 
-- Supporter level:
+-  지원자 레벻:
 
   .. _supporter-sponsors:
   .. container:: horizontal-logos
 
     .. container:: horizontal-logo
 
-        Myles Sutherland
+        마일스 서덜랜드(Myles Sutherland)
 
     .. container:: horizontal-logo
 
-        `Kaplan Open Source Consulting <https://kaplanopensource.co.il/>`__
+        `Kaplan Open Source Consulting <https://kaplanopensource.co.il/>`_
 
     .. container:: horizontal-logo
 
-        `Space Intelligence <https://www.space-intelligence.com>`__
+        `Space Intelligence <https://www.space-intelligence.com>`_
 
     .. container:: horizontal-logo
 
-        `Umbra <https://umbra.space/>`__
+        `Umbra <https://umbra.space/>`_
 
 .. raw:: html
 
    <script type="text/javascript">
-    // Randomize logos
+    // 무작위 로고
     $.fn.randomize = function(selector){
         var $elems = selector ? $(this).find(selector) : $(this).children(),
             $parents = $elems.parent();
 
-        // found at: http://stackoverflow.com/a/2450976/746961
+        // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array/2450976#2450976
+        // 에서 찾은 함수
         function shuffle(array) {
             var currentIndex = array.length, temporaryValue, randomIndex;
-            // While there remain elements to shuffle...
+            // 뒤섞을 요소가 남아 있는 동안...
             while (0 !== currentIndex) {
                 // Pick a remaining element...
                 randomIndex = Math.floor(Math.random() * currentIndex);
                 currentIndex -= 1;
 
-                // And swap it with the current element.
+                // 그리고 현재 요소와 뒤바꾸기
                 temporaryValue = array[currentIndex];
                 array[currentIndex] = array[randomIndex];
                 array[randomIndex] = temporaryValue;
@@ -186,17 +183,11 @@ the health of the project:
     $('#bronze-sponsors').randomize('div.horizontal-logo');
     $('#supporter-sponsors').randomize('div.horizontal-logo');
 
-  </script>
+   </script>
 
-The GDAL Project is hosted by `OSGeo <https://www.osgeo.org>`__,
-and a fiscally sponsored project of `NumFOCUS <https://numfocus.org>`__, a
-nonprofit dedicated to supporting the open-source scientific computing community. If you
-like GDAL and want to support our mission, please consider making a
-`donation <https://numfocus.org/donate-to-gdal>`__ to support our efforts.
+GDAL 프로젝트는 `OSGeo <https://www.osgeo.org>`_ 가 호스팅하고 있으며, 오픈 소스 과학 컴퓨팅 커뮤니티 지원에 전념하는 비영리 단체 `NumFOCUS <https://numfocus.org>`_ 의 제정 지원 프로젝트입니다. 여러분이 GDAL을 좋아하고 GDAL의 사명을 지원하고자 한다면 `기부 <https://numfocus.org/donate-to-gdal>`_ 를 통해 우리의 노력을 지원하는 것을 고려해주십시오.
 
-NumFOCUS is 501(c)(3) non-profit charity in the United States; as such, donations to
-NumFOCUS are tax-deductible as allowed by law. As with any donation, you should
-consult with your personal tax adviser or the IRS about your particular tax situation.
+NumFOCUS는 미국의 501(c)(3) 비영리 자선 단체입니다. 즉 NumFOCUS에 기부하면 법에 따라 세금을 감면받을 수 있습니다. 여느 기부와 마찬가지로, 여러분만의 세금 상황에 관해 개인 세무 고문 또는 IRS와 상담해야 합니다.
 
 .. container:: horizontal-logos
 
@@ -214,32 +205,27 @@ consult with your personal tax adviser or the IRS about your particular tax situ
            :width: 150 px
            :target: https://numfocus.org
 
-Sponsoring
-----------
+후원
+----
 
-If your organization benefits from GDAL we recommend joining the group of
-sponsors above to "pay it forward" and ensure the project has the resources to
-stay healthy and grow. To learn about the benefits of becoming a sponsor at
-various levels start with the `Sustainable GDAL Sponsorship Prospectus`_.
-If you are interested, need help convincing your key decision-makers, or have
-any questions, don't hesitate to contact gdal-sponsors@osgeo.org.
+여러분의 조직이 GDAL의 혜택을 보고 있다면 앞의 후원자 그룹에 가입해서 "선행을 나누고(pay it forward)" 프로젝트가 건전성을 유지하고 성장시킬 수 있는 자원을 가지고 있는지 확인해볼 것을 권장합니다. 다양한 레벨의 후원자가 되면 받을 수 있는 혜택에 대해 알아보려면 `지속 가능한 GDAL 후원 안내서`_ 로부터 시작하십시오.
+관심이 있거나, 주요 의사 결정권자를 설득하는 데 도움이 필요하거나, 질문이 있는 경우 주저하지 말고 gdal-sponsors@osgeo.org 로 연락을 주십시오.
 
-Related resources
------------------
+관련 자원
+---------
 
-- `Sustainable GDAL Sponsorship Prospectus`_.
-- :ref:`Sponsoring frequently asked questions (FAQ) <sponsoring-faq>`.
+- `지속 가능한 GDAL 후원 안내서`_.
+- :ref:`후원에 대해 자주 받는 질문(FAQ) <sponsoring-faq>`.
 
-.. Source of the PDF is at https://docs.google.com/document/d/1yhMWeI_LgEXPUkngqOitqcKfp7ov6WsS41v5ulz-kd0/edit#
+.. PDF의 소스는 https://docs.google.com/document/d/1yhMWeI_LgEXPUkngqOitqcKfp7ov6WsS41v5ulz-kd0/edit# 에 있습니다.
 
-.. _Sustainable GDAL Sponsorship Prospectus: https://gdal.org/sponsors/Sustainable%20GDAL%20Sponsorship%20Prospectus.pdf
+.. _지속 가능한 GDAL 후원 안내서: https://gdal.org/sponsors/Sustainable%20GDAL%20Sponsorship%20Prospectus.pdf
 
 ..
-    Developer comment: make html includes a hack to hide the table from
-    the index.html file. We need to keep it visible so that the top-level
-    index.html lists those pages.
+    개발자 메모: "make html"에는 index.html 파일로부터 테이블을 숨기는 꼼수가 포함되어 있습니다. 최상위 index.html에 해당 페이지들을 목록화할 수 있도록 가시화 상태를 유지해야 합니다.
 
 .. toctree::
    :maxdepth: 0
 
    faq
+
