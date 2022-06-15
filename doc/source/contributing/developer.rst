@@ -1,12 +1,16 @@
 .. _developer_contribution:
 
 ======================================
-Developer Contributions to GDAL
+GDAL로의 개발자 기여
 ======================================
 
-Install all required development packages: GNU make, g++, …
+필요한 모든 개발 패키지를 설치하십시오:
 
-Build:
+-  GNU Make
+-  g++
+-  ...
+
+빌드:
 
 ::
 
@@ -16,14 +20,14 @@ Build:
    make -j8 -s
    cd apps; make -s test_ogrsf; cd ..
 
-Run command line utilities (without installing):
+(설치 없이) 명령줄 유틸리티 실행:
 
 ::
 
    . scripts/setdevenv.sh
    gdalinfo --version
 
-Run autotest suite:
+자동 테스트 스위트 실행:
 
 ::
 
@@ -31,18 +35,15 @@ Run autotest suite:
    pip install -r requirements.txt
    pytest
 
-Git workflows with GDAL
---------------------------------------------------------------------------------
+GDAL의 깃(git) 워크플로
+-----------------------
 
-This is not a git tutorial or reference manual by any means. This just
-collects a few best practice for git usage for GDAL development.
+이 단락은 깃 예제 또는 참조 매뉴얼이 아닙니다. GDAL 개발을 위해 깃 사용법의 모범 사례를 몇 가지 모아놓았을 뿐입니다.
 
-Commit message
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+메시지 커밋하기
++++++++++++++++
 
-Indicate a component name (eg a driver name), a short description and
-when relevant, a reference to a issue (with ‘fixes #’ if it actually
-fixes it)
+구성 요소 이름(예: 드라이버 이름), 간단한 설명 및 관련이 있을 경우 문제점에 대한 참조를 (해당 참조가 실제로 문제점을 수정하는 경우 'fixes #'와 함께) 나타내십시오.
 
 ::
 
@@ -50,10 +51,10 @@ fixes it)
 
    Details here...
 
-Initiate your work repository
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+작업 저장소 시작하기
+++++++++++++++++++++
 
-Fork `OSGeo/GDAL <https://github.com/OSGeo/gdal>`__ from GitHub UI, and then
+깃허브 UI에서 `OSGeo/GDAL <https://github.com/OSGeo/gdal>`_ 을 포크한 다음:
 
 ::
 
@@ -61,76 +62,71 @@ Fork `OSGeo/GDAL <https://github.com/OSGeo/gdal>`__ from GitHub UI, and then
    cd gdal
    git remote add my_user_name https://github.com/my_user_name/gdal.git
 
-Updating your local master against upstream master
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+로컬 마스터를 업스트림 마스터로 업데이트하기
+++++++++++++++++++++++++++++++++++++++++++++
 
 ::
 
    git checkout master
    git fetch origin
-   # Be careful: this will loose all local changes you might have done now
+   # 조심하십시오: 여러분이 수정했던 모든 로컬 변경 사항이 없어질 것입니다.
    git reset --hard origin/master
 
-Working with a feature branch
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+기능 브랜치 작업하기
+++++++++++++++++++++
 
 ::
 
    git checkout master
-   (potentially update your local master against upstream, as described above)
+   (앞에서 설명한 대로 로컬 마스터를 업스트림 마스터로 업데이트할 가능성이 있습니다)
    git checkout -b my_new_feature_branch
 
-   # do work. For example:
+   # 작업을 수행합니다. 예를 들어:
    git add my_new_file
    git add my_modifid_message
    git rm old_file
    git commit -a
 
-   # you may need to resynchronize against master if you need some bugfix
-   # or new capability that has been added since you created your branch
+   # 브랜치를 생성한 이후 추가된 버그 수정 또는 새 케이퍼빌리티가 필요한 경우
+   # 마스터를 대상으로 다시 동기화해야 할 수도 있습니다.
    git fetch origin
    git rebase origin/master
 
-   # At end of your work, make sure history is reasonable by folding non
-   # significant commits into a consistent set
-   git rebase -i master (use 'fixup' for example to merge several commits together,
-   and 'reword' to modify commit messages)
+   # 작업이 끝나면 중요하지 않은 커밋을 일관적인 집합으로 접어서
+   # 이력이 타당한지 확인하십시오.
+   git rebase -i master (예를 들어 커밋 여러 개를 병합하려면 'fixup'을 사용하고,
+   커밋 메시지를 수정하려면 'reword'를 사용하십시오.)
 
-   # or alternatively, in case there is a big number of commits and marking
-   # all them as 'fixup' is tedious
+   # 또는 커밋이 너무 많아서 모든 커밋을 'fixup'으로 표시하기 귀찮을 경우
    git fetch origin
    git rebase origin/master
    git reset --soft origin/master
    git commit -a -m "Put here the synthetic commit message"
 
-   # push your branch
+   # 브랜치를 푸시하십시오.
    git push my_user_name my_new_feature_branch
    From GitHub UI, issue a pull request
 
-If the pull request discussion or CI checks require
-changes, commit locally and push. To get a reasonable history, you may
-need to ``git rebase -i master``, in which case you will have to
-force-push your branch with
-``git push -f my_user_name my_new_feature_branch``
+풀 요청 논의 또는 CI 확인에 변경 사항이 필요한 경우, 로컬에서 커밋한 다음 푸시하십시오. 타당한 이력을 얻으려면 ``git rebase -i master`` 를 실행해야 할 수도 있습니다. 이 경우 ``git push -f my_user_name my_new_feature_branch`` 로 자신의 브랜치를 강제로 푸시해야 할 것입니다.
 
-Backporting bugfixes from master to a stable branch
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+마스터로부터 안정 브랜치로 버그 수정을 백포팅(backport)하기
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ::
 
    git checkout master
-   With git log, identify the sha1sum of the commit you want to backport
-   git checkout 2.2 (if you want to backport to 2.2)
+   깃 로그를 사용해서 백포팅하려는 커밋의 sha1sum을 식별하십시오.
+   git checkout 2.2 (2.2 버전으로 백포팅하려는 경우)
    git pull origin 2.2
-   (git checkout -b branch_name: if you intend to submit the backport as a pull request)
+   (git checkout -b branch_name: 백포트를 풀 요청으로 제출하려는 경우)
    git cherry-pick the_sha1_sum
    git push ...
 
-If changes are needed, do them and ``git commit -a --amend``
+변경 사항을 적용해야 하는 경우, 적용한 다음 ``git commit -a --amend`` 를 실행하십시오.
 
-Things you should NOT do
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+해서는 안 되는 일
++++++++++++++++++
 
-(For anyone with push rights to github.com/OSGeo/gdal) Never modify a
-commit or the history of anything that has been committed to
-https://github.com/OSGeo/gdal
+(`OSGeo/GDAL <https://github.com/OSGeo/gdal>`_ 에 푸시할 권한을 가지고 있는 누구나)
+어떤 커밋도 또는 https://github.com/OSGeo/gdal 에 커밋된 어떤 내용의 이력도 절대로 수정해서는 안 됩니다.
+
