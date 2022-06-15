@@ -1,212 +1,214 @@
 .. _rst_style:
 
 ================================================================================
-Sphinx RST Style guide
+스핑크스 RST 스타일 지침
 ================================================================================
 
-This page contains syntax rules, tips, and tricks for using Sphinx and reStructuredText.  For more information, please see this  `comprehensive guide to reStructuredText <http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html>`_, as well as the `Sphinx reStructuredText Primer <http://sphinx.pocoo.org/rest.html>`_.
+이 페이지는 스핑크스(Sphinx) 및 RST(reStructuredText)를 사용하기 위한 문법 규칙, 도움말, 그리고 꼼수를 담고 있습니다. 더 자세한 정보를 원한다면 이 `reStructuredText에 대한 종합 지침서 <https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html>`_ 는 물론 `스핑크스 reStructuredText 입문서 <https://www.sphinx-doc.org/ko/master/usage/restructuredtext/basics.html>`_ 를 읽어보십시오.
 
-Basic markup
-------------
+기본 마크업
+-----------
 
-Basic markup
-------------
-
-A reStructuredText document is written in plain text.  Without the need for complex formatting, one can be composed simply, just like one would any plain text document.  For basic formatting, see this table:
-
+RST 문서는 평문 텍스트로 작성됩니다. 복잡한 서식을 사용할 필요가 없기 때문에, 일반 텍스트 문서와 마찬가지로 간단하게 작성할 수 있습니다. 기본 서식에 대해서는 다음 표를 참조하십시오:
 
 .. list-table::
    :widths: 30 40 30
 
-   * - **Format**
-     - **Syntax**
-     - **Output**
-   * - Italics
-     - ``*italics*`` (single asterisk)
+   * - **서식**
+     - **문법**
+     - **출력**
+   * - 이탤릭체
+     - ``*italics*`` (별표 하나)
      - *italics*
-   * - Bold
-     - ``**bold**`` (double asterisk)
+   * - 볼드체
+     - ``**bold**`` (별표 2개)
      - **bold**
-   * - Monospace
-     - `` ``monospace`` `` (double back quote)
+   * - 고정폭 글꼴
+     - `` ``monospace`` `` (억음 부호 2개)
      - ``monospace``
 
-.. warning:: Use of basic markup is **not recommend**! Where possible use sphinx inline directives to logically mark commands, parameters, options, input, and files. By using directives consistently these items can be styled appropriately.
+.. warning::
 
-Lists
------
+   기본 마크업 사용을 **권장하지 않습니다**!
+   가능한 경우 스핑크스의 그때 그때 즉시 처리하는(inline) 지시어를 사용해서 명령어, 파라미터, 옵션, 입력 및 파일을 표시하십시오. 지시어를 일관적으로 사용하면 이런 항목들에 스타일을 적절하게 지정할 수 있습니다.
 
-There are two types of lists, bulleted lists and numbered lists.  A **bulleted list** looks like this:
+목록
+----
 
-* An item
-* Another item
-* Yet another item
+글머리 기호 목록(bulleted list)과 번호 매기기 목록(numbered list), 두 가지 유형의 목록이 있습니다. **글머리 기호 목록** 은 다음과 같은 모양입니다:
 
-This is accomplished with the following code::
+* 한 항목
+* 또다른 항목
+* 또 하나의 항목
 
-   * An item
-   * Another item
-   * Yet another item
+다음 코드를 이용해서 이런 목록을 만들 수 있습니다::
 
-A **numbered list** looks like this:
+   * 한 항목
+   * 또다른 항목
+   * 또 하나의 항목
 
-#. First item
-#. Second item
-#. Third item
+**번호 매기기 목록** 은 다음과 같은 모양입니다:
 
-This is accomplished with the following code::
+#. 첫 번째 항목
+#. 두 번째 항목
+#. 세 번째 항목
 
-   #. First item
-   #. Second item
-   #. Third item
+다음 코드를 이용해서 이런 목록을 만들 수 있습니다::
 
-Note that numbers are automatically generated, making it easy to add/remove items.   
+   #. 첫 번째 항목
+   #. 두 번째 항목
+   #. 세 번째 항목
 
-List-tables
------------
+번호가 자동으로 생성되기 때문에 항목들을 쉽게 추가/제거할 수 있다는 사실을 기억하십시오.
 
-Bulleted lists can sometimes be cumbersome and hard to follow.  When dealing with a long list of items, use list-tables.  For example, to talk about a list of options, create a table that looks like this:
+목록 표
+-------
+
+글머리 기호 목록이 길고 복잡해서 이해하기 어려운 경우가 가끔 있습니다. 긴 항목 목록을 다루는 경우 목록 표(list-table)를 사용하십시오. 예를 들어 옵션 목록에 관해 서술하는 경우 다음과 같은 모양의 표를 생성하십시오:
 
 .. list-table::
    :widths: 20 80
    :header-rows: 1
-   
-   * - Shapes
-     - Description
-   * - Square
-     - Four sides of equal length, 90 degree angles
-   * - Rectangle
-     - Four sides, 90 degree angles
-    
-This is done with the following code::
+
+   * - 형태
+     - 설명
+   * - 정사각형
+     - 네 변의 길이가 동일하고 각 변은 90도로 만납니다.
+   * - 직사각형
+     - 네 변이 모두 90도로 만납니다.
+
+이 표는 다음 코드로 만들어집니다::
 
    .. list-table::
       :widths: 20 80
       :header-rows: 1
-      
-      * - Shapes
-        - Description
-      * - Square
-        - Four sides of equal length, 90 degree angles
-      * - Rectangle
-        - Four sides, 90 degree angles
 
-Page labels
+      * - 형태
+        - 설명
+      * - 정사각형
+        - 네 변의 길이가 동일하고 각 변은 90도로 만납니다.
+      * - 직사각형
+        - 네 변이 모두 90도로 만납니다.
+
+페이지 라벨
 -----------
 
-**Ensure every page has a label that matches the name of the file.** For example if the page is named ``foo_bar.rst`` then the page should have the label::
+**모든 페이지에 파일명과 일치하는 라벨을 작성했는지 확인하십시오.**
+예를 들면 페이지 파일명이 ``foo_bar.rst`` 라면 페이지에 다음 라벨을 작성해야 합니다::
 
    ..  _foo_bar:
-  
-Other pages can then link to that page by using the following code::
+
+그러면 다른 페이지에서 다음 코드로 해당 페이지를 링크할 수 있습니다::
 
    :ref:`foo_bar`
 
 .. _linking:
 
-Linking
--------
+링크
+----
 
-Links to other pages should never be titled as "here".  Sphinx makes this easy by automatically inserting the title of the linked document.
+다른 페이지를 가리키는 링크에 절대로 "여기"라는 제목을 붙여서는 안 됩니다. 스핑크스는 링크된 문서의 제목을 자동적으로 삽입해서 이를 쉽게 만들어줍니다.
 
-Bad
-   More information about linking can be found :ref:`here <linking>`.
-Good
-   For more information, please see the section on :ref:`linking`.
-    
-To insert a link to an external website::
+나쁨
+   링크에 관한 자세한 정보는 :ref:`여기 <linking>` 에서 찾아볼 수 있습니다.
+좋음
+   더 자세한 정보를 알고 싶다면 :ref:`linking` 단락을 읽어보십시오.
 
-   `Text of the link <http://example.com>`__
+외부 웹사이트를 가리키는 링크를 삽입하려면::
 
-The resulting link would look like this: `Text of the link <http://example.com>`__
+   `링크 제목 <http://example.com>`__
 
-.. warning:: It is very easy to have two links with the same text resulting in the following error::
+그러면 다음과 같은 모양의 링크를 출력할 것입니다: `링크 제목 <http://example.com>`__
+
+.. warning::
+
+   서로 다른 주소를 가리키지만 동일한 제목을 가진 링크 2개를 작성하는 실수를 쉽게 범할 수 있습니다.
+   이 경우 다음과 같은 오류가 발생합니다::
 
    **(WARNING/2) Duplicate explicit target name:foo**
-   
-   To avoid these warnings use of a double `__` generates an anonymous link. 
 
+   이런 경고를 피하려면 ``__`` 를 이중으로 사용해서 익명 링크를 생성하십시오.
 
-Sections
---------
+단락
+----
 
-Use sections to break up long pages and to help Sphinx generate tables of contents.
+단락을 이용해서 긴 페이지를 나누고 스핑크스가 목차를 생성할 수 있게 하십시오.
 
 ::
 
     ================================================================================
-    Document title
+    문서 제목
     ================================================================================
 
-    First level
-    -----------
+    제1 수준
+    --------
 
-    Second level
-    ++++++++++++
+    제2 수준
+    ++++++++
 
-    Third level
-    ***********
+    제3 수준
+    ********
 
-    Fourth level
-    ~~~~~~~~~~~~
+    제4 수준
+    ~~~~~~~~
 
-Notes and warnings
-------------------
+메모 및 경고
+------------
 
-When it is beneficial to have a section of text stand out from the main text, Sphinx has two such boxes, the note and the warning.  They function identically, and only differ in their coloring.  You should use notes and warnings sparingly, however, as adding emphasis to everything makes the emphasis less effective. 
+본문으로부터 두드러지는 텍스트 단락을 작성하면 좋은 경우, 스핑크스에는 메모(note) 및 경고(warning)라는 글상자 2개가 있습니다. 기능은 동일하며, 색상만 다릅니다. 하지만 모든 것에 강조를 추가하면 강조의 효과가 떨어지기 때문에 메모 및 경고를 너무 자주 사용해서는 안 됩니다.
 
-Here is an example of a note:
+다음은 메모의 예시입니다:
 
-.. note:: This is a note.
+.. note:: 이것은 메모입니다.
 
-This note is generated with the following code::
+다음 코드로 이 메모를 생성합니다::
 
-   .. note:: This is a note.
-   
-Similarly, here is an example of a warning:
+   .. note:: 이것은 메모입니다.
 
-.. warning:: Beware of dragons.
+마찬가지로 다음은 경고의 예시입니다:
 
-This warning is generated by the following code::
+.. warning:: 용을 조심하십시오.
 
-   .. warning:: Beware of dragons.
-   
-Images
+다음 코드로 이 경고를 생성합니다::
+
+   .. warning:: 용을 조심하십시오.
+
+이미지
 ------
 
-Add images to your documentation when possible.  Images, such as screenshots, are a very helpful way of making documentation understandable.  When making screenshots, try to crop out unnecessary content (browser window, desktop, etc).  Avoid scaling the images, as the Sphinx theme automatically resizes large images.  It is also helpful to include a caption underneath the image.::
+가능한 경우 문서에 이미지를 추가하십시오. 화면 캡처 같은 이미지는 문서를 이해하기 쉽게 만들어주는 매우 유용한 방법입니다. 화면을 캡처하는 경우 필요없는 내용(탐색기 창, 배경화면 등등)을 잘라내십시오. 스핑크스가 큰 이미지를 자동으로 크기 조정하기 때문에 이미지 크기를 바꿀 필요는 없습니다. 이미지 아래에 캡션을 포함시키는 것도 도움이 됩니다::
 
   .. figure:: image.png
      :align: center
-   
-     *Caption*
-   
-In this example, the image file exists in the same directory as the source page.  If this is not the case, you can insert path information in the above command. The root :file:`/` is the directory of the :file:`conf.py` file.::
+
+     *캡션*
+
+이 예시에서는 이미지 파일이 소스 페이지와 동일한 디렉터리에 존재합니다. 그렇지 않을 경우, 앞의 지시문에 경로 정보를 삽입하면 됩니다. 루트 :file:`/` 가 :file:`conf.py` 파일의 디렉터리입니다.::
 
   .. figure:: /../images/gdalicon.png
 
-External files
---------------
+외부 파일
+---------
 
-Text snippets, large blocks of downloadable code, and even zip files or other binary sources can all be included as part of the documentation.
+텍스트 조각, 다운로드할 수 있는 코드의 큰 덩어리, 그리고 ZIP 파일 또는 다른 바이너리 소스조차 모두 문서의 일부분으로 포함시킬 수 있습니다.
 
-To include link to sample file, use the ``download`` directive::
+샘플 파일을 가리키는 링크를 포함시키려면 ``download`` 지시어를 사용하십시오::
 
-   :download:`An external file <example.txt>`
+   :download:`외부 파일 <example.txt>`
 
-The result of this code will generate a standard link to an :download:`external file <example.txt>`
+이 코드는 :download:`외부 파일 <example.txt>` 을 가리키는 표준 링크를 생성할 것입니다.
 
-To include the contents of a file, use ``literalinclude`` directive::
+파일의 내용을 포함시키려면 ``literalinclude`` 지시어를 사용하십시오::
 
-   Example of :command:`gdalinfo` use:
+   :command:`gdalinfo` 사용의 예시:
    
    .. literalinclude:: example.txt
 
-Example of :command:`gdalinfo` use:
+:command:`gdalinfo` 사용의 예시:
    
 .. literalinclude:: example.txt
 
-The ``literalinclude`` directive has options for syntax highlighting, line numbers and extracting just a snippet::
+``literalinclude`` 지시어에 문법 강조, 줄 번호 및 조각 추출을 위한 옵션을 사용할 수 있습니다::
 
    Example of :command:`gdalinfo` use:
    
@@ -217,67 +219,68 @@ The ``literalinclude`` directive has options for syntax highlighting, line numbe
       :start-after: Coordinate System is:
       :end-before: Origin =
 
-Reference files and paths
--------------------------
+참조 파일 및 경로
+-----------------
 
-Use the following syntax to reference files and paths::
+파일 및 경로를 참조하려면 다음 문법을 사용하십시오::
 
    :file:`myfile.txt`
 
-This will output: :file:`myfile.txt`.
+이 코드는 다음을 출력할 것입니다: :file:`myfile.txt`.
 
-You can reference paths in the same way::
+경로도 동일한 방법으로 참조할 수 있습니다::
 
    :file:`path/to/myfile.txt`
 
-This will output: :file:`path/to/myfile.txt`.
+이 코드는 다음을 출력할 것입니다: :file:`path/to/myfile.txt`.
 
-For Windows paths, use double backslashes::
+윈도우 경로의 경우, 이중 역슬래시를 사용하십시오::
 
    :file:`C:\\myfile.txt`
 
-This will output: :file:`C:\\myfile.txt`.
+이 코드는 다음을 출력할 것입니다: :file:`C:\\myfile.txt`.
 
-If you want to reference a non-specific path or file name::
+특정하지 않은 경로 또는 파일명을 참조하고자 하는 경우::
 
    :file:`{your/own/path/to}/myfile.txt`
 
-This will output: :file:`{your/own/path/to}/myfile.txt`
+이 코드는 다음을 출력할 것입니다: :file:`{your/own/path/to}/myfile.txt`
 
-Reference code
---------------
+코드 참조
+---------
 
-To reference a class::
+클래스를 참조하려면::
 
   :cpp:class:`MyClass`
 
-To reference a method or function::
+메소드 또는 함수를 참조하려면::
 
   :cpp:func:`MyClass::MyMethod`
   :cpp:func:`MyFunction`
 
-Reference configuration options
--------------------------------
+환경설정 옵션 참조
+------------------
 
-To reference a configuration option, such as **GDAL_CACHEMAX**, use::
+**GDAL_CACHEMAX** 같은 환경설정 옵션을 참조하려면 다음 코드를 사용하십시오::
 
   :decl_configoption:`OPTION_NAME`
 
-Reference commands
-------------------
+명령어 참조
+-----------
 
-Reference commands (such as :program:`gdalinfo`) with the following syntax::
+다음 문법을 사용해서 (:program:`gdalinfo` 같은) 명령어를 참조하십시오::
 
   :program:`gdalinfo`
   
-Use ``option`` directive for command line options::
+명령줄 옵션에는 ``option`` 지시어를 사용하십시오::
   
   .. option:: -json
 
-     Display the output in json format.
+     산출물을 JSON 서식으로 출력합니다.
 
-Use ``describe`` to document create parameters::
+생성 파라미터를 문서화하려면 ``describe`` 지시어를 사용하십시오::
   
   .. describe:: WORLDFILE=YES
      
-     Force the generation of an associated ESRI world file (with the extension .wld).
+     관련 ESRI 월드 파일을 (.wld 확장자로) 강제 생성합니다.
+
