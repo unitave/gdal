@@ -8,8 +8,7 @@ gdalmdimtranslate
 
     .. versionadded:: 3.1
 
-    다중차원 데이터를 서로 다른 포맷으로 변환하고, 
-    Converts multidimensional data between different formats, and perform subsetting.
+    다중차원 데이터를 서로 다른 포맷으로 변환하고, 부분 집합 작업을 수행합니다.
 
 .. Index:: gdalmdimtranslate
 

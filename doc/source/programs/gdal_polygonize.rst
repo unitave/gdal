@@ -24,7 +24,7 @@ gdal_polygonize.py
 
 산출 벡터 데이터소스가 이미 존재하지 않는 경우 이 유틸리티가 산출 벡터 데이터소스를 생성할 것입니다. 기본값은 GML 포맷입니다.
 
-이 유틸리티는 알고리즘에 대한 추가적인 상세 정보를 가지고 있는 ::cpp:func:`GDALPolygonize` 함수를 바탕으로 합니다.
+이 유틸리티는 알고리즘에 대한 추가적인 상세 정보를 가지고 있는 :cpp:func:`GDALPolygonize` 함수를 바탕으로 합니다.
 
 .. program:: gdal_polygonize
 

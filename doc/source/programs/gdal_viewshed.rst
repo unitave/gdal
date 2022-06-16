@@ -8,7 +8,7 @@ gdal_viewshed
 
     .. versionadded:: 3.1.0
 
-    입력 DEM 래스터에 있는 사용자 정의 포인트에 대해 [Wang2000]_ 에 정의된 메소드를 이용해서 가시권(viewshed) 래스터를 계산합니다.
+    입력 DEM 래스터에 있는 사용자 정의 포인트에 대해 `Wang, 2000`_ 에 정의된 메소드를 이용해서 가시권(viewshed) 래스터를 계산합니다.
 
 .. Index:: gdal_viewshed
 
@@ -150,7 +150,5 @@ C에서 :cpp:func:`GDALViewshedGenerate` 를 호출하면 이 유틸리티의 �
     gdal_viewshed -md 500 -ox -10147017 -oy 5108065 source.tif destination.tif
 
 
-.. [Wang2000]::
-    Generating Viewsheds without Using Sightlines. Wang, Jianjun,
-    Robinson, Gary J., and White, Kevin. Photogrammetric Engineering and Remote
-    Sensing. p81. https://www.asprs.org/wp-content/uploads/pers/2000journal/january/2000_jan_87-90.pdf
+.. _Wang, 2000: https://www.asprs.org/wp-content/uploads/pers/2000journal/january/2000_jan_87-90.pdf
+    Generating Viewsheds without Using Sightlines. Wang, Jianjun, Robinson, Gary J., and White, Kevin. Photogrammetric Engineering and Remote Sensing. p81.
