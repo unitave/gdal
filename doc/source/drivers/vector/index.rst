@@ -27,20 +27,14 @@
 
    amigocloud
    arrow
-   ao
-   arcgen
    avcbin
    avce00
    cad
    carto
-   cloudant
-   couchdb
    csv
    csw
-   db2
    dgn
    dgnv8
-   dods
    dwg
    dxf
    eeda
@@ -49,11 +43,9 @@
    esrijson
    filegdb
    flatgeobuf
-   fme
    geoconcept
    geojson
    geojsonseq
-   geomedia
    georss
    gmlas
    gml
@@ -66,16 +58,13 @@
    idb
    idrisi
    ili
-   ingres
    jml
    kml
    libkml
    lvbag
    mapml
-   mdb
    memory
    mitab
-   mongodb
    mongodbv3
    mssqlspatial
    mvt
@@ -111,7 +100,6 @@
    vdv
    vfk
    vrt
-   walk
    wasp
    wfs
    xls

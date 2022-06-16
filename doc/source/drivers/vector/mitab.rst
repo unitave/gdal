@@ -3,7 +3,7 @@
 MapInfo TAB 및 MIF/MID
 =======================
 
-.. shortname:: MITAB
+.. shortname:: MapInfo File
 
 .. built_in_by_default::
 
@@ -91,6 +91,8 @@ MapInfo 객체 속성에는 몇 가지 제한 사항들이 적용됩니다:
 
 환경설정 옵션
 ~~~~~~~~~~~~~~~~~~~~~
+
+다음 :ref:`환경설정 옵션들 <configoptions>` 을 사용할 수 있습니다:
 
 -  :decl_configoption:`MITAB_SET_TOWGS84_ON_KNOWN_DATUM` =YES/NO: (GDAL 3.0.3 이상 버전)
    GDAL 3.0.3버전부터 기본값은 NO입니다. 다시 말해 원점을 추정할 수 있는 경우 .tab 파일의 헤더로부터 읽어온 TOWGS84 파라미터를 좌표계의 Datum 객체에 설정하지 *않을* 것이라는 뜻입니다.

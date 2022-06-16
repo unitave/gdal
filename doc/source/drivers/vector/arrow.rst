@@ -3,6 +3,8 @@
 (지오)애로우 IPC 파일 포맷 / 스트림
 ===================================
 
+.. versionadded:: 3.5
+
 .. shortname:: Arrow
 
 .. build_dependencies:: 아파치 애로우 C++ 라이브러리

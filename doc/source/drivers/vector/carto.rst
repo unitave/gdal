@@ -68,11 +68,11 @@ OGR 드라이버는 RFC 41에 따라 레이어에서 ('the_geom_webmercator' 필
 
 Carto 서비스의 작업과 OGR 개념을 다음과 같이 매핑합니다:
 
-- :cpp:func:`OGRFeature::CreateFeature` <==> ``INSERT`` 작업
-- :cpp:func:`OGRFeature::SetFeature` <==> ``UPDATE`` 작업
-- :cpp:func:`OGRFeature::DeleteFeature` <==> ``DELETE`` 작업
-- :cpp:func:`OGRDataSource::CreateLayer` <==> ``CREATE TABLE`` 작업
-- :cpp:func:`OGRDataSource::DeleteLayer` <==> ``DROP TABLE`` 작업
+-  :cpp:func:`OGRFeature::CreateFeature` <==> ``INSERT`` 작업
+-  :cpp:func:`OGRFeature::SetFeature` <==> ``UPDATE`` 작업
+-  :cpp:func:`OGRFeature::DeleteFeature` <==> ``DELETE`` 작업
+-  :cpp:func:`OGRDataSource::CreateLayer` <==> ``CREATE TABLE`` 작업
+-  :cpp:func:`OGRDataSource::DeleteLayer` <==> ``DROP TABLE`` 작업
 
 :cpp:func:`OGRFeature::CreateFeature` 함수로 새 객체를 삽입할 때 명령어가 성공적으로 실행되었다면, OGR이 반환된 rowid를 가져와서 OGR FID로 사용할 것입니다.
 

@@ -194,7 +194,7 @@ Spatialite 4.3버전부터, CastAutomagic이 더 이상 필요하지 않습니�
 
 -  :decl_configoption:`OGR_SQLITE_JOURNAL`:
    이 옵션을 이용해서 지오패키지 (및 당연히 SQLite) 파일의 저널 모드를 설정할 수 있습니다.
-  https://www.sqlite.org/pragma.html#pragma_journal_mode 도 읽어보십시오.
+   https://www.sqlite.org/pragma.html#pragma_journal_mode 도 읽어보십시오.
 
 -  :decl_configoption:`OGR_SQLITE_CACHE`:
    :ref:`성능 힌트 <target_drivers_vector_gpkg_performance_hints>` 를 참조하십시오.
@@ -251,7 +251,7 @@ GDAL 2.2버전부터, 뷰의 SELECT 문에 있는 열이 정수형 기본 키 �
 
 예를 들면:
 
-.. code-blcok:: sql
+.. code-block:: sql
 
    CREATE VIEW my_view AS SELECT foo.fid AS OGC_FID, foo.geom, ... FROM foo JOIN another_table ON foo.some_id = another_table.other_id
    INSERT INTO gpkg_contents (table_name, identifier, data_type, srs_id) VALUES ( 'my_view', 'my_view', 'features', 4326)
@@ -318,6 +318,12 @@ GDAL 2.3버전부터, (예를 들어 ``ogrinfo --format GPKG`` 명령어로) SQL
    ::
 
       ogr2ogr -f GPKG filename.gpkg abc.shp
+
+-  기존 지오패키지 파일 -- 예를 들면 지오패키지 템플릿 -- 에 동일한 또는 하위 호환되는 데이터베이스 스키마에 따라 피처를 담고 있는 또다른 지오패키지로부터 피처를 추가해서 업데이트하기.
+
+   ::
+
+      ogr2ogr -append output.gpkg input.gpkg
 
 -  shapefile들이 있는 디렉터리를 지오패키지로 변환하기. 각 파일은 GPKG 파일 안에 새 테이블로 각각 작성될 것입니다. ``filename.gpkg`` 파일을 생성할 것이기 때문에, 이 파일이 기존에 존재해서는 절대로 **안 됩니다**.
 

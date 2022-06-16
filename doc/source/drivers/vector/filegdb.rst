@@ -128,6 +128,9 @@ FileGDB SDK API는 사용자가 지정한 FID를 가진 객체를 생성하지 �
 -  **CONFIGURATION_KEYWORD=DEFAULTS/TEXT_UTF16/MAX_FILE_SIZE_4GB/MAX_FILE_SIZE_256TB/GEOMETRY_OUTOFLINE/BLOB_OUTOFLINE/GEOMETRY_AND_BLOB_OUTOFLINE**:
    데이터 저장 방법을 사용자 지정합니다. 기본적으로 텍스트는 UTF-8로, 그리고 데이터는 1TB 용량까지 저장합니다.
 
+-  **CREATE_SHAPE_AREA_AND_LENGTH_FIELDS=YES/NO**: (GDAL 3.6.0 이상 버전)
+   기본값은 (CreateLayer() API를 통해서) NO입니다. 이 옵션을 설정하는 경우 폴리곤 레이어를 위해 Shape_Area 및 Shape_Length 특수 필드를 생성할 것입니다. (Shape_Length는 선형 레이어 전용입니다.) ogr2ogr를 이용해서 Shape_Area/Shape_Length 특수 필드를 가진 소스 레이어를 작업하는데 이 옵션을 명확하게 설정하지 않은 경우, 산출되는 파일 지리 데이터베이스(FileGeodatabase)가 이 필드들을 제대로 태그하도록 옵션을 자동으로 설정할 것입니다.
+
 환경설정 옵션
 -------------
 

@@ -97,7 +97,7 @@ VDV-451/VDV-452 용 일반 판독기/작성기는 임의 크기의 대용량 파
 Links
 -----
 
--  `VDV-451 파일 포맷 <https://www.vdv.de/vdv-schrift-451.pdfx?forced=true>`_ (독일어)
--  `VDV-452 데이터 모델 <https://www.vdv.de/452--sdsv15.pdfx?forced=true>`_ (독일어)
+-  `VDV-451 파일 포맷 <https://www.vdv.de/vdv-schrift-451.pdfx?forced=false>`_ (독일어)
+-  `VDV-452 데이터 모델 <https://www.vdv.de/service/downloads_onp.aspx?id=4328&forced=false>`_ (독일어)
 -  `오스트리아 INTREST 데이터 포맷 <https://gip.gv.at/assets/downloads/1908_dokumentation_gipat_ogd.pdf>`_ (독일어)
 

@@ -199,7 +199,7 @@ OGRDataSource::ExecuteSQL()에 전송되는 다음 SQL/유사 SQL 명령어는 W
 
 각 레코드는 :cpp:func:`OGRLayer::GetCapabilities` 메소드가 반환하는 문서로부터 나온 "layer_name", "title" 및 "abstract" 필드를 담고 있습니다.
 
-:cpp:func:`OGRLayer::GetLayerByName("WFSLayerMetadata")` 를 통해 해당 레이어를 반환합니다.
+``OGRLayer::GetLayerByName("WFSLayerMetadata")`` 를 통해 해당 레이어를 반환합니다.
 
 특수 레이어: WFSGetCapabilities
 ----------------------------------
@@ -207,7 +207,7 @@ OGRDataSource::ExecuteSQL()에 전송되는 다음 SQL/유사 SQL 명령어는 W
 "WFSGetCapabilities"라는 "숨겨진" 레이어는 :cpp:func:`OGRLayer::GetCapabilities` 요청의 원시(raw) XML 결과물로 채워져 있습니다.
 
 
-:cpp:func:`OGRLayer::GetLayerByName("WFSGetCapabilities")` 를 통해 해당 레이어를 반환합니다.
+``OGRLayer::GetLayerByName("WFSGetCapabilities")`` 를 통해 해당 레이어를 반환합니다.
 
 열기 옵션
 ------------

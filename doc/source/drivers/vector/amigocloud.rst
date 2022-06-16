@@ -108,7 +108,7 @@ AmigoCloud 서비스의 작업과 OGR 개념을 다음과 같이 매핑합니다
    또다른 서버를 가리키도록 설정할 수 있습니다.
 
 -  :decl_configoption:`AMIGOCLOUD_API_KEY`:
-   다음 단락을 참조하십시오.
+   "인증" 단락을 참조하십시오.
 
 예시
 --------

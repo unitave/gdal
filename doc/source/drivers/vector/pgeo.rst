@@ -5,7 +5,7 @@ ESRI 개인 지리 데이터베이스
 
 .. shortname:: PGeo
 
-.. build_dependencies:: ODBC library
+.. build_dependencies:: ODBC 라이브러리
 
 OGR는 ODBC를 통해 ESRI 개인 지리 데이터베이스(Personal Geodatabase) .mdb 파일의 읽기를 선택적으로 지원합니다. 개인 지리 데이터베이스란 지리 데이터베이스 메타데이터를 담기 위해 ESRI가 정의한 테이블 집합 및 BLOB 열에 담긴 객체의 맞춤형 포맷으로 된 도형을 (본질적으로 shapefile 도형 조각들을) 가진 마이크로소프트 액세스 데이터베이스입니다. PGeo 드라이버는 ODBC를 통해 하지만 어떤 ESRI 미들웨어에도 의존하지 않고 개인 지리 데이터베이스에 접근합니다.
 

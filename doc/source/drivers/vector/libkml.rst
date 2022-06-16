@@ -240,7 +240,7 @@ Placemark, Model, NetworkLink 및 PhotoOverlay 객체는 camera_longitude, camer
 
 KML 피처를 읽어올 때 :decl_configoption:`LIBKNL_RESOLVE_STYLE` 환경설정 옵션이 YES로 설정되어 있는 경우, 스타일 테이블에서 StyleUrl을 검색해서 피처 스타일 문자열을 테이블로부터 나온 스타일로 설정합니다. 이렇게 하면 스타일 테이블을 읽어오지 않는 MapServer 같은 응용 프로그램에 공유 스타일을 읽어오게 할 수 있습니다.
 
-KML 피처를 읽어올 때 :decl_configoption:`LIBKNL_EXTERNAL_STYLE` 환경설정 옵션이 YES로 설정되어 있는 경우, 디스크 또는 서버로부터 데이터소스 외부에 있는 StyleUrl을 가져와서 데이터소스 스타일 테이블에 파싱합니다. 스타일 KML을 읽어올 수 없거나 :decl_configoption:`LIBKNL_EXTERNAL_STYLE이 NO로 설정되어 있다면, StyleUrl을 스타일 문자열로 복사합니다.
+KML 피처를 읽어올 때 :decl_configoption:`LIBKNL_EXTERNAL_STYLE` 환경설정 옵션이 YES로 설정되어 있는 경우, 디스크 또는 서버로부터 데이터소스 외부에 있는 StyleUrl을 가져와서 데이터소스 스타일 테이블에 파싱합니다. 스타일 KML을 읽어올 수 없거나 :decl_configoption:`LIBKNL_EXTERNAL_STYLE` 이 NO로 설정되어 있다면, StyleUrl을 스타일 문자열로 복사합니다.
 
 KML StyleMap을 읽어올 때 기본 매핑은 "NORMAL"로 설정됩니다. 강조 스타일을 이용하고 싶다면 :decl_configoption:`LIBKNL_STYLEMAP_KEY` 환경설정 옵션을 "HIGHLIGHT"으로 설정하십시오.
 
