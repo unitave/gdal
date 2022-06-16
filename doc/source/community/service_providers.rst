@@ -108,7 +108,7 @@ GDAL 서비스 제공자
     $('#core-contributors').randomize('div.service-provider');
     $('#contributors').randomize('div.service-provider');
     $('#other-service-providers').randomize('div.service-provider');
-  </script>
+   </script>
 
 .. seealso::
 
