@@ -1,7 +1,7 @@
 .. _raster_drivers:
 
 ================================================================================
-Raster drivers
+래스터 드라이버
 ================================================================================
 
 ..
@@ -46,12 +46,10 @@ Raster drivers
    ctable2
    ctg
    daas
-   db2
    dds
    derived
    dimap
    dipex
-   dods
    doq1
    doq2
    dted
@@ -69,7 +67,6 @@ Raster drivers
    fast
    fit
    fits
-   fujibas
    genbin
    georaster
    gff
@@ -90,10 +87,8 @@ Raster drivers
    heif
    hf2
    hfa
-   ida
    Idrisi
    ilwis
-   intergraphraster
    iris
    isce
    isg
@@ -105,9 +100,8 @@ Raster drivers
    jp2lura
    jp2mrsid
    jp2openjpeg
-   jpeg2000
-   jpegls
    jpeg
+   jpegxl
    jpipkak
    kea
    kmlsuperoverlay
@@ -123,7 +117,6 @@ Raster drivers
    mem
    mff
    mff2
-   mg4lidar
    mrsid
    msg
    msgn

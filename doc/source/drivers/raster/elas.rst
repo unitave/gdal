@@ -8,8 +8,7 @@ ELAS - 지구 자원 연구실 응용 소프트웨어
 
 .. built_in_by_default::
 
-ELAS(Earth Resources Laboratory Applications Software)는 오래된 원격탐사 시스템으로 지금도 NASA 내부에서 다양한 연구 프로젝트에 쓰이고 있습니다. is an old remote sensing system still used for a variety of
-research projects within NASA. gdal/frmts/elas에서 ELAS 포맷에 대한 지원을 찾아볼 수 있습니다.
+ELAS(Earth Resources Laboratory Applications Software)는 오래된 원격탐사 시스템으로 지금도 NASA 내부에서 다양한 연구 프로젝트에 쓰이고 있습니다. :file:`gdal/frmts/elas` 에서 ELAS 포맷에 대한 지원을 찾아볼 수 있습니다.
 
 드라이버 케이퍼빌리티
 -------------------
