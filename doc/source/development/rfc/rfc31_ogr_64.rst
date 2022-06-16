@@ -72,7 +72,7 @@ C API 수준에서는 다음과 같이 변경합니다:
       OFTInteger64 = 12
       OFTInteger64List = 13
 
-:cpp:class:`OGRField` 합집합(union)이 다음을 포함하도록 확장할 것입니다:
+OGRField 합집합(union)이 다음을 포함하도록 확장할 것입니다:
 
 .. code-block:: cpp
 

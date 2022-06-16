@@ -92,3 +92,4 @@ RFC 목록
     rfc83_use_of_project_sponsorship
     rfc84_cmake
     rfc85_policy_code_additions
+    rfc86_column_oriented_api

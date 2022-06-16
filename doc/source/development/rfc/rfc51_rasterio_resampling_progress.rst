@@ -118,7 +118,7 @@ GDALRIOResampleAlg 구조 추가
 C++ 변경 사항
 ~~~~~~~~~~~~~
 
-:cpp:class:`GDALDataset` 및 :cpp:class:`GDALDataset`GDALRasterBand` 의 (가상이 아닌) RasterIO()와 (가상) IRasterIO() 메소드는 ``GDALRasterIOExtraArg*`` 유형의 새로운 마지막 인자 'psExtraArg'를 가지고 있습니다. GDAL을 사용하는 코드의 경우 이 추가 인자의 기본값은 NULL이지만, 모든 인트리(in-tree) 코드에 필수적이기 때문에 인트리 코드가 호출자로부터 반환되었을 수도 있는 'psExtraArg'를 포워딩하는 것을 잊어버리는 일을 방지합니다.
+:cpp:class:`GDALDataset` 및 :cpp:class:`GDALDataset::GDALRasterBand` 의 (가상이 아닌) RasterIO()와 (가상) IRasterIO() 메소드는 ``GDALRasterIOExtraArg*`` 유형의 새로운 마지막 인자 'psExtraArg'를 가지고 있습니다. GDAL을 사용하는 코드의 경우 이 추가 인자의 기본값은 NULL이지만, 모든 인트리(in-tree) 코드에 필수적이기 때문에 인트리 코드가 호출자로부터 반환되었을 수도 있는 'psExtraArg'를 포워딩하는 것을 잊어버리는 일을 방지합니다.
 
 
 :cpp:func:`GDALDataset::RasterIO` 및 :cpp:func:`GDALRasterBand::RasterIO` 메소드는 이 인자에 대해 NULL 포인터를 받아들일 수 있습니다. 이 경우 IRasterIO()에 기본 GDALRasterIOExtraArg 구조를 전송할 수 있도록 이 메소드들이 이 구조를 인스턴스화할 것입니다. IRasterIO()를 직접 호출하는 다른 모든 코드는 (몇몇 IReadBlock() 구현들은) IRasterIO()가 자신의 'psExtraArg'가 NULL이 아니라고 가정할 수 있도록 기본 GDALRasterIOExtraArg 구조를 인스턴스화하는 것을 확인해야 합니다.
@@ -128,7 +128,7 @@ C++ 변경 사항
 :cpp:func:`GDALRasterBand::IRasterIO` 및 :cpp:func:`GDALDataset::BlockBasedRasterIO` 가 이제 사용할 수 있는 경우 진행 상황 콜백을 사용합니다.
 
 C API 변경 사항
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 다음 내용만 추가합니다:
 
@@ -151,8 +151,8 @@ C API 변경 사항
 
 이 메소드들은 마지막 ``GDALRasterIOExtraArg* psExtraArg`` 인자를 가진 기존 함수와 동일하며, 간격 파라미터는 GSpacing으로 승격되었습니다.
 
-드라이버 변경 사항
---------------
+드라이버 변경
+-------------
 
 -  RasterIO()를 구현하거나 사용하는 모든 인트리 드라이버가 ``GDALRasterIOExtraArg* psExtraArg`` 파라미터를 받아들이고 필요한 경우 포워딩하도록 편집했습니다. 사용자 지정 RasterIO() 구현을 가졌던 드라이버는 이제 사용할 수 있는 경우 진행 상황 콜백을 사용합니다.
 

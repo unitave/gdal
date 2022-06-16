@@ -211,7 +211,7 @@ OGRCreateCoordinateTransformation()가 이제 "데이터 축을 공간 좌표계
 
 래스터 데이터셋이 자신이 반환하는 ``OGRSpatialReference*`` 상에서 ``SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER)`` 를 호출하고 SetSpatialRef()에서 이를 가정하도록 수정합니다. (현재 가정만 하고 확인하지는 않습니다.)
 
-벡터 레이어는 주로 GetSpatialRef()가 반환하는 ``OGRSpatialReference*`` 상에서 ``SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER)`` 를 호출합니다. GML 드라이버의 경우, 사용자가 INVERT_AXIS_ORDER_IF_LAT_LONG 열기 옵션을 정의한다면 (예전과 마찬가지로) 축 순서 뒤바꾸기를 수행하지 않고 AUTHORITY_COMPLIANT 전략을 사용합니다. ``OGRSpatialReference*`` 를 받을 때 ICreateLayer()가 축 매핑 전략을 변경할 수도 있습니다. (대부분의 경우 변경할 것입니다.) 다시 말해 GML 드라이버가 AUTHORITY_COMPLIANT 순서를 가진 :cpp:class:`OGRSpatialReference` 객체를 받는 경우 TRADITIONAL_GIS_ORDER로 변경하도록 결정할 수도 있으며 :cpp:func:`GetSpatialRef()::GetDataAxisToSRSAxisMapping()` 이 이를 반영할 것입니다. 이런 경우 ogr2ogr가 도형 축 순서 뒤바꾸기를 수행하도록 수정합니다.
+벡터 레이어는 주로 GetSpatialRef()가 반환하는 ``OGRSpatialReference*`` 상에서 ``SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER)`` 를 호출합니다. GML 드라이버의 경우, 사용자가 INVERT_AXIS_ORDER_IF_LAT_LONG 열기 옵션을 정의한다면 (예전과 마찬가지로) 축 순서 뒤바꾸기를 수행하지 않고 AUTHORITY_COMPLIANT 전략을 사용합니다. ``OGRSpatialReference*`` 를 받을 때 ICreateLayer()가 축 매핑 전략을 변경할 수도 있습니다. (대부분의 경우 변경할 것입니다.) 다시 말해 GML 드라이버가 AUTHORITY_COMPLIANT 순서를 가진 :cpp:class:`OGRSpatialReference` 객체를 받는 경우 TRADITIONAL_GIS_ORDER로 변경하도록 결정할 수도 있으며 :cpp:func:`GetSpatialRef::GetDataAxisToSRSAxisMapping` 이 이를 반영할 것입니다. 이런 경우 ogr2ogr가 도형 축 순서 뒤바꾸기를 수행하도록 수정합니다.
 
 이 변경 사항과 관련해서 WKT 1 내보내기는 이제 항상 AXIS 요소를 반환하고, 따라서 EPSG:xxxx는 EPSGA:xxxx와 동일하게 동작합니다.
 

@@ -31,7 +31,7 @@ GDAL/OGR 1.4.x 이전 버전에서는 C API를 이용해서 스타일 정보를 
        OGRSTSymbolParam;
        OGRSTLabelParam;
 
--  C API에 (:cpp:class:`OGRStyleMgr` C++ 클래스에 대응하는) :c:class:`OGRStyleMgrH` 클래스를 추가할 것입니다:
+-  C API에 (:cpp:class:`OGRStyleMgr` C++ 클래스에 대응하는) ``OGRStyleMgrH`` 클래스를 추가할 것입니다:
 
 ::
 
@@ -44,7 +44,7 @@ GDAL/OGR 1.4.x 이전 버전에서는 C API를 이용해서 스타일 정보를 
        OGRStyleToolH OGR_SM_GetPart(OGRStyleMgrH hSM)
        int           OGR_SM_AddPart(OGRStyleMgrH hSM, OGRStyleTool *sPart)
 
--  C API에 (:cpp:class:`OGRStyleTool` C++ 클래스에 대응하는) :c:class:`OGRStyleToolH` 클래스를 추가할 것입니다:
+-  C API에 (:cpp:class:`OGRStyleTool` C++ 클래스에 대응하는) ``OGRStyleToolH`` 클래스를 추가할 것입니다:
 
 ::
 
@@ -67,9 +67,9 @@ GDAL/OGR 1.4.x 이전 버전에서는 C API를 이용해서 스타일 정보를 
         int           OGR_ST_GetRGBFromString(OGRStyleToolH hST, const char *pszColor, 
                                              int *nRed, int *nGreen, int *nBlue, int *nAlpha);
 
-주의: 구현 시 C++ 메소드들에 더 근접하게 매핑하기 위해 모든 :c:func:`OGR_ST_GetParam...` 함수들 상에서 :c:func:`OGR_ST_GetParamIsNull` 을 제거하고 'int \*bValueIsNull' 인자로 대체했습니다.
+주의: 구현 시 C++ 메소드들에 더 근접하게 매핑하기 위해 모든 ``OGR_ST_GetParam...`` 함수들 상에서 ``OGR_ST_GetParamIsNull`` 을 제거하고 'int \*bValueIsNull' 인자로 대체했습니다.
 
--  앞의 :c:func:`OGR_ST_*` 래퍼(wrapper)들이 내부적으로 처리하는 다음 C++ 클래스들에 대한 래퍼는 필요없습니다:
+-  앞의 ``OGR_ST_*`` 래퍼(wrapper)들이 내부적으로 처리하는 다음 C++ 클래스들에 대한 래퍼는 필요없습니다:
 
 ::
 
@@ -78,7 +78,7 @@ GDAL/OGR 1.4.x 이전 버전에서는 C API를 이용해서 스타일 정보를 
        class OGRStyleSymbol : public OGRStyleTool
        class OGRStyleLabel : public OGRStyleTool
 
--  :file:`ogr_featurestyle.h` 파일이 :c:class:`OGRSTVectorParam` 열거형 및 대응하는 :cpp:class:`OGRStyleVector` 클래스도 담고 있지만 이 클래스는 현재 사용되지 않기 때문에 향후 제거될 수도 있습니다. 따라서 C API에 :cpp:class:`OGRStyleVector` 클래스를 위한 지원을 구현하지 않을 것입니다. (또한 :c:class:`OGRSTVectorParam` 열거형을 :file:`ogr_core.h` 로 이동시키지 않을 것입니다.)
+-  :file:`ogr_featurestyle.h` 파일이 OGRSTVectorParam 열거형 및 대응하는 :cpp:class:`OGRStyleVector` 클래스도 담고 있지만 이 클래스는 현재 사용되지 않기 때문에 향후 제거될 수도 있습니다. 따라서 C API에 :cpp:class:`OGRStyleVector` 클래스를 위한 지원을 구현하지 않을 것입니다. (또한 OGRSTVectorParam 열거형을 :file:`ogr_core.h` 로 이동시키지 않을 것입니다.)
 
 파이썬 및 기타 언어 바인딩
 --------------------------

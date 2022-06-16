@@ -29,7 +29,7 @@ GDALAsyncReader
 
 이 단순 접근자 구현을 :cpp:class:`GDALAsyncReader` 클래스의 일부로 제공하긴 하지만, 그 목적은 이 클래스를 특정 드라이버의 구현 그리고 지정한 :cpp:func:`GetNextUpdatedRegion`, :cpp:func:`LockBuffer` 및 :cpp:func:`UnlockBuffer` 의 사용자 지정 구현의 일부로서 하위 클래스화시키는 것입니다.
 
-.. code-block::
+.. code-block:: c
 
    {{{ class CPL_DLL GDALAsyncReader { protected: GDALDataset\* poDS; int nXOff; int nYOff; int nXSize; int nYSize; void \* pBuf; int nBufXSize; int nBufYSize; GDALDataType eBufType; int nBandCount; int\* panBandMap; int nPixelSpace; int nLineSpace; int nBandSpace; long nDataRead;
 

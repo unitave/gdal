@@ -22,7 +22,7 @@ WKT 축 표현
 
 다음 예시에서 (OGC 01-???을 따르는) OGC WKT 공간 좌표계 서식이 이미 좌표계 축을 정의하는 방법을 보여줍니다:
 
-.. code-block:: wkt
+.. code-block::
 
    GEOGCS["WGS 84",
        DATUM["WGS_1984",

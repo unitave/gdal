@@ -135,5 +135,5 @@ GDAL이 제3자 API를 호출해야 하는 경우 문자열 인코딩 문제가 
    `http://svn.easysw.com/public/fltk/fltk/trunk/src/utf.c <http://svn.easysw.com/public/fltk/fltk/trunk/src/utf.c>`_
 -  `http://www.easysw.com/~mike/fltk/doc-2.0/html/utf_8h.html <http://www.easysw.com/~mike/fltk/doc-2.0/html/utf_8h.html>`_
 -  #1494 티켓: GML 산출물 용 UTF-8 인코딩
--  :ref:`rfc30_utf8_filenames` 에서도 파일명에 대해 논의합니다.
+-  :ref:`rfc-30` 에서도 파일명에 대해 논의합니다.
 

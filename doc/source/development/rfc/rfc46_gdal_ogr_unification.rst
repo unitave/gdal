@@ -274,7 +274,7 @@ GDAL/OGR 1.x버전에서, GDAL/래스터 및 OGR/벡터 두 쪽이 서로 달라
 -  기존 ``OGR_DS_*`` API를 보전합니다. 이 함수들의 구현은 ``GDALDataset*`` 을 가리키는 OGRDataSourceH 불투명 포인터(opaque pointer)를 캐스트하기 때문에, C API 관점에서 GDALDatasetH와 OGRDataSourceH가 동등하다고 간주할 수 있습니다. 현재 C++ 수준에서는 그렇지 않다는 사실을 기억하십시오!
 
 -  :cpp:func:`OGRDataSource::SyncToDisk` 를 제거했습니다. 기존 FlushCache()에 동등한 기능을 구현해야 합니다.
-   :cpp:class:`GDALDataset::FlushCache` 는 이제 예를 들어 모든 레이어를 반복한 다음 레이어들에 대해 SyncToDisk()를 호출하는 것 같은 :cpp:class:`OGRDataSource::SyncToDisk` 의 예전 일반 구현의 작업을 수행합니다.
+   :cpp:func:`GDALDataset::FlushCache` 는 이제 예를 들어 모든 레이어를 반복한 다음 레이어들에 대해 SyncToDisk()를 호출하는 것 같은 :cpp:class:`OGRDataSource::SyncToDisk` 의 예전 일반 구현의 작업을 수행합니다.
 
 -  :cpp:class:`GDALDataset` 은 이제 보호된(protected) ICreateLayer() 메소드를 가집니다.
 

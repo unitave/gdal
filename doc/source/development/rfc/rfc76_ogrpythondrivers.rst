@@ -68,7 +68,7 @@ RFC 76: OGR 파이썬 드라이버
 
 -  시작된(originated) API 호출에 따라 ``identify`` 및 ``open`` 메소드를 호출할 것입니다.
 
-``open`` 메소드는 파이썬 ``BaseDataset`` 객체를 대응하는 GDAL API 호출이 호출할 필수 및 선택적 메소들과 함께 반환할 것입니다. ``BaseLayer`` 객체에 대해서도 마찬가지입니다. :ref:`드라이버 예시 <example_>` 를 참조하십시오.
+``open`` 메소드는 파이썬 ``BaseDataset`` 객체를 대응하는 GDAL API 호출이 호출할 필수 및 선택적 메소들과 함께 반환할 것입니다. ``BaseLayer`` 객체에 대해서도 마찬가지입니다. :ref:`example` 를 참조하십시오.
 
 Python 해석기와 연결
 ++++++++++++++++++++

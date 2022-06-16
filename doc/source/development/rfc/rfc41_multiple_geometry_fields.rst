@@ -232,7 +232,7 @@ OGRDataSource 클래스
 
 (앞에서 자세히 설명한 제안 접근법을 완전히 확신한다면 이 단락을 건너뛰어도 상관없습니다. :-) )
 
-가능한 대안 해결책 가운데 하나는 기존 :cpp:class:`OGRFieldDefn` 객체를 도형 관련 정보로 확장하는 것일 것입니다. 이를 위해 :cpp:class:`OGRFieldType` 열거형(enumeration)에 OFTGeometry 값을 추가하고 :cpp:class:`OGRFieldDefn` 클래스에  OGRwkbGeometryType eGeomType 및 OGRSpatialReference\* poSRS 멤버를 추가해야 합니다.
+가능한 대안 해결책 가운데 하나는 기존 :cpp:class:`OGRFieldDefn` 객체를 도형 관련 정보로 확장하는 것일 것입니다. 이를 위해 OGRFieldType 열거형(enumeration)에 OFTGeometry 값을 추가하고 :cpp:class:`OGRFieldDefn` 클래스에  OGRwkbGeometryType eGeomType 및 OGRSpatialReference\* poSRS 멤버를 추가해야 합니다.
 :cpp:class:`OGRFeature` 클래스 수준에서 OGRField 합집합(union)을 OGRGeometry\* 필드로 확장할 수 있습니다. 마찬가지로 :cpp:class:`OGRLayer` 클래스 수준에서 CreateField()를 사용, 새 도형 필드를 생성할 수도 있습니다.
 
 가장 네이티브한 방식으로 보이는 이 접근법의 주요 단점은 하위 호환성입니다. 이 접근법은 OGR 자체 코드 또는 외부 코드에서 필드를 검색하고 도형을 예상할 수 없는 모든 지점에 영향을 미칠 것입니다. 예를 들어 (대부분의 드라이버에 있는 CreateFeature()에서 또는 GetNextFeature()가 반환하는 피처를 입력받는 사용자 코드에서 매우 흔히 사용되는) 다음과 같은 코드에서 말입니다:
@@ -503,7 +503,6 @@ test_ogrsf
 -  C++ ABI가 변경될 것입니다.
 
 -  GDAL 1.10버전과 관련해서, PostGIS 드라이버에서의 도형을 여러 개 가진 테이블에 대한 습성이 변경될 것입니다.
-Change of behavior in PostGIS driver w.r.t GDAL 1.10 for tables with multiple geometries.
 
 구현
 ----
