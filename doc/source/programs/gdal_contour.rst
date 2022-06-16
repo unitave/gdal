@@ -6,12 +6,12 @@ gdal_contour
 
 .. only:: html
 
-    Builds vector contour lines from a raster elevation model.
+    래스터 표고 모델로부터 벡터 등고선 라인을 작성합니다.
 
 .. Index:: gdal_contour
 
-Synopsis
---------
+개요
+----
 
 .. code-block::
 
@@ -23,116 +23,106 @@ Synopsis
                  [-nln <outlayername>] [-q] [-p]
                  <src_filename> <dst_filename>
 
-Description
------------
+설명
+----
 
-The :program:`gdal_contour` generates a vector contour file from the input
-raster elevation model (DEM).
+:program:`gdal_contour` 는 입력 래스터 DEM으로부터 벡터 등고선 파일을 생성합니다.
 
-The contour line-strings are oriented consistently and the high side will
-be on the right, i.e. a line string goes clockwise around a top.
+등고선 라인스트링의 방향은 일정하며 더 높은 쪽이 오른쪽일 것입니다. 예를 들면 라인스트링이 산봉우리 주변을 시계 방향으로 돕니다.
 
 .. program:: gdal_contour
 
 .. option:: -b <band>
 
-    Picks a particular band to get the DEM from. Defaults to band 1.
+    DEM을 가져올 특정 밴드를 선택합니다. 기본값은 1번 밴드입니다.
 
 .. option:: -a <name>
 
-    Provides a name for the attribute in which to put the elevation.
-    If not provided no elevation attribute is attached.
-    Ignored in polygonal contouring (:option:`-p`) mode.
+    표고를 넣을 속성의 이름을 지정합니다. 지정하지 않는 경우 어떤 표고 속성도 추가하지 않습니다. 폴리곤 등고선 (:option:`-p`) 모드에서는 무시됩니다.
 
 .. option:: -amin <name>
 
-    Provides a name for the attribute in which to put the minimum elevation
-    of contour polygon. If not provided no minimum elevation attribute
-    is attached. Ignored in default line contouring mode.
+    등고선 폴리곤의 최저 표고를 넣을 속성의 이름을 지정합니다. 지정하지 않는 경우 어떤 최저 표고 속성도 추가하지 않습니다. 기본 라인 등고선 모드에서는 무시됩니다.
 
     .. versionadded:: 2.4.0
 
 .. option:: -amax <name>
 
-    Provides a name for the attribute in which to put the maximum elevation of
-    contour polygon. If not provided no maximum elevation attribute is attached.
-    Ignored in default line contouring mode.
+    등고선 폴리곤의 최고 표고를 넣을 속성의 이름을 지정합니다. 지정하지 않는 경우 어떤 최고 표고 속성도 추가하지 않습니다. 기본 라인 등고선 모드에서는 무시됩니다.
 
     .. versionadded:: 2.4.0
 
 .. option:: -3d
 
-    Force production of 3D vectors instead of 2D.
-    Includes elevation at every vertex.
+    2차원 벡터 대신 3차원 벡터를 강제 생성합니다. 모든 꼭짓점에 표고가 포함됩니다.
 
 .. option:: -inodata
 
-    Ignore any nodata value implied in the dataset - treat all values as valid.
+    데이터셋에 나타나는 모든 NODATA 값을 무시합니다 -- 모든 값을 무결한 것으로 취급합니다.
 
 .. option:: -snodata <value>
 
-    Input pixel value to treat as "nodata".
+    "NODATA"로 취급할 입력 픽셀 값을 지정합니다.
 
 .. option:: -f <format>
 
-    Create output in a particular format.
+    산출물을 특정 포맷으로 생성합니다.
 
     .. versionadded:: 2.3.0
 
-        If not specified, the format is guessed from the extension (previously was ESRI Shapefile).
+        지정하지 않는 경우, 확장자로부터 포맷을 추정합니다. (예전에는 기본값 ESRI Shapefile로 생성했습니다.)
 
 .. option:: -dsco <NAME=VALUE>
 
-    Dataset creation option (format specific)
+    데이터셋 생성 옵션(DataSet Creation Option) (포맷 특화)
 
 .. option:: -lco <NAME=VALUE>
 
-    Layer creation option (format specific)
+    레이어 생성 옵션(Layer Creation Option) (포맷 특화)
 
 .. option:: -i <interval>
 
-    Elevation interval between contours.
+    등고선 사이의 표고 간격을 지정합니다.
 
 .. option:: -off <offset>
 
-    Offset from zero relative to which to interpret intervals.
+    간격을 해석할 기준에 비례하는 0으로부터의 오프셋입니다.
 
 .. option:: -fl <level>
 
-    Name one or more "fixed levels" to extract.
+    하나 이상의 추출할 "고정 수준(Fixed Level)"의 이름을 지정합니다.
 
 .. option:: -e <base>
 
-    Generate levels on an exponential scale: `base ^ k`, for `k` an integer.
+    지수(exponential) 척도로 수준을 생성합니다. ``base ^ k`` 에서 ``k`` 는 정수입니다.
 
     .. versionadded:: 2.4.0
 
 .. option:: -nln <name>
 
-    Provide a name for the output vector layer. Defaults to "contour".
+    산출 벡터 레이어의 이름을 지정합니다. 기본값은 "contour"입니다.
 
 .. option:: -p
 
-    Generate contour polygons rather than contour lines.
+    등고선 라인 대신 등고선 폴리곤을 생성합니다.
 
     .. versionadded:: 2.4.0
 
 .. option:: -q
 
-    Be quiet.
+    아무것도 출력하지 않습니다.
 
 C API
 -----
 
-Functionality of this utility can be done from C with :cpp:func:`GDALContourGenerate`.
+이 유틸리티의 기능은 :cpp:func:`GDALContourGenerate` C 함수로도 수행할 수 있습니다.
 
-Example
--------
+예시
+----
 
-This would create 10-meter contours from the DEM data in :file:`dem.tif` and
-produce a shapefile in :file:`contour.shp|shx|dbf` with the contour elevations
-in the ``elev`` attribute.
+다음 명령어는 :file:`dem.tif` 의 DEM 데이터로부터 10미터 간격 등고선을 생성해서, ``elev`` 속성에 등고선 표고를 가진 :file:`contour.shp|shx|dbf` shapefile을 생성할 것입니다:
 
 .. code-block::
 
     gdal_contour -a elev dem.tif contour.shp -i 10.0
+
