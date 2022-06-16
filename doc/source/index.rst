@@ -13,7 +13,7 @@ GDAL
     programs/index
     drivers/raster/index
     drivers/vector/index
-    User <user/index>
+    사용자 <user/index>
     api/index
     tutorials/index
     development/index

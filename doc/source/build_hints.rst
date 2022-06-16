@@ -9,7 +9,7 @@
 
 최소 요구 사항:
 
-- CMake 3.10 이후 버전, 그리고 관련 빌드 체계 (make, ninja, Visual Studio 등등)
+- CMake 3.10 이상 버전, 그리고 관련 빌드 체계 (make, ninja, Visual Studio 등등)
 - C99 컴파일러
 - C++11 컴파일러
 - PROJ 6.0 이상 버전
@@ -21,11 +21,11 @@ CMake
 --------------------------------------------------------------------------------
 
 CMake 빌드 체계를 통해 거의 모든 플랫폼에서 GDAL을 컴파일해서 설치할 수 있습니다.
-소스 배포 압축 파일을 압축 해제한 다음 소스 트리 구조로 들어가십시오:
+소스 배포 압축 파일을 압축 해제한 다음 소스 트리 구조로 들어가십시오::
 
     cd gdal-{VERSION}
 
-빌드 디렉터리를 생성한 다음 해당 디렉터리로 가십시오:
+빌드 디렉터리를 생성한 다음 해당 디렉터리로 가십시오::
 
     mkdir build
     cd build
@@ -53,7 +53,6 @@ include 디렉터리와 라이브러리를 가리키는 경로를 지정하십�
 
     cmake .. -UGDAL_USE_*
 
-
 .. warning::
 
     의존성을 추가/수정/제거하기 위해 GDAL 환경설정을 반복하는 경우, 이전에
@@ -61,6 +60,7 @@ include 디렉터리와 라이브러리를 가리키는 경로를 지정하십�
     있습니다. Cmake 실행 도중 이상한 오류가 발생하는 경우, CMakeCache.txt를
     제거해서 깨끗한 상태에서 시작해볼 수도 있습니다.
 
+CMake 프로젝트에서 GDAL을 사용하는 방법에 대해서는 :ref:`using_gdal_in_cmake` 를 참조하십시오.
 
 CMake 일반 환경설정 옵션
 +++++++++++++++++++++++++++++++
@@ -1932,6 +1932,30 @@ GDAL도 다음 옵션을 제공하고 있습니다:
 
     빌드 요소들을 서명하기 위한 GPG 비밀구절(pass phrase)입니다.
 
+C# 바인딩 옵션
++++++++++++++++++++
+
+C# 바인딩을 빌드하고 사용하는 방법에 대해 더 자세히 알고 싶다면 :ref:`csharp_compile_cmake` 를 읽어보십시오.
+
+.. option:: BUILD_CSHARP_BINDINGS:BOOL=ON/OFF
+
+    C# 바인딩을 빌드해야 할지 여부를 지정합니다. 기본값은 ON이지만 C# 런타임 및 개발 패키지를 찾은 경우에만 빌드합니다. .NET SDK 또는 Mono 가운데 하나를 사용할 수 있습니다. 설정할 수 있는 관련 옵션은 ``cmake/modules/thirdparty/FindDotNetFrameworkSdk.cmake`` 및 ``cmake/modules/thirdparty/FindMono.cmake`` 에서 설명하고 있습니다.
+
+.. option:: CSHARP_MONO=ON/OFF
+
+    .NET 대신 Mono를 사용하도록 강제해서 C# 바인딩을 컴파일합니다.
+
+.. option:: CSHARP_LIBRARY_VERSION
+
+    C# 바인딩 라이브러리 컴파일 시 .NET (또는 Mono) 대상 SDK를 사용하도록 설정합니다. `.NET이 허용하는 콘텐츠 목록 <https://docs.microsoft.com/en-us/dotnet/standard/frameworks#supported-target-frameworks>`_
+
+.. option:: CSHARP_APPLICATION_VERSION
+
+    C# 샘플 프로그램 컴파일 시 .NET (또는 Mono) 대상 SDK를 사용하도록 설정합니다. `.NET이 허용하는 콘텐츠 목록 <https://docs.microsoft.com/en-us/dotnet/standard/frameworks#supported-target-frameworks>`_
+
+.. option:: GDAL_CSHARP_ONLY=OFF/ON
+
+    GDAL을 빌드하지 않은 채 C# 바인딩을 빌드합니다. 기조 GDAL 설치본을 기반으로, 예를 들어 콘다 패키지를 기반으로 바인딩을 빌드하는 경우 이 옵션을 사용해야 합니다.
 
 드라이버 특정 옵션
 +++++++++++++++++++++++
@@ -1940,7 +1964,8 @@ GDAL도 다음 옵션을 제공하고 있습니다:
 
     :ref:`raster.msg` 드라이버는 이 옵션이 ON으로 설정된 경우에만 (기본값은 OFF) 빌드됩니다.
     이 옵션이 ON인 경우 https://gitlab.eumetsat.int/open-source/PublicDecompWT.git 저장소를
-    빌드 트리로 다운로드해서 필요한 파일들을 드라이버로 빌드합니다.
+    빌드 트리로 다운로드해서 (환경설정 시 ``git`` 바이너리를 사용할 수 있어야 합니다) 필요한
+    파일들을 드라이버로 빌드합니다.
 
 
 윈도우에서 콘다 의존성과 비주얼 스튜디오로 빌드하기
