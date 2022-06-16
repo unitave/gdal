@@ -597,7 +597,15 @@ GDAL 3.3버전부터, :cpp:func:`VSIGetFileMetadata` 및 :cpp:func:`VSISetFileMe
 
 파일명 문법이 반드시 :file:`/vsistdin/` 뿐이어야 합니다.
 
-사용할 수 있는 파일 작업은 당연히 Read()와 Seek() 포워딩으로 제한되어 있습니다. 파일의 처음 1MB 전체에 Seek() 작업을 할 수 있으며, 동일한 프로세스에서 :file:`/vsistdin/` 을 몇 번이고 종료하고, 다시 열고, 처음 1MB를 읽을 수 있도록 해당 부분을 캐시합니다.
+사용할 수 있는 파일 작업은 당연히 Read()와 정방향(forward) Seek()으로 제한되어 있습니다. 파일의 처음 1MB 전체에 Seek() 작업을 할 수 있으며, 동일한 프로세스에서 :file:`/vsistdin/` 을 몇 번이고 종료하고, 다시 열고, 처음 1MB를 읽을 수 있도록 해당 부분을 캐시합니다.
+
+GDAL 3.6버전부터, :decl_configoption:`CPL_VSISTDIN_BUFFER_LIMIT` 환경설정 옵션을 바이트 단위 용량으로 (또는 예를 들어 "1GB"처럼 MB 또는 GB 접미어를 사용해서) 지정하면 인메모리(in-memory) 캐시의 용량을 제어할 수 있습니다. -1로 지정하면 무제한이 됩니다. ``/vsistdin?buffer_limit=value`` 문법도 사용할 수 있습니다.
+
+:file:`/vsistdin` 파일명을 다른 파일 시스템과 결합할 수 있습니다. 예를 들면 :program:`gdal_translate` 로 스트림되는 대용량일 수도 있는 ZIP 파일 안에 있는 파일을 읽어오려면 다음 문법을 사용하십시오:
+
+::
+
+    cat file.tif.zip | gdal_translate /vsizip/{/vsistdin?buffer_limit=-1}/path/to/some.tif out.tif
 
 .. _vsistdout:
 
