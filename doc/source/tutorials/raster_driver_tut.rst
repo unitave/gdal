@@ -169,7 +169,7 @@ GDAL 드라이버를 구현하려 시도하기 전에 :ref:`raster_data_model` �
     poDS->fp = poOpenInfo->fpL;
     poOpenInfo->fpL = NULL;
 
-이 단계에서 :cpp:class:`GDALOpenInfo*` 클래스가 담고 있는 파일 핸들(handle)을 "빌려옵니다". 이 파일 포인터는 디스크 상에 있는 파일에 접근하기 위해 VSI*L GDAL API를 사용합니다. 이 가상화 POSIX 스타일 API는 대용량 파일, 인메모리 파일 및 ZIP 압축 파일을 지원하는 등 몇몇 특수 케이퍼빌리티를 제공합니다.
+이 단계에서 ``GDALOpenInfo*`` 클래스가 담고 있는 파일 핸들(handle)을 "빌려옵니다". 이 파일 포인터는 디스크 상에 있는 파일에 접근하기 위해 VSI*L GDAL API를 사용합니다. 이 가상화 POSIX 스타일 API는 대용량 파일, 인메모리 파일 및 ZIP 압축 파일을 지원하는 등 몇몇 특수 케이퍼빌리티를 제공합니다.
 
 그 다음, 헤더로부터 X 및 Y 크기를 추출합니다. 'nRasterXSize' 및 'nRasterYSize'가 :cpp:class:`GDALDataset` 기본 클래스로부터 상속된 데이터 필드로, :cpp:func:`Open` 메소드로 설정되어야만 합니다.
 
@@ -243,7 +243,7 @@ RasterBand 구현하기
    -  nBlockXSize: 해당 밴드에 있는 블록 하나의 너비입니다.
    -  nBlockYSize: 해당 밴드에 있는 블록 하나의 높이입니다.
 
-가능한 :cpp:class:`GDALDataType` 값의 전체 목록은 "gdal.h" 파일에 선언되어 있고, GDT_Byte, GDT_UInt16, GDT_Int16, 및 GDT_Float32 유형을 포함합니다. 블록 크기는 데이터에 접근하기 위해 자연스럽거나 효율적인 블록 크기를 확립하는 데 사용됩니다. 타일화 데이터셋의 경우 블록 크기가 타일의 크기일 것이지만 다른 대부분의 데이터셋의 경우 이 예시에서와 마찬가지로 블록 크기가 스캔라인 한 줄의 크기일 것입니다.
+가능한 GDALDataType 값의 전체 목록은 "gdal.h" 파일에 선언되어 있고, GDT_Byte, GDT_UInt16, GDT_Int16, 및 GDT_Float32 유형을 포함합니다. 블록 크기는 데이터에 접근하기 위해 자연스럽거나 효율적인 블록 크기를 확립하는 데 사용됩니다. 타일화 데이터셋의 경우 블록 크기가 타일의 크기일 것이지만 다른 대부분의 데이터셋의 경우 이 예시에서와 마찬가지로 블록 크기가 스캔라인 한 줄의 크기일 것입니다.
 
 다음은 실제로 이미지 데이터를 읽어오는 코드 :cpp:func:`IReadBlock` 을 구현하는 예시입니다:
 
@@ -591,7 +591,7 @@ CreateCopy
 
 동적 생성의 경우, 소스 데이터셋이 존재하지 않습니다. 그 대신 원하는 파일의 크기, 밴드 개수, 그리고 픽셀 데이터 유형을 지정합니다. 나중에 산출되는 :cpp:class:`GDALDataset` 에 다른 메소드들을 호출해서 (지리참조, 영상 데이터 같은) 다른 정보를 작성할 것입니다.
 
-다음 예시는 PCI .aux 확장자를 사용하는 원시(raw) 래스터 생성을 구현합니다. GDAL이 아닌 메소드를 호출해서 비어 있지만 무결한 파일을 생성한 다음, 마지막에 :cpp:func:`GDALOpen` (그리고 :cpp:func:`GA_Update`) 함수를 호출해서 쓰기 가능한 파일 핸들을 반환합니다. 이렇게 하면 :cpp:func:`Open` 함수에 다양한 설정 액션을 복제해야 하는 일을 피할 수 있습니다.
+다음 예시는 PCI .aux 확장자를 사용하는 원시(raw) 래스터 생성을 구현합니다. GDAL이 아닌 메소드를 호출해서 비어 있지만 무결한 파일을 생성한 다음, 마지막에 :cpp:func:`GDALOpen` (그리고 GA_Update) 함수를 호출해서 쓰기 가능한 파일 핸들을 반환합니다. 이렇게 하면 :cpp:func:`Open` 함수에 다양한 설정 액션을 복제해야 하는 일을 피할 수 있습니다.
 
 .. code-block::
 
@@ -749,7 +749,7 @@ RawDataset/RawRasterBand 도우미 클래스
    한 스캔라인의 시작으로부터 다음 스캔라인의 시작까지의 바이트 오프셋입니다.
 
 -  eDataType:
-   디스크 상에 있는 데이터의 유형을 나타내는 :cpp:class:`GDALDataType` 코드입니다.
+   디스크 상에 있는 데이터의 유형을 나타내는 GDALDataType 코드입니다.
 
 -  bNativeOrder:
    데이터가 GDAL이 실행 중인 머신과 동일한 엔디언(endian)에 있지 않는 경우 FALSE로 설정합니다. 데이터의 바이트를 자동으로 뒤바꿀 것입니다.
