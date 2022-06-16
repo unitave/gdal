@@ -14,8 +14,6 @@ GDAL 프로젝트가 (예전에는 이벤 루올(Even Rouault)이) SWIG(Simplifi
 
 크리스 개러드(Chris Garrard)가 유타 주립 대학교에서 `"오픈소스 GIS를 이용한 파이썬 지리 정보 처리(Geoprocessing with Python using Open Source GIS)" <https://www.gis.usu.edu/~chrisg/python/>`_) 를 강의했습니다. 파이썬 GDAL/OGR 초심자에게 굉장히 도움이 될 수 있는 슬라이드, 예제, 테스트 데이터 및 과제가 많이 있습니다.
 
-그렉 페트리(Greg Petrie)가 `http://cosmicproject.org/OGR <http://cosmicproject.org/OGR>`_ 에 OGR 관련 예제를 제공하고 있습니다.
-
 `http://pcjericks.github.io/py-gdalogr-cookbook/index.html <http://pcjericks.github.io/py-gdalogr-cookbook/index.html>`_ 웹사이트는 파이썬 GDAL/OGR 바인딩을 이용하기 위한 레시피를 가득 담고 있는 쿡북입니다.
 
 예시
