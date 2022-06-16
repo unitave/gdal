@@ -41,7 +41,7 @@ C# 벡터 및 공간 좌표계 인터페이스
 
 :file:`DataSource` 가 OGR 소스를 (예: 파일명을) 둘러싸는데, 다음과 같이 생성됩니다:
 
-.. code-block:: 
+.. code-block:: c#
 
     /* -------------------------------------------------------------------- */
     /*      포맷(들) 등록                                                   */
@@ -64,7 +64,7 @@ C# 벡터 및 공간 좌표계 인터페이스
 
 각 :file:`DataSource` 는 다음과 같이 반복할 수 있는 레이어를 하나 이상 가질 것입니다:
 
-.. code-block:: C#
+.. code-block:: c#
 
     /* -------------------------------------------------------------------- */
     /*      레이어 반복하기                                                 */
@@ -86,7 +86,7 @@ C# 벡터 및 공간 좌표계 인터페이스
 
 각 :file:`Layer` 는 :file:`Feature` 를 0개 이상 가질 수 있습니다. 피처에는 다음과 같이 접근해야 합니다:
 
-.. code-block:: C#
+.. code-block:: c#
 
     layer.ResetReading();
     Feature f = null;
@@ -99,7 +99,7 @@ C# 벡터 및 공간 좌표계 인터페이스
 피처의 도형에 접근
 ++++++++++++++++++
 
-.. code-block:: C#
+.. code-block:: c#
 
     Geometry geom = feature.GetGeometryRef();
     wkbGeometryType type = geom.GetGeometryType();
@@ -112,7 +112,7 @@ C# 벡터 및 공간 좌표계 인터페이스
 
 가장 기본적인 유형에 도달했을 때 -- 보통 :file:`wkbGeometryType.wkbPoint`, :file:`wkbGeometryType.wkbLineString` 또는 :file:`wkbGeometryType.wkbLinearRing` 유형, 또는 이 유형들의 다중 버전, 25D 버전 또는 ZM 버전이 나타나는 경우 -- 다음과 같이 포인트 좌표에 접근할 수 있습니다:
 
-.. code-block:: C#
+.. code-block:: c#
 
     int count = geom.GetPointCount();
     if (count > 0)
@@ -131,7 +131,7 @@ C# 벡터 및 공간 좌표계 인터페이스
 
 각 :file:`Feature` 객체는 관련된 데이터 필드 여러 개를 가질 수 있습니다. 이 데이터 필드에 대한 스키마는 :file:`FieldDefn` 객체에 정의됩니다. 이런 필드를 다음과 같이 가져올 수 있습니다:
 
-.. code-block:: C#
+.. code-block:: c#
 
     Dictionary<string, object> ret = new Dictionary<string, object>();
     if (feature != null) {
@@ -162,13 +162,13 @@ C# 벡터 및 공간 좌표계 인터페이스
 
 :file:`Geometry` 에 좌표계(공간 좌표계)가 정의되어 있는 경우 다음과 같이 가져올 수 있습니다:
 
-.. code-block:: C#
+.. code-block:: c#
 
     SpatialReference crs = geom.GetSpatialReference()
 
 :file:`SpatialReference` 는 좌표계/투영법을 표현하기 위한 주 클래스입니다. 이 좌표계는 예를 들면 터미널에 출력하기 위해 다음과 같이 WKT 문자열로 변환시킬 수 있습니다:
 
-.. code-block:: C#
+.. code-block:: c#
 
     string wkt;
     crs.ExportToWkt(out wkt, null);
@@ -182,14 +182,14 @@ C# 벡터 및 공간 좌표계 인터페이스
 
 :file:`Geometry` 에 무결한 :file:`SpatialReference` 가 정의되어 있다면, 다음과 같은 명령어를 사용해서 :file:`Geometry` 을 새 좌표계로 변환할 수 있습니다:
 
-.. code-block:: C#
+.. code-block:: c#
 
     if (geom.TransformTo(newProjection) != 0)
         throw new NotSupportedException("projection failed");
 
 하지만 많은 경우 사용할 :file:`CoordinateTransform` 을 명확하게 정의하는 편이 낫습니다:
 
-.. code-block:: C#
+.. code-block:: c#
 
     SpatialReference from_crs = new SpatialReference(null) 
         // 메모: WKT로부터 정의하는 경우 'null'을 'wkt'로 대체하십시오
