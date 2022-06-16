@@ -30,7 +30,7 @@ GDAL 3.1버전부터, VICAR 라벨을 json:VICAR 메타데이터 도메인에 �
 
 다음은 그 예시입니다:
 
-.. code-block:: python
+::
 
    $ python
    from osgeo import gdal

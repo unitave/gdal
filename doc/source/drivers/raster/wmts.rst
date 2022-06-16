@@ -123,6 +123,8 @@ WMTS 드라이버는 다음을 열 수 있습니다:
      - 
    * - <GetCapabilitiesUrl>http://foo/WMTSCapabilities.xml</GetCapabilitiesUrl>
      - GetCapabilities 응답 문서를 가리키는 URL(또는 로컬 파일의 파일명)입니다. (필수) KVP 전용 서버의 경우, http://end_point?SERVICE=WMTS&amp;REQUEST=GetCapabilities 같은 서식일 것입니다.
+   * - <ExtraQueryParameters>foo=bar&amp;
+     - 모든 요청(GetCapabilities, GetTile, GetFeatureInfo)에 추가할 URL 쿼리 파라미터 (GDAL 3.5.1버전에 추가)
    * - <Layer>layer_id</Layer>
      - 레이어 식별자입니다. (선택적이지만 레이어 여러 개를 명확하게 구분하기 위해 필요할 수도 있습니다.)
    * - <Style>style_id</Style>
@@ -183,6 +185,8 @@ WMTS 드라이버는 다음을 열 수 있습니다:
      - 어떤 새 이미지도 다운로드하지 않고, 캐시에 있는 이미지만 사용합니다. 캐시를 활성화한 경우에만 유용합니다. (선택적, 기본값은 거짓)
    * - <UserAgent>GDAL WMS driver (http://www.gdal.org/frmt_wms.html)</UserAgent>
      - HTTP 사용자 에이전트(user agent) 문자열입니다. 일부 서버는 "Mozilla/5.0" 같은 잘 알려진 사용자 에이전트를 요구할 수도 있습니다. (선택적, 기본값은 "GDAL WMS driver (http://www.gdal.org/frmt_wms.html)")
+   * - <Accept>mimetype</Accept>
+     - 서버의 예상 산출물의 MIME 유형을 지정하는 HTTP Accept 헤더입니다. 기본적으로 비어 있습니다. (GDAL 3.5.1버전에 추가)
    * - <UserPwd>user:password</UserPwd>
      - HTTP 인증 용 사용자 ID 및 비밀번호입니다. (선택적)
    * - <UnsafeSSL>true</UnsafeSSL>
