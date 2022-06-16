@@ -107,6 +107,14 @@ GDAL2Tiles는 제공하는 맵이 EPSG:4326 투영법을 사용하는 경우 구
 
     .. versionadded:: 3.1
 
+.. option:: --tiledriver=<DRIVER>
+
+    타일을 위해 사용할 산출 드라이버입니다. 타일 파일 포맷을 결정합니다.
+    현재 PNG 및 WEBP를 지원합니다. 기본값은 PNG입니다.
+    WEBP 드라이버에 대한 추가적인 환경설정은 'WEBP 옵션' 단락에 문서화되어 있습니다.
+
+  .. versionadded:: 3.6
+
 .. option:: -h, --help
 
     도움말 메시지를 표시하고 엑시트합니다.
@@ -159,7 +167,6 @@ KML (구글 어스) 옵션
 
     https://www.bingmapsportal.com/ 에서 받은 빙 맵 API 키입니다.
 
-
 .. note::
 
     gdal2tiles.py는 파이썬 스크립트로, 파이썬 GDAL 바인딩을 대상으로 실행되어야 합니다.
@@ -184,6 +191,25 @@ GDAL 3.2버전부터 MapML을 지원합니다. --webviewer=mapml을 지정한 �
     변수들을 대신할 템플릿 MapML 파일의 이름입니다. 지정하지 않는 경우 GDAL 데이터 리소스에 있는 일반 template_tiles.mapml 파일을 사용할 것입니다.
 
 템플릿 MapML 파일의 ``${URL}`` 을 대신하기 위한 --url 옵션도 사용합니다.
+
+WEBP 옵션
++++++++++++++
+
+GDAL 3.6버전에서 WEBP 타일 드라이버를 새롭게 지원합니다. :option:`--tiledriver=WEBP` 를 사용해서 활성화합니다.
+
+다름 환경설정 옵션을 사용해서 WEBP 산출물을 심화 사용자 지정할 수 있습니다:
+
+.. option:: --webp-quality=<QUALITY>
+
+    QUALITY는 1에서 100 사이의 정수입니다. 기본값은 75입니다.
+
+.. option:: --webp-lossless
+
+    WEBP 비손실 압축을 사용합니다. 기본값은 손실 압축입니다.
+
+.. note::
+
+    GDAL :ref:`WEBP 드라이버 <raster.webp>` 문서를 참고하십시오.
 
 예시
 --------
