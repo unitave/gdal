@@ -85,9 +85,13 @@ OGRFeatureDefn 클래스는 (일반적으로 레이어 이름으로 사용되는
 
 :cpp:class:`OGRLayer` 클래스는 데이터소스 안에 있는 피처 레이어를 표현합니다. OGRLayer에 있는 모든 피처는 공통 스키마를 공유하며 동일한 :cpp:class:`OGRFeatureDefn` 클래스입니다. OGRLayer 클래스는 데이터소스로부터 피처를 읽어오기 위한 메소드도 담고 있습니다. OGRLayer를 일반적으로 파일 포맷인 기저 데이터소스로부터 피처를 읽고 쓰기 위한 게이트웨이로 생각해도 됩니다. SFCOM 및 다른 테이블 기반 단순 피처 구현에서 OGRLayer는 공간 테이블로 표현됩니다.
 
-OGRLayer에는 순차 및 임의 읽기 및 쓰기를 위한 메소드가 포함됩니다. (:cpp:func:`OGRLayer::GetNextFeature` 메소드를 통한) 읽기 접근은 일반적으로 모든 피처를 한 번에 하나씩 순차적으로 읽어옵니다. 하지만 OGRLayer에 (:cpp:func:`OGRLayer::SetSpatialFilter` 메소드를 통해) 공간 필터를 설치하면 특정 지리 영역과 교차하는 피처만 반환하도록 제한할 수 있습니다.
+OGRLayer에는 순차 및 임의 읽기 및 쓰기를 위한 메소드가 포함됩니다. (:cpp:func:`OGRLayer::GetNextFeature` 메소드를 통한) 읽기 접근은 일반적으로 모든 피처를 한 번에 하나씩 순차적으로 읽어옵니다. 하지만 OGRLayer에 (:cpp:func:`OGRLayer::SetSpatialFilter` 메소드를 통해) 공간 필터를 설치하면 특정 지리 영역과 교차하는 피처만 반환하도록 제한할 수 있습니다. 속성에 대한 필터는 :cpp:func:`OGRLayer::SetAttributeFilter` 메소드로만 설정할 수 있습니다.
 
-현재 OGR 아키텍처에 존재하는 한 가지 결함은 공간 필터가 데이터소스에 있는 어떤 레이어를 유일하게 대표하기 위한 OGRLayer 상에 직접 설정된다는 점입니다. 즉 한 번에 서로 다른 공간 필터를 각각 가진 읽기 작업 여러 개를 수행할 수 없다는 뜻입니다. 향후 :cpp:class:`OGRLayerView` 또는 이와 유사한 클래스를 도입하기 위해 이런 측면을 수정할 수도 있습니다.
+GDAL 3.6버전부터, ``GetNextFeature`` 를 통해 피처를 가져오는 대신 :cpp:func:`OGRLayer::GetArrowStream` 메소드를 사용해서 열 지향 메모리 레이아웃을 가진 배치(batch)로 가져올 수도 있습니다. (참고: :ref:`vector_api_tut_arrow_stream`)
+
+현재 OGR 아키텍처에 존재하는 한 가지 결함은 공간 필터 및 속성 필터가 데이터소스에 있는 어떤 레이어를 유일하게 대표하기 위한 OGRLayer 상에 직접 설정된다는 점입니다. 즉 한 번에 서로 다른 공간 필터를 각각 가진 읽기 작업 여러 개를 수행할 수 없다는 뜻입니다.
+
+.. note:: 향후 :cpp:class:`OGRLayerView` 또는 이와 유사한 클래스를 도입하기 위해 이런 측면을 수정할 수도 있습니다.
 
 떠올릴 수도 있는 또다른 질문은 어째서 OGRLayer와 OGRFeatureDefn 클래스가 구별되느냐입니다. OGRLayer 클래스와 OGRFeatureDefn 클래스는 항상 일대일 관계이기 때문에, 어째서 두 클래스를 합치면 안 되느냐라는 질문 말입니다. 두 가지 이유가 있습니다:
 
