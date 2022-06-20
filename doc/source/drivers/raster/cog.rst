@@ -44,6 +44,8 @@ COG -- 클라우드 최적화 GeoTIFF 생성기
 
    * ``LERC_ZSTD`` 압축은 ``LERC`` 과 ``ZSTD`` 를 사용할 수 있는 경우 사용할 수 있습니다.
 
+   * ``JXL`` 은 JPEG-XL의 단축명으로, 내부 libtiff를 사용하고 GDAL이 `libjxl <https://github.com/libjxl/libjxl>`_ 을 대상으로 빌드된 경우에만 사용할 수 있습니다. 4개 이하의 밴드를 가진 데이터셋에 대해서만 JXL 압축을 사용할 수도 있습니다. 이 옵션은 GDAL 3.4버전에서 추가되었습니다.
+
 -  **LEVEL=integer_value**: DEFLATE/ZSTD/LERC_DEFLATE/LERC_ZSTD/LZMA 압축 수준입니다. 숫자가 낮을수록 압축 속도는 빨라지지만 압축 효율은 떨어집니다. 1로 설정하면 속도가 가장 빠릅니다.
 
    * DEFLATE/LZMA의 경우, 9로 (또는 libdeflate를 지원하는 libtiff를 사용하는 경우 12로) 설정하면 속도는 가장 느리지만 압축률은 가장 높습니다. 기본값은 6입니다.
@@ -52,6 +54,12 @@ COG -- 클라우드 최적화 GeoTIFF 생성기
 -  **MAX_Z_ERROR=threshold**: LERC/LERC_DEFLATE/LERC_ZSTD 압축에 대한 최대 오류 한계값을 설정합니다. 기본값은 0(비손실)입니다.
 
 -  **QUALITY=integer_value**: JPEG/WEBP 품질을 설정합니다. 값이 100이면 최고 품질(최저 압축), 1이면 최저 품질(최고 압축)입니다. 기본값은 75입니다. WEBP의 경우, QUALITY=100으로 설정하면 자동적으로 비손실 모드를 활성화합니다.
+
+-  **JXL_LOSSLESS=YES/NO**: JPEG-XL 압축이 비손실이어야 할지 (YES, 기본값) 또는 손실이어야 할지 (NO) 여부를 설정합니다. 손실 압축의 경우 기저 데이터가 회색조, 회색조+알파, RGB 또는 RGBA 가운데 하나여야 합니다.
+
+-  **JXL_EFFORT=[1-9]**: JPEG-XL 압축의 압축 수준을 설정합니다. 숫자가 높을수록 파일 용량은 적어지지만 압축 속도는 느려집니다. 기본값은 5입니다.
+
+-  **JXL_DISTANCE=[0.1-15]**: 손실 JPEG-XL 압축의 거리 수준을 설정합니다. 0은 수학적으로 비손실, 1.0은 시각적으로 비손실이며 일반적인 범위는 [0.5,3]입니다. 기본값은 1.0입니다.
 
 -  **NUM_THREADS=number_of_threads/ALL_CPUS**: 작업자 스레드의 개수를 지정해서 멀티스레딩 압축을 활성화합니다. 기본값은 주 스레드에서 압축하는 것입니다. 이 옵션은 TILING_SCHEME 또는 TARGET_SRS 생성 옵션으로 재투영하는 경우 사용하는 스레드 개수도 결정합니다. (GDAL 3.2버전부터 오버뷰 생성도 멀티스레딩을 지원합니다.)
 
