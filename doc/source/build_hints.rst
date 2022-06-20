@@ -181,7 +181,7 @@ Conda-Forge 의존성을 사용하는 윈도우 빌드에서는 다음 패키지
 Arrow
 *****
 
-:ref:`vector.arrow` 및 :ref:`vector.parquet` 드라이버는 `아파치 애로우 C++ <https://github.com/apache/arrow/tree/master/cpp>` 라이브러리를 요구합니다. ``CMAKE_PREFIX_PATH`` 변수에 설치 접두어를 지정하십시오.
+:ref:`vector.arrow` 및 :ref:`vector.parquet` 드라이버는 `아파치 애로우 C++ <https://github.com/apache/arrow/tree/master/cpp>`_ 라이브러리를 요구합니다. ``CMAKE_PREFIX_PATH`` 변수에 설치 접두어를 지정하십시오.
 
 .. option:: GDAL_USE_ARROW=ON/OFF
 
@@ -906,7 +906,7 @@ LERC v1 압축을 제공합니다.
 LibKML
 ******
 
-`LibKML <https://github.com/libkml/libkml>`_ 은 :ref:`vector.libkml` 드라이버를'
+`LibKML <https://github.com/libkml/libkml>`_ 은 :ref:`vector.libkml` 드라이버를
 사용하기 위해 필수적인 라이브러리입니다. pkg-config으로 탐지할 수 있습니다.
 
 .. option:: LIBKML_INCLUDE_DIR
@@ -1439,6 +1439,14 @@ PROJ
     빌드하기 위해 비슷한 라이브러리에 비슷한 ``PROJ_LIBRARY_DEBUG``
     변수를 지정할 수도 있습니다.
 
+QB3
+*******
+
+:ref:`raster.marfa` 드라이버가 사용하는 `QB3 <https://github.com/lucianpls/QB3>`_ 압축 라이브러리입니다.
+
+.. option:: GDAL_USE_QB3=ON/OFF
+
+    QB3 압축을 사용할지 여부를 제어합니다. QB3이 존재하는 경우 기본값은 ON입니다.
 
 QHULL
 *****
