@@ -90,6 +90,7 @@ GDAL을 사용하는 소프트웨어
 - `QGIS <http://www.qgis.org>`_ 크로스 플랫폼 데스크톱 GIS.
 - `QLandkarte GT <http://qlandkarte.org>`_ GT는 GeoTiff 포맷은 물론 가민(Garmin)의 IMG 벡터 맵 포맷으로 된 GPS 맵을 위한 아웃도어 애호가의 궁극적인 도구입니다.
 - `R <http://www.r-project.org>`_ rgdal 패키지를 통해 GDAL에 바인딩된, 통계 계산 및 그래픽을 위한 프리 소프트웨어 환경.
+- `Rasterio <https://rasterio.readthedocs.io>`_  GDAL 래스터를 읽고 쓰기 위한 파이썬 라이브러리와 명령줄 유틸리티들.
 - `Rasterix <https://github.com/mogasw/rasterix/>`_ Qt 및 GDAL을 기반으로 래스터 데이터를 처리하기 위한 크로스 플랫폼 오픈 소스 유틸리티.
 - `SAGA GIS <http://www.saga-gis.org/en/index.html>`_ 지리 데이터 처리를 위한 특수 'API(Application Programming Interface)'를 가진 무료 GIS.
 - `ScanMagic <http://www.scanex.ru>`_ 원격탐사 데이터의 가시화, 분석 및 처리를 위한 Win32 응용 프로그램.
