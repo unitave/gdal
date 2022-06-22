@@ -6,6 +6,10 @@ GDAL
 
 이 문서는 `PDF 파일 <gdal.pdf>`_ 로도 볼 수 있습니다.
 
+.. warning::
+
+    이 GDAL 문서 한국어 번역본은 2022년 6월 22일 기준으로, 그 이후 업데이트된 내용은 https://gdal.org/ 사이트를 참조하십시오.
+
 .. toctree::
     :maxdepth: 2
 
