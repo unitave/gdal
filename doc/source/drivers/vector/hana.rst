@@ -23,7 +23,7 @@ SAP HANA 데이터베이스에 접속하려면, 데이터베이스 이름을 필
 
 ::
 
-   HANA:"DRIVER={HDBODBC};DATABASE=HAN;HOST=localhost;PORT=30015;USER=mylogin;PASSWORD=mypassword;SCHEMA=MYSCHEMA"
+   HANA:"DRIVER=HDBODBC;DATABASE=HAN;HOST=localhost;PORT=30015;USER=mylogin;PASSWORD=mypassword;SCHEMA=MYSCHEMA"
 
 이 문법에서 각 파라미터 설정은 키워드=값 형식으로 되어 있습니다. 등호 기호 양쪽에 공백을 넣을 수도 있습니다. 비어 있는 값 또는 공백을 담고 있는 값을 작성하려면, keyword='a value'처럼 값을 작은따옴표로 감싸십시오. 값에 있는 작은따옴표 및 백슬래시는 \\' 및 \\\ 처럼 백슬래시로 이스케이프 처리해야만 합니다.
 
@@ -47,7 +47,7 @@ HANA 드라이버는 새 스키마의 생성을 지원하지 않지만, 기존 �
    데이터소스의 이름을 설정합니다.
 
 -  **DRIVER=string**:
-   드라이버를 가리키는 이름 또는 경로를 설정합니다. 예를 들어 (윈도우의 경우) DRIVER={HDBODBC} 또는 (리눅스/맥OS의 경우) DRIVER=/usr/sap/hdbclient/libodbcHDB.so 처럼 설정할 수 있습니다.
+   드라이버를 가리키는 이름 또는 경로를 설정합니다. 예를 들어 (윈도우의 경우) DRIVER=HDBODBC 또는 (리눅스/맥OS의 경우) DRIVER=/usr/sap/hdbclient/libodbcHDB.so 처럼 설정할 수 있습니다.
 
 -  **HOST=string**:
    서버 호스트명을 설정합니다.
@@ -161,7 +161,7 @@ HANA 드라이버는 새 스키마의 생성을 지원하지 않지만, 기존 �
 
    ::
 
-      ogrinfo -ro HANA:"DRIVER={HDBODBC};DATABASE=HAN;HOST=localhost;PORT=30015;USER=mylogin;PASSWORD=mypassword;SCHEMA=MYSCHEMA"
+      ogrinfo -ro HANA:"DRIVER=HDBODBC;DATABASE=HAN;HOST=localhost;PORT=30015;USER=mylogin;PASSWORD=mypassword;SCHEMA=MYSCHEMA"
 
    또는
 
@@ -173,7 +173,7 @@ HANA 드라이버는 새 스키마의 생성을 지원하지 않지만, 기존 �
 
    ::
 
-      ogrinfo -ro HANA:"DRIVER={HDBODBC};DATABASE=HAN;HOST=localhost;PORT=30015;USER=mylogin;PASSWORD=mypassword;SCHEMA=MYSCHEMA" -so "planet_osm_line"
+      ogrinfo -ro HANA:"DRIVER=HDBODBC;DATABASE=HAN;HOST=localhost;PORT=30015;USER=mylogin;PASSWORD=mypassword;SCHEMA=MYSCHEMA" -so "planet_osm_line"
 
       Layer name: planet_osm_line
       Geometry: Line String
@@ -211,13 +211,13 @@ HANA 드라이버는 새 스키마의 생성을 지원하지 않지만, 기존 �
 
    ::
 
-      ogr2ogr -f "ESRI Shapefile" "D:\\points_output.shp" HANA:"DRIVER={HDBODBC};DATABASE=HAN;HOST=localhost;PORT=30015;USER=mylogin;PASSWORD=mypassword;SCHEMA=GIS;TABLES=points"
+      ogr2ogr -f "ESRI Shapefile" "D:\\points_output.shp" HANA:"DRIVER=HDBODBC;DATABASE=HAN;HOST=localhost;PORT=30015;USER=mylogin;PASSWORD=mypassword;SCHEMA=GIS;TABLES=points"
 
 -  다음 예시는 shapefile로부터 가져온 데이터로 테이블을 생성하고 채우는 방법을 보여줍니다:
 
    ::
 
-      ogr2ogr -f HANA HANA:"DRIVER={HDBODBC};DATABASE=HAN;HOST=localhost;PORT=30015;USER=mylogin;PASSWORD=mypassword;SCHEMA=MYSCHEMA" myshapefile.shp
+      ogr2ogr -f HANA HANA:"DRIVER=HDBODBC;DATABASE=HAN;HOST=localhost;PORT=30015;USER=mylogin;PASSWORD=mypassword;SCHEMA=MYSCHEMA" myshapefile.shp
 
 
 개발자에게
