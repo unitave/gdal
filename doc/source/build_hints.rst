@@ -160,9 +160,35 @@ https://cmake.org/cmake/help/latest/release/3.12.html?highlight=root#commands
 
 .. option:: GDAL_USE_EXTERNAL_LIBS:BOOL=ON/OFF
 
+     기본값은 ON,입니다. OFF로 설정하는 경우, 개별 의존성을
+     "GDAL_USE_<Packagename_in_upper_case>:BOOL=ON"으로 활성화시키지 않는 이상
+     (필수 의존성을 제외한) 모든 외부 의존성을 비활성화시킬 것입니다.
      CMakeCache.txt를 생성하기 전에 이 옵션을 설정해야 합니다. CMakeCache.txt를
      생성한 다음 이 옵션을 OFF로 설정하면 이전에 탐지된 라이브러리들의 활성화를
      취소하기 위해 CMake를 "-UGDAL_USE_*" 로 재호출해야 합니다.
+
+GDAL 의존성 가운데 일부는 (GEOTIFF, GIF, JPEG, JSONC, LERC, OPENCAD, PNG, QHULL, TIFF, ZLIB)
+GDAL 소스 코드 트리 내부에 자신의 소스 코드 복사본을 가지고 있습니다.
+"GDAL_USE_<Packagename_in_upper_case>_INTERNAL:BOOL=ON" 변수를 설정하면 이 내부 복사본을
+활설화시킬 수 있습니다. 이 변수를 설정하는 경우, 탐지되었을 수도 있는 외부 라이브러리보다
+내부 복사본이 우선합니다. 다음 변수를 사용해서 전체 수준에서 이 습성을 제어할 수도 있습니다:
+
+.. option:: GDAL_USE_INTERNAL_LIBS=ON/OFF/WHEN_NO_EXTERNAL
+
+     내부 라이브러리를 어떻게 사용해야 할지를 제어합니다.
+     ON으로 설정하면 항상 내부 라이브러리를 사용할 것입니다.
+     OFF로 설정하면 ("GDAL_USE_<Packagename_in_upper_case>_INTERNAL:BOOL=ON"으로
+     개별적으로 활성화시키지 않는 이상) 내부 라이브러리를 절대 사용하지 않을 것입니다.
+     (기본값인) WHEN_NO_EXTERNAL로 설정하는 경우 대응하는 외부 라이브러리를
+     찾지 못 해 활성화시킬 수 없는 경우에만 내부 라이브러리를 사용할 것입니다.
+     CMakeCache.txt를 생성하기 전에 이 옵션을 설정해야 합니다.
+
+.. note::
+
+    GDAL_USE_EXTERNAL_LIBS=OFF 및 GDAL_USE_INTERNAL_LIBS=OFF 를 동시에 사용하면
+    CMake 환경설정이 실패하게 될 것입니다. 최소한 (외부 의존성으로든 내부 복사본을
+    사용하든) ZLIB, TIFF, GEOTIFF 및 JSONC 라이브러리가 필수이기 때문입니다.
+    따라서 이 라이브러리들을 외부 또는 내부 라이브러리로 활성화시켜야만 합니다.
 
 Armadillo
 *********
