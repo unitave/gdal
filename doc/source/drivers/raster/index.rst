@@ -31,6 +31,7 @@
    airsar
    arg
    bag
+   basisu
    blx
    bmp
    bsb
@@ -106,6 +107,7 @@
    kea
    kmlsuperoverlay
    kro
+   ktx2
    lan
    l1b
    lcp
