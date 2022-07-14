@@ -213,6 +213,15 @@ Arrow
 
     애로우를 사용할지 여부를 제어합니다. 애로우가 존재하는 경우 기본값은 ON입니다.
 
+basisu
+******
+
+:ref:`raster.basisu` 및 :ref:`raster.ktx2` 드라이버는 `Basis Universal <https://github.com/rouault/basis_universal/tree/cmake>` 라이브러리를 요구합니다.
+``CMAKE_PREFIX_PATH`` 변수 또는 ``basisu_ROOT`` 변수에 설치 접두어를 지정하십시오.
+
+.. option:: GDAL_USE_BASISU=ON/OFF
+
+    basisu를 사용할지 여부를 제어합니다. basisu가 존재하는 경우 기본값은 ON입니다.
 
 Blosc
 *****
