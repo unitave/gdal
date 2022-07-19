@@ -272,7 +272,9 @@ GDAL 2.1.3버전부터, :decl_configoption:`CURL_CA_BUNDLE` 또는 :decl_configo
 
 4. 자격인증서 및 AWS 영역(region)을 가져오기 위해 ``~/.aws/config`` 또는 ``%UserProfile%/.aws/config`` 파일을 (또는 :decl_configoption:`AWS_CONFIG_FILE` 환경설정 옵션이 가리키는 파일을) 사용할 수도 있습니다.
 
-5. 앞의 방법들이 모두 실패하면, EC2 인스턴스 상에 GDAL을 사용하는 경우 인스턴스 프로파일 자격인증서를 가져올 것입니다.
+5. :decl_configoption:`AWS_ROLE_ARN` 및 :decl_configoption:`AWS_WEB_IDENTITY_TOKEN_FILE` 이 정의된 경우 AWS sts 액션 AssumeRoleWithWebIdentity 기반 웹 식별 정보 토큰(web identity token) 용 자격인증서 메커니즘(credentials mechanism)에 의존할 것입니다. (https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html 웹 문서를 참조하십시오.)
+
+6. 앞의 방법들이 모두 실패한다면, EC2 인스턴스 상에 GDAL을 사용하는 경우 인스턴스 프로파일 자격인증서를 가져올 것입니다.
 
 :decl_configoption:`AWS_REGION` (또는 GDAL 2.3버전부터 :decl_configoption:`AWS_DEFAULT_REGION`) 환경설정 옵션을 지원하는 S3 영역 가운데 하나로 설정할 수 있습니다. 기본값은 ``us-east-1`` 입니다.
 
