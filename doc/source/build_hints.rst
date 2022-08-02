@@ -783,8 +783,13 @@ libjpeg은 :ref:`raster.jpeg` 드라이버를 사용하기 위해 필수적인 �
 
 .. option:: GDAL_USE_JPEG_INTERNAL=ON/OFF
 
-    내부 libjpeg 복사본을 사용할지 여부를 제어합니다.
-    외부 libjpeg이 검색되지 않는 경우 기본값은 ON입니다.
+    내부 libjpeg 복사본을 사용할지 여부를 제어합니다. GDAL_USE_INTERNAL_LIBS 설정에 따라 기본값이 달라집니다.
+    ON으로 설정하는 경우, GDAL_USE_JPEG=ON보다 우선합니다.
+
+.. option:: EXPECTED_JPEG_LIB_VERSION=number
+
+    외부 libjpeg과 함께 쓰입니다. 숫자는, 예를 들어 libjpeg 8 ABI의 경우 80입니다.
+    예상 JPEG 라이브러리가 GDAL이 포함시킨 것인지 빌드 시간을 확인하려는 경우 이 옵션이 유용합니다.
 
 
 JPEG12
