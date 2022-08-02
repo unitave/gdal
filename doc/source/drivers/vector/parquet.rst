@@ -40,7 +40,8 @@ https://databricks.com/glossary/what-is-parquet 에서 발췌:
 ----------------------
 
 -  **COMPRESSION=string**:
-   압축 메소드를 지정합니다. ``NONE``, ``SNAPPY``, ``GZIP``, ``BROTLI``, ``ZSTD``, ``LZ4``, ``BZ2`` 또는 ``LZ4_HADOOP`` 가운데 하나로 지정할 수 있습니다. 파켓 라이브러리가 어떻게 컴파일되었는지에 따라 지정할 수 있는 값이 달라집니다.
+   압축 메소드를 지정합니다. ``NONE`` (또는 ``UNCOMPRESSED``), ``SNAPPY``, ``GZIP``, ``BROTLI``, ``ZSTD``, ``LZ4_RAW``,
+  ``LZ4_HADOOP`` 가운데 하나로 지정할 수 있습니다. 파켓 라이브러리가 어떻게 컴파일되었는지에 따라 지정할 수 있는 값이 달라집니다.
    SNAPPY를 사용할 수 있는 경우 기본값은 SNAPPY이고, 사용할 수 없다면 기본값은 NONE입니다.
 
 -  **GEOMETRY_ENCODING=WKB/WKT/GEOARROW**:
