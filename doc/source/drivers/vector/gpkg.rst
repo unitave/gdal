@@ -101,7 +101,8 @@ Spatialite 4.3버전부터, CastAutomagic이 더 이상 필요하지 않습니�
 
 .. versionadded:: 3.6
 
-OGC 지오패키지 관련 테이블 확장 사양에 따라 관계성(relationship) 가져오기를 지원합니다.
+OGC 지오패키지 관련 테이블 확장 사양(Related Tables Extension)에 따라 관계성(relationship) 가져오기를 지원합니다.
+관련 테이블 확장 사양을 사용하고 있지 않은 경우, FOREIGN KEY 제약 조건을 활용하는 테이블들의 관계성을 리포트할 것입니다.
 
 데이터셋 열기 옵션
 ------------------
