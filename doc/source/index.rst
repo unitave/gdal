@@ -8,7 +8,7 @@ GDAL
 
 .. warning::
 
-    이 GDAL 문서 한국어 번역본은 2022년 6월 22일 기준으로, 그 이후 업데이트된 내용은 https://gdal.org/ 사이트를 참조하십시오.
+    이 GDAL 문서 한국어 번역본은 2022년 8월 2일 기준으로, 그 이후 업데이트된 내용은 https://gdal.org/ 사이트를 참조하십시오.
 
 .. toctree::
     :maxdepth: 2
