@@ -5,7 +5,7 @@ ESRI 파일 지리 데이터베이스 (FileGDB)
 
 .. shortname:: FileGDB
 
-.. build_dependencies:: FileGDB API library
+.. build_dependencies:: FileGDB API 라이브러리
 
 FileGDB 드라이버는 ArcGIS 10 이상 버전이 생성한 파일 지리 데이터베이스(.gdb 디렉터리)의 벡터 레이어에 읽기 및 쓰기 접근을 지원합니다. 데이터셋 이름은 디렉터리/폴더 이름이어야만 하며, .gdb 확장자로 끝나야만 합니다.
 

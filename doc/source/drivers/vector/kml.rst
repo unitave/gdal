@@ -5,7 +5,7 @@ KML - 키홀 마크업 언어
 
 .. shortname:: KML
 
-.. build_dependencies:: (read support needs libexpat) 
+.. build_dependencies:: (읽기 지원에 libexpat 필요)
 
 KML(Keyhole Markup Language)은 3차원 지리공간 데이터의 표시(display)를 관리하기 위한 XML 기반 언어입니다. KML은 OGC 표준으로 받아들여졌으며, 주요 지리 브라우저(GeoBrowser)들 상에서 어떤 방식으로든 지원되고 있습니다. KML 사양은 EPSG:4326 투영법 하나만 사용한다는 사실을 기억하십시오. 모든 OGR KML 산출물은 EPSG:4326 좌표계를 사용할 것입니다. OGR는 레이어를 정확한 좌표계로 생성하고 모든 도형을 그에 맞춰 변환할 것입니다.
 

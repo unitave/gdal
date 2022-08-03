@@ -5,7 +5,7 @@ DB2 Spatial
 
 .. shortname:: DB2
 
-.. build_dependencies:: ODBC library
+.. build_dependencies:: ODBC 라이브러리
 
 .. deprecated_driver:: version_targeted_for_removal: 3.5
    env_variable: GDAL_ENABLE_DEPRECATED_DRIVER_DB2

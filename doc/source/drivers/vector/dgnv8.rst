@@ -7,7 +7,7 @@
 
 .. shortname:: DGNv8
 
-.. build_dependencies:: Open Design Alliance Teigha library
+.. build_dependencies:: 오픈 디자인 얼라이언스 Teigha 라이브러리
 
 DGN 드라이버는 마이크로스테이션(Microstation) 버전 8이 생성한 DGN 파일 읽기 및 쓰기를 지원합니다. 각 파일의 모델은 OGR 레이어로 표현됩니다.
 

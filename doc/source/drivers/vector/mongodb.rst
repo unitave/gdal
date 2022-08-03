@@ -7,7 +7,7 @@ MongoDB
 
 .. shortname:: MongoDB
 
-.. build_dependencies:: Mongo C++ client legacy library
+.. build_dependencies:: Mongo C++ 클라이언트 레거시 라이브러리
 
 .. deprecated_driver:: version_targeted_for_removal: 3.5
    env_variable: GDAL_ENABLE_DEPRECATED_DRIVER_MONGODB

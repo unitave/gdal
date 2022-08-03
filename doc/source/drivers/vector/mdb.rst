@@ -5,7 +5,7 @@ Access MDB databases
 
 .. shortname:: MDB
 
-.. build_dependencies:: JDK/JRE and Jackcess
+.. build_dependencies:: JDK/JRE 및 Jackcess
 
 .. deprecated_driver:: version_targeted_for_removal: 3.5
    env_variable: GDAL_ENABLE_DEPRECATED_DRIVER_MDB
